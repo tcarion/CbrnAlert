@@ -1,0 +1,1 @@
+"/usr/bin/julia" --color=yes --depwarn=no -q -- ../bootstrap.jl -r %*

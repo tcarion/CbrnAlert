@@ -1,0 +1,75 @@
+/* .container {
+    width: 70vw;
+    height: 100vh;
+    margin-top: 10px;
+    background-color: #f2f2fa;
+} */
+
+.container-fluid {
+    display: flex;
+    justify-content: stretch;
+    align-items: stretch;
+}
+
+/* ARCHIVE FORM STYLES */
+.archive-form {
+    display: flex;
+    justify-content: stretch;
+    align-items: stretch;
+    flex-direction: column;
+    min-width: 200px;
+}
+
+.archive-form-item {
+    min-width: 200px;
+    margin: 5px;
+}
+
+.date-item {
+    flex: 1 1 auto;
+    min-width: 150px;
+}
+
+.time-item {
+    flex: 0 2 auto;
+    min-height: 100px;
+}
+
+.step-item {
+    flex: 2 0 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.step-item select {
+    flex-grow: 1;
+}
+
+/* LOADED DATA FORM STYLE */
+.atp-form {
+    padding-top: 10px;
+}
+img { 
+    height: 100%;
+    width: 100%;
+    display: block;
+
+    /* border: 1px solid black */
+ }
+ img#magic_plot {
+     border: 1px solid black;
+ }
+
+
+/* MAP STYLE */
+#mapid {
+    height: 100%;
+    background-color: blue;
+}
+
+.mymap-container {
+    /* border: 1px solid black; */
+    height: 520px;
+    padding: 10px;
+    flex: 1 1 auto;
+}

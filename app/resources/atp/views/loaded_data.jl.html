@@ -1,0 +1,73 @@
+<input hidden id="loaded_file" value=$(loaded_file)></input>
+
+<!-- <div class="row my-form-row"> -->
+<form class="atp-form" action="" method="post">
+  <div class="row">
+    <div class="col">
+      <div class="form-group">
+        <label for="lat">Latitude</label>
+        <input class="form-control" type="text" name="lat" id="lat" required>
+      </div>
+      <div class="form-group">
+        <label for="lon">Longitude</label>
+        <input class="form-control" type="text" name="lon" id="lon" required>
+      </div>
+      <div class="form-group">
+        <button class="btn btn-primary" type="button" data-toggle="modal" data-target="#pick_data">Load other data</button>
+      </div>
+    </div>
+    <div class="col">
+      <div class="form-group">
+        <label for="select_date">Date</label>
+        <select class="form-control" name="select_date" id="select_date">
+          <% @foreach(dates) do date %>
+          <option>$(date)</option>
+          <% end %>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="select_time">Time</label>
+        <select class="form-control" name="select_time" id="select_time">
+          <% @foreach(times) do time %>
+          <option>$(time)</option>
+          <% end %>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="select_step">Step</label>
+        <select class="form-control" name="select_step" id="select_step">
+          <% @foreach(steps) do step %>
+          <option>$(step)</option>
+          <% end %>
+        </select>
+      </div>
+    </div>
+  </div>
+</form>
+
+<!-- Modal -->
+<div class="modal fade" id="pick_data" tabindex="-1" role="dialog" aria-labelledby="pick_dataLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Data Selection</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="list-group">
+          <% @foreach(files) do f %>
+          <a href="/load/$(f)" class="list-group-item list-group-item-action">$(f)</a>
+          <% end %>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Load Data</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- </div> -->
+
