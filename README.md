@@ -1,2 +1,2 @@
-# CBRN_dispersion_webApp
+# CBRN-dispersion-app
 Web application sources for CBRN dispersion modeling
