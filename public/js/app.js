@@ -58,16 +58,12 @@ function onMapClick(e) {
 }
 
 function archiveDataRequest() {
-    let date_from = $('#date_from').val();
-    let date_to = $('#date_to').val();
-    let steps = $('.step-item select option:selected').map(function(){
-        return $(this).val();
-    }).get();
-    let times = $('.time-item input[type="checkbox"]:checked').map(function(){
+    let date_request = $('#date_request').val();
+    let times_request = $('.time-item input[type="checkbox"]:checked').map(function(){
         return $(this).val();
     }).get();
 
-    let to_send = {'date_from' : date_from, 'date_to' : date_to, 'steps' : steps, 'times' : times}
+    let to_send = {'date_request' : date_request, 'times_request' : times_request}
 
     let xhr = new XMLHttpRequest();
 

@@ -5,6 +5,7 @@ using Genie.Renderer.Html, Genie.Renderer.Json, Genie.Requests
 using ComputeShapes
 using EarthCompute
 using JSON
+using Dates
 import Genie.Router: @params
 
 const ec = EarthCompute
@@ -50,6 +51,15 @@ function to_dict(sd::ShapeData)
 	return d
 end
 
+function steps_to_datetimes(start_date, start_time, steps::Array{Int})
+  df = DateFormat("yyyy-mm-ddHH:MM:SS")
+  inc = steps[2:end] - steps[1:end-1]
+  start_d = DateTime(start_date*start_time, df)
+  datetimes = accumulate((date, step) -> date + Dates.Hour(step), inc, init=start_d)
+  return [start_d, datetimes...]
+
+end
+
 function preloaded_data()
   pypath = PyVector(pyimport("sys")."path")
   if !("/home/tcarion/WebApp/lib" in pypath) pushfirst!(pypath, "/home/tcarion/WebApp/lib") end
@@ -73,7 +83,7 @@ function preloaded_data()
   steps = reader.idx_get("step")
   
   searchdir(path,key) = filter(x->occursin(key,x), readdir(path))
-  grib_files = searchdir(pwd() * "/public/grib_files",".grib")
+  grib_files = searchdir(joinpath(pwd(), "public", "grib_files"),".grib")
   grib_files = map(x -> split(x, ".")[1], grib_files)
 
   html(:atp, "loaded_data.jl.html", 
@@ -162,33 +172,13 @@ end
 
 function archive_request()
   archive_keys = jsonpayload()
-
-  pypath = PyVector(pyimport("sys")."path")
-  if !("/home/tcarion/WebApp/lib" in pypath) pushfirst!(pypath, "/home/tcarion/WebApp/lib") end
   
-  # println(archive_keys)
   open("public/grib_files/request.txt", "w") do file
     JSON.print(file, archive_keys)
   end
 
-  run_script_cmd = `/home/tcarion/mars_requests/web_request.py`
+  run_script_cmd = `lib/web_request.py`
   run(run_script_cmd)
-  # py"""
-  # with open("test.txt", "w") as f:
-  #   print(archive_keys, file=f)
-  # """(archive_keys)
-  # @pywith pybuiltin("open")("public/grib_files/request.txt","w") as f begin
-  #   print(archive_keys, file=f)
-  # end
-
-  # api_req = pyimport("ecmwfrequest")
-  # pyimport("importlib")."reload"(api_req)
-
-  # server = api_req.ApiServer()
-  # server.build_request(archive_keys["date_from"], archive_keys["date_to"], archive_keys["steps"], archive_keys["times"], "60/-30/-20/40")
-
-  # #println(server.req)
-  # server.send_request()
   
 end
 
