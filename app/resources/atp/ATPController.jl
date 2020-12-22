@@ -9,6 +9,7 @@ using Dates
 import Genie.Router: @params
 
 const ec = EarthCompute
+const LIB_PATH = joinpath(pwd(), "lib")
 
 struct Wind
   u::Float64
@@ -62,7 +63,7 @@ end
 
 function preloaded_data()
   pypath = PyVector(pyimport("sys")."path")
-  if !("/home/tcarion/WebApp/lib" in pypath) pushfirst!(pypath, "/home/tcarion/WebApp/lib") end
+  if !(LIB_PATH in pypath) pushfirst!(pypath, LIB_PATH) end
   rg = pyimport("readgrib")
 
   if haskey(payload(), :file)
@@ -101,7 +102,7 @@ end
 
 function shape_coord_request()
   pypath = PyVector(pyimport("sys")."path")
-  if !("/home/tcarion/WebApp/lib" in pypath) pushfirst!(pypath, "/home/tcarion/WebApp/lib") end
+  if !(LIB_PATH in pypath) pushfirst!(pypath, LIB_PATH) end
   rg = pyimport("readgrib")
   ajax_received = jsonpayload()
   
@@ -110,7 +111,7 @@ function shape_coord_request()
   keys_to_select = ["date", "time", "shortName", "level", "step"]
 
   grib_to_read = ajax_received["loaded_file"]
-  @show grib_to_read
+
   reader = rg.GribReader(grib_to_read, keys_to_select)
 
   keys_to_select = Dict(

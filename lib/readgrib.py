@@ -1,9 +1,8 @@
-import numpy as np
 from eccodes import (codes_index_new_from_file, codes_index_get, codes_get,
-                    codes_index_select, codes_new_from_index, codes_set,
-                    codes_index_add_file, codes_get_array, codes_get_values,
-                    codes_index_release, codes_release, codes_set_values,
-                    codes_write, codes_grib_find_nearest)
+                    codes_index_select, codes_new_from_index,
+                    codes_index_add_file, codes_get_array,
+                    codes_index_release, codes_release,
+                    codes_grib_find_nearest)
 
 class GribReader():
     def __init__(self, filename, index_keys):

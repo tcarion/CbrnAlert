@@ -1,6 +1,10 @@
 module EarthCompute
+const TEST_MODE = false
 
-using Plots #TODO FOR TESTING PURPOSE. TO BE REMOVED
+if TEST_MODE
+    using Plots #TODO FOR TESTING PURPOSE. TO BE REMOVED
+end
+
 const R = 6371.0e3
 
 struct SphereC{T<:Union{Vector{Float64}, Float64}}
@@ -121,34 +125,36 @@ function GC_distance(c1::SphereC, c2::SphereC)
 end
 GC_distance(phi1, theta1, phi2, theta2) = GC_distance(SphereC(phi1, theta1), SphereC(phi2, theta2))
 
-@recipe function f(c::SphereC) 
-    markershape --> :circle # if markershape is unset, make it :circle
-    markersize --> 1
-    seriestype --> :scatter
-    cart = sphere_to_cart(c)
-    typeof(c) == SphereC{Float64} ? ([cart.x], [cart.y], [cart.z]) : (cart.x, cart.y, cart.z)
-end
+# if TEST_MODE
+#     println("i come here !!!!!!!!!!!!!!!!!!!!")
+#     @recipe function f(c::SphereC) 
+#         markershape --> :circle # if markershape is unset, make it :circle
+#         markersize --> 1
+#         seriestype --> :scatter
+#         cart = sphere_to_cart(c)
+#         typeof(c) == SphereC{Float64} ? ([cart.x], [cart.y], [cart.z]) : (cart.x, cart.y, cart.z)
+#     end
 
-@recipe function f(c::CartC, customcolor = :green) 
-    markershape --> :circle 
-    markercolor := customcolor # force markercolor to be customcolor
-    markersize --> 1
-    seriestype --> :scatter
-    (c.x, c.y, c.z)
-end
+#     @recipe function f(c::CartC, customcolor = :green) 
+#         markershape --> :circle 
+#         markercolor := customcolor # force markercolor to be customcolor
+#         markersize --> 1
+#         seriestype --> :scatter
+#         (c.x, c.y, c.z)
+#     end
 
-@recipe function f(c::StereoC) 
-    markershape --> :rect
-    markersize --> 1
-    seriestype --> :scatter
-    (c.x, c.y, zeros(length(c.x)))
-end
+#     @recipe function f(c::StereoC) 
+#         markershape --> :rect
+#         markersize --> 1
+#         seriestype --> :scatter
+#         (c.x, c.y, zeros(length(c.x)))
+#     end
 
-@recipe function f(c::StereoC, val::Union{Vector{Float64}, Float64})
-    markershape --> :circle
-    markersize --> 2
-    seriestype --> :scatter
-    typeof(val) == Float64 ? ([c.x], [c.y], [val]) : (c.x, c.y, val)
-end
-
+#     @recipe function f(c::StereoC, val::Union{Vector{Float64}, Float64})
+#         markershape --> :circle
+#         markersize --> 2
+#         seriestype --> :scatter
+#         typeof(val) == Float64 ? ([c.x], [c.y], [val]) : (c.x, c.y, val)
+#     end
+# end
 end
