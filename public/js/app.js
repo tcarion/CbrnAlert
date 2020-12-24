@@ -7,6 +7,14 @@ L.tileLayer('//{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
     maxZoom: 20
 }).addTo(mymap);
 
+$('#picker').datetimepicker({
+    timepicker: true,
+    datepicker: true,
+    formatDate:'Y-m-d',
+    allowTimes: ['00:00', '12:00'],
+    allowDates: ['2020-12-23','2020-12-25'], 
+})
+
 function onMapClick(e) {
     let latlng = e.latlng;
     let lat = Math.round(latlng.lat*100)/100;

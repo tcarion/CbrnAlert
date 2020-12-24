@@ -72,11 +72,11 @@ function preloaded_data()
     grib_to_read = "/home/tcarion/grib_files/20171201_to_20171231_tigge.grib"
   end
 
-  keys_to_select = ["date", "time", "shortName", "level", "step"]
+  keys = ["date", "time", "shortName", "level", "step"]
   if isfile(grib_to_read)
-    reader = rg.GribReader(grib_to_read, keys_to_select)
+    reader = rg.GribReader(grib_to_read, keys)
   else
-    reader = rg.GribReader("/home/tcarion/grib_files/20171201_to_20171231_tigge.grib", keys_to_select)
+    reader = rg.GribReader("/home/tcarion/grib_files/20171201_to_20171231_tigge.grib", keys)
   end
 
   dates = reader.idx_get("date")
@@ -108,11 +108,11 @@ function shape_coord_request()
   
   lat = typeof(ajax_received["lat"]) == String ? parse(Float64, ajax_received["lat"]) : ajax_received["lat"]
   lon = typeof(ajax_received["lon"]) == String ? parse(Float64, ajax_received["lon"]) : ajax_received["lon"]
-  keys_to_select = ["date", "time", "shortName", "level", "step"]
+  keys = ["date", "time", "shortName", "level", "step"]
 
   grib_to_read = ajax_received["loaded_file"]
 
-  reader = rg.GribReader(grib_to_read, keys_to_select)
+  reader = rg.GribReader(grib_to_read, keys)
 
   keys_to_select = Dict(
     "date" => ajax_received["date"],
