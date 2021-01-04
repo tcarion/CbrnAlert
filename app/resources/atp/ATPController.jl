@@ -53,13 +53,14 @@ function to_dict(sd::ShapeData)
 end
 
 function steps_to_datetimes(start_date, start_time, steps::Array{Int})
-  df = DateFormat("yyyy-mm-ddHH:MM:SS")
+  df = DateFormat("yyyymmddHH:MM:SS")
   inc = steps[2:end] - steps[1:end-1]
   start_d = DateTime(start_date*start_time, df)
   datetimes = accumulate((date, step) -> date + Dates.Hour(step), inc, init=start_d)
   return [start_d, datetimes...]
-
 end
+steps_to_datetimes(start_date, start_time, steps::Tuple{Vararg}) = steps_to_datetimes(start_date, start_time, collect(steps))
+steps_to_datetimes(start_date, start_time, steps::Array{String}) = steps_to_datetimes(start_date, start_time, map(x -> parse(Int, x), steps))
 
 function preloaded_data()
   pypath = PyVector(pyimport("sys")."path")
@@ -82,13 +83,19 @@ function preloaded_data()
   dates = reader.idx_get("date")
   times = reader.idx_get("time")
   steps = reader.idx_get("step")
-  
+  steps = sort(map(x -> parse(Int, x), collect(steps)))
+
   searchdir(path,key) = filter(x->occursin(key,x), readdir(path))
   grib_files = searchdir(joinpath(pwd(), "public", "grib_files"),".grib")
   grib_files = map(x -> split(x, ".")[1], grib_files)
 
+  available_datetimes = steps_to_datetimes(dates[1], times[1], steps)
+  @show dates[1]
+  @show available_datetimes[1]
+  available_datetimes_str = map(x -> Dates.format(x, "yyyy-mm-ddTHH:MM"), available_datetimes)
+  @show available_datetimes_str
   html(:atp, "loaded_data.jl.html", 
-    dates = dates, times=times, steps=steps, files=grib_files, loaded_file=grib_to_read, 
+    datetimes = available_datetimes_str, files=grib_files, loaded_file=grib_to_read, 
     layout=:app)
 
   #html(:plotting, "plotmap.jl.html", layout=:app, speed=speed)

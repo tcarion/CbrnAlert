@@ -7,7 +7,11 @@ L.tileLayer('//{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
     maxZoom: 20
 }).addTo(mymap);
 
-$('#picker').datetimepicker({
+let available_dates = $(".available-dates").map(function(){
+    return new Date($(this).val())
+})
+
+$('#forecast_datepicker').datetimepicker({
     timepicker: true,
     datepicker: true,
     formatDate:'Y-m-d',
