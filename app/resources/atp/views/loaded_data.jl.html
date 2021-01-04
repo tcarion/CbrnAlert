@@ -17,11 +17,12 @@
       </div>
     </div>
     <div class="col-6">
-      <label for="forecast_hour">Forecast hour selection</label>
-      <input class="form-control" type="text" name="forecast_datepicker" id="forecast_datepicker">
-      <% @foreach(datetimes) do d %>
-      <input hidden type="datetime" class="available-dates" value="$(d)">
-      <% end %>
+      <label for="forecast_time">Forecast time selection</label>
+      <select class="form-control" name="forecast_time" id="forecast_time">
+        <% @foreach(datetimes) do d %>
+        <option value="$(d)">$(d)</option>
+        <% end %>
+      </select>
     </div>
   </div>
 </form>

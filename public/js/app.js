@@ -7,17 +7,17 @@ L.tileLayer('//{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
     maxZoom: 20
 }).addTo(mymap);
 
-let available_dates = $(".available-dates").map(function(){
-    return new Date($(this).val())
-})
+// let available_dates = $(".available-dates").map(function(){
+//     return new Date($(this).val())
+// })
 
-$('#forecast_datepicker').datetimepicker({
-    timepicker: true,
-    datepicker: true,
-    formatDate:'Y-m-d',
-    allowTimes: ['00:00', '12:00'],
-    allowDates: ['2020-12-23','2020-12-25'], 
-})
+// $('#forecast_datepicker').datetimepicker({
+//     timepicker: true,
+//     datepicker: true,
+//     formatDate:'Y-m-d',
+//     allowTimes: ['00:00', '12:00'],
+//     allowDates: ['2020-12-23','2020-12-25'], 
+// })
 
 function onMapClick(e) {
     let latlng = e.latlng;
