@@ -25,9 +25,10 @@ function onMapClick(e) {
     let lon = Math.round(latlng.lng *100)/100;
     $("input#lat").val(lat);
     $("input#lon").val(lon);
-    let date = $("select#select_date option:selected").val();
-    let step = $("select#select_step option:selected").val();
-    let time = $("select#select_time option:selected").val();
+    let selected_option = $("select#forecast_time option:selected").val().match("(.*)T(.*)\\+(.*)");
+    let date = selected_option[1];
+    let step = selected_option[3];
+    let time = selected_option[2];
     let loaded_file = $("input#loaded_file").val();
     let to_send = {'lon' : lon, 'lat' : lat, 'date' : date, 'step' : step, 'time' : time, 'loaded_file' : loaded_file};
     L.circleMarker([lat, lon], {radius : 0.5, color : 'black'}).addTo(mymap)

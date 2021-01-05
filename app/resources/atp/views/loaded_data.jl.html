@@ -17,10 +17,11 @@
       </div>
     </div>
     <div class="col-6">
-      <label for="forecast_time">Forecast time selection</label>
+      <label for="forecast_time">Forecast step selection</label>
       <select class="form-control" name="forecast_time" id="forecast_time">
         <% @foreach(datetimes) do d %>
-        <option value="$(d)">$(d)</option>
+        <option value="$(d[:datetime])+$(d[:step])">$(d[:datetime])</option>
+        <!-- <option value="$(d["datetime"])">$(d["datetime"]) --- $(d["step"])</option> -->
         <% end %>
       </select>
     </div>
