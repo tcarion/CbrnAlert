@@ -4,16 +4,17 @@
         <input class="form-control date-picker" type="date" name="date_request" id="date_request" value="2020-12-10">
     </div>
 
+    <label for="time-item">Select forecast starting time</label>
     <div class="archive-form-item time-item">
-        <label for="time-check">Select forecast starting time</label>
-        <div class="form-check" id="time-check">
-            <input checked class="form-check-input" type="checkbox" value="00:00:00" id="00:00:00">
-            <label class="form-check-label" for="00:00:00">
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="exampleRadios" id="arch_retr_time_00" value="00:00:00" checked>
+            <label class="form-check-label" for="arch_retr_time_00">
                 00:00:00
             </label>
-            <br>
-            <input class="form-check-input" type="checkbox" value="12:00:00" id="12:00:00">
-            <label class="form-check-label" for="12:00:00">
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="exampleRadios" id="arch_retr_time_12" value="12:00:00">
+            <label class="form-check-label" for="arch_retr_time_12">
                 12:00:00
             </label>
         </div>

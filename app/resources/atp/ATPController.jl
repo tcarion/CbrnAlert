@@ -173,13 +173,29 @@ end
 
 function archive_request()
   archive_keys = jsonpayload()
-  
-  open("public/grib_files/request.txt", "w") do file
-    JSON.print(file, archive_keys)
+  # cur_time = Dates.now()
+  area = "europe"
+  # date = Dates.format(cur_time, "yyyy-mm-dd")
+  # time = "0"
+  date = archive_keys["date_request"]
+  time = archive_keys["times_request"]
+  time = match(r"(\d+):(\d+)", time)[1]*match(r"(\d+):(\d+)", time)[2]
+  req = """retrieve,
+    type    = fc,
+    date    = $date,
+    time    = $time,
+    step    = 0/6/12/18/24/30/36,
+    levtype = sfc,
+    param   = 10u/10v,
+    area    = $area,
+    grid    = 2.5/2.5,    
+    target  = "public/grib_files/$(date)_$(time)_$(area).grib"""
+
+  open("public/grib_files/request.req", "w") do file
+    write(file, req)
   end
 
-  run_script_cmd = `lib/web_request.py`
-  run(run_script_cmd)
+  run(pipeline(`echo $req`, `mars`))
   
 end
 

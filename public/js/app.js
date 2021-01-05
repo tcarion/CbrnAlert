@@ -59,9 +59,7 @@ function onMapClick(e) {
 
 function archiveDataRequest() {
     let date_request = $('#date_request').val();
-    let times_request = $('.time-item input[type="checkbox"]:checked').map(function(){
-        return $(this).val();
-    }).get();
+    let times_request = $('.time-item input[type=radio]:checked').val()
 
     let to_send = {'date_request' : date_request, 'times_request' : times_request}
 
