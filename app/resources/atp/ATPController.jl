@@ -53,13 +53,24 @@ function to_dict(sd::ShapeData)
 end
 
 function steps_to_datetimes(start_date, start_time, steps::Array{Int})
-  df = DateFormat("yyyy-mm-ddHH:MM:SS")
-  inc = steps[2:end] - steps[1:end-1]
+  df = DateFormat("yyyymmddHH:MM:SS")
+  # inc = steps[2:end] - steps[1:end-1]
   start_d = DateTime(start_date*start_time, df)
-  datetimes = accumulate((date, step) -> date + Dates.Hour(step), inc, init=start_d)
-  return [start_d, datetimes...]
-
+  datetimes = map(step -> start_d + Dates.Hour(step), steps)
+  # datetimes = accumulate((date, step) -> date + Dates.Hour(step), inc, init=start_d)
+  return datetimes
 end
+steps_to_datetimes(start_date, start_time, steps::Tuple{Vararg}) = steps_to_datetimes(start_date, start_time, collect(steps))
+steps_to_datetimes(start_date, start_time, steps::Array{String}) = steps_to_datetimes(start_date, start_time, map(x -> parse(Int, x), steps))
+
+"""
+    start_date(date, step[, df])
+
+Return the date `step` hours before `date`. If `typeof(date)` is a string, a format must be provided as `df`
+"""
+start_date(date::DateTime, step) :: DateTime = date - Dates.Hour(step)
+start_date(date::String, step) :: DateTime = start_date(DateTime(date), step)
+start_date(date::String, step, df::String) :: DateTime = start_date(DateTime(date, DateFormat(df)), step)
 
 function preloaded_data()
   pypath = PyVector(pyimport("sys")."path")
@@ -72,23 +83,28 @@ function preloaded_data()
     grib_to_read = "/home/tcarion/grib_files/20171201_to_20171231_tigge.grib"
   end
 
-  keys_to_select = ["date", "time", "shortName", "level", "step"]
+  keys = ["date", "time", "shortName", "level", "step"]
   if isfile(grib_to_read)
-    reader = rg.GribReader(grib_to_read, keys_to_select)
+    reader = rg.GribReader(grib_to_read, keys)
   else
-    reader = rg.GribReader("/home/tcarion/grib_files/20171201_to_20171231_tigge.grib", keys_to_select)
+    reader = rg.GribReader("/home/tcarion/grib_files/20171201_to_20171231_tigge.grib", keys)
   end
 
   dates = reader.idx_get("date")
   times = reader.idx_get("time")
   steps = reader.idx_get("step")
-  
+  steps = sort(map(x -> parse(Int, x), collect(steps)))
+
   searchdir(path,key) = filter(x->occursin(key,x), readdir(path))
   grib_files = searchdir(joinpath(pwd(), "public", "grib_files"),".grib")
   grib_files = map(x -> split(x, ".")[1], grib_files)
 
-  html(:atp, "loaded_data.jl.html", 
-    dates = dates, times=times, steps=steps, files=grib_files, loaded_file=grib_to_read, 
+  available_datetimes = steps_to_datetimes(dates[1], times[1], steps)
+  available_datetimes_str = map(x -> Dates.format(x, "yyyy-mm-ddTHH:MM:SS"), available_datetimes)
+  available_time = [Dict(:datetime => x, :step => y) for (x, y) in zip(available_datetimes_str, steps)]
+  
+  html(:atp, "loaded_data.jl.html",
+    datetimes = available_time, files=grib_files, loaded_file=grib_to_read, 
     layout=:app)
 
   #html(:plotting, "plotmap.jl.html", layout=:app, speed=speed)
@@ -108,16 +124,27 @@ function shape_coord_request()
   
   lat = typeof(ajax_received["lat"]) == String ? parse(Float64, ajax_received["lat"]) : ajax_received["lat"]
   lon = typeof(ajax_received["lon"]) == String ? parse(Float64, ajax_received["lon"]) : ajax_received["lon"]
-  keys_to_select = ["date", "time", "shortName", "level", "step"]
+  keys = ["date", "time", "shortName", "level", "step"]
 
   grib_to_read = ajax_received["loaded_file"]
+  reader = rg.GribReader(grib_to_read, keys)
 
-  reader = rg.GribReader(grib_to_read, keys_to_select)
+  datetime_start = start_date(ajax_received["date"]*ajax_received["time"], ajax_received["step"], "yyyy-mm-ddHH:MM:SS")
+  date = Dates.format(datetime_start, "yyyymmdd")
+  time = Dates.format(datetime_start, "HHMM")
+
+  # m = replace(available_time[1][:datetime],r"(?<y>\d{4}).?(?<m>\d{2}).?(?<d>\d{2})" => s"\g<y>\g<m>\g<d>")
+  # m = match(r"(?<y>\d{4}).?(?<m>\d{2}).?(?<d>\d{2})", ajax_received["date"])
+  # date = !isnothing(m) ? m[:y]*m[:m]*m[:d] : error("date is in unreadable format")
+
+  # m = match(r"(?<h>\d{2}).?(?<m>\d{2}).?(?<s>\d{2})", ajax_received["time"])
+  # time = !isnothing(m) ? m[:h]*m[:m] : error("date is in unreadable format")
+  time = time == "0000" ? "0" : time
 
   keys_to_select = Dict(
-    "date" => ajax_received["date"],
+    "date" => date,
     "step" => ajax_received["step"],
-    "time" => ajax_received["time"],
+    "time" => time,
     "level"=> reader.idx_get("level")[1],
     "shortName" => reader.idx_get("shortName")[1]
   )
