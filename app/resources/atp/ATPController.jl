@@ -6,11 +6,11 @@ using ComputeShapes
 using EarthCompute
 using JSON
 using Dates
-import Genie.Router: @params
 
 const ec = EarthCompute
 const LIB_PATH = joinpath(pwd(), "lib")
 const MARS_PATH = "mars"
+const DEFAULT_GRIB = "public/grib_files/2020-12-10_0000_europe.grib"
 struct Wind
   u::Float64
   v::Float64
@@ -18,6 +18,10 @@ struct Wind
   Wind(u, v) = new(u, v, sqrt(u^2 + v^2))
 end
 
+"""
+Structure to represent one ATP model instance. `shapes` contains all to shapes related to the ATP instance (release area, hazard area etc.). 
+The other fields are data related to the instance
+"""
 struct ShapeData
   shapes::Vector{ComputeShapes.Shape}
   wind::Wind
@@ -26,12 +30,17 @@ struct ShapeData
   step::String
 end
 
+"""
+    to_dict(arg::Union{Wind, ShapeData})
+
+Convert the structures in dict to be passed to Genie.Renderer.Json.json
+"""
 function to_dict(w::Wind)
-	d = Dict()
-	for fn in fieldnames(typeof(w))
-		push!(d, fn => getfield(w, fn))
-	end
-	return d
+  d = Dict()
+  for fn in fieldnames(typeof(w))
+    push!(d, fn => getfield(w, fn))
+  end
+  return d
 end
 
 function to_dict(sd::ShapeData)
@@ -52,6 +61,19 @@ function to_dict(sd::ShapeData)
 	return d
 end
 
+"""
+    steps_to_datetimes(toParse, steps::Union{Array{Int}, Tuple{Vararg}, Array{String}}, df)
+
+Return an array of `DateTime` objects for each element in `steps`. `toParse` is parsed according to `df`
+# Examples
+```julia-repl
+julia> steps_to_datetimes("19930212T12:00:00", [0, 3, 6], "yyyymmddTH:M:S")
+3-element Array{DateTime,1}:
+ 1993-02-12T12:00:00
+ 1993-02-12T15:00:00
+ 1993-02-12T18:00:00
+```
+"""
 function steps_to_datetimes(toParse, steps::Array{Int}, df)
   start_d = DateTime(toParse, df)
   return map(step -> start_d + Dates.Hour(step), steps)
@@ -68,6 +90,17 @@ start_date(date::DateTime, step) :: DateTime = date - Dates.Hour(step)
 start_date(date::String, step) :: DateTime = start_date(DateTime(date), step)
 start_date(date::String, step, df::String) :: DateTime = start_date(DateTime(date, DateFormat(df)), step)
 
+"""
+    preloaded_data()
+Generate the page for working with data preloaded on the server.
+The file from which information are collected is given in `payload()[:file]`. If no `payload()[:file]` default file is loaded.
+Data sent for html parsing :
+  @`datetimes` Array{Dict{Symbol,String},1} with 2 fields:
+    :datetime => forecast step in a datetime form
+    :step => step of the forecast
+  @`files` grib files available on the server
+  @`loaded_file` path of the file from which data have to be loaded
+"""
 function preloaded_data()
   pypath = PyVector(pyimport("sys")."path")
   if !(LIB_PATH in pypath) pushfirst!(pypath, LIB_PATH) end
@@ -76,46 +109,56 @@ function preloaded_data()
   if haskey(payload(), :file)
     grib_to_read = "public/grib_files/" * payload()[:file] * ".grib"
   else
-    grib_to_read = "/home/tcarion/grib_files/20171201_to_20171231_tigge.grib"
+    grib_to_read = DEFAULT_GRIB
   end
 
   keys = ["date", "time", "shortName", "level", "step"]
-  if isfile(grib_to_read)
-    reader = rg.GribReader(grib_to_read, keys)
-  else
-    reader = rg.GribReader("/home/tcarion/grib_files/20171201_to_20171231_tigge.grib", keys)
-  end
+  reader = rg.GribReader(grib_to_read, keys)
 
   date = reader.idx_get("date")[1]
   time = reader.idx_get("time")[1]
   steps = reader.idx_get("step")
+
   steps = sort(map(x -> parse(Int, x), collect(steps)))
-  searchdir(path,key) = filter(x->occursin(key,x), readdir(path))
-  grib_files = searchdir(joinpath(pwd(), "public", "grib_files"),".grib")
-  grib_files = map(x -> split(x, ".")[1], grib_files)
 
   time = time == "0" ? "0000" : time
   m = match(r"(?<h>\d{2}).?(?<m>\d{2})", time)
-  time = !isnothing(m) ? m[:h]*":"*m[:m] : error("date is in unreadable format")
+  time = !isnothing(m) ? m[:h]*":"*m[:m] : error("time is in unreadable format")
 
   available_datetimes = steps_to_datetimes(date*"T"*time, steps, "yyyymmddTH:M")
   available_datetimes_str = map(x -> Dates.format(x, "yyyy-mm-ddTHH:MM:SS"), available_datetimes)
   available_time = [Dict(:datetime => x, :step => y) for (x, y) in zip(available_datetimes_str, steps)]
 
+  searchdir(path,key) = filter(x->occursin(key,x), readdir(path))
+  grib_files = searchdir(joinpath(pwd(), "public", "grib_files"),".grib")
+  grib_files = map(x -> split(x, ".")[1], grib_files)
+
   html(:atp, "loaded_data.jl.html",
     datetimes = available_time, files=grib_files, loaded_file=grib_to_read, 
     layout=:app)
-
-  #html(:plotting, "plotmap.jl.html", layout=:app, speed=speed)
-  #html(:readgrib, "initiateform.jl.html", layout=:app)
-
 end
 
+"""
+    archive_data()
+Generate the page for chosing date and time for archive data retrieval.
+No data sent for html parsing
+"""
 function archive_data()
   html(:atp, "archive_data.jl.html")
 end
 
-function shape_coord_request()
+"""
+    atp_shape_request()
+Handle a request for an ATP hazard prediction. Interpolate the wind speed at the requested lon/lat with the four nearest points.
+Then calculate the ATP shapes according to the wind speed and return a Dict with the prediction data.
+
+Needed from json request :
+  @`lat`, @`lon`, @`date`, @`time`, @`step`
+  @`loaded_file` file to get the data from
+Data sent for html parsing :
+  @`shape_data` 
+"""
+function atp_shape_request()
   pypath = PyVector(pyimport("sys")."path")
   if !(LIB_PATH in pypath) pushfirst!(pypath, LIB_PATH) end
   rg = pyimport("readgrib")
@@ -131,13 +174,6 @@ function shape_coord_request()
   datetime_start = start_date(ajax_received["date"]*ajax_received["time"], ajax_received["step"], "yyyy-mm-ddHH:MM:SS")
   date = Dates.format(datetime_start, "yyyymmdd")
   time = Dates.format(datetime_start, "HHMM")
-
-  # m = replace(available_time[1][:datetime],r"(?<y>\d{4}).?(?<m>\d{2}).?(?<d>\d{2})" => s"\g<y>\g<m>\g<d>")
-  # m = match(r"(?<y>\d{4}).?(?<m>\d{2}).?(?<d>\d{2})", ajax_received["date"])
-  # date = !isnothing(m) ? m[:y]*m[:m]*m[:d] : error("date is in unreadable format")
-
-  # m = match(r"(?<h>\d{2}).?(?<m>\d{2}).?(?<s>\d{2})", ajax_received["time"])
-  # time = !isnothing(m) ? m[:h]*m[:m] : error("date is in unreadable format")
   time = time == "0000" ? "0" : time
 
   keys_to_select = Dict(
@@ -188,21 +224,21 @@ function shape_coord_request()
     push!(shape_data.shapes, rel_area)
   end
 
-  requested_data = to_dict(shape_data)
-
-  #### FOR LOGGING PURPOSE - TO BE REMOVED
-  #push!(requested_data, "nearest_u" => nearest_u)
-  #push!(requested_data, "nearest_v" => nearest_v)
-  ####
-  return requested_data |> Genie.Renderer.Json.json
+  return to_dict(shape_data) |> Genie.Renderer.Json.json
 end
 
+
+"""
+    archive_request()
+Send a mars request for archive data with the requested date, time and area
+
+Needed from json request :
+  @`date_request`, @`times_request`
+"""
 function archive_request()
   archive_keys = jsonpayload()
-  # cur_time = Dates.now()
   area = "europe"
-  # date = Dates.format(cur_time, "yyyy-mm-dd")
-  # time = "0"
+
   date = archive_keys["date_request"]
   time = archive_keys["times_request"]
   time = match(r"(\d+):(\d+)", time)[1]*match(r"(\d+):(\d+)", time)[2]
@@ -219,7 +255,6 @@ function archive_request()
     """
 
   run(pipeline(`echo $req`, `$MARS_PATH`))
-  
 end
 
 end

@@ -10,6 +10,6 @@ route("/load/:file::String", ATPController.preloaded_data, named = :preloaded_da
 
 route("/archive_data", ATPController.archive_data, named = :archive_data)
 
-route("/atp_coords", ATPController.shape_coord_request, method = POST, named = :atp_coords)
+route("/atp_shape_request", ATPController.atp_shape_request, method = POST, named = :atp_shape_request)
 
 route("/archive_request", ATPController.archive_request, method = POST, named = :archive_request)
