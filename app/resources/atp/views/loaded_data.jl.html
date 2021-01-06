@@ -1,7 +1,6 @@
 <input hidden id="loaded_file" value=$(loaded_file)></input>
 
-<!-- <div class="row my-form-row"> -->
-<form class="atp-form" action="" method="post">
+<form class="preloaded-form" action="" method="post">
   <div class="row">
     <div class="col-6">
       <div class="form-group">
@@ -21,7 +20,6 @@
       <select class="form-control" name="forecast_time" id="forecast_time">
         <% @foreach(datetimes) do d %>
         <option value="$(d[:datetime])+$(d[:step])">$(d[:datetime])</option>
-        <!-- <option value="$(d["datetime"])">$(d["datetime"]) --- $(d["step"])</option> -->
         <% end %>
       </select>
     </div>
@@ -29,14 +27,11 @@
 </form>
 
 <!-- Modal -->
-<div class="modal fade" id="pick_data" tabindex="-1" role="dialog" aria-labelledby="pick_dataLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
+<div class="modal fade" id="pick_data" tabindex="-1">
+  <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Data Selection</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <h5 class="modal-title">Data Selection</h5>
       </div>
       <div class="modal-body">
         <div class="list-group">
@@ -52,5 +47,5 @@
     </div>
   </div>
 </div>
-<!-- </div> -->
+
 

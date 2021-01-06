@@ -1,3 +1,8 @@
+$(document).ready(function(){
+    $(".nav-item.active").removeClass("active")
+    $(".nav-item a[href*='" + location.pathname + "']").parent().addClass("active");
+});
+
 let mymap = L.map('mapid').setView([50.82, 4.35], 8);
 let atp_area_prediction_array = [];
 let shapes_color = ['blue', 'red', 'yellow']
@@ -63,7 +68,7 @@ function onMapClick(e) {
         }
     }
 
-    xhr.open('POST', '/atp_coords', true);
+    xhr.open('POST', '/atp_shape_request', true);
 
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.send(JSON.stringify(to_send));

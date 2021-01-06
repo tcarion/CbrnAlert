@@ -1,14 +1,66 @@
-/* .container {
-    width: 70vw;
-    height: 100vh;
-    margin-top: 10px;
-    background-color: #f2f2fa;
-} */
+:root {
+    --sidebar-width: 13rem;
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: var(--sidebar-width);
+    height: 100%;
+    top: 0;
+    left: 0;
+    position: fixed; /* stay in place on scroll) */
+    z-index: 1; /* Stay on top */
+    background-color: #4e73df;
+    background-size: cover;
+    letter-spacing: 0.05rem;
+}
+
+.sidebar .sidebar-brand {
+    color: #fff;
+    text-transform: uppercase;
+    text-align: center;
+    font-weight: 800;
+    padding: 16px 16px;
+}
+
+.sidebar-divider {
+    box-sizing: border-box;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 0;
+    margin: 0 1em;
+    
+}
+
+.sidebar .nav-item.active .nav-link {
+    font-weight: 700;
+    color: white;
+}
+.sidebar a.nav-link {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem;
+    padding: 16px;
+    display: block;
+    letter-spacing: -0.02rem;
+}
+
+.sidebar a.nav-link:hover {
+    color: rgba(255, 255, 255, 1);
+}
+
+/* CONTENT */
+#content-wrapper {
+    margin-left: var(--sidebar-width);
+}
 
 .container-fluid {
     display: flex;
     justify-content: stretch;
     align-items: stretch;
+}
+
+/* LOADED DATA FORM STYLE */
+.preloaded-form {
+    padding-top: 10px;
 }
 
 /* ARCHIVE FORM STYLES */
@@ -44,22 +96,6 @@
 .step-item select {
     flex-grow: 1;
 }
-
-/* LOADED DATA FORM STYLE */
-.atp-form {
-    padding-top: 10px;
-}
-img { 
-    height: 100%;
-    width: 100%;
-    display: block;
-
-    /* border: 1px solid black */
- }
- img#magic_plot {
-     border: 1px solid black;
- }
-
 
 /* MAP STYLE */
 #mapid {
