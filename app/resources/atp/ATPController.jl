@@ -10,7 +10,7 @@ import Genie.Router: @params
 
 const ec = EarthCompute
 const LIB_PATH = joinpath(pwd(), "lib")
-
+const MARS_PATH = "mars"
 struct Wind
   u::Float64
   v::Float64
@@ -52,16 +52,12 @@ function to_dict(sd::ShapeData)
 	return d
 end
 
-function steps_to_datetimes(start_date, start_time, steps::Array{Int})
-  df = DateFormat("yyyymmddHH:MM:SS")
-  # inc = steps[2:end] - steps[1:end-1]
-  start_d = DateTime(start_date*start_time, df)
-  datetimes = map(step -> start_d + Dates.Hour(step), steps)
-  # datetimes = accumulate((date, step) -> date + Dates.Hour(step), inc, init=start_d)
-  return datetimes
+function steps_to_datetimes(toParse, steps::Array{Int}, df)
+  start_d = DateTime(toParse, df)
+  return map(step -> start_d + Dates.Hour(step), steps)
 end
-steps_to_datetimes(start_date, start_time, steps::Tuple{Vararg}) = steps_to_datetimes(start_date, start_time, collect(steps))
-steps_to_datetimes(start_date, start_time, steps::Array{String}) = steps_to_datetimes(start_date, start_time, map(x -> parse(Int, x), steps))
+steps_to_datetimes(toParse, steps::Tuple{Vararg}, df) = steps_to_datetimes(toParse, collect(steps), df)
+steps_to_datetimes(toParse, steps::Array{String}, df) = steps_to_datetimes(toParse, map(x -> parse(Int, x), steps), df)
 
 """
     start_date(date, step[, df])
@@ -90,19 +86,22 @@ function preloaded_data()
     reader = rg.GribReader("/home/tcarion/grib_files/20171201_to_20171231_tigge.grib", keys)
   end
 
-  dates = reader.idx_get("date")
-  times = reader.idx_get("time")
+  date = reader.idx_get("date")[1]
+  time = reader.idx_get("time")[1]
   steps = reader.idx_get("step")
   steps = sort(map(x -> parse(Int, x), collect(steps)))
-
   searchdir(path,key) = filter(x->occursin(key,x), readdir(path))
   grib_files = searchdir(joinpath(pwd(), "public", "grib_files"),".grib")
   grib_files = map(x -> split(x, ".")[1], grib_files)
 
-  available_datetimes = steps_to_datetimes(dates[1], times[1], steps)
+  time = time == "0" ? "0000" : time
+  m = match(r"(?<h>\d{2}).?(?<m>\d{2})", time)
+  time = !isnothing(m) ? m[:h]*":"*m[:m] : error("date is in unreadable format")
+
+  available_datetimes = steps_to_datetimes(date*"T"*time, steps, "yyyymmddTH:M")
   available_datetimes_str = map(x -> Dates.format(x, "yyyy-mm-ddTHH:MM:SS"), available_datetimes)
   available_time = [Dict(:datetime => x, :step => y) for (x, y) in zip(available_datetimes_str, steps)]
-  
+
   html(:atp, "loaded_data.jl.html",
     datetimes = available_time, files=grib_files, loaded_file=grib_to_read, 
     layout=:app)
@@ -216,13 +215,10 @@ function archive_request()
     param   = 10u/10v,
     area    = $area,
     grid    = 2.5/2.5,    
-    target  = "public/grib_files/$(date)_$(time)_$(area).grib"""
+    target  = "public/grib_files/$(date)_$(time)_$(area).grib
+    """
 
-  open("public/grib_files/request.req", "w") do file
-    write(file, req)
-  end
-
-  run(pipeline(`echo $req`, `mars`))
+  run(pipeline(`echo $req`, `$MARS_PATH`))
   
 end
 
