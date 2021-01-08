@@ -4,6 +4,7 @@
 
 body {
     color: rgb(133, 135, 150);
+    height: 100%;
 }
 
 #wrapper {
@@ -57,10 +58,11 @@ body {
 }
 
 /* CONTENT */
-#content-wrapper {
+#wrapper #content-wrapper {
     background-color: rgb(248, 249, 252);
     /* margin-left: var(--sidebar-width); */
     display: flex;
+    width: 100%;
 }
 
 #content {
