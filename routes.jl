@@ -1,8 +1,5 @@
 using Genie.Router, Genie.Requests
-# using ReadgribController
-# using PlottingController
 using ATPController
-import Genie.Router: @params
 
 route("/", ATPController.preloaded_data, named = :preloaded_data)
 

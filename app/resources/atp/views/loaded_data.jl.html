@@ -1,33 +1,36 @@
+
 <input hidden id="loaded_file" value=$(loaded_file)></input>
 
-<form class="preloaded-form" action="" method="post">
-  <div class="row">
-    <div class="col-6">
-      <div class="form-group">
-        <label for="lat">Latitude</label>
-        <input class="form-control" type="text" name="lat" id="lat" required>
-      </div>
-      <div class="form-group">
-        <label for="lon">Longitude</label>
-        <input class="form-control" type="text" name="lon" id="lon" required>
-      </div>
-      <div class="form-group">
-        <button class="btn btn-primary" type="button" data-toggle="modal" data-target="#pick_data">Load other data</button>
-      </div>
-    </div>
-    <div class="col-6">
-      <label for="forecast_time">Forecast step selection</label>
+<form class="map-form preloaded-form" action="" method="post">
+  <div class="alert alert-danger" id="error_loaded_data"></div>
+  <div class="form-group form-item">
+    <label for="lat">Latitude</label>
+    <input class="form-control lonlat" type="text" name="lat" id="lat" required>
+  </div>
+  <div class="form-group form-item">
+    <label for="lon">Longitude</label>
+    <input class="form-control lonlat" type="text" name="lon" id="lon" required>
+  </div>
+  <div class="form-item">
+    <label for="forecast_time">Forecast step selection</label>
       <select class="form-control" name="forecast_time" id="forecast_time">
         <% @foreach(datetimes) do d %>
         <option value="$(d[:datetime])+$(d[:step])">$(d[:datetime])</option>
         <% end %>
       </select>
-    </div>
+  </div>
+  <div class="form-item manual-btn">
+    <label for="manual_entry_button">&nbsp;</label><br>
+    <button class="btn btn-primary" type="button" id="manual_entry_button">Manual coord entry</button>
+  </div>
+  <div class="form-item load-other-btn">
+    <button class="btn btn-warning" type="button" id="load_other_data" data-toggle="modal" data-target="#pick_data_modal" >Load other forecast data</button>
   </div>
 </form>
 
+
 <!-- Modal -->
-<div class="modal fade" id="pick_data" tabindex="-1">
+<div class="modal fade" id="pick_data_modal" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">

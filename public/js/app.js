@@ -12,24 +12,7 @@ L.tileLayer('//{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
     maxZoom: 20
 }).addTo(mymap);
 
-// let available_dates = $(".available-dates").map(function(){
-//     return new Date($(this).val())
-// })
-
-// $('#forecast_datepicker').datetimepicker({
-//     timepicker: true,
-//     datepicker: true,
-//     formatDate:'Y-m-d',
-//     allowTimes: ['00:00', '12:00'],
-//     allowDates: ['2020-12-23','2020-12-25'], 
-// })
-
-function onMapClick(e) {
-    let latlng = e.latlng;
-    let lat = Math.round(latlng.lat*100)/100;
-    let lon = Math.round(latlng.lng *100)/100;
-    $("input#lat").val(lat);
-    $("input#lon").val(lon);
+function shapeRequest(lon, lat) {
     let selected_option = $("select#forecast_time option:selected").val().match("(.*)T(.*)\\+(.*)");
     let date = selected_option[1];
     let step = selected_option[3];
@@ -40,7 +23,6 @@ function onMapClick(e) {
     let atp_area_prediction = []
     let xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
-        // console.log(this) 
         if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
             let shape_data = JSON.parse(this.response);
             let shapes = shape_data.shapes
@@ -72,9 +54,44 @@ function onMapClick(e) {
 
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.send(JSON.stringify(to_send));
-
+}
+function onMapClick(e) {
+    let latlng = e.latlng;
+    let lat = Math.round(latlng.lat*100)/100;
+    let lon = Math.round(latlng.lng *100)/100;
+    $("input#lat").val(lat);
+    $("input#lon").val(lon);
+    shapeRequest(lon, lat)
 }
 
+function manualEntryRequest(e) {
+    let messages = [];
+    let lat = $("input#lat").val().trim();
+    let lon = $("input#lon").val().trim();
+    let lonlat_format = /^\d{1,3}[,|.]?\d*$/gm
+    if (lat=="") {
+        messages.push("A latitude must be specified");
+    }
+    else if (!lat.match(/^\d{1,3}[,|.]?\d*$/gm)){
+        messages.push("Wrong format for latitude");
+    }
+
+    if (lon=="") {
+        messages.push("A longitude must be specified");
+    }
+    else if (!lon.match(/^\d{1,3}[,|.]?\d*$/gm)){
+        messages.push("Wrong format for longitude");
+    }
+
+    if (messages.length == 0) {
+        shapeRequest(lon, lat);
+    }
+    else {
+        e.stopPropagation();
+        $("#error_loaded_data").text(messages.join(', '));
+        $("#error_loaded_data").show("slow");
+    }
+}
 function archiveDataRequest() {
     let date_request = $('#date_request').val();
     let times_request = $('.time-item input[type=radio]:checked').val()
@@ -102,6 +119,18 @@ function archiveDataRequest() {
 mymap.on('click', onMapClick);
 
 $('#archive_data_retrieve').on('click', archiveDataRequest);
+
+$('#manual_entry_button').on('click', manualEntryRequest);
+
+$('.preloaded-form .lonlat').keypress((e) => {
+    if(e.keyCode==13)
+    $('#manual_entry_button').click();
+});
+
+$(document).click(function() {
+    $("#error_loaded_data").hide("slow");
+});
+
 // let bounds = mymap.getBounds();
 // $("input#lolelon").val(bounds.getSouthWest().lng);
 // $("input#lolelat").val(bounds.getSouthWest().lat);
