@@ -2,22 +2,26 @@
     --sidebar-width: 13rem;
 } */
 
+html {
+    min-height: 100vh;
+    position: relative;
+}
+
 body {
     color: rgb(133, 135, 150);
-    height: 100%;
+    min-height: 100%;
 }
 
 #wrapper {
     display: flex;
     flex-direction: row;
-    justify-content: stretch;
+    align-items: stretch;
+    min-height: 100vh;
 }
 
 /* SIDEBAR */
 .sidebar {
     min-width: 13rem;
-    height: 100vh;
-    /* background-color: #4e73df; */
     background-color: rgb(78, 115, 223);
     background-image: linear-gradient(rgb(78, 115, 223) 10%, rgb(34, 74, 190) 100%);
     background-size: cover;
@@ -61,13 +65,14 @@ body {
 #wrapper #content-wrapper {
     background-color: rgb(248, 249, 252);
     /* margin-left: var(--sidebar-width); */
-    display: flex;
     width: 100%;
 }
 
 #content {
     background-color: rgb(248, 249, 252);
-    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+    /* flex: 1 0 auto; */
 }
 
 .topbar {
@@ -77,8 +82,7 @@ body {
 .container-fluid {
     padding-top: 1em;
     display: flex;
-    justify-content: stretch;
-    align-items: start;
+    align-items: flex-start;
 }
 
 .map-form {
