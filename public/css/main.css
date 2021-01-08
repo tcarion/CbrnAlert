@@ -1,16 +1,24 @@
-:root {
+/* :root {
     --sidebar-width: 13rem;
+} */
+
+body {
+    color: rgb(133, 135, 150);
+}
+
+#wrapper {
+    display: flex;
+    flex-direction: row;
 }
 
 /* SIDEBAR */
 .sidebar {
-    width: var(--sidebar-width);
+    min-width: 13rem;
     height: 100%;
-    top: 0;
-    left: 0;
-    position: fixed; /* stay in place on scroll) */
-    z-index: 1; /* Stay on top */
-    background-color: #4e73df;
+    /* background-color: #4e73df; */
+    background-color: rgb(78, 115, 223);
+    background-image: linear-gradient(rgb(78, 115, 223) 10%, rgb(34, 74, 190) 100%);
+    background-size: cover;
     background-size: cover;
     letter-spacing: 0.05rem;
 }
@@ -49,7 +57,18 @@
 
 /* CONTENT */
 #content-wrapper {
-    margin-left: var(--sidebar-width);
+    background-color: rgb(248, 249, 252);
+    /* margin-left: var(--sidebar-width); */
+    display: flex;
+}
+
+#content {
+    background-color: rgb(248, 249, 252);
+    flex: 1 0 auto;
+}
+
+.topbar {
+    height: 70px;
 }
 
 .container-fluid {
