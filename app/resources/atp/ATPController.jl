@@ -80,6 +80,7 @@ function steps_to_datetimes(toParse, steps::Array{Int}, df)
 end
 steps_to_datetimes(toParse, steps::Tuple{Vararg}, df) = steps_to_datetimes(toParse, collect(steps), df)
 steps_to_datetimes(toParse, steps::Array{String}, df) = steps_to_datetimes(toParse, map(x -> parse(Int, x), steps), df)
+steps_to_datetimes(start_d::DateTime, steps::Array{Int}) = map(step -> start_d + Dates.Hour(step), steps)
 
 """
     start_date(date, step[, df])
@@ -157,8 +158,16 @@ function preloaded_atp_prediction()
 end
 
 function realtime_atp_prediction()
-  html(:atp, "realtime_data.jl.html", layout=:app)
+  today = Dates.today()
+  today_midnight = Dates.DateTime(today)
+
+  steps =  collect(0:6:240)
+  available_dt = steps_to_datetimes(today_midnight,steps)
+  available_dt_str = map(x -> Dates.format(x, "yyyy-mm-ddTHH:MM:SS"), available_dt)
+  available_time_dict = [Dict(:datetime => x, :step => y) for (x, y) in zip(available_dt_str, steps)]
+  html(:atp, "realtime_data.jl.html", datetimes = available_time_dict, layout=:app)
 end
+
 """
     archive_data()
 Generate the page for chosing date and time for archive data retrieval.
@@ -189,13 +198,38 @@ function atp_shape_request()
   lon = typeof(ajax_received["lon"]) == String ? parse(Float64, ajax_received["lon"]) : ajax_received["lon"]
   keys = ["date", "time", "shortName", "level", "step"]
 
-  grib_to_read = ajax_received["loaded_file"]
-  reader = rg.GribReader(grib_to_read, keys)
-
-  datetime_start = start_date(ajax_received["date"]*ajax_received["time"], ajax_received["step"], "yyyy-mm-ddHH:MM:SS")
+  step = ajax_received["step"]
+  datetime_start = start_date(ajax_received["date"]*ajax_received["time"], step, "yyyy-mm-ddHH:MM:SS")
   date = Dates.format(datetime_start, "yyyymmdd")
   time = Dates.format(datetime_start, "HHMM")
   time = time == "0000" ? "0" : time
+
+  grib_to_read = ajax_received["loaded_file"]
+
+  if grib_to_read != ""
+    reader = rg.GribReader(grib_to_read, keys)
+  else
+    area = ajax_received["area"]
+    target_file = "public/grib_files/$(date)_$(time)_$(replace(area, "/" => "-")).grib"
+    req = """retrieve,
+    type    = fc,
+    date    = $date,
+    time    = $time,
+    step    = $step,
+    levtype = sfc,
+    param   = 10u/10v,
+    area    = $area,
+    grid    = 0.5/0.5,
+    target  = "$target_file"
+    """
+    run(pipeline(`echo $req`, `$MARS_PATH`))
+    reader = rg.GribReader(target_file, keys)
+    # if success(pipeline(`echo $req`, `$MARS_PATH`))
+    #   reader = rg.GribReader(target_file, keys)
+    # else
+    #   error("Problem with mars request")
+    # end
+  end
 
   keys_to_select = Dict(
     "date" => date,

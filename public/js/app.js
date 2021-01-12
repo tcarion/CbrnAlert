@@ -1,3 +1,16 @@
+// import { datetimepicker } from './external/jquery.datetimepicker.full.min.js';
+
+// function include(file) {
+//     let script = document.createElement('script');
+//     script.src = file;
+//     script.type = 'text/javascript';
+//     script.defer = true;
+
+//     document.getElementsByTagName('head').item(0).appendChild(script);
+// }
+
+// include('/js/external/jquery.datetimepicker.full.min.js')
+
 $(document).ready(function(){
     $(".nav-item.active").removeClass("active")
     $(".nav-item a[href*='" + location.pathname + "']").parent().addClass("active");
@@ -28,13 +41,20 @@ if ($("#av-area").text()) {
     L.rectangle(areaToCoords(available_area), {interactive : false, fillOpacity : 0}).addTo(mymap)
 }
 
-function shapeRequest(lon, lat) {
-    let selected_option = $("select#forecast_time option:selected").val().match("(.*)T(.*)\\+(.*)");
+$('#realtime_datepicker').datetimepicker({
+    timepicker: true,
+    datepicker: true,
+    formatDate:'Y-m-d',
+    allowTimes: ['00:00', '12:00'],
+    allowDates: ['2020-12-23','2020-12-25'], 
+})
+
+function shapeRequest(lon, lat, loaded_file = "") {
+    let selected_option = $("select option:selected").val().match("(.*)T(.*)\\+(.*)");
     let date = selected_option[1];
     let step = selected_option[3];
     let time = selected_option[2];
-    let loaded_file = $("input#loaded_file").val();
-    let to_send = {'lon' : lon, 'lat' : lat, 'date' : date, 'step' : step, 'time' : time, 'loaded_file' : loaded_file};
+    let to_send = {'lon' : lon, 'lat' : lat, 'date' : date, 'step' : step, 'time' : time, 'loaded_file' : loaded_file, 'area' : map_area.join('/')};
     L.circleMarker([lat, lon], {radius : 0.5, color : 'black'}).addTo(mymap)
     let atp_area_prediction = []
     let xhr = new XMLHttpRequest();
@@ -71,13 +91,15 @@ function shapeRequest(lon, lat) {
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.send(JSON.stringify(to_send));
 }
+
 function onMapClick(e) {
     let latlng = e.latlng;
     let lat = Math.round(latlng.lat*100)/100;
     let lon = Math.round(latlng.lng *100)/100;
     $("input#lat").val(lat);
     $("input#lon").val(lon);
-    shapeRequest(lon, lat)
+    let loaded_file = $("input#loaded_file").val();
+    shapeRequest(lon, lat, loaded_file)
 }
 
 function manualEntryRequest(e) {

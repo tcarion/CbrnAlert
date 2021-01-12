@@ -1,0 +1,23 @@
+<div class="realtime-form">
+    <!-- <div class="form-item">
+        <label for="realtime_datepicker">Select the forecast date</label>
+        <input class="form-control" type="text" name="realtime_datepicker" id="realtime_datepicker">
+    </div>
+    <div class="form-item">
+        <label for="realtime_time">Select the forecast time</label>
+        <select class="form-control">
+            <option value="00:00">00:00</option>
+            <option value="06:00">06:00</option>
+            <option value="12:00">12:00</option>
+            <option value="18:00">18:00</option>
+        </select>
+    </div> -->
+    <div class="form-item">
+        <label for="realtime_time">Forecast step selection</label>
+        <select class="form-control" name="realtime_time" id="realtime_time">
+            <% @foreach(datetimes) do d %>
+            <option value="$(d[:datetime])+$(d[:step])">$(d[:datetime])</option>
+            <% end %>
+        </select>
+    </div>
+</div>
