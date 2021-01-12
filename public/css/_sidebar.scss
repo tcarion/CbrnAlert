@@ -1,0 +1,40 @@
+.sidebar {
+    min-width: $sidebarMinWidth;
+    background-color: rgb(78, 115, 223);
+    background-image: linear-gradient(rgb(78, 115, 223) 10%, rgb(34, 74, 190) 100%);
+    background-size: cover;
+    background-size: cover;
+    letter-spacing: 0.05rem;
+
+    .sidebar-brand {
+        color: #fff;
+        text-transform: uppercase;
+        text-align: center;
+        font-weight: 800;
+        padding: 16px 16px;
+    }
+
+    .nav-item.active .nav-link {
+        font-weight: 700;
+        color: white;
+    }
+
+    a.nav-link {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.85rem;
+        padding: 16px;
+        display: block;
+        letter-spacing: -0.02rem;
+        &:hover{
+            color: rgba(255, 255, 255, 1);
+        }
+    }
+}
+
+.sidebar-divider {
+    box-sizing: border-box;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 0;
+    margin: 0 1em;
+    
+}

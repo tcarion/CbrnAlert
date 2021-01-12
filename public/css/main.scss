@@ -1,0 +1,59 @@
+@import "./variables";
+@import "./sidebar";
+@import "./forms";
+
+@mixin flexDir($dir) {
+    display: flex;
+    flex-direction: $dir;
+}
+
+html {
+    min-height: 100vh;
+    position: relative;
+
+    body {
+        color: rgb(133, 135, 150);
+        min-height: 100%;
+
+        #wrapper {
+            display: flex;
+            flex-direction: row;
+            align-items: stretch;
+            min-height: 100vh;
+
+            #content-wrapper {
+                background-color: rgb(248, 249, 252);
+                width: 100%;
+
+                #content {
+                    @extend #content-wrapper;
+                    @include flexDir(column);
+
+                    .topbar {
+                        height: 70px;
+                    }
+
+                    .container-fluid {
+                        padding-top: 1em;
+                        display: flex;
+                        align-items: flex-start;
+                    }
+                }
+            }
+        }
+    }
+}
+
+/* MAP STYLE */
+
+.mymap-container {
+    height: 500px;
+    min-width: 400px;
+    flex: 3 1 auto;
+    padding-left: 1em;
+
+    #mapid {
+        height: 100%;
+        background-color: blue;
+    }
+}
