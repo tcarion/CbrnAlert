@@ -90,7 +90,7 @@ body {
 }
 
 /* LOADED DATA FORM STYLE */
-.preloaded-form {
+.atp-prediction-form {
     max-width: 420px;
     min-width: 100px;
     display: grid;
@@ -106,7 +106,7 @@ body {
     position: relative;
 }
 
-.preloaded-form .form-item {
+.atp-prediction-form .form-item {
     /* grid-column: 1/3;
     grid-row: 1/3; */
     /* justify-self: end; */
@@ -115,11 +115,11 @@ body {
     margin: 0;
 }
 
-.preloaded-form button {
+.atp-prediction-form button {
     width: 100%;
 }
 
-.preloaded-form .load-other-btn {
+.atp-prediction-form .load-other-btn {
     margin-top: 1em;
     grid-column: 1/3;
     justify-self: center;
@@ -139,21 +139,51 @@ body {
     display: none;
 }
 
+.loaded-data-info {
+    max-width: 420px;
+    /* border: 2px solid black; */
+    border-radius: 5px;
+    /* background-color: rgb(78, 115, 223); */
+    background-color: white;
+    color: black;
+    /* background: rgb(254,254,254);
+    background: linear-gradient(90deg, rgba(254,254,254,0.742734593837535) 0%, rgba(222,255,243,0.5382528011204482) 50%, rgba(197,247,249,0.32816876750700286) 100%); */
+    margin-bottom: 1em;
+    padding: 0.3em;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto;
+    column-gap: 0em;
+    row-gap: 0.5em;
+    justify-items: start;
+}
+
+.loaded-data-info span:nth-child(odd) {
+    font-weight: 700;
+}
+
+.loaded-data-info span:nth-child(even) {
+    color: #222;
+}
 /* ARCHIVE FORM STYLES */
 .archive-form {
     max-width: 250px;
     min-width: 100px;
     display: flex;
-    justify-content: stretch;
     align-items: stretch;
     flex-direction: column;
 }
 
 .archive-form-item {
     margin: 5px;
+    padding-bottom: 0.5em;
 }
 
-.date-item {
+.archive-form-item button {
+    width: 100%;
+    font-size: 0.8rem;
+}
+/* .date-item {
     flex: 1 1 auto;
     min-width: 150px;
 }
@@ -161,17 +191,7 @@ body {
 .time-item {
     flex: 0 2 auto;
     min-height: 100px;
-}
-
-.step-item {
-    flex: 2 0 auto;
-    display: flex;
-    flex-direction: column;
-}
-
-.step-item select {
-    flex-grow: 1;
-}
+} */
 
 /* MAP STYLE */
 #mapid {

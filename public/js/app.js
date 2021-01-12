@@ -4,6 +4,7 @@ $(document).ready(function(){
 });
 
 let mymap = L.map('mapid').setView([50.82, 4.35], 8);
+
 let atp_area_prediction_array = [];
 let shapes_color = ['blue', 'red', 'yellow']
 L.tileLayer('//{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
@@ -11,6 +12,21 @@ L.tileLayer('//{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
     minZoom: 1,
     maxZoom: 20
 }).addTo(mymap);
+
+function areaToCoords(area) {
+    let newArr = [];
+    while(area.length) newArr.push(area.splice(0,2));
+    return newArr;
+}
+
+let map_area;
+updateArea();
+
+let available_area
+if ($("#av-area").text()) {
+    available_area = JSON.parse($("#av-area").text())
+    L.rectangle(areaToCoords(available_area), {interactive : false, fillOpacity : 0}).addTo(mymap)
+}
 
 function shapeRequest(lon, lat) {
     let selected_option = $("select#forecast_time option:selected").val().match("(.*)T(.*)\\+(.*)");
@@ -92,37 +108,57 @@ function manualEntryRequest(e) {
         $("#error_loaded_data").show("slow");
     }
 }
-function archiveDataRequest() {
-    let date_request = $('#date_request').val();
-    let times_request = $('.time-item input[type=radio]:checked').val()
 
-    let to_send = {'date_request' : date_request, 'times_request' : times_request}
+function realTimeRequest() {
+    let xhr = new XMLHttpRequest();
+
+    xhr.open('POST', '/realtime_request', true);
+
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.send();
+}
+
+function marsDataRequest(event) {
+    let date_request = $('#date_request').val();
+    let time_request = $('.time-item input[type=radio]:checked').val()
+    let area_request = map_area.join('/');
+    let to_send;
+    if (event.data.req_flag) {
+        to_send = {'area_request' : area_request};
+    }
+    else {
+        to_send = {'date_request' : date_request, 'time_request' : time_request, 'area_request' : area_request};
+    }
 
     let xhr = new XMLHttpRequest();
 
-    xhr.open('POST', '/archive_request', true);
+    xhr.open('POST', '/mars_request', true);
 
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.send(JSON.stringify(to_send));
 };
-// function updateArea(e) {
-//     let bounds = mymap.getBounds();
-//     $("input#lolelon").val(bounds.getSouthWest().lng);
-//     $("input#lolelat").val(bounds.getSouthWest().lat);
-//     $("input#uprilon").val(bounds.getNorthEast().lng);
-//     $("input#uprilat").val(bounds.getNorthEast().lat);
-// }
 
-// mymap.on('dragend', updateArea);
-// mymap.on('zoomend', updateArea);
+function updateArea() {
+    let bounds = mymap.getBounds();
+    map_area = [
+        Math.ceil(bounds.getNorthWest().lat),
+        Math.floor(bounds.getNorthWest().lng),
+        Math.floor(bounds.getSouthEast().lat),
+        Math.ceil(bounds.getSouthEast().lng)
+    ];
+};
+
+mymap.on('dragend', updateArea);
+mymap.on('zoomend', updateArea);
 
 mymap.on('click', onMapClick);
 
-$('#archive_data_retrieve').on('click', archiveDataRequest);
+$('#archive_data_retrieve').on('click', {req_flag: 0}, marsDataRequest);
+$('#real_time_fc').on('click', {req_flag: 1}, marsDataRequest);
 
 $('#manual_entry_button').on('click', manualEntryRequest);
 
-$('.preloaded-form .lonlat').keypress((e) => {
+$('.atp-prediction-form .lonlat').keypress((e) => {
     if(e.keyCode==13)
     $('#manual_entry_button').click();
 });

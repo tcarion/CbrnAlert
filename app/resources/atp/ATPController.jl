@@ -91,8 +91,8 @@ start_date(date::String, step) :: DateTime = start_date(DateTime(date), step)
 start_date(date::String, step, df::String) :: DateTime = start_date(DateTime(date, DateFormat(df)), step)
 
 """
-    preloaded_data()
-Generate the page for working with data preloaded on the server.
+    preloaded_atp_prediction()
+Generate the page with the map to make atp prediction requests either by clicking on the map or by manually picking the coordinates.
 The file from which information are collected is given in `payload()[:file]`. If no `payload()[:file]` default file is loaded.
 Data sent for html parsing :
   @`datetimes` Array{Dict{Symbol,String},1} with 2 fields:
@@ -101,7 +101,7 @@ Data sent for html parsing :
   @`files` grib files available on the server
   @`loaded_file` path of the file from which data have to be loaded
 """
-function preloaded_data()
+function preloaded_atp_prediction()
   pypath = PyVector(pyimport("sys")."path")
   if !(LIB_PATH in pypath) pushfirst!(pypath, LIB_PATH) end
   rg = pyimport("readgrib")
@@ -119,6 +119,17 @@ function preloaded_data()
   time = reader.idx_get("time")[1]
   steps = reader.idx_get("step")
 
+  keys_to_select = Dict(
+    "date" => date,
+    "step" => steps[1],
+    "time" => time,
+    "level"=> reader.idx_get("level")[1],
+    "shortName" => reader.idx_get("shortName")[1]
+  )
+
+  reader.idx_select(keys_to_select)
+  reader.new_handle()
+
   steps = sort(map(x -> parse(Int, x), collect(steps)))
 
   time = time == "0" ? "0000" : time
@@ -133,11 +144,21 @@ function preloaded_data()
   grib_files = searchdir(joinpath(pwd(), "public", "grib_files"),".grib")
   grib_files = map(x -> split(x, ".")[1], grib_files)
 
+  loaded_data_info = Dict(
+    :date => Dates.format(available_datetimes[1], "Y-mm-dd"), 
+    :time => Dates.format(available_datetimes[1], "HH:MM"),
+    :hour_nbr => steps[end],
+    :filename => split(grib_to_read, '/')[end],
+    :area => reader.get_area())
+
   html(:atp, "loaded_data.jl.html",
-    datetimes = available_time, files=grib_files, loaded_file=grib_to_read, 
+    datetimes = available_time, files=grib_files, loaded_file=grib_to_read, loaded_data_info = loaded_data_info,
     layout=:app)
 end
 
+function realtime_atp_prediction()
+  html(:atp, "realtime_data.jl.html", layout=:app)
+end
 """
     archive_data()
 Generate the page for chosing date and time for archive data retrieval.
@@ -229,18 +250,29 @@ end
 
 
 """
-    archive_request()
+    mars_request()
 Send a mars request for archive data with the requested date, time and area
 
 Needed from json request :
   @`date_request`, @`times_request`
 """
-function archive_request()
+function mars_request()
   archive_keys = jsonpayload()
+  @show archive_keys
   area = "europe"
 
-  date = archive_keys["date_request"]
-  time = archive_keys["times_request"]
+  area = archive_keys["area_request"]
+  
+  if haskey(archive_keys, "date_request") && haskey(archive_keys, "time_request")
+    date = archive_keys["date_request"]
+    time = archive_keys["time_request"]
+  else
+    today = Dates.now()
+    date = Dates.format(today, "yyyy-mm-dd")
+    # time = Dates.format(today, "HH:MM")
+    time = "00:00"
+  end
+  
   time = match(r"(\d+):(\d+)", time)[1]*match(r"(\d+):(\d+)", time)[2]
   req = """retrieve,
     type    = fc,
@@ -250,8 +282,8 @@ function archive_request()
     levtype = sfc,
     param   = 10u/10v,
     area    = $area,
-    grid    = 1/1,    
-    target  = "public/grib_files/$(date)_$(time)_$(area).grib"
+    grid    = 0.5/0.5,
+    target  = "public/grib_files/$(date)_$(time)_$(replace(area, "/" => "-")).grib"
     """
 
   run(pipeline(`echo $req`, `$MARS_PATH`))

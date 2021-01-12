@@ -35,4 +35,8 @@ class GribReader():
         latit = latit[0::Nx]
         longit = longit[0:Nx]
         return {"longitudes" : longit, "latitudes" : latit}
+
+    def get_area(self):
+        lonlat = self.get_coord()
+        return [max(lonlat["latitudes"]), min(lonlat["longitudes"]), min(lonlat["latitudes"]), max(lonlat["longitudes"])]
     

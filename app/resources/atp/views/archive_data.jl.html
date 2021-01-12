@@ -1,26 +1,30 @@
 <div class="archive-form">
     <div class="archive-form-item date-item">
-        <label for="date_request">Date of the forecast</label>
+        <label for="date_request">Date of the forecast :</label>
         <input class="form-control date-picker" type="date" name="date_request" id="date_request" value="2020-12-10">
     </div>
 
-    <label for="time-item">Select forecast starting time</label>
     <div class="archive-form-item time-item">
+        <div>Select forecast starting time :</div>
         <div class="form-check">
-            <input class="form-check-input" type="radio" id="arch_retr_time_00" value="00:00:00" checked>
+            <input class="form-check-input" type="radio" id="arch_retr_time_00" value="00:00:00" name="arch_retr_time" checked>
             <label class="form-check-label" for="arch_retr_time_00">
                 00:00:00
             </label>
         </div>
         <div class="form-check">
-            <input class="form-check-input" type="radio" id="arch_retr_time_12" value="12:00:00">
+            <input class="form-check-input" type="radio" id="arch_retr_time_12" value="12:00:00" name="arch_retr_time">
             <label class="form-check-label" for="arch_retr_time_12">
                 12:00:00
             </label>
         </div>
     </div>
 
-    <div class="archive-form-item">
+    <div class="archive-form-item archive-form-btn">
         <button type="button" class="btn btn-primary submit-item" id="archive_data_retrieve">Send data request</button>
+    </div>
+
+    <div class="archive-form-item archive-form-btn">
+        <button class="btn btn-success" type="button" id="real_time_fc">Request the most recent forecast</button>
     </div>
 </div>

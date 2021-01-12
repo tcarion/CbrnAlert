@@ -1,54 +1,63 @@
+<div class="atp-prediction">
 
-<input hidden id="loaded_file" value=$(loaded_file)></input>
+  <input hidden id="loaded_file" value=$(loaded_file)></input>
 
-<form class="map-form preloaded-form" action="" method="post">
-  <div class="alert alert-danger" id="error_loaded_data"></div>
-  <div class="form-group form-item">
-    <label for="lat">Latitude</label>
-    <input class="form-control lonlat" type="text" name="lat" id="lat" required>
+  <div class="loaded-data-info">
+    <span>Name of the file loaded : </span> <span>$(loaded_data_info[:filename])</span>
+    <span>Forecast start date : </span> <span>$(loaded_data_info[:date])</span>
+    <span>Forecast start time : </span> <span>$(loaded_data_info[:time])</span>
+    <span>Forecast duration : </span> <span>$(loaded_data_info[:hour_nbr]) hours</span>
+    <span>Available area : </span> <span id="av-area">$(loaded_data_info[:area])</span>
   </div>
-  <div class="form-group form-item">
-    <label for="lon">Longitude</label>
-    <input class="form-control lonlat" type="text" name="lon" id="lon" required>
-  </div>
-  <div class="form-item">
-    <label for="forecast_time">Forecast step selection</label>
+  
+  <form class="map-form atp-prediction-form" action="" method="post">
+    <div class="alert alert-danger" id="error_loaded_data"></div>
+    <div class="form-group form-item">
+      <label for="lat">Latitude</label>
+      <input class="form-control lonlat" type="text" name="lat" id="lat" required>
+    </div>
+    <div class="form-group form-item">
+      <label for="lon">Longitude</label>
+      <input class="form-control lonlat" type="text" name="lon" id="lon" required>
+    </div>
+    <div class="form-item">
+      <label for="forecast_time">Forecast step selection</label>
       <select class="form-control" name="forecast_time" id="forecast_time">
         <% @foreach(datetimes) do d %>
         <option value="$(d[:datetime])+$(d[:step])">$(d[:datetime])</option>
         <% end %>
       </select>
-  </div>
-  <div class="form-item manual-btn">
-    <label for="manual_entry_button">&nbsp;</label><br>
-    <button class="btn btn-primary" type="button" id="manual_entry_button">Manual coord entry</button>
-  </div>
-  <div class="form-item load-other-btn">
-    <button class="btn btn-warning" type="button" id="load_other_data" data-toggle="modal" data-target="#pick_data_modal" >Load other forecast data</button>
-  </div>
-</form>
+    </div>
+    <div class="form-item manual-btn">
+      <label for="manual_entry_button">&nbsp;</label><br>
+      <button class="btn btn-primary" type="button" id="manual_entry_button">Manual coord entry</button>
+    </div>
 
+    <div class="form-item load-other-btn">
+      <button class="btn btn-warning" type="button" id="load_other_data" data-toggle="modal"
+        data-target="#pick_data_modal">Load other forecast data</button>
+    </div>
+  </form>
 
-<!-- Modal -->
-<div class="modal fade" id="pick_data_modal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Data Selection</h5>
-      </div>
-      <div class="modal-body">
-        <div class="list-group">
-          <% @foreach(files) do f %>
-          <a href="/load/$(f)" class="list-group-item list-group-item-action">$(f)</a>
-          <% end %>
+  <!-- Modal -->
+  <div class="modal fade" id="pick_data_modal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Data Selection</h5>
         </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Load Data</button>
+        <div class="modal-body">
+          <div class="list-group">
+            <% @foreach(files) do f %>
+              <a href="/load/$(f)" class="list-group-item list-group-item-action">$(f)</a>
+              <% end %>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Load Data</button>
+        </div>
       </div>
     </div>
   </div>
 </div>
-
-
