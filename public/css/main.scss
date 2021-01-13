@@ -1,7 +1,3 @@
-@import "./variables";
-@import "./sidebar";
-@import "./forms";
-
 @mixin flexDir($dir) {
     display: flex;
     flex-direction: $dir;
@@ -44,8 +40,11 @@ html {
     }
 }
 
-/* MAP STYLE */
+@import "./variables";
+@import "./sidebar";
+@import "./forms";
 
+/* MAP STYLE */
 .mymap-container {
     height: 500px;
     min-width: 400px;
