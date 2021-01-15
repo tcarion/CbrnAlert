@@ -216,7 +216,8 @@ html body #wrapper #content-wrapper #content .container-fluid {
 /* MAP STYLE */
 .mymap-container {
   height: 100%;
-  min-width: 400px;
+  min-width: 500px;
+  min-height: 500px;
   -webkit-box-flex: 3;
       -ms-flex: 3 1 auto;
           flex: 3 1 auto;

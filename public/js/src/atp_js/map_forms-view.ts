@@ -31,22 +31,20 @@ export default class MapForms {
         });
     }
 
-    manualEntryRequest(e: KeyboardEvent) {
+    manualEntryRequest(e: any) {
         let messages = [];
-        let lat = $("input#lat").val()?.trim();
-        let lon = $("input#lon").val()?.trim();
+        let lat = $("input#lat").val()?.toString().trim();
+        let lon = $("input#lon").val()?.toString().trim();
 
         if (lat=="") {
             messages.push("A latitude must be specified");
-        }
-        else if (!lat.match(/^\d{1,3}[,|.]?\d*$/gm)){
+        } else if (!lat.match(/^\d{1,3}[,|.]?\d*$/gm)){
             messages.push("Wrong format for latitude");
         }
     
         if (lon=="") {
             messages.push("A longitude must be specified");
-        }
-        else if (!lon.match(/^\d{1,3}[,|.]?\d*$/gm)){
+        } else if (!lon.match(/^\d{1,3}[,|.]?\d*$/gm)){
             messages.push("Wrong format for longitude");
         }
     
