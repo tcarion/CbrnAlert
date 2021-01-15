@@ -292,11 +292,9 @@ Needed from json request :
 """
 function mars_request()
   archive_keys = jsonpayload()
-  @show archive_keys
-  area = "europe"
 
   area = archive_keys["area_request"]
-  
+
   if haskey(archive_keys, "date_request") && haskey(archive_keys, "time_request")
     date = archive_keys["date_request"]
     time = archive_keys["time_request"]
