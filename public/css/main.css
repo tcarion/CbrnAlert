@@ -1,3 +1,67 @@
+* {
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+}
+
+html {
+  min-height: 100vh;
+  position: relative;
+}
+
+html body {
+  color: #858796;
+  min-height: 100%;
+}
+
+html body #wrapper {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -webkit-box-align: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch;
+  min-height: 100vh;
+}
+
+html body #wrapper #content-wrapper {
+  background-color: #f8f9fc;
+  width: 100%;
+  height: 100vh;
+}
+
+html body #wrapper #content-wrapper #content {
+  background-color: #f8f9fc;
+  width: 100%;
+  height: 100%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+}
+
+html body #wrapper #content-wrapper #content .topbar {
+  height: 70px;
+}
+
+html body #wrapper #content-wrapper #content .container-fluid {
+  height: 100%;
+  padding-top: 1em;
+  padding-bottom: 1em;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+}
+
 .sidebar {
   min-width: 14rem;
   background-color: #4e73df;
@@ -149,71 +213,19 @@
   font-size: 0.8rem;
 }
 
-html {
-  min-height: 100vh;
-  position: relative;
-}
-
-html body {
-  color: #858796;
-  min-height: 100%;
-}
-
-html body #wrapper {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-orient: horizontal;
-  -webkit-box-direction: normal;
-      -ms-flex-direction: row;
-          flex-direction: row;
-  -webkit-box-align: stretch;
-      -ms-flex-align: stretch;
-          align-items: stretch;
-  min-height: 100vh;
-}
-
-html body #wrapper #content-wrapper, html body #wrapper #content-wrapper #content {
-  background-color: #f8f9fc;
-  width: 100%;
-}
-
-html body #wrapper #content-wrapper #content {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column;
-}
-
-html body #wrapper #content-wrapper #content .topbar {
-  height: 70px;
-}
-
-html body #wrapper #content-wrapper #content .container-fluid {
-  padding-top: 1em;
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-align: start;
-      -ms-flex-align: start;
-          align-items: flex-start;
-}
-
 /* MAP STYLE */
 .mymap-container {
-  height: 500px;
+  height: 100%;
   min-width: 400px;
   -webkit-box-flex: 3;
       -ms-flex: 3 1 auto;
           flex: 3 1 auto;
-  padding-left: 1em;
+  margin-left: 1em;
+  border-style: ridge;
+  border: 5px ridge;
 }
 
 .mymap-container #mapid {
   height: 100%;
-  background-color: blue;
 }
 /*# sourceMappingURL=main.css.map */

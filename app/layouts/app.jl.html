@@ -21,7 +21,7 @@
     <!-- Sidebar -->
     <ul class="navbar-nav bg-gradient-primary sidebar">
       <a class="sidebar-brand" href="#">
-        <div class="sidebar-brand-text">ATP implementation</sup></div>
+        <div class="sidebar-brand-text">ATP-45 implementation</sup></div>
       </a>
 
       <!-- Divider -->
@@ -37,13 +37,13 @@
 
       <li class="nav-item active">
         <a class="nav-link" href="$(Genie.Router.linkto(:preloaded_atp_prediction))">
-          <span>Preloaded ATP prediction</span>
+          <span>Preloaded ATP-45 prediction</span>
         </a>
       </li>
       
       <li class="nav-item">
         <a class="nav-link" href="$(Genie.Router.linkto(:realtime_atp_prediction))">
-          <span>Real time ATP prediction</span>
+          <span>Real time ATP-45 prediction</span>
         </a>
       </li>
 
@@ -66,7 +66,7 @@
 
         <!-- Begin Page Content -->
         <div class="container-fluid">
-          <% @yield %>
+          <% @yield %>          
           <div class="mymap-container">
             <div id="mapid"></div>
           </div>
