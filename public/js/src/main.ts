@@ -23,5 +23,9 @@ $(() => {
 
     let map_form = new MapForms(my_atp_map)
     map_form.initEvents()
+
+    window.parse_payload = function (payload) {
+        $(".mars-output code").append(payload + '<br>')
+    }
 }) 
 

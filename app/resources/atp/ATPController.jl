@@ -1,11 +1,13 @@
 module ATPController
 
 using PyCall
-using Genie.Renderer.Html, Genie.Renderer.Json, Genie.Requests
+using Genie.Renderer.Html, Genie.Renderer.Json, Genie.Requests, Genie.Assets
 using ComputeShapes
 using EarthCompute
 using JSON
 using Dates
+using Sockets
+using UUIDs
 
 const ec = EarthCompute
 const LIB_PATH = joinpath(pwd(), "lib")
@@ -91,7 +93,65 @@ start_date(date::DateTime, step) :: DateTime = date - Dates.Hour(step)
 start_date(date::String, step) :: DateTime = start_date(DateTime(date), step)
 start_date(date::String, step, df::String) :: DateTime = start_date(DateTime(date, DateFormat(df)), step)
 
+
+get_request(date, step, time, area, target_file = "public/grib_files/$(date)_$(time)_$(replace(area, "/" => "-")).grib") = """retrieve,
+                                      type    = fc,
+                                      date    = $date,
+                                      time    = $time,
+                                      step    = $step,
+                                      levtype = sfc,
+                                      param   = 10u/10v,
+                                      area    = $area,
+                                      grid    = 0.5/0.5,
+                                      target  = "$target_file"
+                                      """
+
+
+function initiate_socket_mars(req, channel)
+  s_name = "tmp/socket_$(Dates.format(Dates.now(), "yyyymmddHHMMSSs"))"
+  @async begin
+      server = listen(s_name)
+      while true
+          sock = accept(server)
+          redirect_stdout(sock) do 
+              redirect_stderr(sock) do 
+                try
+                  # run(pipeline(`echo $req`, `mars`))
+                  run(`./test/sleeping_script.sh`)
+                  write(stdout, "--EOF--")
+                catch e
+                  write(stdout, "EXCEPTION IN MARS REQUEST : $e")
+                  write(stdout, "--EOF--")
+                finally
+                  close(sock)
+                end
+              end
+            end
+      end
+  end
+   
+  clientside = client_connect(s_name)
+
+  r = readline(clientside)
+  while r != "--EOF--"
+      Genie.WebChannels.broadcast(channel, r)
+      r = readline(clientside)
+  end
+
+  if isopen(clientside) close(clientside) end
+  rm(s_name)
+end
+
+function client_connect(named_pipe)
+  try
+    connect(named_pipe)
+  catch
+    sleep(0.5)
+    client_connect(named_pipe)
+  end
+end
 """
+
     preloaded_atp_prediction()
 Generate the page with the map to make atp prediction requests either by clicking on the map or by manually picking the coordinates.
 The file from which information are collected is given in `payload()[:file]`. If no `payload()[:file]` default file is loaded.
@@ -165,7 +225,8 @@ function realtime_atp_prediction()
   available_dt = steps_to_datetimes(today_midnight,steps)
   available_dt_str = map(x -> Dates.format(x, "yyyy-mm-ddTHH:MM:SS"), available_dt)
   available_time_dict = [Dict(:datetime => x, :step => y) for (x, y) in zip(available_dt_str, steps)]
-  html(:atp, "realtime_data.jl.html", datetimes = available_time_dict, layout=:app)
+  channels_js_script = Assets.channels_support("$(uuid4())")
+  html(:atp, "realtime_data.jl.html", datetimes = available_time_dict, channels_js_script = channels_js_script, layout=:app)
 end
 
 """
@@ -211,24 +272,12 @@ function atp_shape_request()
   else
     area = ajax_received["area"]
     target_file = "public/grib_files/$(date)_$(time)_$(replace(area, "/" => "-")).grib"
-    req = """retrieve,
-    type    = fc,
-    date    = $date,
-    time    = $time,
-    step    = $step,
-    levtype = sfc,
-    param   = 10u/10v,
-    area    = $area,
-    grid    = 0.5/0.5,
-    target  = "$target_file"
-    """
-    run(pipeline(`echo $req`, `$MARS_PATH`))
+    req = get_request(date, step, time, area, target_file)
+    channel = ajax_received["channel"]
+    @show channel
+    initiate_socket_mars(req, channel)
+    # run(pipeline(`echo $req`, `$MARS_PATH`))
     reader = rg.GribReader(target_file, keys)
-    # if success(pipeline(`echo $req`, `$MARS_PATH`))
-    #   reader = rg.GribReader(target_file, keys)
-    # else
-    #   error("Problem with mars request")
-    # end
   end
 
   keys_to_select = Dict(
@@ -282,6 +331,9 @@ function atp_shape_request()
   return to_dict(shape_data) |> Genie.Renderer.Json.json
 end
 
+function atp_shape_request_realtime()
+  "Shape requestfullfilled"
+end
 
 """
     mars_request()
@@ -300,7 +352,7 @@ function mars_request()
     time = archive_keys["time_request"]
   else
     today = Dates.now()
-    date = Dates.format(today, "yyyy-mm-dd")
+    date = Dates.kkaa-2019(today, "yyyy-mm-dd")
     # time = Dates.format(today, "HH:MM")
     time = "00:00"
   end

@@ -22,7 +22,9 @@ interface ShapeData {
 }
 
 export function shapeRequest(lon: number | string, lat: number | string, date: string, time: string, step: string, area: number[], loaded_file = "") {
-    let to_send = { 'lon': lon, 'lat': lat, 'date': date, 'step': step, 'time': time, 'loaded_file': loaded_file, 'area': area.join('/') };
+    let to_send: {[k: string]: any } = { lon: lon, lat: lat, date: date, step: step, time: time, loaded_file: loaded_file, area: area.join('/') };
+
+    if (loaded_file == "") { to_send.channel = Genie.Settings.webchannels_default_route }
 
     return fetch('/atp_shape_request', {
         method: 'POST',
@@ -53,35 +55,6 @@ export function shapeRequest(lon: number | string, lat: number | string, date: s
         })
         return shape_data;
     })
-    // return new Promise((resolve, reject) => {
-    //     let to_send = { 'lon': lon, 'lat': lat, 'date': date, 'step': step, 'time': time, 'loaded_file': loaded_file, 'area': area.join('/') };
-    //     let xhr = new XMLHttpRequest();
-
-    //     xhr.open('POST', '/atp_shape_request', true);
-
-    //     xhr.onload = function () {
-    //         let shape_data: ShapeData = JSON.parse(this.response);
-    //         let shapes = shape_data.shapes
-    //         let speed = Math.round(shape_data.wind.speed * 10) / 10;
-    //         shapes.forEach((shape, i) => {
-    //             shape.coords = shape.lon.map((l, i) => [shape.lat[i], l]);
-    //             shape.text =
-    //                 `<b>${shape.label}</b><br>
-    //                 <b>Coordinates : (${lat}, ${lon})</b><br>
-    //                 wind speed = ${speed}<br>
-    //                 date = ${date}<br>
-    //                 time = ${time}<br>
-    //                 step = ${step}`;
-    //         })
-    //         resolve(shape_data)
-    //     };
-    //     xhr.onerror = () => {
-    //         alert("error in shape request")
-    //         reject("ERROR IN SHAPE REQUEST")
-    //     }
-    //     xhr.setRequestHeader("Content-Type", "application/json");
-    //     xhr.send(JSON.stringify(to_send));
-    // })
 }
 
 export async function marsDataRequest(map_area: number[], date?: string, time?: string) {

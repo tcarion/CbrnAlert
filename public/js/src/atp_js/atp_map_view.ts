@@ -32,5 +32,9 @@ export default class ATP_map_view {
         let loaded_file = $("input#loaded_file").val();
 
         shapeRequest(lon, lat, date, time, step, this.mymap.map_area, loaded_file).then(data => this.mymap.drawShapes(data, this.mymap.map));
+        // if (loaded_file == "" || !loaded_file) {
+        //     Genie.WebChannels.sendMessageTo('realtime_atp_prediction', 'shape_request', {"f1" : 1})
+        // } else {
+        // }
     }
 }

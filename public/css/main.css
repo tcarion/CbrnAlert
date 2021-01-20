@@ -62,6 +62,19 @@ html body #wrapper #content-wrapper #content .container-fluid {
           align-items: flex-start;
 }
 
+.container-fluid .realtime-wrapper {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+}
+
 .sidebar {
   min-width: 14rem;
   background-color: #4e73df;
