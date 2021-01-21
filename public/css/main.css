@@ -57,15 +57,6 @@ html body #wrapper #content-wrapper #content .container-fluid {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: start;
-      -ms-flex-align: start;
-          align-items: flex-start;
-}
-
-.container-fluid .realtime-wrapper {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
       -ms-flex-direction: column;
@@ -108,6 +99,7 @@ html body #wrapper #content-wrapper #content .container-fluid {
 
 .sidebar a.nav-link:hover {
   color: white;
+  cursor: pointer;
 }
 
 .sidebar-divider {
@@ -118,8 +110,16 @@ html body #wrapper #content-wrapper #content .container-fluid {
   margin: 0 1em;
 }
 
+.atp-prediction {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: distribute;
+      justify-content: space-around;
+  width: 100%;
+}
+
 .loaded-data-info {
-  max-width: 420px;
   border-radius: 5px;
   background-color: white;
   color: black;
@@ -201,24 +201,33 @@ html body #wrapper #content-wrapper #content .container-fluid {
   display: none;
 }
 
-.archive-form, .realtime-form {
-  max-width: 250px;
+.archive-form {
+  width: 100%;
   min-width: 100px;
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-columns: 1fr 1fr 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+  -ms-grid-rows: auto;
+      grid-template-rows: auto;
+  -webkit-column-gap: 1em;
+          column-gap: 1em;
+}
+
+.archive-form .form-item {
+  margin: 5px;
+}
+
+.archive-form .archive-form-btn {
+  -ms-flex-item-align: end;
+      -ms-grid-row-align: end;
+      align-self: end;
+}
+
+.realtime-form {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: stretch;
-      -ms-flex-align: stretch;
-          align-items: stretch;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column;
-}
-
-.archive-form .form-item, .realtime-form .form-item {
-  margin: 5px;
-  padding-bottom: 0.5em;
 }
 
 .archive-form .form-item button {
@@ -226,15 +235,66 @@ html body #wrapper #content-wrapper #content .container-fluid {
   font-size: 0.8rem;
 }
 
+.realtime-wrapper {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+}
+
+.topbar {
+  position: relative;
+}
+
+.topbar ul {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+.topbar ul .topbar-elem {
+  height: 100%;
+  background-color: #2b2626;
+  color: azure;
+  padding: 1em;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+}
+
+.topbar ul .topbar-elem:hover {
+  background-color: #AAA;
+  cursor: pointer;
+}
+
+.topbar .userfb {
+  position: absolute;
+  top: 100%;
+  width: 800px;
+  max-height: 700px;
+  z-index: 10000;
+  padding-left: 1em;
+  padding-right: 1em;
+  display: none;
+}
+
 /* MAP STYLE */
 .mymap-container {
   height: 100%;
+  width: 100%;
   min-width: 500px;
   min-height: 500px;
   -webkit-box-flex: 3;
       -ms-flex: 3 1 auto;
           flex: 3 1 auto;
-  margin-left: 1em;
+  margin-top: 1em;
   border-style: ridge;
   border: 5px ridge;
 }

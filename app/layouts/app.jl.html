@@ -10,7 +10,8 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
     integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
     crossorigin="" />
-  <link rel="stylesheet" href="/css/external/jquery.datetimepicker.min.css">
+  <!-- <link rel="stylesheet" href="/css/external/jquery.datetimepicker.min.css"> -->
+  <link href="/css/external/prism.css" rel="stylesheet" />
   <link rel="stylesheet" href="/css/main.css">
 </head>
 
@@ -60,7 +61,30 @@
       <!-- Main Content -->
       <div id="content">
         <!-- Topbar -->
-        <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+        <nav class="topbar static-top shadow">
+          <ul> 
+            <li class="topbar-elem" data-user-feedback="#userfb1"> ATP4 request n°1 </li>
+            <li class="topbar-elem" data-user-feedback="#userfb2"> ATP4 request n°2 </li>
+          </ul>
+          <div class="userfb" id="userfb1">
+            <pre>
+              <code class="language-batch">
+                Lorem ipsum, dolor sit amet consectetur adipisicing elit. Nemo, minus 
+                esse numquam quidem, sapiente error voluptas earum eligendi velit ipsa, 
+                nam eaque. Eius corrupti fugiat eos eveniet exercitationem amet expedita!
+                Lorem ipsum, dolor sit amet consectetur adipisicing elit. Nemo, minus 
+                esse numquam quidem, sapiente error voluptas earum eligendi velit ipsa, 
+                nam eaque. Eius corrupti fugiat eos eveniet exercitationem amet expedita!
+              </code>
+            </pre>
+          </div>
+          <div class="userfb" id="userfb2">
+            <pre>
+              <code class="language-batch">
+               BDSQJKDBHQSJKDHQSKJDHSQJKHDQSDHQSJKBDSKQQBL
+              </code>
+            </pre>
+          </div>
         </nav>
         <!-- End of Topbar -->
 
@@ -82,7 +106,7 @@
 
 
   <script src="/js/genie/jquery.min.js"></script>
-  <script src="/js/external/jquery.datetimepicker.full.min.js"></script>
+  <!-- <script src="/js/external/jquery.datetimepicker.full.min.js"></script> -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
     integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
     crossorigin="anonymous"></script>

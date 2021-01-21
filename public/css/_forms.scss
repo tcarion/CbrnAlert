@@ -1,5 +1,11 @@
+.atp-prediction {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+}
+
 .loaded-data-info {
-    max-width: 420px;
+    // max-width: 420px;
     border-radius: 5px;
     background-color: white;
     color: black;
@@ -64,19 +70,26 @@
     }
 }
 
-.archive-form, .realtime-form {
-    max-width: 250px;
+.archive-form {
+    // text-align: center;
+    width: 100%;
     min-width: 100px;
-    display: flex;
-    align-items: stretch;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-rows: auto;
+    column-gap: 1em;
     .form-item {
         margin: 5px;
-        padding-bottom: 0.5em;
+    }
+
+    .archive-form-btn {
+        align-self: end;
     }
 }
 
-
+.realtime-form {
+    display: flex;
+}
 .archive-form .form-item button {
     width: 100%;
     font-size: 0.8rem;

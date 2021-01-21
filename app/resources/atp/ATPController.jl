@@ -274,8 +274,8 @@ function atp_shape_request()
     target_file = "public/grib_files/$(date)_$(time)_$(replace(area, "/" => "-")).grib"
     req = get_request(date, step, time, area, target_file)
     channel = ajax_received["channel"]
-    @show channel
     initiate_socket_mars(req, channel)
+    return
     # run(pipeline(`echo $req`, `$MARS_PATH`))
     reader = rg.GribReader(target_file, keys)
   end

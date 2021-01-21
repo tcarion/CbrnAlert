@@ -1,0 +1,38 @@
+.realtime-wrapper {
+    display: flex;
+    flex-direction: row;
+}
+
+.topbar {
+    position: relative;
+    ul {
+        display: flex;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        list-style-type: none;
+        .topbar-elem {
+            height: 100%;
+            background-color: rgb(43, 38, 38);
+            color: azure;
+            padding: 1em;
+            justify-content: center;
+            &:hover {
+                background-color: #AAA;
+                cursor: pointer;
+            }
+        }
+    }
+
+    .userfb {
+        position: absolute;
+        top: 100%;
+        width: 800px;
+        max-height: 700px;
+        z-index: 10000;
+        padding-left: 1em;
+        padding-right: 1em;
+        // background-color: brown;
+        display: none;
+    }
+}
