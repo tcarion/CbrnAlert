@@ -110,7 +110,7 @@ html body #wrapper #content-wrapper #content .container-fluid {
   margin: 0 1em;
 }
 
-.atp-prediction {
+.loaded-data-wrapper {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -250,39 +250,97 @@ html body #wrapper #content-wrapper #content .container-fluid {
 }
 
 .topbar ul {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
   height: 100%;
   margin: 0;
-  padding: 0;
+  padding: 0.5em;
   list-style-type: none;
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-columns: (1fr)[6];
+      grid-template-columns: repeat(6, 1fr);
+  -ms-grid-rows: auto;
+      grid-template-rows: auto;
+  -webkit-column-gap: 0.5em;
+          column-gap: 0.5em;
 }
 
 .topbar ul .topbar-elem {
-  height: 100%;
-  background-color: #2b2626;
+  font-size: 0.8em;
   color: azure;
-  padding: 1em;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
+  border-radius: 6px;
+  text-align: center;
+  padding-top: 0.5em;
 }
 
 .topbar ul .topbar-elem:hover {
-  background-color: #AAA;
+  opacity: 0.5;
   cursor: pointer;
+}
+
+.topbar ul .topbar-elem.active {
+  opacity: 0.5;
+}
+
+.topbar ul .topbar-elem.success {
+  background-color: #28a745;
+}
+
+.topbar ul .topbar-elem.success::after {
+  display: block;
+  text-align: center;
+  color: black;
+  font-size: 0.8em;
+  content: "Finished";
+}
+
+.topbar ul .topbar-elem.pending {
+  background-color: #d39e00d9;
+}
+
+.topbar ul .topbar-elem.pending::after {
+  display: block;
+  text-align: center;
+  color: black;
+  font-size: 0.8em;
+  content: "processing";
+}
+
+.topbar ul .topbar-elem.error {
+  background-color: #e22d3e;
+}
+
+.topbar ul .topbar-elem.error::after {
+  display: block;
+  text-align: center;
+  color: black;
+  font-size: 0.8em;
+  content: "Error";
 }
 
 .topbar .userfb {
   position: absolute;
   top: 100%;
-  width: 800px;
+  max-width: 700px;
   max-height: 700px;
   z-index: 10000;
   padding-left: 1em;
   padding-right: 1em;
+  background-color: brown;
   display: none;
+  line-height: 0.6em;
+  background-color: #272822;
+  border-radius: 6px;
+  padding: 1em;
+  margin: 0.5em 0.5em;
+  overflow-x: scroll;
+  overflow-y: scroll;
+}
+
+.topbar .userfb code {
+  color: #f8f8f2;
+  font-size: 0.6em;
+  font-family: Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New;
+  text-shadow: 0 1px rgba(0, 0, 0, 0.3);
 }
 
 /* MAP STYLE */

@@ -18,6 +18,12 @@ import websocket_utils from './atp_js/shape_request_ws'
 // })
 
 $(() => {
+    $(".nav-item.active").removeClass("active");
+    if (location.pathname.includes("load") || location.pathname == "/") {
+        $('.nav-item a[href="/"]').parent().addClass("active");
+    }
+    $(".nav-item a[href='" + location.pathname + "']").parent().addClass("active");
+    
     let my_atp_map = new ATP_map('mapid', [50.82, 4.35], 8);
     let atp_map_view = new ATP_map_view(my_atp_map);
     atp_map_view.initEvents();
@@ -25,9 +31,6 @@ $(() => {
     let map_form = new MapForms(my_atp_map);
     map_form.initEvents();
 
-    websocket_utils();
-    // window.parse_payload = function (payload) {
-    //     $(".mars-output code").append(payload + '<br>')
-    // }
+    
 }) 
 

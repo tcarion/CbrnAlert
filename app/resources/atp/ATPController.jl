@@ -116,8 +116,8 @@ function initiate_socket_mars(req, channel)
           redirect_stdout(sock) do 
               redirect_stderr(sock) do 
                 try
-                  # run(pipeline(`echo $req`, `mars`))
-                  run(`./test/sleeping_script.sh`)
+                  run(pipeline(`echo $req`, `mars`))
+                  # run(`./test/sleeping_script.sh`)
                   write(stdout, "--EOF--")
                 catch e
                   write(stdout, "EXCEPTION IN MARS REQUEST : $e")
@@ -267,16 +267,14 @@ function atp_shape_request()
 
   grib_to_read = ajax_received["loaded_file"]
 
+  area = ajax_received["area"]
+  target_file = "public/grib_files/$(date)_$(time)_$(replace(area, "/" => "-")).grib"
   if grib_to_read != ""
     reader = rg.GribReader(grib_to_read, keys)
   else
-    area = ajax_received["area"]
-    target_file = "public/grib_files/$(date)_$(time)_$(replace(area, "/" => "-")).grib"
     req = get_request(date, step, time, area, target_file)
     channel = ajax_received["channel"]
     initiate_socket_mars(req, channel)
-    return
-    # run(pipeline(`echo $req`, `$MARS_PATH`))
     reader = rg.GribReader(target_file, keys)
   end
 
@@ -328,6 +326,8 @@ function atp_shape_request()
     push!(shape_data.shapes, rel_area)
   end
 
+  if grib_to_read == "" rm(target_file) end
+    
   return to_dict(shape_data) |> Genie.Renderer.Json.json
 end
 
