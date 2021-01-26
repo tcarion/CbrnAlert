@@ -1,38 +1,38 @@
 
-export function shapeRequest(lon: number | string, lat: number | string, date: string, time: string, step: string, area: number[], loaded_file = "") {
+export async function shapeRequest(lon: number | string, lat: number | string, date: string, time: string, step: string, area: number[], loaded_file = "") {
     let to_send: {[k: string]: any } = { lon: lon, lat: lat, date: date, step: step, time: time, loaded_file: loaded_file, area: area.join('/') };
 
     if (loaded_file == "") { to_send.channel = Genie.Settings.webchannels_default_route }
 
-    return fetch('/atp_shape_request', {
+    let response = await fetch('/atp_shape_request', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(to_send)
-    }).then(res => {
-        if (res.ok) {
-            return res.json();
-        } else {
-            alert("Couldn't get ATP prediction from server")
-        }
     })
-    .then(data => {
-        let shape_data: ShapeData = data;
-        let shapes = shape_data.shapes;
-        let speed = Math.round(shape_data.wind.speed * 10) / 10;
-        shapes.forEach((shape, i: number) => {
-            shape.coords = shape.lon.map((l, i) => [shape.lat[i], l]);
-            shape.text =
-                `<b>${shape.label}</b><br>
-                <b>Coordinates : (${lat}, ${lon})</b><br>
-                wind speed = ${speed}<br>
-                date = ${date}<br>
-                time = ${time}<br>
-                step = ${step}`;
-        });
-        return shape_data;
-    })
+    
+    let shape_data;
+    if (response.ok) {
+        shape_data = await response.json();
+    } else {
+        alert("Couldn't get ATP prediction from server");
+        return;
+    }
+    
+    let shapes = shape_data.shapes;
+    let speed = Math.round(shape_data.wind.speed * 10) / 10;
+    shapes.forEach((shape: Shape, i: number) => {
+        shape.coords = shape.lon.map((l, i) => [shape.lat[i], l]);
+        shape.text =
+            `<b>${shape.label}</b><br>
+            <b>Coordinates : (${lat}, ${lon})</b><br>
+            wind speed = ${speed}<br>
+            date = ${date}<br>
+            time = ${time}<br>
+            step = ${step}`;
+    });
+    return shape_data;
 }
 
 export async function marsDataRequest(map_area: number[], date?: string, time?: string) {

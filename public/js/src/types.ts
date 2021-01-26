@@ -1,6 +1,7 @@
 interface ATP_map {
     map: any;
     drawn_shapes: ShapeData[];
+    clickable: boolean;
     areaToCoords(area: number[]): number[][];
     // areaToCoords : Function;
     // map_area(): number[];
@@ -8,15 +9,6 @@ interface ATP_map {
     drawShapes(shape_data: ShapeData, map: any): void;
     // drawShapes: Function;
 }
-
-interface MapForm_interactions {
-    mymap: ATP_map;
-    form: Form_view;
-    initEvents(): void;
-    onMapClick(e: any): void;
-    shapeRequestWithLocation(lon: number, lat: number): void;
-}
-
 interface Form_view {
     form: Form | undefined;
     lon_selector: string;
@@ -27,6 +19,15 @@ interface Form_view {
     initEvents(): void;
     verifyLonLatInput(): string[];
 }
+
+interface MapForm_interactions {
+    mymap: ATP_map;
+    form: Form_view;
+    initEvents(): void;
+    onMapClick(e: any): void;
+    shapeRequestWithLocation(lon: number, lat: number): void;
+}
+
 
 interface Shape {
     lon: number[],

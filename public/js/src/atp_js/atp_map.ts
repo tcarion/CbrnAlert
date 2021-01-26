@@ -3,7 +3,8 @@ let L = require('leaflet')
 export default class ATP_map implements ATP_map {
     map: any;
     drawn_shapes: ShapeData[];
-    constructor(mapid: string, center: Array<string | number>, zoom: number | string) {
+
+    constructor(mapid: string, center: Array<string | number>, zoom: number | string, public clickable: boolean) {
         this.map = L.map(mapid).setView(center, zoom);
         this.drawn_shapes = [];
         L.tileLayer('//{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {

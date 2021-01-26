@@ -24,7 +24,7 @@ $(() => {
     }
     $(".nav-item a[href='" + location.pathname + "']").parent().addClass("active");
     
-    let atp_map = new ATP_map('mapid', [50.82, 4.35], 8);
+    let atp_map = $(".archive-form").length ? new ATP_map('mapid', [50.82, 4.35], 8, false) : new ATP_map('mapid', [50.82, 4.35], 8, true);
     let form_view = new Form_view();
     form_view.initEvents();
     let mapform = new MapForm_interactions(atp_map, form_view);
