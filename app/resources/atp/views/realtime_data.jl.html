@@ -1,15 +1,27 @@
-
 <div class="realtime-wrapper">
-    <div class="realtime-form">
+    <form class="realtime-form atp-prediction-form" action="" method="">
+        <div class="alert alert-danger" id="error_lonlat_input"></div>
         <div class="form-item">
-            <label for="realtime_time">Forecast step selection</label>
-            <select class="form-control" name="realtime_time" id="realtime_time">
+            <label for="forecast_dt">Forecast step selection</label>
+            <select class="form-control" name="forecast_dt" id="forecast_dt">
                 <% @foreach(datetimes) do d %>
                     <option value="$(d[:datetime])+$(d[:step])">$(d[:datetime])</option>
                     <% end %>
             </select>
         </div>
-    </div>
+        <div class="form-item">
+            <label for="lat">Latitude</label>
+            <input class="form-control lonlat" type="text" name="lat" id="lat" required>
+        </div>
+        <div class="form-item">
+            <label for="lon">Longitude</label>
+            <input class="form-control lonlat" type="text" name="lon" id="lon" required>
+        </div>
+        <div class="form-item manual-btn">
+            <label for="manual_entry_button">&nbsp;</label><br>
+            <button class="btn btn-primary" type="button" id="manual_entry_button">Manual coord entry</button>
+        </div>
+    </form>
 </div>
 
 $(channels_js_script)

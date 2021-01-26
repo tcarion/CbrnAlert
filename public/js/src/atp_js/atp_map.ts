@@ -1,17 +1,16 @@
 let L = require('leaflet')
 
-export default class ATP_map {
+export default class ATP_map implements ATP_map {
     map: any;
-    // map_area: number[];
+    drawn_shapes: ShapeData[];
     constructor(mapid: string, center: Array<string | number>, zoom: number | string) {
         this.map = L.map(mapid).setView(center, zoom);
+        this.drawn_shapes = [];
         L.tileLayer('//{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
             attribution: 'donn&eacute;es &copy; <a href="//osm.org/copyright">OpenStreetMap</a>/ODbL - rendu <a href="//openstreetmap.fr">OSM France</a>',
             minZoom: 1,
             maxZoom: 20
         }).addTo(this.map);
-        // this.map_area = [];
-        // this.updateArea(this.map);
     }
 
     areaToCoords(area: number[]) {
@@ -30,11 +29,12 @@ export default class ATP_map {
         ];
     };
 
-    drawShapes(shape_data: any, map: any) {
-        shape_data.shapes.forEach((shape: any, i: number) => {
+    drawShapes(shape_data: ShapeData, map: any) {
+        shape_data.shapes.forEach((shape: Shape, i: number) => {
             let shapes_color = ['blue', 'red', 'yellow']
             L.polygon(shape.coords, {color : shapes_color[i]}).addTo(map).bindPopup(shape.text);
         });
+        this.drawn_shapes.push(shape_data);
     }
 }
 

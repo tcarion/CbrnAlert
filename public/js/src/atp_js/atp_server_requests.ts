@@ -1,25 +1,3 @@
-import { SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION } from "constants";
-
-interface Shape {
-    lon: number[],
-    lat: number[],
-    type: string,
-    label: string
-    coords?: number[][],
-    text?: string
-}
-interface Wind {
-    u: number,
-    v: number,
-    speed: number
-}
-interface ShapeData {
-    shapes: Shape[],
-    wind: Wind,
-    date: string,
-    time: string,
-    step: string
-}
 
 export function shapeRequest(lon: number | string, lat: number | string, date: string, time: string, step: string, area: number[], loaded_file = "") {
     let to_send: {[k: string]: any } = { lon: lon, lat: lat, date: date, step: step, time: time, loaded_file: loaded_file, area: area.join('/') };
@@ -43,7 +21,7 @@ export function shapeRequest(lon: number | string, lat: number | string, date: s
         let shape_data: ShapeData = data;
         let shapes = shape_data.shapes;
         let speed = Math.round(shape_data.wind.speed * 10) / 10;
-        shapes.forEach((shape, i) => {
+        shapes.forEach((shape, i: number) => {
             shape.coords = shape.lon.map((l, i) => [shape.lat[i], l]);
             shape.text =
                 `<b>${shape.label}</b><br>
@@ -52,7 +30,7 @@ export function shapeRequest(lon: number | string, lat: number | string, date: s
                 date = ${date}<br>
                 time = ${time}<br>
                 step = ${step}`;
-        })
+        });
         return shape_data;
     })
 }

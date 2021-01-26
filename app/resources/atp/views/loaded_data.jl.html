@@ -10,8 +10,8 @@
     <span>Available area : </span> <span id="av-area">$(loaded_data_info[:area])</span>
   </div>
   
-  <form class="map-form atp-prediction-form" action="" method="post">
-    <div class="alert alert-danger" id="error_loaded_data"></div>
+  <form class="loaded-data-form atp-prediction-form" action="" method="post">
+    <div class="alert alert-danger" id="error_lonlat_input"></div>
     <div class="form-group form-item">
       <label for="lat">Latitude</label>
       <input class="form-control lonlat" type="text" name="lat" id="lat" required>
@@ -21,8 +21,8 @@
       <input class="form-control lonlat" type="text" name="lon" id="lon" required>
     </div>
     <div class="form-item">
-      <label for="forecast_time">Forecast step selection</label>
-      <select class="form-control" name="forecast_time" id="forecast_time">
+      <label for="forecast_dt">Forecast step selection</label>
+      <select class="form-control" name="forecast_dt" id="forecast_dt">
         <% @foreach(datetimes) do d %>
         <option value="$(d[:datetime])+$(d[:step])">$(d[:datetime])</option>
         <% end %>
