@@ -150,8 +150,8 @@ function client_connect(named_pipe)
     client_connect(named_pipe)
   end
 end
-"""
 
+"""
     preloaded_atp_prediction()
 Generate the page with the map to make atp prediction requests either by clicking on the map or by manually picking the coordinates.
 The file from which information are collected is given in `payload()[:file]`. If no `payload()[:file]` default file is loaded.
@@ -352,23 +352,14 @@ function mars_request()
     time = archive_keys["time_request"]
   else
     today = Dates.now()
-    date = Dates.kkaa-2019(today, "yyyy-mm-dd")
+    date = Dates(today, "yyyy-mm-dd")
     # time = Dates.format(today, "HH:MM")
     time = "00:00"
   end
   
   time = match(r"(\d+):(\d+)", time)[1]*match(r"(\d+):(\d+)", time)[2]
-  req = """retrieve,
-    type    = fc,
-    date    = $date,
-    time    = $time,
-    step    = 0/6/12/18/24/30/36,
-    levtype = sfc,
-    param   = 10u/10v,
-    area    = $area,
-    grid    = 0.5/0.5,
-    target  = "public/grib_files/$(date)_$(time)_$(replace(area, "/" => "-")).grib"
-    """
+
+  req = get_request(date, join(collect(0:6:36), "/"), time, area)
 
   run(pipeline(`echo $req`, `$MARS_PATH`))
 end

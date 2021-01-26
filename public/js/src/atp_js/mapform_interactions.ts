@@ -1,6 +1,5 @@
 // import ATP_map from "./atp_map";
 import { shapeRequest, marsDataRequest } from './atp_server_requests'
-import websocket_utils from './shape_request_ws'
 let L = require('leaflet')
 // let $ = require('jquery')
 
@@ -11,21 +10,21 @@ export default class MapForm_interactions implements MapForm_interactions {
     ) { }
 
     initEvents() {
-        let map = this.mymap.map;
+        let mymap = this.mymap;
         let form_view = this.form_view;
-        map.on('click', (e: any) => this.onMapClick(e));
+        if (mymap.clickable) mymap.map.on('click', (e: any) => this.onMapClick(e));
 
-        if ($("#av-area").text()) L.rectangle(this.mymap.areaToCoords(JSON.parse($("#av-area").text())), { interactive: false, fillOpacity: 0 }).addTo(map);
+        if ($("#av-area").text()) L.rectangle(this.mymap.areaToCoords(JSON.parse($("#av-area").text())), { interactive: false, fillOpacity: 0 }).addTo(mymap.map);
 
         $('.archive-form #archive_data_retrieve').on('click', () => {
             let form = form_view.getForm
             let date = form.date;
             let time = form.time;
-            marsDataRequest(map.map_area, date, time)
+            marsDataRequest(mymap.map_area, date, time)
         });
 
         $('.archive-form #latest_available_fc').on('click', () => {
-            marsDataRequest(map.map_area)
+            marsDataRequest(mymap.map_area)
         });
 
         $(form_view.manual_entry_selector).on('click', e => this.manualEntryRequest(e));
@@ -40,7 +39,7 @@ export default class MapForm_interactions implements MapForm_interactions {
         $(this.form_view.lon_selector).val(lon);
         this.shapeRequestWithLocation(lon, lat)
 
-        this.mymap.map.on('click', (e: any) => this.onMapClick(e))
+        // this.mymap.map.on('click', (e: any) => this.onMapClick(e))
 
         // if (loaded_file == "" || !loaded_file) {
         //     Genie.WebChannels.sendMessageTo('realtime_atp_prediction', 'shape_request', {"f1" : 1})
@@ -49,6 +48,7 @@ export default class MapForm_interactions implements MapForm_interactions {
     }
 
     async shapeRequestWithLocation(lon: number, lat: number) {
+        this.disableRequest();
         L.circleMarker([lat, lon], { radius: 0.5, color: 'black' }).addTo(this.mymap.map)
         let form = this.form_view.getForm as PredictionForm
         let date = form.date;
@@ -93,6 +93,9 @@ export default class MapForm_interactions implements MapForm_interactions {
             $(`.topbar-elem[data-user-feedback="#userfb${len}"]`).toggleClass("pending")
             $(`.topbar-elem[data-user-feedback="#userfb${len}"]`).toggleClass("error")
         }
+        finally {
+            this.enableRequest();
+        }
     }
 
     manualEntryRequest(e: any) {
@@ -106,5 +109,15 @@ export default class MapForm_interactions implements MapForm_interactions {
             $(this.form_view.error_selector).text(messages.join(', '));
             $(this.form_view.error_selector).show("slow");
         }
+    }
+
+    disableRequest() {
+        this.mymap.map.off('click');
+        $(this.form_view.manual_entry_selector).off('click');
+    }
+
+    enableRequest() {
+        this.mymap.map.on('click', (e: any) => this.onMapClick(e));
+        $(this.form_view.manual_entry_selector).on('click', e => this.manualEntryRequest(e));
     }
 }
