@@ -32,6 +32,16 @@ struct ShapeData
   step::String
 end
 
+struct MarsRequest
+  date::String
+  time::String
+  step::String
+  area::String
+  target_file::String
+  datetime::DateTime
+end
+MarsRequest(date, time, step, area) = MarsRequest(date, time, step, area,  "public/grib_files/$(date)_$(time)_$(replace(area, "/" => "-")).grib", DateTime(date*time, dateformat"yyyymmddHHMM"))
+
 """
     to_dict(arg::Union{Wind, ShapeData})
 
@@ -94,7 +104,7 @@ start_date(date::String, step) :: DateTime = start_date(DateTime(date), step)
 start_date(date::String, step, df::String) :: DateTime = start_date(DateTime(date, DateFormat(df)), step)
 
 
-get_request(date, step, time, area, target_file = "public/grib_files/$(date)_$(time)_$(replace(area, "/" => "-")).grib") = """retrieve,
+get_request(date, time, step, area, target_file = "public/grib_files/$(date)_$(time)_$(replace(area, "/" => "-")).grib") = """retrieve,
                                       type    = fc,
                                       date    = $date,
                                       time    = $time,
@@ -105,10 +115,12 @@ get_request(date, step, time, area, target_file = "public/grib_files/$(date)_$(t
                                       grid    = 0.5/0.5,
                                       target  = "$target_file"
                                       """
+                                      
+get_request(req::MarsRequest) = get_request(req.date, req.time, req.step, req.area, req.target_file)
 
-
-function initiate_socket_mars(req, channel)
+function initiate_socket_mars(req::MarsRequest, channel)
   s_name = "tmp/socket_$(Dates.format(Dates.now(), "yyyymmddHHMMSSs"))"
+  str_req = get_request(req)
   @async begin
       server = listen(s_name)
       while true
@@ -116,12 +128,20 @@ function initiate_socket_mars(req, channel)
           redirect_stdout(sock) do 
               redirect_stderr(sock) do 
                 try
-                  run(pipeline(`echo $req`, `mars`))
+                  run(pipeline(`echo $str_req`, `mars`))
                   # run(`./test/sleeping_script.sh`)
                   write(stdout, "--EOF--")
                 catch e
-                  write(stdout, "EXCEPTION IN MARS REQUEST : $e")
+                  write(stdout, "EXCEPTION IN MARS REQUEST : $e\n")
+                  write(stdout, "TRYING TO GET PREVIOUS FORECAST\n")
                   write(stdout, "--EOF--")
+                  # prev_date = Date(req.date, dateformat"yyyymmdd")
+                  # new_date = prev_date - Dates.Hour(12)
+                  # new_time = req.time == "1200" ? "0000" : "1200"
+                  # new_step = req.step + 12
+                  # new_req = MarsRequest(Dates.format(new_date, "yyyymmdd"), new_step, new_time, req.area)
+                  close(sock)
+                  # initiate_socket_mars(new_req, channel, n-1)
                 finally
                   close(sock)
                 end
@@ -220,12 +240,28 @@ end
 function realtime_atp_prediction()
   today = Dates.today()
   today_midnight = Dates.DateTime(today)
+  today_noon = today_midnight + Dates.Hour(12)
+  yesterday_noon = today_midnight - Dates.Hour(12)
+  if Dates.now() > Dates.DateTime(Dates.year(today), Dates.month(today), Dates.day(today), 18, 55)
+    start_date = today_noon
+  elseif Dates.now() > Dates.DateTime(Dates.year(today), Dates.month(today), Dates.day(today), 6, 55)
+    start_date = today_midnight
+  else
+    start_date = yesterday_noon
+  end
+
+  # if Dates.now() < today_noon
+  #   start_date = today_midnight
+  # else
+  #   start_date = today_noon
+  # end
 
   steps =  collect(0:6:240)
-  available_dt = steps_to_datetimes(today_midnight,steps)
-  available_dt_str = map(x -> Dates.format(x, "yyyy-mm-ddTHH:MM:SS"), available_dt)
+  available_dt = steps_to_datetimes(start_date, steps)
+  available_dt_str = map(x -> Dates.format(x, "yyyy-mm-dd @ HH:MM:SS"), available_dt)
   available_time_dict = [Dict(:datetime => x, :step => y) for (x, y) in zip(available_dt_str, steps)]
   channels_js_script = Assets.channels_support("$(uuid4())")
+
   html(:atp, "realtime_data.jl.html", datetimes = available_time_dict, channels_js_script = channels_js_script, layout=:app)
 end
 
@@ -263,24 +299,43 @@ function atp_shape_request()
   datetime_start = start_date(ajax_received["date"]*ajax_received["time"], step, "yyyy-mm-ddHH:MM:SS")
   date = Dates.format(datetime_start, "yyyymmdd")
   time = Dates.format(datetime_start, "HHMM")
-  time = time == "0000" ? "0" : time
-
+  
   grib_to_read = ajax_received["loaded_file"]
-
+  
   area = ajax_received["area"]
-  target_file = "public/grib_files/$(date)_$(time)_$(replace(area, "/" => "-")).grib"
+  
   if grib_to_read != ""
     reader = rg.GribReader(grib_to_read, keys)
   else
-    req = get_request(date, step, time, area, target_file)
+    req = MarsRequest(date, time, step, area)
     channel = ajax_received["channel"]
-    initiate_socket_mars(req, channel)
-    reader = rg.GribReader(target_file, keys)
+    for n_attempts in 1:2
+      initiate_socket_mars(req, channel)
+      if isfile(req.target_file)
+        reader = rg.GribReader(req.target_file, keys)
+        break
+      else
+        prev_date = DateTime(req.date*req.time, dateformat"yyyymmddHHMM")
+        new_date = prev_date - Dates.Hour(12)
+        new_step = parse(Int, req.step) + 12
+        req = MarsRequest(Dates.format(new_date, "yyyymmdd"), Dates.format(new_date, "HHMM"), string(new_step), req.area)
+      end
+    end
+    
+    if !isfile(req.target_file)
+      error("The 2 request attempts on mars were unsuccessful")
+    end
+    
+    date = req.date
+    time = req.time
+    step = req.step
   end
-
+  
+  time = time == "0000" ? "0" : time
+  
   keys_to_select = Dict(
     "date" => date,
-    "step" => ajax_received["step"],
+    "step" => step,
     "time" => time,
     "level"=> reader.idx_get("level")[1],
     "shortName" => reader.idx_get("shortName")[1]
@@ -307,7 +362,7 @@ function atp_shape_request()
 
   wind = Wind(u_wind, v_wind)
 
-  shape_data = ShapeData(Vector{ComputeShapes.Shape}(), wind, ajax_received["date"], ajax_received["time"], ajax_received["step"])
+  shape_data = ShapeData(Vector{ComputeShapes.Shape}(), wind, date, time, step)
 
   resolution = 25
   if wind.speed < 10
@@ -326,14 +381,11 @@ function atp_shape_request()
     push!(shape_data.shapes, rel_area)
   end
 
-  if grib_to_read == "" rm(target_file) end
+  if grib_to_read == "" rm(req.target_file) end
     
   return to_dict(shape_data) |> Genie.Renderer.Json.json
 end
 
-function atp_shape_request_realtime()
-  "Shape requestfullfilled"
-end
 
 """
     mars_request()
@@ -359,7 +411,7 @@ function mars_request()
   
   time = match(r"(\d+):(\d+)", time)[1]*match(r"(\d+):(\d+)", time)[2]
 
-  req = get_request(date, join(collect(0:6:36), "/"), time, area)
+  req = get_request(date, time, join(collect(0:6:36), "/"), area)
 
   run(pipeline(`echo $req`, `$MARS_PATH`))
 end

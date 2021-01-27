@@ -22,13 +22,14 @@ export default class Form_view implements Form_view {
 
     get getForm() {
         if ($(".atp-prediction-form").length) {
-            let selected_option = ($(".atp-prediction-form select option:selected").val())?.match("(.*)T(.*)\\+(.*)");
+            let option = $(".atp-prediction-form select option:selected").val() as string
+            let selected_option = option?.match("(.*)@(.*)\\+(.*)")!;
             this.form = {
                 lon: $(this.lon_selector).val(),
                 lat: $(this.lat_selector).val(),
-                date: selected_option[1],
+                date: selected_option[1].trim(),
                 step: selected_option[3],
-                time: selected_option[2],
+                time: selected_option[2].trim(),
             } as PredictionForm;
         } else {
             this.form = {
@@ -37,7 +38,7 @@ export default class Form_view implements Form_view {
             } as ArchiveForm;
         }
 
-        return this.form
+        return this.form;
     }
 
     verifyLonLatInput() {
