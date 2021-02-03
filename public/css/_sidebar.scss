@@ -30,12 +30,19 @@
             cursor: pointer;
         }
     }
+    a.logout {
+        margin: 0.5em;
+        margin-top: 1em;
+        padding: 0.5em;
+        text-align: center;
+        background-color: rgba($color: #eb3f3f, $alpha: 0.6);
+        border-radius: 4px;
+    }
 }
 
 .sidebar-divider {
     box-sizing: border-box;
     border-top: 1px solid rgba(255, 255, 255, 0.15);
     padding: 0;
-    margin: 0 1em;
-    
+    margin: 0 1em;   
 }

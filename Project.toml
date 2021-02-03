@@ -1,8 +1,11 @@
 [deps]
 Genie = "c43c736e-a2d1-11e8-161f-af95117fbd1e"
+GenieAuthentication = "e115e502-7e3a-11e9-29b2-aba8be6c6778"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 LoggingExtras = "e6f89c97-d47a-5376-807f-9c37f3926c36"
 MbedTLS = "739be429-bea8-5141-9913-cc70e7f3736d"
 PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
 Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
+SearchLight = "340e8cb6-72eb-11e8-37ce-c97ebeb32050"
+SearchLightSQLite = "21a827c4-482a-11ea-3a19-4d2243a4a2c5"
 StaticLint = "b3cc710f-9c33-5bdb-a03d-a94903873e97"

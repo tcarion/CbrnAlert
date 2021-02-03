@@ -1,0 +1,16 @@
+.dashboard-container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    column-gap: 2em;
+    a.dashboard-link {
+        text-decoration: none;
+        color: inherit;
+        .card {
+            width: 18em;
+            height: 24em;
+            img {
+                height: 186px;
+            }
+        }
+    }
+}

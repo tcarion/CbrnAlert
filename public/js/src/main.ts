@@ -19,10 +19,10 @@ import websocket_utils from './atp_js/shape_request_ws'
 
 $(() => {
     $(".nav-item.active").removeClass("active");
-    if (location.pathname.includes("load") || location.pathname == "/") {
-        $('.nav-item a[href="/"]').parent().addClass("active");
-    }
-    $(".nav-item a[href='" + location.pathname + "']").parent().addClass("active");
+    // if (location.pathname.includes("load") {
+    //     $('.nav-item a[href="/"]').parent().addClass("active");
+    // }
+    $(".nav-item a[href*='" + location.pathname + "']").parent().addClass("active");
     
     let atp_map = $(".archive-form").length ? new ATP_map('mapid', [50.82, 4.35], 8, false) : new ATP_map('mapid', [50.82, 4.35], 8, true);
     let form_view = new Form_view();

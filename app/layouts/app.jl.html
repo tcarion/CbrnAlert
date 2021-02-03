@@ -28,7 +28,7 @@
       <hr class="sidebar-divider">
 
       <li class="nav-item">
-        <a class="nav-link" href="#">
+        <a class="nav-link" href="$(Genie.Router.linkto(:dashboard))">
           <span>Dashboard</span></a>
       </li>
 
@@ -52,6 +52,14 @@
           <span>Archive data retrieval</span>
         </a>
       </li>
+
+      <hr class="sidebar-divider">
+
+      <li class="nav-item">
+        <a class="nav-link logout" href="$(Genie.Router.linkto(:logout))">
+          <span>LOG OUT</span>
+        </a>
+      </li>
     </ul>
     <!-- End Sidebar -->
 
@@ -68,10 +76,7 @@
 
         <!-- Begin Page Content -->
         <div class="container-fluid">
-          <% @yield %>          
-          <div class="mymap-container">
-            <div id="mapid"></div>
-          </div>
+          <% @yield %>
         </div>
       </div>
       <!-- /.container-fluid -->

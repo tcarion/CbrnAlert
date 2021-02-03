@@ -49,7 +49,9 @@ html {
     }
 }
 @import "./variables";
+@import "./authentication";
 @import "./sidebar";
+@import "./dashboard";
 @import "./forms";
 @import "./realtime";
 

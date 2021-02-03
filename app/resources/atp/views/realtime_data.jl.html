@@ -5,8 +5,8 @@
             <label for="forecast_dt">Forecast step selection</label>
             <select class="form-control" name="forecast_dt" id="forecast_dt">
                 <% @foreach(datetimes) do d %>
-                <option value="$(d[:datetime])+$(d[:step])">$(d[:datetime])</option>
-                <% end %>
+                    <option value="$(d[:datetime])+$(d[:step])">$(d[:datetime])</option>
+                    <% end %>
             </select>
         </div>
         <div class="form-item">
@@ -22,6 +22,10 @@
             <button class="btn btn-primary" type="button" id="manual_entry_button">Manual coord entry</button>
         </div>
     </form>
+</div>
+
+<div class="mymap-container">
+    <div id="mapid"></div>
 </div>
 
 $(channels_js_script)

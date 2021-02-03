@@ -1,9 +1,16 @@
 using Genie.Router, Genie.Requests, Genie.Assets
 using ATPController
+using DashboardController
 
 Genie.config.websockets_server = true # enable the websocket server
 
-route("/", ATPController.preloaded_atp_prediction, named = :preloaded_atp_prediction)
+route("/") do 
+    Genie.Renderer.redirect(:dashboard) 
+end
+
+route("/dashboard", DashboardController.dashboard, named = :dashboard)
+
+route("/load", ATPController.preloaded_atp_prediction, named = :preloaded_atp_prediction)
 
 route("/load/:file::String", ATPController.preloaded_atp_prediction, named = :preloaded_atp_prediction_picked)
 

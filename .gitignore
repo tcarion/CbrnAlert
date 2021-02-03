@@ -48,4 +48,5 @@ public/shapefiles
 # Loaded grib files
 public/grib_files
 
+sessions/
 tmp/

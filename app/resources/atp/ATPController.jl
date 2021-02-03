@@ -1,13 +1,18 @@
 module ATPController
 
 using PyCall
-using Genie.Renderer.Html, Genie.Renderer.Json, Genie.Requests, Genie.Assets
+using Genie.Renderer.Html, Genie.Renderer.Json, Genie.Requests, Genie.Assets, Genie.Renderer
 using ComputeShapes
 using EarthCompute
 using JSON
 using Dates
 using Sockets
 using UUIDs
+using GenieAuthentication
+import Genie.Exceptions.ExceptionalResponse
+# using Router
+
+before() =  authenticated() || throw(ExceptionalResponse(redirect(:show_login)))
 
 const ec = EarthCompute
 const LIB_PATH = joinpath(pwd(), "lib")
@@ -218,7 +223,7 @@ function preloaded_atp_prediction()
   time = !isnothing(m) ? m[:h]*":"*m[:m] : error("time is in unreadable format")
 
   available_datetimes = steps_to_datetimes(date*"T"*time, steps, "yyyymmddTH:M")
-  available_datetimes_str = map(x -> Dates.format(x, "yyyy-mm-ddTHH:MM:SS"), available_datetimes)
+  available_datetimes_str = map(x -> Dates.format(x, "yyyy-mm-dd @ HH:MM:SS"), available_datetimes)
   available_time = [Dict(:datetime => x, :step => y) for (x, y) in zip(available_datetimes_str, steps)]
 
   searchdir(path,key) = filter(x->occursin(key,x), readdir(path))
@@ -365,7 +370,8 @@ function atp_shape_request()
   shape_data = ShapeData(Vector{ComputeShapes.Shape}(), wind, date, time, step)
 
   resolution = 25
-  if wind.speed < 10
+  thres_wind = 10 / 3.6
+  if wind.speed < thres_wind
     haz_area = ComputeShapes.ATP_circle(lat, lon, 10., resolution)
     haz_area.label = "Hazard Area"
     rel_area = ComputeShapes.ATP_circle(lat, lon, 2., resolution)
