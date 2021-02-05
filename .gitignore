@@ -49,4 +49,4 @@ public/shapefiles
 public/grib_files
 
 sessions/
-tmp/
+tmp/*
