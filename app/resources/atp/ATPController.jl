@@ -17,7 +17,7 @@ before() =  authenticated() || throw(ExceptionalResponse(redirect(:show_login)))
 const ec = EarthCompute
 const LIB_PATH = joinpath(pwd(), "lib")
 const MARS_PATH = "mars"
-const DEFAULT_GRIB = "public/grib_files/2020-12-10_0000_europe.grib"
+const DEFAULT_GRIB = "public/grib_files/2021-01-04_1200_europe.grib"
 struct Wind
   u::Float64
   v::Float64
@@ -117,7 +117,6 @@ get_request(date, time, step, area, target_file = "public/grib_files/$(date)_$(t
                                       levtype = sfc,
                                       param   = 10u/10v,
                                       area    = $area,
-                                      grid    = 0.5/0.5,
                                       target  = "$target_file"
                                       """
                                       
@@ -140,13 +139,7 @@ function initiate_socket_mars(req::MarsRequest, channel)
                   write(stdout, "EXCEPTION IN MARS REQUEST : $e\n")
                   write(stdout, "TRYING TO GET PREVIOUS FORECAST\n")
                   write(stdout, "--EOF--")
-                  # prev_date = Date(req.date, dateformat"yyyymmdd")
-                  # new_date = prev_date - Dates.Hour(12)
-                  # new_time = req.time == "1200" ? "0000" : "1200"
-                  # new_step = req.step + 12
-                  # new_req = MarsRequest(Dates.format(new_date, "yyyymmdd"), new_step, new_time, req.area)
                   close(sock)
-                  # initiate_socket_mars(new_req, channel, n-1)
                 finally
                   close(sock)
                 end
@@ -417,7 +410,7 @@ function mars_request()
   
   time = match(r"(\d+):(\d+)", time)[1]*match(r"(\d+):(\d+)", time)[2]
 
-  req = get_request(date, time, join(collect(0:6:36), "/"), area)
+  req = get_request(date, time, join(collect(0:6:240), "/"), area)
 
   run(pipeline(`echo $req`, `$MARS_PATH`))
 end

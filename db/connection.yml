@@ -10,8 +10,8 @@ dev:
   config:
 
 prod:
-  adapter:
-  database:
+  adapter: SQLite
+  database: db/users.sqlite
   host:
   username:
   password:
@@ -19,8 +19,8 @@ prod:
   config:
 
 test:
-  adapter:
-  database:
+  adapter: SQLite
+  database: db/users.sqlite
   host:
   username:
   password:
