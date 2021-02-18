@@ -1,7 +1,7 @@
 import ATP_map from './atp_js/atp_map';
 import MapForm_interactions from './atp_js/mapform_interactions'
 import Form_view from './atp_js/forms-view'
-import websocket_utils from './atp_js/shape_request_ws'
+// import websocket_utils from './atp_js/shape_request_ws'
 // let $ = require('jquery')
 
 // $(document).ready(function(){

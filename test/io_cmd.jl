@@ -84,3 +84,25 @@ end
 #         write(f, readlines(io))
 #     end
 # end
+cmd = `./sleeping_script.sh`
+cmd = `mars ../tmp/req`
+p = open(cmd)
+readline(p)
+# open(cmd) do stream
+#     readline(stream)
+# end
+while !eof(p)
+    println(readline(p))
+end
+process_running(p)
+success(p)
+close(p)
+isopen(p)
+run(`./sleeping_script.sh`)
+
+b = IOBuffer()
+writer = @async write(b, "data")
+reader = @async println(read(b, String))
+
+wait(writer)
+fetch(reader)

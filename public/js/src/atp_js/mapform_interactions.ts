@@ -12,6 +12,7 @@ export default class MapForm_interactions implements MapForm_interactions {
     initEvents() {
         let mymap = this.mymap;
         let form_view = this.form_view;
+
         if (mymap.clickable) mymap.map.on('click', (e: any) => this.onMapClick(e));
 
         if ($("#av-area").text()) L.rectangle(this.mymap.areaToCoords(JSON.parse($("#av-area").text())), { interactive: false, fillOpacity: 0 }).addTo(mymap.map);
@@ -31,7 +32,6 @@ export default class MapForm_interactions implements MapForm_interactions {
     }
 
     onMapClick(e: any) {
-        this.mymap.map.off('click')
         let latlng = e.latlng;
         let lat = Math.round(latlng.lat * 1000) / 1000;
         let lon = Math.round(latlng.lng * 1000) / 1000;
@@ -48,7 +48,7 @@ export default class MapForm_interactions implements MapForm_interactions {
     }
 
     async shapeRequestWithLocation(lon: number, lat: number) {
-        this.disableRequest();
+        // this.disableRequest();
         L.circleMarker([lat, lon], { radius: 0.5, color: 'black' }).addTo(this.mymap.map)
         let form = this.form_view.getForm as PredictionForm
         let date = form.date;
@@ -94,7 +94,7 @@ export default class MapForm_interactions implements MapForm_interactions {
             $(`.topbar-elem[data-user-feedback="#userfb${len}"]`).toggleClass("error")
         }
         finally {
-            this.enableRequest();
+            // this.enableRequest();
         }
     }
 

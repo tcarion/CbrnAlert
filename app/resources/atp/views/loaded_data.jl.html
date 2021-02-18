@@ -2,14 +2,37 @@
 
   <input hidden id="loaded_file" value=$(loaded_file)></input>
 
-  <div class="loaded-data-info">
-    <span>Name of the file loaded : </span> <span>$(loaded_data_info[:filename])</span>
-    <span>Forecast start date : </span> <span>$(loaded_data_info[:date])</span>
-    <span>Forecast start time : </span> <span>$(loaded_data_info[:time])</span>
-    <span>Forecast duration : </span> <span>$(loaded_data_info[:hour_nbr]) hours</span>
-    <span>Available area : </span> <span id="av-area">$(loaded_data_info[:area])</span>
-  </div>
-  
+  <table class="loaded-data-info">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Loaded data info</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Name of the loaded file : </td>
+        <td>$(loaded_data_info[:filename])</td>
+      </tr>
+      <tr>
+        <td>Forecast start date : </td>
+        <td>$(loaded_data_info[:date])</td>
+      </tr>
+      <tr>
+        <td>Forecast start time : </td>
+        <td>$(loaded_data_info[:time])</td>
+      </tr>
+      <tr>
+        <td>Forecast duration : </td>
+        <td>$(loaded_data_info[:hour_nbr]) hours</td>
+      </tr>
+      <tr>
+        <td>Available area : </td>
+        <td id="av-area">$(loaded_data_info[:area])</td>
+      </tr>
+    </tbody>
+  </table>
+
   <form class="loaded-data-form atp-prediction-form" action="" method="post">
     <div class="alert alert-danger" id="error_lonlat_input"></div>
     <div class="form-group form-item">
@@ -24,8 +47,8 @@
       <label for="forecast_dt">Forecast step selection</label>
       <select class="form-control" name="forecast_dt" id="forecast_dt">
         <% @foreach(datetimes) do d %>
-        <option value="$(d[:datetime])+$(d[:step])">$(d[:datetime])</option>
-        <% end %>
+          <option value="$(d[:datetime])+$(d[:step])">$(d[:datetime])</option>
+          <% end %>
       </select>
     </div>
     <div class="form-item manual-btn">

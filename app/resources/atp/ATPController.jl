@@ -109,7 +109,7 @@ start_date(date::String, step) :: DateTime = start_date(DateTime(date), step)
 start_date(date::String, step, df::String) :: DateTime = start_date(DateTime(date, DateFormat(df)), step)
 
 
-get_request(date, time, step, area, target_file = "public/grib_files/$(date)_$(time)_$(replace(area, "/" => "-")).grib") = """retrieve,
+request_to_string(date, time, step, area, target_file = "public/grib_files/$(date)_$(time)_$(replace(area, "/" => "-")).grib") = """retrieve,
                                       type    = fc,
                                       date    = $date,
                                       time    = $time,
@@ -120,54 +120,74 @@ get_request(date, time, step, area, target_file = "public/grib_files/$(date)_$(t
                                       target  = "$target_file"
                                       """
                                       
-get_request(req::MarsRequest) = get_request(req.date, req.time, req.step, req.area, req.target_file)
+request_to_string(req::MarsRequest) = request_to_string(req.date, req.time, req.step, req.area, req.target_file)
 
-function initiate_socket_mars(req::MarsRequest, channel)
-  s_name = "tmp/socket_$(Dates.format(Dates.now(), "yyyymmddHHMMSSs"))"
-  str_req = get_request(req)
-  @async begin
-      server = listen(s_name)
-      while true
-          sock = accept(server)
-          redirect_stdout(sock) do 
-              redirect_stderr(sock) do 
-                try
-                  run(pipeline(`echo $str_req`, `mars`))
-                  # run(`./test/sleeping_script.sh`)
-                  write(stdout, "--EOF--")
-                catch e
-                  write(stdout, "EXCEPTION IN MARS REQUEST : $e\n")
-                  write(stdout, "TRYING TO GET PREVIOUS FORECAST\n")
-                  write(stdout, "--EOF--")
-                  close(sock)
-                finally
-                  close(sock)
-                end
-              end
-            end
-      end
+function broadcast_mars_output(req::MarsRequest, channel)
+  str_req = request_to_string(req)
+  cmd = pipeline(`echo $str_req`, `mars`)
+  # cmd = `./test/sleeping_script.sh`
+  process = open(cmd)
+  while !eof(process)
+    try
+      Genie.WebChannels.broadcast(channel, readline(process))
+    catch e
+      println("COULDN'T BROADCAST TO WEBCHANNEL")
+      throw(e)
+    end
   end
+end
+
+# function initiate_socket_mars(req::MarsRequest, channel)
+#   s_name = "tmp/socket_$(Dates.format(Dates.now(), "yyyymmddHHMMSSs"))"
+#   str_req = request_to_string(req)
+#   @async begin
+#       server = listen(s_name)
+#       while true
+#           sock = accept(server)
+#           redirect_stdout(sock) do 
+#               redirect_stderr(sock) do 
+#                 try
+#                   # run(pipeline(`echo $str_req`, `mars`))
+#                   run(`./test/sleeping_script.sh`)
+#                   write(stdout, "--EOF--")
+#                 catch e
+#                   write(stdout, "EXCEPTION IN MARS REQUEST : $e\n")
+#                   write(stdout, "TRYING TO GET PREVIOUS FORECAST\n")
+#                   write(stdout, "--EOF--")
+#                   close(sock)
+#                 finally
+#                   close(sock)
+#                 end
+#               end
+#             end
+#       end
+#   end
    
-  clientside = client_connect(s_name)
+#   clientside = client_connect(s_name)
 
-  r = readline(clientside)
-  while r != "--EOF--"
-      Genie.WebChannels.broadcast(channel, r)
-      r = readline(clientside)
-  end
+#   r = readline(clientside)
+#   while r != "--EOF--"
+#     try
+#       Genie.WebChannels.broadcast(channel, r)
+#       r = readline(clientside)
+#     catch e
+#       println("COULDN'T BROADCAST TO WEBCHANNEL")
+#       throw(e)
+#     end
+#   end
 
-  if isopen(clientside) close(clientside) end
-  rm(s_name)
-end
+#   if isopen(clientside) close(clientside) end
+#   rm(s_name)
+# end
 
-function client_connect(named_pipe)
-  try
-    connect(named_pipe)
-  catch
-    sleep(0.5)
-    client_connect(named_pipe)
-  end
-end
+# function client_connect(named_pipe)
+#   try
+#     connect(named_pipe)
+#   catch
+#     sleep(0.5)
+#     client_connect(named_pipe)
+#   end
+# end
 
 """
     preloaded_atp_prediction()
@@ -308,7 +328,7 @@ function atp_shape_request()
     req = MarsRequest(date, time, step, area)
     channel = ajax_received["channel"]
     for n_attempts in 1:2
-      initiate_socket_mars(req, channel)
+      broadcast_mars_output(req, channel)
       if isfile(req.target_file)
         reader = rg.GribReader(req.target_file, keys)
         break
@@ -410,7 +430,7 @@ function mars_request()
   
   time = match(r"(\d+):(\d+)", time)[1]*match(r"(\d+):(\d+)", time)[2]
 
-  req = get_request(date, time, join(collect(0:6:240), "/"), area)
+  req = request_to_string(date, time, join(collect(0:6:240), "/"), area)
 
   run(pipeline(`echo $req`, `$MARS_PATH`))
 end

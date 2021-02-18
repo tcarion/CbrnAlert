@@ -4,6 +4,7 @@
 }
 
 html {
+  font-size: 14px;
   min-height: 100vh;
   position: relative;
 }
@@ -193,29 +194,45 @@ html body #wrapper #content-wrapper #content .container-fluid {
 }
 
 .loaded-data-info {
-  border-radius: 5px;
-  background-color: white;
-  color: black;
-  margin-bottom: 1em;
-  padding: 0.3em;
-  display: -ms-grid;
-  display: grid;
-  -ms-grid-columns: 1fr 1fr;
-      grid-template-columns: 1fr 1fr;
-  -ms-grid-rows: auto;
-      grid-template-rows: auto;
-  -webkit-column-gap: 0em;
-          column-gap: 0em;
-  row-gap: 0.5em;
-  justify-items: start;
+  border-collapse: collapse;
+  margin: 0.2em 0;
+  font-size: 0.9em;
+  min-width: 400px;
+  border-radius: 5px 5px 0 0;
+  overflow: hidden;
+  -webkit-box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+          box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
 
-.loaded-data-info span:nth-child(odd) {
-  font-weight: 700;
+.loaded-data-info thead tr {
+  background-color: #009879;
+  color: #fff;
+  text-align: left;
+  font-weight: bold;
 }
 
-.loaded-data-info span:nth-child(even) {
-  color: #222;
+.loaded-data-info th, .loaded-data-info td {
+  padding: 0.5em 15px;
+}
+
+.loaded-data-info tbody tr {
+  border-bottom: 1px solid #ddd;
+}
+
+.loaded-data-info tbody tr:nth-of-type(even) {
+  background-color: #f3f3f3;
+}
+
+.loaded-data-info tbody tr:last-of-type {
+  border-bottom: 2px solid #009879;
+}
+
+.loaded-data-info tbody tr:hover {
+  background-color: bisque;
+}
+
+.loaded-data-info tbody tr td:nth-child(odd) {
+  font-weight: 600;
 }
 
 .loaded-data-form {
@@ -419,7 +436,6 @@ html body #wrapper #content-wrapper #content .container-fluid {
   height: 100%;
   width: 100%;
   min-width: 500px;
-  min-height: 500px;
   -webkit-box-flex: 3;
       -ms-flex: 3 1 auto;
           flex: 3 1 auto;
