@@ -122,6 +122,8 @@ request_to_string(date, time, step, area, target_file = "public/grib_files/$(dat
                                       
 request_to_string(req::MarsRequest) = request_to_string(req.date, req.time, req.step, req.area, req.target_file)
 
+searchdir(path,key) = filter(x->occursin(key,x), readdir(path))
+
 function broadcast_mars_output(req::MarsRequest, channel)
   str_req = request_to_string(req)
   cmd = pipeline(`echo $str_req`, `mars`)
@@ -136,58 +138,6 @@ function broadcast_mars_output(req::MarsRequest, channel)
     end
   end
 end
-
-# function initiate_socket_mars(req::MarsRequest, channel)
-#   s_name = "tmp/socket_$(Dates.format(Dates.now(), "yyyymmddHHMMSSs"))"
-#   str_req = request_to_string(req)
-#   @async begin
-#       server = listen(s_name)
-#       while true
-#           sock = accept(server)
-#           redirect_stdout(sock) do 
-#               redirect_stderr(sock) do 
-#                 try
-#                   # run(pipeline(`echo $str_req`, `mars`))
-#                   run(`./test/sleeping_script.sh`)
-#                   write(stdout, "--EOF--")
-#                 catch e
-#                   write(stdout, "EXCEPTION IN MARS REQUEST : $e\n")
-#                   write(stdout, "TRYING TO GET PREVIOUS FORECAST\n")
-#                   write(stdout, "--EOF--")
-#                   close(sock)
-#                 finally
-#                   close(sock)
-#                 end
-#               end
-#             end
-#       end
-#   end
-   
-#   clientside = client_connect(s_name)
-
-#   r = readline(clientside)
-#   while r != "--EOF--"
-#     try
-#       Genie.WebChannels.broadcast(channel, r)
-#       r = readline(clientside)
-#     catch e
-#       println("COULDN'T BROADCAST TO WEBCHANNEL")
-#       throw(e)
-#     end
-#   end
-
-#   if isopen(clientside) close(clientside) end
-#   rm(s_name)
-# end
-
-# function client_connect(named_pipe)
-#   try
-#     connect(named_pipe)
-#   catch
-#     sleep(0.5)
-#     client_connect(named_pipe)
-#   end
-# end
 
 """
     preloaded_atp_prediction()
@@ -208,7 +158,13 @@ function preloaded_atp_prediction()
   if haskey(payload(), :file)
     grib_to_read = "public/grib_files/" * payload()[:file] * ".grib"
   else
-    grib_to_read = DEFAULT_GRIB
+    # grib_to_read = DEFAULT_GRIB
+    grib_files = searchdir(joinpath(pwd(), "public", "grib_files"),".grib")
+    if isempty(grib_files)
+      return html(:atp, "loaded_data_not_found.jl.html", layout=:app)
+    else
+      grib_to_read = joinpath(pwd(), "public", "grib_files", grib_files[1])
+    end
   end
 
   keys = ["date", "time", "shortName", "level", "step"]
@@ -239,7 +195,6 @@ function preloaded_atp_prediction()
   available_datetimes_str = map(x -> Dates.format(x, "yyyy-mm-dd @ HH:MM:SS"), available_datetimes)
   available_time = [Dict(:datetime => x, :step => y) for (x, y) in zip(available_datetimes_str, steps)]
 
-  searchdir(path,key) = filter(x->occursin(key,x), readdir(path))
   grib_files = searchdir(joinpath(pwd(), "public", "grib_files"),".grib")
   grib_files = map(x -> split(x, ".")[1], grib_files)
 
