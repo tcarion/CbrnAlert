@@ -3,6 +3,7 @@ let L = require('leaflet')
 export default class ATP_map implements ATP_map {
     map: any;
     drawn_shapes: ShapeData[];
+    marker: any;
 
     constructor(mapid: string, center: Array<string | number>, zoom: number | string, public clickable: boolean) {
         this.map = L.map(mapid).setView(center, zoom);
@@ -12,6 +13,8 @@ export default class ATP_map implements ATP_map {
             minZoom: 1,
             maxZoom: 20
         }).addTo(this.map);
+        L.control.scale().addTo(this.map);
+        this.marker = null;
     }
 
     areaToCoords(area: number[]) {
@@ -36,6 +39,14 @@ export default class ATP_map implements ATP_map {
             L.polygon(shape.coords, {color : shapes_color[i]}).addTo(map).bindPopup(shape.text);
         });
         this.drawn_shapes.push(shape_data);
+    }
+
+    newMarker(lon: number, lat: number) {
+        if (this.marker !== null) {
+            this.map.removeLayer(this.marker)
+        }
+        this.marker = L.marker([lat, lon]);
+        this.marker.addTo(this.map);
     }
 }
 

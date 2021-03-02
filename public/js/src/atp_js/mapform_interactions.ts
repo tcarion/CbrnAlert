@@ -28,7 +28,21 @@ export default class MapForm_interactions implements MapForm_interactions {
             marsDataRequest(mymap.map_area)
         });
 
-        $(form_view.manual_entry_selector).on('click', e => this.manualEntryRequest(e));
+        $(`${form_view.lon_selector}, ${form_view.lat_selector}`).on('keypress', (e) => {
+            if (e.key == 'Enter') {
+                let messages = form_view.verifyLonLatInput();
+                if (messages.length == 0) {
+                    mymap.newMarker(form_view.form.lon, form_view.form.lat);
+                }
+                else {
+                    e.stopPropagation();
+                    $(this.form_view.error_selector).text(messages.join(', '));
+                    $(this.form_view.error_selector).show("slow");
+                }
+            }
+        });  //UNCOMMENT THIS TO HAVE THE REQUEST DIRECTLY ON MAP CLICK
+
+        $(form_view.atp45_request_selector).on('click', e => this.sendAtp45Request(e));
     }
 
     onMapClick(e: any) {
@@ -37,14 +51,10 @@ export default class MapForm_interactions implements MapForm_interactions {
         let lon = Math.round(latlng.lng * 1000) / 1000;
         $(this.form_view.lat_selector).val(lat);
         $(this.form_view.lon_selector).val(lon);
-        this.shapeRequestWithLocation(lon, lat)
-
+        // this.shapeRequestWithLocation(lon, lat)   //UNCOMMENT THIS TO HAVE THE REQUEST DIRECTLY ON MAP CLICK
+        this.mymap.newMarker(lon, lat)
         // this.mymap.map.on('click', (e: any) => this.onMapClick(e))
 
-        // if (loaded_file == "" || !loaded_file) {
-        //     Genie.WebChannels.sendMessageTo('realtime_atp_prediction', 'shape_request', {"f1" : 1})
-        // } else {
-        // }
     }
 
     async shapeRequestWithLocation(lon: number, lat: number) {
@@ -98,7 +108,7 @@ export default class MapForm_interactions implements MapForm_interactions {
         }
     }
 
-    manualEntryRequest(e: any) {
+    sendAtp45Request(e: any) {
         let messages = this.form_view.verifyLonLatInput();
         let form = this.form_view.getForm as PredictionForm;
         if (messages.length == 0) {
@@ -113,11 +123,11 @@ export default class MapForm_interactions implements MapForm_interactions {
 
     disableRequest() {
         this.mymap.map.off('click');
-        $(this.form_view.manual_entry_selector).off('click');
+        $(this.form_view.atp45_request_selector).off('click');
     }
 
     enableRequest() {
         this.mymap.map.on('click', (e: any) => this.onMapClick(e));
-        $(this.form_view.manual_entry_selector).on('click', e => this.manualEntryRequest(e));
+        $(this.form_view.atp45_request_selector).on('click', e => this.sendAtp45Request(e));
     }
 }

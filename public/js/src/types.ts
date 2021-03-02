@@ -3,18 +3,16 @@ interface ATP_map {
     drawn_shapes: ShapeData[];
     clickable: boolean;
     areaToCoords(area: number[]): number[][];
-    // areaToCoords : Function;
-    // map_area(): number[];
     map_area: number[];
     drawShapes(shape_data: ShapeData, map: any): void;
-    // drawShapes: Function;
+    newMarker(lon: number, lat: number) : void;
 }
 interface Form_view {
     form: Form | undefined;
     lon_selector: string;
     lat_selector: string;
     error_selector: string;
-    manual_entry_selector: string;
+    atp45_request_selector: string;
     getForm : Form;
     initEvents(): void;
     verifyLonLatInput(): string[];

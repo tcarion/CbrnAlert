@@ -4,16 +4,16 @@ export default class Form_view implements Form_view {
     lon_selector: string = "input#lon";
     lat_selector: string = "input#lat";
     error_selector: string = "#error_lonlat_input";
-    manual_entry_selector: string = "#manual_entry_button";
+    atp45_request_selector: string = "#atp45_request_button";
     // date_selector: string;
     // time_selector: string;
     // step_selector: string | undefined;
 
     initEvents() {
         let form_view = this
-        $('.lonlat').on('keypress', (e) => {
-            if (e.key == 'Enter') $(form_view.manual_entry_selector).trigger('click');
-        });
+        // $('.lonlat').on('keypress', (e) => {
+        //     if (e.key == 'Enter') $(form_view.atp45_request_selector).trigger('click');
+        // });  //UNCOMMENT THIS TO HAVE THE REQUEST DIRECTLY ON MAP CLICK
 
         $(document).on('click', function () {
             $(form_view.error_selector).hide("slow");
