@@ -7,14 +7,24 @@ using ViewHelper
 using Users
 using Logging
 
+# global pl = 0
+
 function show_login()
   html(:authentication, :login, context = @__MODULE__, layout=:login_layout)
 end
 
 function login()
   try
+    # global pl = Genie.Requests.payload()
     user = SearchLight.findone(User, username = Genie.Router.@params(:username), password = Users.hash_password(Genie.Router.@params(:password)))
     GenieAuthentication.authenticate(user.id, Genie.Sessions.session(Genie.Router.@params))
+
+    list_ips = if user.connected_with_ips != "" split(user.connected_with_ips, ',') else String[] end
+    ipv4 = string(Genie.Requests.payload(:request_ipv4))
+    if !(ipv4 in list_ips) push!(list_ips, ipv4) end
+    user.connected_with_ips = join(list_ips, ',')
+    user.connections_number += 1
+    SearchLight.save!(user)
 
     Genie.Renderer.redirect(:dashboard)
   catch ex

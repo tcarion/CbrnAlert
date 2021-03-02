@@ -50,3 +50,5 @@ public/grib_files
 
 sessions/
 tmp/*
+
+db/users.sqlite

@@ -114,8 +114,8 @@ html body #wrapper #content-wrapper #content .container-fluid {
   background-image: -webkit-gradient(linear, left top, left bottom, color-stop(10%, #4e73df), to(#224abe));
   background-image: linear-gradient(#4e73df 10%, #224abe 100%);
   background-size: cover;
-  background-size: cover;
   letter-spacing: 0.05rem;
+  height: 100vh;
 }
 
 .sidebar .sidebar-brand {
@@ -161,6 +161,41 @@ html body #wrapper #content-wrapper #content .container-fluid {
   margin: 0 1em;
 }
 
+@media all and (max-width: 1024px) {
+  .hamburger {
+    position: fixed;
+    top: 5px;
+    left: 5px;
+    background: #4e73df;
+    border-radius: 5px;
+    width: 35px;
+    cursor: pointer;
+    z-index: 1000000;
+  }
+  .hamburger .line {
+    height: 3px;
+    background: #fff;
+    margin: 5px 8px;
+    border-radius: 5px;
+  }
+  .sidebar {
+    position: absolute;
+    left: 0px;
+    width: 14rem;
+    z-index: 100000;
+    -webkit-transform: translateX(-14rem);
+            transform: translateX(-14rem);
+  }
+  .sidebar.open {
+    -webkit-transform: translateX(0);
+            transform: translateX(0);
+    -webkit-transition: -webkit-transform 0.5s ease-in;
+    transition: -webkit-transform 0.5s ease-in;
+    transition: transform 0.5s ease-in;
+    transition: transform 0.5s ease-in, -webkit-transform 0.5s ease-in;
+  }
+}
+
 .dashboard-container {
   display: -ms-grid;
   display: grid;
@@ -195,9 +230,10 @@ html body #wrapper #content-wrapper #content .container-fluid {
 
 .loaded-data-info {
   border-collapse: collapse;
-  margin: 0.2em 0;
+  margin: 0.2em;
+  margin-right: 1.5em;
   font-size: 0.9em;
-  min-width: 400px;
+  min-width: 380px;
   border-radius: 5px 5px 0 0;
   overflow: hidden;
   -webkit-box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);

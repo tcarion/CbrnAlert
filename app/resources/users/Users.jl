@@ -12,6 +12,8 @@ Base.@kwdef mutable struct User <: AbstractModel
   password::String = ""
   name::String = ""
   email::String = ""
+  connections_number::Integer = 0
+  connected_with_ips::String = ""
 end
 
 Validation.validator(u::Type{User}) = ModelValidator([
@@ -20,11 +22,17 @@ Validation.validator(u::Type{User}) = ModelValidator([
   ValidationRule(:password, UsersValidator.not_empty),
   ValidationRule(:email,    UsersValidator.not_empty),
   ValidationRule(:email,    UsersValidator.unique),
-  ValidationRule(:name,     UsersValidator.not_empty)
 ])
 
 function hash_password(password::String)
   sha256(password) |> bytes2hex
+end
+
+function add_user(username, password, email)
+    user = User(username  = username,
+                password  = password |> hash_password,
+                email = email
+                ) |> SearchLight.save!
 end
 
 end

@@ -10,6 +10,8 @@ function up()
       column(:password, :string, limit = 100)
       column(:name, :string, limit = 100)
       column(:email, :string, limit = 100)
+      column(:connections_number, :int)
+      column(:connected_with_ips, :string)
     ]
   end
 

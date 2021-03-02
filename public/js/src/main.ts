@@ -23,6 +23,10 @@ $(() => {
     //     $('.nav-item a[href="/"]').parent().addClass("active");
     // }
     $(".nav-item a[href*='" + location.pathname + "']").parent().addClass("active");
+
+    $(".hamburger").on("click", () => {
+        $(".sidebar").toggleClass("open")
+    })
     
     let atp_map = $(".archive-form").length ? new ATP_map('mapid', [50.82, 4.35], 8, false) : new ATP_map('mapid', [50.82, 4.35], 8, true);
     let form_view = new Form_view();
