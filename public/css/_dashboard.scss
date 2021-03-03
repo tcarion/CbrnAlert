@@ -1,8 +1,9 @@
 .dashboard-container {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    column-gap: 2em;
+    display: flex;
+    flex-flow: row wrap;
+
     a.dashboard-link {
+        margin: 1em;
         text-decoration: none;
         color: inherit;
         .card {

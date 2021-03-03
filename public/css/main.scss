@@ -10,6 +10,7 @@
 html {
     font-size: 14px;
     min-height: 100vh;
+    min-width: 100vw;
     position: relative;
 
     body {
@@ -33,10 +34,6 @@ html {
                     height: 100%;
                     @include flexDir(column);
 
-                    .topbar {
-                        height: 70px;
-                    }
-
                     .container-fluid {
                         height: 100%;
                         padding-top: 1em;
@@ -49,23 +46,50 @@ html {
         }
     }
 }
+
+.box-arrow {
+    width: 18px;
+    height: 18px;
+    background-color: grey;
+    border-radius: 2px;
+    cursor: pointer;
+
+    .arrow {
+        margin: 5px auto;
+        width: 0;
+        height: 0;
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+        border-top: 6px solid #fff;
+        transform: rotate(180deg);
+        &.down {
+            transform: rotate(0deg);
+        }
+    }
+}
+
 @import "./variables";
 @import "./authentication";
 @import "./sidebar";
 @import "./dashboard";
 @import "./forms";
 @import "./realtime";
+@import "./topbar";
 
 /* MAP STYLE */
 .mymap-container {
     height: 100%;
     width: 100%;
-    min-width: 500px;
+    // min-width: 500px;
     // min-height: 500px;
     flex: 3 1 auto;
     margin-top: 1em;
     border-style: ridge;
     border: 5px ridge;
+
+    // @media (max-width: $widthForDisplayChange) {
+    //     min-width: none;
+    // }
     #mapid {
         height: 100%;
         // background-color: blue;

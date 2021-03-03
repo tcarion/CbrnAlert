@@ -2,9 +2,15 @@
     display: flex;
     justify-content: space-around;
     width: 100%;
+
+    @media (max-width: $widthForDisplayChange) {
+        flex-direction: column;
+        align-items: stretch;
+    }
 }
 
 .loaded-data-info {
+    position: relative;
     border-collapse: collapse;
     margin: 0.2em;
     margin-right: 1.5em;
@@ -18,6 +24,21 @@
         color: #fff;
         text-align: left;
         font-weight: bold;
+        cursor: pointer;
+
+        .toggle-loaded-info {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+        }
+
+        th:nth-child(1) {
+            width: 170px;
+        }
+
+        th:nth-child(2) {
+            width: 340px;
+        }
     }
 
     th, td {
@@ -57,6 +78,10 @@
     /* justify-items: end; */
     align-items: start;
 
+    @media (max-width: $widthForDisplayChange) {
+        max-width: none;
+    }
+
     .form-item {
         width: 100%;
         margin: 0;
@@ -75,37 +100,21 @@
 }
 
 .archive-form, .realtime-form {
-    // text-align: center;
     width: 100%;
     min-width: 100px;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-    grid-template-rows: auto;
-    column-gap: 1em;
+    display: flex;
+    flex-flow: row wrap;
+    align-items: flex-end;
+
     .form-item {
         margin: 5px;
+        min-width: 120px;
         button {
             width: 100%;
             font-size: 0.8rem;
         }
     }
-
-    .archive-form-btn {
-        align-self: end;
-    }
 }
-
-// .realtime-form {
-//     display: flex;
-//     justify-content: space-around;
-//     .form-item {
-//         margin: 5px;
-//         button {
-//             width: 100%;
-//             font-size: 0.8rem;
-//         }
-//     }
-// }
 
 .atp-prediction-form {
     position: relative;

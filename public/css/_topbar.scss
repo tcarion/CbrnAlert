@@ -1,0 +1,113 @@
+@mixin request_notif() {
+    display: block;
+    text-align: center;
+    color: black;
+    font-size: 0.8em;
+}
+
+.arrow-down {
+    width: 0; 
+    height: 0; 
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    
+    border-top: 20px solid #f00;
+}
+
+// .topbar {
+//     height: 70px;
+// }
+
+.topbar {
+    position: relative;
+
+    .toggle-topbar {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+    }
+
+    ul {
+        height: 100%;
+        margin: 0;
+        padding: 0.5em;
+        list-style-type: none;
+        display: grid;
+        grid-template-columns: repeat(8, 1fr);
+        grid-template-rows: auto;
+        column-gap: 0.5em;
+        row-gap: 0.5em;
+
+        @media (max-width:$widthForSidebarChange) {
+            grid-template-columns: repeat(6, 1fr);
+        }
+        @media (max-width:375px)  {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .topbar-elem {
+            // height: 100%;
+            // background-color: rgb(43, 38, 38);
+            font-size: 0.8em;
+            color: azure;
+            border-radius: 6px;
+            text-align: center;
+            padding: 0.5em;
+            &:hover {
+                opacity: 0.5;
+                cursor: pointer;
+            }
+            &.active {
+                // background-color: #AAA;
+                opacity: 0.5;
+            }
+            &.success {
+                background-color: #28a745;
+                &::after {
+                    @include request_notif;
+                    content: "Finished";
+                }
+            }
+            &.pending {
+                background-color: #d39e00d9;
+                &::after {
+                    @include request_notif;
+                    content: "processing";
+                }
+            }
+            &.error {
+                background-color: #e22d3e;
+                &::after {
+                    @include request_notif;
+                    content: "Error";
+                }
+            }
+        }
+    }
+
+    .userfb {
+        position: absolute;
+        top: 100%;
+        max-width: 700px;
+        max-height: 700px;
+        z-index: 10000;
+        padding-left: 1em;
+        padding-right: 1em;
+        background-color: brown;
+        display: none;
+        line-height: 0.6em;
+        
+        background-color: rgb(39, 40, 34);
+        border-radius: 6px;
+        padding: 1em;
+        margin: 0.5em 0.5em;
+        overflow-x: scroll;
+        overflow-y: scroll;
+        code {
+            color: #f8f8f2;
+            font-size: 0.6em;
+            font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New;
+            text-shadow: 0 1px rgba(0, 0, 0, 0.3);
+          }
+    }
+}

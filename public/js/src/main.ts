@@ -26,8 +26,18 @@ $(() => {
 
     $(".hamburger").on("click", () => {
         $(".sidebar").toggleClass("open")
-    })
+    });
     
+    $(".toggle-topbar").on("click", () => {
+        $(".topbar ul").toggle("slow");
+        $(".toggle-topbar .arrow").toggleClass("down");
+    });
+
+    $(".loaded-data-info thead").on("click", () => {
+        $(".loaded-data-info tbody").toggle("slow");
+        $(".toggle-loaded-info .arrow").toggleClass("down");
+    });
+
     let atp_map = $(".archive-form").length ? new ATP_map('mapid', [50.82, 4.35], 8, false) : new ATP_map('mapid', [50.82, 4.35], 8, true);
     let form_view = new Form_view();
     form_view.initEvents();

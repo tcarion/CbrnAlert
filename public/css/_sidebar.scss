@@ -46,7 +46,7 @@
     margin: 0 1em;   
 }
 
-@media all and (max-width: 1024px) {
+@media all and (max-width: $widthForSidebarChange) {
     .hamburger {
         position: fixed;
         top: 5px;
