@@ -25,6 +25,7 @@ Vagrantfile
 *.sass-cache
 *.pyc
 
+*.sqlite
 # OS or Editor folders
 .DS_Store
 .cache
@@ -50,5 +51,4 @@ public/grib_files
 
 sessions/
 tmp/*
-
-db/users.sqlite
+log/*
