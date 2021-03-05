@@ -22,6 +22,9 @@ route("/atp_shape_request", ATPController.atp_shape_request, method = POST, name
 
 route("/mars_request", ATPController.mars_request, method = POST, named = :mars_request)
 
+channel("/:default_ch/:client_ch") do 
+    "def_ch = $(payload(:default_ch))       payload : $(@params(:payload))"
+end
 # channel("realtime_atp_prediction/shape_request", ATPController.atp_shape_request_realtime)
 
 # route("/websocket_test") do 

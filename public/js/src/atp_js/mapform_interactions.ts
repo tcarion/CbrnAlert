@@ -17,16 +17,7 @@ export default class MapForm_interactions implements MapForm_interactions {
 
         if ($("#av-area").text()) L.rectangle(this.mymap.areaToCoords(JSON.parse($("#av-area").text())), { interactive: false, fillOpacity: 0 }).addTo(mymap.map);
 
-        $('.archive-form #archive_data_retrieve').on('click', () => {
-            let form = form_view.getForm
-            let date = form.date;
-            let time = form.time;
-            marsDataRequest(mymap.map_area, date, time)
-        });
-
-        $('.archive-form #latest_available_fc').on('click', () => {
-            marsDataRequest(mymap.map_area)
-        });
+        $('.archive-form #archive_data_retrieve').on('click', () => this.sendMarsRequest());
 
         $(`${form_view.lon_selector}, ${form_view.lat_selector}`).on('keypress', (e) => {
             if (e.key == 'Enter') {
@@ -40,7 +31,7 @@ export default class MapForm_interactions implements MapForm_interactions {
                     $(this.form_view.error_selector).show("slow");
                 }
             }
-        });  //UNCOMMENT THIS TO HAVE THE REQUEST DIRECTLY ON MAP CLICK
+        });
 
         $(form_view.atp45_request_selector).on('click', e => this.sendAtp45Request(e));
     }
@@ -57,54 +48,69 @@ export default class MapForm_interactions implements MapForm_interactions {
 
     }
 
+    addNotification(len: number, notifText: string) {
+        $(".topbar ul").append(`<li class="topbar-elem" data-user-feedback="#userfb${len}"> ${notifText} n°${len} </li>`)
+        let userfb_html = `<div class="userfb" id="userfb${len}"> \
+                                    <code> \
+                                    </code> \
+                                </div>`;
+        $(".topbar").append(userfb_html);
+
+        window.parse_payload = function (payload: any) {
+            let elem = `${payload.payload.displayed} <br>`;
+            $(`#userfb${payload.payload.userfb_id} code`).append(elem);
+        }
+        $(`.topbar-elem[data-user-feedback="#userfb${len}"]`).toggleClass("pending")
+        $(`.topbar-elem[data-user-feedback="#userfb${len}"]`).on('click', function () {
+            $(this).siblings().each(function () {
+                $(this).removeClass("active")
+                $($(this).data("user-feedback")).hide();
+            });
+            let id = $(this).data("user-feedback");
+            $(this).toggleClass("active");
+            $(id).toggle(500);
+        });
+        return { channel: Genie.Settings.webchannels_default_route, userfb_id: len }
+    }
+
     async shapeRequestWithLocation(lon: number, lat: number) {
         // this.disableRequest();
-        L.circleMarker([lat, lon], { radius: 0.5, color: 'black' }).addTo(this.mymap.map)
         let form = this.form_view.getForm as PredictionForm
         let date = form.date;
         let step = form.step;
         let time = form.time;
         let loaded_file = $("input#loaded_file").val();
 
-        let len = 0
+        let len = $(".topbar ul li").length
+        let channel_info = {}
         if (!loaded_file || loaded_file == "") {
-            len = $(".topbar ul li").length + 1;
-            let id = `#userfb${len} code`;
-            $(".topbar ul").append(`<li class="topbar-elem" data-user-feedback="#userfb${len}"> ATP45 request n°${len} </li>`)
-            let userfb_html = `<div class="userfb" id="userfb${len}"> \
-                                    <code> \
-                                    </code> \
-                                </div>`;
-            $(".topbar").append(userfb_html);
-
-            window.parse_payload = function (payload: string) {
-                let elem = `${payload} <br>`;
-                $(`#userfb${len} code`).append(elem);
-            }
-            $(`.topbar-elem[data-user-feedback="#userfb${len}"]`).toggleClass("pending")
-            $(`.topbar-elem[data-user-feedback="#userfb${len}"]`).on('click', function () {
-                $(this).siblings().each(function () {
-                    $(this).removeClass("active")
-                    $($(this).data("user-feedback")).hide();
-                });
-                let id = $(this).data("user-feedback");
-                $(this).toggleClass("active");
-                $(id).toggle(500);
-            });
+            len += 1;
+            channel_info = this.addNotification(len, "ATP45 request")
         }
 
         try {
-            let shape = await shapeRequest(lon, lat, date, time, step, this.mymap.map_area, loaded_file);
-            this.mymap.drawShapes(shape, this.mymap.map)
-            $(`.topbar-elem[data-user-feedback="#userfb${len}"]`).toggleClass("pending")
-            $(`.topbar-elem[data-user-feedback="#userfb${len}"]`).toggleClass("success")
+            let to_send = { lon: lon, lat: lat, date: date, step: step, time: time, loaded_file: loaded_file, area: this.mymap.map_area.join('/'), channel_info: channel_info };
+            let shape = await shapeRequest(to_send);
+            this.mymap.drawShapes(shape, this.mymap.map);
+            L.circleMarker([lat, lon], { radius: 0.5, color: 'black' }).addTo(this.mymap.map);
+            this.notificationSucces(len);
         } catch (error) {
-            console.error(error);
-            $(`.topbar-elem[data-user-feedback="#userfb${len}"]`).toggleClass("pending")
-            $(`.topbar-elem[data-user-feedback="#userfb${len}"]`).toggleClass("error")
+            // console.error(error);
+            this.notificationError(len);
         }
-        finally {
-            // this.enableRequest();
+    }
+
+    async sendMarsRequest() {
+        let form = this.form_view.getForm
+
+        let len = $(".topbar ul li").length + 1;
+        let channel_info = this.addNotification(len, "Arch. Request");
+        let to_send = { date: form.date, time: form.time, area: this.mymap.map_area.join('/'), channel_info: channel_info }
+        try {
+            await marsDataRequest(to_send);
+            this.notificationSucces(len);
+        } catch (error) {
+            this.notificationError(len);
         }
     }
 
@@ -129,5 +135,15 @@ export default class MapForm_interactions implements MapForm_interactions {
     enableRequest() {
         this.mymap.map.on('click', (e: any) => this.onMapClick(e));
         $(this.form_view.atp45_request_selector).on('click', e => this.sendAtp45Request(e));
+    }
+
+    notificationSucces(len: number) {
+        $(`.topbar-elem[data-user-feedback="#userfb${len}"]`).toggleClass("pending")
+        $(`.topbar-elem[data-user-feedback="#userfb${len}"]`).toggleClass("success")
+    }
+
+    notificationError(len: number) {
+        $(`.topbar-elem[data-user-feedback="#userfb${len}"]`).toggleClass("pending")
+        $(`.topbar-elem[data-user-feedback="#userfb${len}"]`).toggleClass("error")
     }
 }

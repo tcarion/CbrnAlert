@@ -5,7 +5,7 @@
             <label for="forecast_dt">Forecast step selection</label>
             <select class="form-control" name="forecast_dt" id="forecast_dt">
                 <% @foreach(datetimes) do d %>
-                    <option value="$(d[:datetime])+$(d[:step])">$(d[:datetime])</option>
+                    <option value="$(d[:datetime])" data-step="$(d[:step])">$(d[:datetime])</option>
                     <% end %>
             </select>
         </div>
