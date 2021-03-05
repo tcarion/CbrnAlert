@@ -22,14 +22,16 @@ export default class Form_view implements Form_view {
 
     get getForm() {
         if ($(".atp-prediction-form").length) {
-            let option = $(".atp-prediction-form select option:selected").val() as string
-            let selected_option = option?.match("(.*)@(.*)\\+(.*)")!;
+            let option = $(".atp-prediction-form select option:selected");
+            let date = option.val() as string;
+            let selected_date = date?.match("(.*)@(.*)")!;
+            let step = option.data().step.toString();
             this.form = {
                 lon: $(this.lon_selector).val(),
                 lat: $(this.lat_selector).val(),
-                date: selected_option[1].trim(),
-                step: selected_option[3],
-                time: selected_option[2].trim(),
+                date: selected_date[1].trim(),
+                step: step,
+                time: selected_date[2].trim(),
             } as PredictionForm;
         } else {
             this.form = {

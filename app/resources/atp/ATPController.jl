@@ -1,9 +1,10 @@
 module ATPController
 
-using PyCall
+# using PyCall
 using Genie.Renderer.Html, Genie.Renderer.Json, Genie.Requests, Genie.Assets, Genie.Renderer
 using ComputeShapes
 using EarthCompute
+using ReadGrib
 using JSON
 using Dates
 using Sockets
@@ -45,7 +46,8 @@ struct MarsRequest
   target_file::String
   datetime::DateTime
 end
-MarsRequest(date, time, step, area) = MarsRequest(date, time, step, area,  "public/grib_files/$(date)_$(time)_$(replace(area, "/" => "-")).grib", DateTime(date*time, dateformat"yyyymmddHHMM"))
+MarsRequest(date, time, step, area::Array) = MarsRequest(date, time, step, join(area, "/"))
+MarsRequest(date, time, step, area::String) = MarsRequest(date, time, step, area,  "public/grib_files/$(date)_$(time)_$(replace(area, "/" => "-")).grib", DateTime(date*time, dateformat"yyyymmddHHMM"))
 
 """
     to_dict(arg::Union{Wind, ShapeData})
@@ -124,14 +126,17 @@ request_to_string(req::MarsRequest) = request_to_string(req.date, req.time, req.
 
 searchdir(path,key) = filter(x->occursin(key,x), readdir(path))
 
-function broadcast_mars_output(req::MarsRequest, channel)
+wrap_coord(lon, lat) = [ceil(Int, lat)+1, floor(Int, lon)-1, floor(Int, lat)-1, ceil(Int, lon)+1]
+
+function broadcast_mars_output(req::MarsRequest, channel_info)
   str_req = request_to_string(req)
   cmd = pipeline(`echo $str_req`, `mars`)
-  # cmd = `./test/sleeping_script.sh`
+#   cmd = `./test/sleeping_script.sh`
   process = open(cmd)
   while !eof(process)
     try
-      Genie.WebChannels.broadcast(channel, readline(process))
+      info_to_send = Dict(:displayed => readline(process), :userfb_id => channel_info["userfb_id"])
+      Genie.WebChannels.broadcast(channel_info["channel"], info_to_send)
     catch e
       println("COULDN'T BROADCAST TO WEBCHANNEL")
       throw(e)
@@ -151,14 +156,10 @@ Data sent for html parsing :
   @`loaded_file` path of the file from which data have to be loaded
 """
 function preloaded_atp_prediction()
-  pypath = PyVector(pyimport("sys")."path")
-  if !(LIB_PATH in pypath) pushfirst!(pypath, LIB_PATH) end
-  rg = pyimport("readgrib")
 
   if haskey(payload(), :file)
     grib_to_read = "public/grib_files/" * payload()[:file] * ".grib"
   else
-    # grib_to_read = DEFAULT_GRIB
     grib_files = searchdir(joinpath(pwd(), "public", "grib_files"),".grib")
     if isempty(grib_files)
       return html(:atp, "loaded_data_not_found.jl.html", layout=:app)
@@ -167,27 +168,13 @@ function preloaded_atp_prediction()
     end
   end
 
-  keys = ["date", "time", "shortName", "level", "step"]
-  reader = rg.GribReader(grib_to_read, keys)
+  date = ReadGrib.get_key_values(grib_to_read, "date")[1]
+  time = ReadGrib.get_key_values(grib_to_read, "time")[1]
+  steps = ReadGrib.get_key_values(grib_to_read, "step")
 
-  date = reader.idx_get("date")[1]
-  time = reader.idx_get("time")[1]
-  steps = reader.idx_get("step")
+  steps = typeof(steps[1]) != Int ? sort(map(x -> parse(Int, x), collect(steps))) : sort(collect(steps))
 
-  keys_to_select = Dict(
-    "date" => date,
-    "step" => steps[1],
-    "time" => time,
-    "level"=> reader.idx_get("level")[1],
-    "shortName" => reader.idx_get("shortName")[1]
-  )
-
-  reader.idx_select(keys_to_select)
-  reader.new_handle()
-
-  steps = sort(map(x -> parse(Int, x), collect(steps)))
-
-  time = time == "0" ? "0000" : time
+  time = (time == "0" || time == 0) ? "0000" : string(time)
   m = match(r"(?<h>\d{2}).?(?<m>\d{2})", time)
   time = !isnothing(m) ? m[:h]*":"*m[:m] : error("time is in unreadable format")
 
@@ -203,7 +190,8 @@ function preloaded_atp_prediction()
     :time => Dates.format(available_datetimes[1], "HH:MM"),
     :hour_nbr => steps[end],
     :filename => split(grib_to_read, '/')[end],
-    :area => reader.get_area())
+    :area => round.(ReadGrib.get_area(grib_to_read), digits=3)
+    )
 
   html(:atp, "loaded_data.jl.html",
     datetimes = available_time, files=grib_files, loaded_file=grib_to_read, loaded_data_info = loaded_data_info,
@@ -223,12 +211,6 @@ function realtime_atp_prediction()
     start_date = yesterday_noon
   end
 
-  # if Dates.now() < today_noon
-  #   start_date = today_midnight
-  # else
-  #   start_date = today_noon
-  # end
-
   steps =  collect(0:6:240)
   available_dt = steps_to_datetimes(start_date, steps)
   available_dt_str = map(x -> Dates.format(x, "yyyy-mm-dd @ HH:MM:SS"), available_dt)
@@ -244,7 +226,9 @@ Generate the page for chosing date and time for archive data retrieval.
 No data sent for html parsing
 """
 function archive_data()
-  html(:atp, "archive_data.jl.html")
+  channels_js_script = Assets.channels_support("$(uuid4())")
+
+  html(:atp, "archive_data.jl.html", channels_js_script = channels_js_script, layout=:app)
 end
 
 """
@@ -259,33 +243,30 @@ Data sent for html parsing :
   @`shape_data` 
 """
 function atp_shape_request()
-  pypath = PyVector(pyimport("sys")."path")
-  if !(LIB_PATH in pypath) pushfirst!(pypath, LIB_PATH) end
-  rg = pyimport("readgrib")
-  ajax_received = jsonpayload()
+  request_data = jsonpayload()
   
-  lat = typeof(ajax_received["lat"]) == String ? parse(Float64, ajax_received["lat"]) : ajax_received["lat"]
-  lon = typeof(ajax_received["lon"]) == String ? parse(Float64, ajax_received["lon"]) : ajax_received["lon"]
-  keys = ["date", "time", "shortName", "level", "step"]
+  lat = typeof(request_data["lat"]) == String ? parse(Float64, request_data["lat"]) : request_data["lat"]
+  lon = typeof(request_data["lon"]) == String ? parse(Float64, request_data["lon"]) : request_data["lon"]
 
-  step = ajax_received["step"]
-  datetime_start = start_date(ajax_received["date"]*ajax_received["time"], step, "yyyy-mm-ddHH:MM:SS")
+  step = request_data["step"]
+  datetime_start = start_date(request_data["date"]*request_data["time"], step, "yyyy-mm-ddHH:MM:SS")
   date = Dates.format(datetime_start, "yyyymmdd")
   time = Dates.format(datetime_start, "HHMM")
   
-  grib_to_read = ajax_received["loaded_file"]
+  grib_to_read = haskey(request_data, "loaded_file") ? request_data["loaded_file"] : ""
   
-  area = ajax_received["area"]
+  area = request_data["area"]
   
   if grib_to_read != ""
-    reader = rg.GribReader(grib_to_read, keys)
+    filename = grib_to_read
   else
-    req = MarsRequest(date, time, step, area)
-    channel = ajax_received["channel"]
+
+    req = MarsRequest(date, time, step, wrap_coord(lon, lat))
+    channel_info = request_data["channel_info"]
     for n_attempts in 1:2
-      broadcast_mars_output(req, channel)
+      broadcast_mars_output(req, channel_info)
       if isfile(req.target_file)
-        reader = rg.GribReader(req.target_file, keys)
+        filename = req.target_file
         break
       else
         prev_date = DateTime(req.date*req.time, dateformat"yyyymmddHHMM")
@@ -296,7 +277,7 @@ function atp_shape_request()
     end
     
     if !isfile(req.target_file)
-      error("The 2 request attempts on mars were unsuccessful")
+        throw(Genie.Exceptions.RuntimeException("Mars request not completed", "The grib file hasn't been found", 1))
     end
     
     date = req.date
@@ -310,27 +291,30 @@ function atp_shape_request()
     "date" => date,
     "step" => step,
     "time" => time,
-    "level"=> reader.idx_get("level")[1],
-    "shortName" => reader.idx_get("shortName")[1]
+    "level"=> "0",
   )
-
-  reader.idx_select(keys_to_select)
-  reader.new_handle()
   
-  surroundings = reader.find_nearest(lon, lat, 4)
-  nearest_phi = [d["lon"] for d in surroundings] * pi/180
-	nearest_theta = [d["lat"] for d in surroundings] * pi/180
+  surroundings = Dict()
+  try 
+    surroundings = ReadGrib.find_nearest_wind(filename, keys_to_select, lon, lat)
+  catch e
+    if isa(e, ReadGrib.OutOfBoundAreaError)
+        throw(Genie.Exceptions.RuntimeException("$(e)", sprint(showerror, e), 1))
+    elseif isa(e, ReadGrib.KeysNotFoundError)
+        throw(Genie.Exceptions.RuntimeException("$(e)", sprint(showerror, e), 1))
+    else
+        throw(e)
+    end
+  end
+
+  nearest_phi = surroundings["10u"][:lon] .* pi/180
+  nearest_theta =  surroundings["10u"][:lat] .* pi/180
   nearest_coord= ec.SphereC(nearest_phi, nearest_theta)
   
-	nearest_u = [d["value"] for d in surroundings]
+  nearest_u = surroundings["10u"][:values]
+  nearest_v = surroundings["10v"][:values]
+  
   u_wind = ec.evaluate_interp(lon * pi/180, lat * pi/180, ec.poly_bilinear_interp(nearest_coord, nearest_u))
-
-  keys_to_select["shortName"] = reader.idx_get("shortName")[2]
-  reader.idx_select(keys_to_select)
-  reader.new_handle()
-  surroundings = reader.find_nearest(lon, lat, 4)
-
-  nearest_v = [d["value"] for d in surroundings]
   v_wind = ec.evaluate_interp(lon * pi/180, lat * pi/180, ec.poly_bilinear_interp(nearest_coord, nearest_v))
 
   wind = Wind(u_wind, v_wind)
@@ -371,11 +355,11 @@ Needed from json request :
 function mars_request()
   archive_keys = jsonpayload()
 
-  area = archive_keys["area_request"]
+  area = archive_keys["area"]
 
-  if haskey(archive_keys, "date_request") && haskey(archive_keys, "time_request")
-    date = archive_keys["date_request"]
-    time = archive_keys["time_request"]
+  if haskey(archive_keys, "date") && haskey(archive_keys, "time")
+    date = archive_keys["date"]
+    time = archive_keys["time"]
   else
     today = Dates.now()
     date = Dates(today, "yyyy-mm-dd")
@@ -384,10 +368,18 @@ function mars_request()
   end
   
   time = match(r"(\d+):(\d+)", time)[1]*match(r"(\d+):(\d+)", time)[2]
+  req = MarsRequest(replace(date, "-" => ""), time, join(collect(0:6:240), "/"), area)
 
-  req = request_to_string(date, time, join(collect(0:6:240), "/"), area)
-
-  run(pipeline(`echo $req`, `$MARS_PATH`))
+  try
+    channel_info = archive_keys["channel_info"]
+    broadcast_mars_output(req, channel_info)
+  catch e
+    if isa(e, ProcessFailedException)
+        throw(Genie.Exceptions.RuntimeException("$(e)", "Error in mars, probably because the forecast is not available yet", 1))
+    else
+        throw(e)
+    end
+  end
 end
 
 end

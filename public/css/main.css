@@ -267,9 +267,8 @@ html body #wrapper #content-wrapper #content .container-fluid {
   position: relative;
   border-collapse: collapse;
   margin: 0.2em;
-  margin-right: 1.5em;
   font-size: 0.9em;
-  min-width: 380px;
+  min-width: 330px;
   border-radius: 5px 5px 0 0;
   overflow: hidden;
   -webkit-box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
@@ -288,14 +287,6 @@ html body #wrapper #content-wrapper #content .container-fluid {
   position: absolute;
   top: 5px;
   right: 5px;
-}
-
-.loaded-data-info thead tr th:nth-child(1) {
-  width: 170px;
-}
-
-.loaded-data-info thead tr th:nth-child(2) {
-  width: 340px;
 }
 
 .loaded-data-info th, .loaded-data-info td {

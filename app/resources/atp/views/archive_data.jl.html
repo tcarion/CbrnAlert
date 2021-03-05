@@ -1,7 +1,7 @@
 <div class="archive-form">
     <div class="form-item date-item">
         <label for="date_request">Date of the forecast :</label>
-        <input class="form-control date-picker" type="date" name="date_request" id="archive_date" value="2020-12-10">
+        <input class="form-control" type="date" name="date_request" id="archive_date">
     </div>
 
     <div class="form-item time-item">
@@ -24,12 +24,17 @@
     <div class="form-item archive-form-btn">
         <button type="button" class="btn btn-primary submit-item" id="archive_data_retrieve">Send data request</button>
     </div>
-
-    <div class="form-item archive-form-btn">
-        <button class="btn btn-success" type="button" id="latest_available_fc">Request the most recent forecast</button>
-    </div>
 </div>
 
 <div class="mymap-container">
     <div id="mapid"></div>
 </div>
+
+<script>
+    let archive_date = document.getElementById("archive_date")
+    let today = new Date().toISOString().split("T")[0]
+    archive_date.setAttribute("max", today)
+    archive_date.setAttribute("value", today)
+</script>
+
+$(channels_js_script)
