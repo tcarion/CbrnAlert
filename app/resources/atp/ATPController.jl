@@ -368,6 +368,13 @@ function mars_request()
   end
   
   time = match(r"(\d+):(\d+)", time)[1]*match(r"(\d+):(\d+)", time)[2]
+<<<<<<< HEAD
+=======
+#   @show archive_keys
+#   @show date
+#   @show time 
+#   req = request_to_string(date, time, join(collect(0:6:240), "/"), area)
+>>>>>>> da19e898c0f3e3355786c732cb5474e41315fec5
   req = MarsRequest(replace(date, "-" => ""), time, join(collect(0:6:240), "/"), area)
 
   try
