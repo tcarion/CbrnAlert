@@ -26,6 +26,7 @@ struct Wind
   Wind(u, v) = new(u, v, sqrt(u^2 + v^2))
 end
 
+request = 0
 """
 Structure to represent one ATP model instance. `shapes` contains all to shapes related to the ATP instance (release area, hazard area etc.). 
 The other fields are data related to the instance
@@ -156,7 +157,7 @@ Data sent for html parsing :
   @`loaded_file` path of the file from which data have to be loaded
 """
 function preloaded_atp_prediction()
-
+  global request = payload()
   if haskey(payload(), :file)
     grib_to_read = "public/grib_files/" * payload()[:file] * ".grib"
   else

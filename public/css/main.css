@@ -275,6 +275,12 @@ html body #wrapper #content-wrapper #content .container-fluid {
           box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
 
+@media (max-width: 780px) {
+  .loaded-data-info tbody {
+    display: none;
+  }
+}
+
 .loaded-data-info thead tr {
   background-color: #009879;
   color: #fff;

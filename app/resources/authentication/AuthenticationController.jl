@@ -7,7 +7,14 @@ using ViewHelper
 using Users
 using Logging
 
-# global pl = 0
+
+function pairs_array_to_dict(array)
+    d = Dict()
+    for pair in array
+        push!(d, pair[1] => pair[2])
+    end
+    d
+end
 
 function show_login()
   html(:authentication, :login, context = @__MODULE__, layout=:login_layout)
@@ -15,14 +22,15 @@ end
 
 function login()
   try
-    # global pl = Genie.Requests.payload()
     user = SearchLight.findone(User, username = Genie.Router.@params(:username), password = Users.hash_password(Genie.Router.@params(:password)))
     GenieAuthentication.authenticate(user.id, Genie.Sessions.session(Genie.Router.@params))
-
-    list_ips = if user.connected_with_ips != "" split(user.connected_with_ips, ',') else String[] end
-    ipv4 = string(Genie.Requests.payload(:request_ipv4))
-    if !(ipv4 in list_ips) push!(list_ips, ipv4) end
-    user.connected_with_ips = join(list_ips, ',')
+    head = Genie.Requests.payload()[:REQUEST].headers |> pairs_array_to_dict
+    if haskey(head, "X-Forwarded-For")
+        client_ip = head["X-Forwarded-For"]
+        list_ips = if user.connected_with_ips != "" split(user.connected_with_ips, ',') else String[] end
+        if !(client_ip in list_ips) push!(list_ips, client_ip) end
+        user.connected_with_ips = join(list_ips, ',')
+    end
     user.connections_number += 1
     SearchLight.save!(user)
 
