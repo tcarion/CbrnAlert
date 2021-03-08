@@ -10,6 +10,9 @@ using Dates
 using Sockets
 using UUIDs
 using GenieAuthentication
+using SearchLight
+using Users
+using ViewHelper
 import Genie.Exceptions.ExceptionalResponse
 # using Router
 
@@ -26,7 +29,6 @@ struct Wind
   Wind(u, v) = new(u, v, sqrt(u^2 + v^2))
 end
 
-request = 0
 """
 Structure to represent one ATP model instance. `shapes` contains all to shapes related to the ATP instance (release area, hazard area etc.). 
 The other fields are data related to the instance
@@ -143,8 +145,17 @@ function broadcast_mars_output(req::MarsRequest, channel_info)
       throw(e)
     end
   end
+  if process.processes[2].exitcode == 1
+    throw(ProcessFailedException(process.processes[2]))
+  end
 end
 
+function flash_user_info()
+    session = Genie.Sessions.session(Genie.Router.@params)
+    uid = session.data[:__auth_user_id]
+    user = SearchLight.findone(Users.User, id=uid)
+    Genie.Flash.flash(Dict(:username => user.name, :user_email => user.email))
+end
 """
     preloaded_atp_prediction()
 Generate the page with the map to make atp prediction requests either by clicking on the map or by manually picking the coordinates.
@@ -157,7 +168,7 @@ Data sent for html parsing :
   @`loaded_file` path of the file from which data have to be loaded
 """
 function preloaded_atp_prediction()
-  global request = payload()
+  flash_user_info()
   if haskey(payload(), :file)
     grib_to_read = "public/grib_files/" * payload()[:file] * ".grib"
   else
@@ -195,11 +206,12 @@ function preloaded_atp_prediction()
     )
 
   html(:atp, "loaded_data.jl.html",
-    datetimes = available_time, files=grib_files, loaded_file=grib_to_read, loaded_data_info = loaded_data_info,
+    datetimes = available_time, context = @__MODULE__, files=grib_files, loaded_file=grib_to_read, loaded_data_info = loaded_data_info,
     layout=:app)
 end
 
 function realtime_atp_prediction()
+  flash_user_info()
   today = Dates.today()
   today_midnight = Dates.DateTime(today)
   today_noon = today_midnight + Dates.Hour(12)
@@ -218,7 +230,7 @@ function realtime_atp_prediction()
   available_time_dict = [Dict(:datetime => x, :step => y) for (x, y) in zip(available_dt_str, steps)]
   channels_js_script = Assets.channels_support("$(uuid4())")
 
-  html(:atp, "realtime_data.jl.html", datetimes = available_time_dict, channels_js_script = channels_js_script, layout=:app)
+  html(:atp, "realtime_data.jl.html", context = @__MODULE__, datetimes = available_time_dict, channels_js_script = channels_js_script, layout=:app)
 end
 
 """
@@ -227,9 +239,10 @@ Generate the page for chosing date and time for archive data retrieval.
 No data sent for html parsing
 """
 function archive_data()
+  flash_user_info()
   channels_js_script = Assets.channels_support("$(uuid4())")
 
-  html(:atp, "archive_data.jl.html", channels_js_script = channels_js_script, layout=:app)
+  html(:atp, "archive_data.jl.html", context = @__MODULE__, channels_js_script = channels_js_script, layout=:app)
 end
 
 """

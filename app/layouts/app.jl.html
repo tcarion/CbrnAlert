@@ -62,7 +62,11 @@
                 </li>
     
                 <hr class="sidebar-divider">
-    
+                <div class="user-info">
+                    $(user_info())
+                </div>
+                <hr class="sidebar-divider">
+
                 <li class="nav-item">
                     <a class="nav-link logout" href="$(Genie.Router.linkto(:logout))">
                         <span>LOG OUT</span>

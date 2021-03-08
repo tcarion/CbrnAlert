@@ -37,6 +37,17 @@
         background-color: rgba($color: #eb3f3f, $alpha: 0.6);
         border-radius: 4px;
     }
+    .user-info {
+        color: rgba(255, 255, 255, 1);
+        padding: 1em;
+        div:nth-child(odd) {
+            font-size: 0.8rem;
+        }
+        div:nth-child(even) {
+            font-size: 1rem;
+            padding-left: 8px;
+        }
+    }
 }
 
 .sidebar-divider {

@@ -49,5 +49,6 @@ export async function marsDataRequest(to_send: any) {
     else {
         let error = await response.json();
         alert(error.info)
+        throw(error.info)
     }
 };
