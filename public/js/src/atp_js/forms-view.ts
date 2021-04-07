@@ -1,21 +1,29 @@
-
+let $ = require('jquery')
 export default class Form_view implements Form_view {
-    form: Form | undefined;
+    /*
+    * ATP-45 SELECTORS
+    */
+    form: Form = {};
     lon_selector: string = "input#lon";
     lat_selector: string = "input#lat";
     error_selector: string = "#error_lonlat_input";
     atp45_request_selector: string = "#atp45_request_button";
-    // date_selector: string;
-    // time_selector: string;
-    // step_selector: string | undefined;
+
+    /*
+    * FLEX_EXTRACT SELECTORS
+    */
+    flexextract_startdate_selector: string = "#flexextract_startdate"
+    flexextract_starttime_selector: string = "#flexextract_starttime"
+    flexextract_enddate_selector: string = "#flexextract_enddate"
+    flexextract_endtime_selector: string = "#flexextract_endtime"
+    flexextract_timestep_selector: string = "#flexextract_step"
+    flexextract_gridres_selector: string = "#flexextract_grid"
+    flexextract_area_selector: string = "#flexextract_area"
 
     initEvents() {
         let form_view = this
-        // $('.lonlat').on('keypress', (e) => {
-        //     if (e.key == 'Enter') $(form_view.atp45_request_selector).trigger('click');
-        // });  //UNCOMMENT THIS TO HAVE THE REQUEST DIRECTLY ON MAP CLICK
 
-        $(document).on('click', function () {
+        $(document).on('click', function () { 
             $(form_view.error_selector).hide("slow");
         });
     }
@@ -33,11 +41,21 @@ export default class Form_view implements Form_view {
                 step: step,
                 time: selected_date[2].trim(),
             } as PredictionForm;
-        } else {
+        } else if ($(".archive-form").length) {
             this.form = {
                 date: $('.archive-form #archive_date').val()?.toString(),
                 time: $('.archive-form .time-item input[type=radio]:checked').val()?.toString()
             } as ArchiveForm;
+        } else if ($(".flexextract-form")) {
+            this.form = {
+                startdate: $(this.flexextract_startdate_selector).val(),
+                starttime: $(this.flexextract_starttime_selector).val(),
+                enddate: $(this.flexextract_enddate_selector).val(),
+                endtime: $(this.flexextract_endtime_selector).val(),
+                timestep: $(this.flexextract_timestep_selector).val(),
+                gridres: $(this.flexextract_gridres_selector).val(),
+                area: $(this.flexextract_area_selector).val(),
+            } as FlexextractForm
         }
 
         return this.form;

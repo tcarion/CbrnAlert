@@ -41,7 +41,7 @@
         @media (max-width:$widthForSidebarChange) {
             grid-template-columns: repeat(6, 1fr);
         }
-        @media (max-width:375px)  {
+        @media (max-width:$smallWidth)  {
             grid-template-columns: repeat(4, 1fr);
         }
 

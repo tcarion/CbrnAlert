@@ -21,7 +21,7 @@
 
     @media (max-width: $widthForDisplayChange) {
         tbody {
-            display: none;        
+            display: none;
         }
     }
 
@@ -47,7 +47,8 @@
         // }
     }
 
-    th, td {
+    th,
+    td {
         padding: 0.5em 15px;
     }
 
@@ -98,14 +99,21 @@
     }
 
     .load-other-btn {
-        margin-top: 1em;
         grid-column: 1/3;
         justify-self: center;
-        width: 70%;
+        width: 60%;
+        padding: 0.5em 1em;
+        background-color: #e0a800;
+        border-radius: 4px;
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+        color: white;
     }
 }
 
-.archive-form, .realtime-form {
+.archive-form,
+.realtime-form {
     width: 100%;
     min-width: 100px;
     display: flex;
@@ -134,5 +142,48 @@
         font-weight: 700;
         font-size: 0.7rem;
         display: none;
+    }
+}
+
+.send-btn {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: #fff;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    &:hover {
+        opacity: 0.5;
+        cursor: pointer;
+    }
+}
+.flexextract-form {
+    margin: auto;
+    min-width: 300px;
+    max-width: 550px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    column-gap: 1em;
+    row-gap: 1em;
+    label {
+        margin: 0;
+    }
+    @media (max-width: 375px) {
+        max-width: 350px;
+        grid-template-columns: repeat(2, 1fr);
+    }
+    select,
+    input {
+        outline: none;
+        border: 1px solid rgb(206, 212, 218);
+        transition: all 0.3s;
+    }
+    select:focus,
+    input:focus {
+        border-color: dodgerblue;
+        box-shadow: 0 0 4px 0 dodgerblue;
+    }
+
+    .flexextract-btn {
+        grid-column: span 2;
     }
 }

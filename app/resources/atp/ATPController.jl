@@ -148,6 +148,7 @@ function broadcast_mars_output(req::MarsRequest, channel_info)
   if process.processes[2].exitcode == 1
     throw(ProcessFailedException(process.processes[2]))
   end
+  close(process)
 end
 
 function flash_user_info()

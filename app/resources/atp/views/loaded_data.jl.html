@@ -60,30 +60,24 @@
       <label for="atp45_request_button">&nbsp;</label><br>
       <button class="btn btn-primary" type="button" id="atp45_request_button">Send ATP-45 request</button>
     </div>
+    <a href="#pick_data_modal" class="form-item load-other-btn" id="load_other_data">Load other forecast data</a>
 
-    <div class="form-item load-other-btn">
-      <button class="btn btn-warning" type="button" id="load_other_data" data-toggle="modal"
-        data-target="#pick_data_modal">Load other forecast data</button>
-    </div>
   </form>
 
   <!-- Modal -->
-  <div class="modal fade" id="pick_data_modal" tabindex="-1">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
+  <div class="mymodal" id="pick_data_modal">
+    <div class="mymodal-dialog">
+      <div class="mymodal-content">
+        <div class="mymodal-header">
           <h5 class="modal-title">Data Selection</h5>
+          <a href="#" class="btn-close">&times;</a>
         </div>
-        <div class="modal-body">
+        <div class="mymodal-body">
           <div class="list-group">
             <% @foreach(files) do f %>
-              <a href="/load/$(f)" class="list-group-item list-group-item-action">$(f)</a>
+              <a href="$(Genie.Router.linkto(:preloaded_atp_prediction))/$(f)" class="list-group-item list-group-item-action">$(f)</a>
               <% end %>
           </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Load Data</button>
         </div>
       </div>
     </div>

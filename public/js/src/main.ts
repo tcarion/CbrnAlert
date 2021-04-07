@@ -2,7 +2,7 @@ import ATP_map from './atp_js/atp_map';
 import MapForm_interactions from './atp_js/mapform_interactions'
 import Form_view from './atp_js/forms-view'
 // import websocket_utils from './atp_js/shape_request_ws'
-// let $ = require('jquery')
+let $ = require('jquery')
 
 // $(document).ready(function(){
 //     $(".nav-item.active").removeClass("active")
@@ -38,7 +38,17 @@ $(() => {
         $(".toggle-loaded-info .arrow").toggleClass("down");
     });
 
-    let atp_map = $(".archive-form").length ? new ATP_map('mapid', [50.82, 4.35], 8, false) : new ATP_map('mapid', [50.82, 4.35], 8, true);
+    $(`input[type=checkbox]#${location.pathname.split('/')[1]}`).prop("checked", "true")
+
+    let atp_map;
+    if ($(".archive-form").length) {
+        atp_map = new ATP_map('mapid', [50.82, 4.35], 8, false);
+    } else if ($(".flexextract-form").length) {
+        atp_map = new ATP_map('mapid', [50.82, 4.35], 8, false, true);
+    }
+    else {
+        atp_map = new ATP_map('mapid', [50.82, 4.35], 8, true);
+    }
     let form_view = new Form_view();
     form_view.initEvents();
     let mapform = new MapForm_interactions(atp_map, form_view);

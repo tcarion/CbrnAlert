@@ -49,6 +49,8 @@ public/shapefiles
 # Loaded grib files
 public/grib_files
 
+public/extracted_met_data
+
 sessions/
 tmp/*
 log/*

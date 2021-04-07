@@ -1,5 +1,6 @@
 module DashboardController
 using Genie, Genie.Renderer.Html
+using Genie.Renderer
 using GenieAuthentication
 using ViewHelper
 using SearchLight

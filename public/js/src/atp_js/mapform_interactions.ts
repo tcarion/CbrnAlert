@@ -1,6 +1,7 @@
 // import ATP_map from "./atp_map";
-import { shapeRequest, marsDataRequest } from './atp_server_requests'
+import { shapeRequest, marsDataRequest, flexextractRequest } from './atp_server_requests'
 let L = require('leaflet')
+let $ = require('jquery')
 // let $ = require('jquery')
 
 export default class MapForm_interactions implements MapForm_interactions {
@@ -19,11 +20,12 @@ export default class MapForm_interactions implements MapForm_interactions {
 
         $('.archive-form #archive_data_retrieve').on('click', () => this.sendMarsRequest());
 
-        $(`${form_view.lon_selector}, ${form_view.lat_selector}`).on('keypress', (e) => {
+        $(`${form_view.lon_selector}, ${form_view.lat_selector}`).on('keypress', (e:KeyboardEvent) => {
             if (e.key == 'Enter') {
+                let form = form_view.form as PredictionForm;
                 let messages = form_view.verifyLonLatInput();
                 if (messages.length == 0) {
-                    mymap.newMarker(form_view.form.lon, form_view.form.lat);
+                    mymap.newMarker(form.lon, form.lat);
                 }
                 else {
                     e.stopPropagation();
@@ -33,7 +35,16 @@ export default class MapForm_interactions implements MapForm_interactions {
             }
         });
 
-        $(form_view.atp45_request_selector).on('click', e => this.sendAtp45Request(e));
+        $(form_view.atp45_request_selector).on('click', (e:Event) => this.sendAtp45Request(e));
+
+        mymap.map.on('draw:created', (e:any) => {
+            let rect = e.layer;
+            mymap.newRectangle(rect)
+            let area = mymap.rect_area.join('/');
+            $(form_view.flexextract_area_selector).val(area);
+        });
+
+        $("#flexextract_req_btn").on('click', (e:Event) => this.sendFlexextractRequest(e))
     }
 
     onMapClick(e: any) {
@@ -60,9 +71,11 @@ export default class MapForm_interactions implements MapForm_interactions {
             let elem = `${payload.payload.displayed} <br>`;
             $(`#userfb${payload.payload.userfb_id} code`).append(elem);
         }
-        $(`.topbar-elem[data-user-feedback="#userfb${len}"]`).toggleClass("pending")
-        $(`.topbar-elem[data-user-feedback="#userfb${len}"]`).on('click', function () {
-            $(this).siblings().each(function () {
+        let current_notif = $(`.topbar-elem[data-user-feedback="#userfb${len}"]`)
+        current_notif.toggleClass("pending")
+        current_notif.on('click', function (this: typeof current_notif) {
+            let current_notif_siblings = $(this).siblings()
+            current_notif_siblings.each(function (this: typeof current_notif_siblings) {
                 $(this).removeClass("active")
                 $($(this).data("user-feedback")).hide();
             });
@@ -101,7 +114,7 @@ export default class MapForm_interactions implements MapForm_interactions {
     }
 
     async sendMarsRequest() {
-        let form = this.form_view.getForm
+        let form = this.form_view.getForm as ATP45Form;
 
         let len = $(".topbar ul li").length + 1;
         let channel_info = this.addNotification(len, "Arch. Request");
@@ -111,6 +124,16 @@ export default class MapForm_interactions implements MapForm_interactions {
             this.notificationSucces(len);
         } catch (error) {
             this.notificationError(len);
+        }
+    }
+
+    async sendFlexextractRequest(e:Event) {
+        let form = this.form_view.getForm as FlexextractForm;
+
+        try {
+            await flexextractRequest(form)
+        } catch (error) {
+            console.error(error)
         }
     }
 
@@ -134,7 +157,7 @@ export default class MapForm_interactions implements MapForm_interactions {
 
     enableRequest() {
         this.mymap.map.on('click', (e: any) => this.onMapClick(e));
-        $(this.form_view.atp45_request_selector).on('click', e => this.sendAtp45Request(e));
+        $(this.form_view.atp45_request_selector).on('click', (e:Event) => this.sendAtp45Request(e));
     }
 
     notificationSucces(len: number) {

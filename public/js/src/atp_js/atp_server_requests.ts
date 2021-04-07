@@ -4,7 +4,7 @@ export async function shapeRequest(to_send: any) {
 
     // if (loaded_file == "") { to_send.channel = Genie.Settings.webchannels_default_route + "/" + uuidv4() }
 
-    let response = await fetch('/atp_shape_request', {
+    let response = await fetch('/atp45/atp_shape_request', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -34,10 +34,10 @@ export async function shapeRequest(to_send: any) {
             step = ${to_send.step}`;
     });
     return shape_data;
-}
+};
 
 export async function marsDataRequest(to_send: any) {
-    const response = await fetch('/mars_request', {
+    let response = await fetch('/atp45/mars_request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(to_send)
@@ -50,5 +50,17 @@ export async function marsDataRequest(to_send: any) {
         let error = await response.json();
         alert(error.info)
         throw(error.info)
+    }
+};
+
+export async function flexextractRequest(to_send: FlexextractForm) {
+    let response = await fetch('/flexpart/flexextract_request', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(to_send)
+    })
+
+    if (response.ok) {
+        alert('The flexetract has been sent and is processing')
     }
 };

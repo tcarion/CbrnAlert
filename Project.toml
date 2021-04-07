@@ -1,4 +1,5 @@
 [deps]
+Conda = "8f4d0f93-b110-5947-807f-2305c1781a2d"
 GRIB = "b16dfd50-4035-11e9-28d4-9dfe17e6779b"
 Genie = "c43c736e-a2d1-11e8-161f-af95117fbd1e"
 GenieAuthentication = "e115e502-7e3a-11e9-29b2-aba8be6c6778"

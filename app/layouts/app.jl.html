@@ -7,11 +7,13 @@
     <title>ATP_implementation</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
         integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    <!-- <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
         integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
-        crossorigin="" />
+        crossorigin="" /> -->
     <!-- <link rel="stylesheet" href="/css/external/jquery.datetimepicker.min.css"> -->
     <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/js/node_modules/leaflet/dist/leaflet.css">
+    <link rel="stylesheet" href="/js/node_modules/leaflet-draw/dist/leaflet.draw.css">
 </head>
 
 <body>
@@ -27,40 +29,60 @@
             </div>
 
             <ul class="navbar-nav bg-gradient-primary sidebar">
-    
+
                 <a class="sidebar-brand" href="#">
-                    <div class="sidebar-brand-text">ATP-45 implementation</sup></div>
+                    <div class="sidebar-brand-text">CBRN dispersion app</sup></div>
                 </a>
-    
+
                 <!-- Divider -->
                 <hr class="sidebar-divider">
-    
+
                 <li class="nav-item">
                     <a class="nav-link" href="$(Genie.Router.linkto(:dashboard))">
                         <span>Dashboard</span></a>
                 </li>
-    
+
                 <!-- Divider -->
                 <hr class="sidebar-divider">
-    
-                <li class="nav-item">
-                    <a class="nav-link" href="$(Genie.Router.linkto(:preloaded_atp_prediction))">
-                        <span>Preloaded ATP-45 prediction</span>
-                    </a>
-                </li>
-    
-                <li class="nav-item">
-                    <a class="nav-link" href="$(Genie.Router.linkto(:realtime_atp_prediction))">
-                        <span>Real time ATP-45 prediction</span>
-                    </a>
-                </li>
-    
-                <li class="nav-item">
-                    <a class="nav-link" href="$(Genie.Router.linkto(:archive_data))">
-                        <span>Archive data retrieval</span>
-                    </a>
-                </li>
-    
+
+                <div class="model-accordion">
+                    <div>
+                        <input class="model-accordion-input" type="checkbox" name="atp45" id="atp45">
+                        <label class="model-accordion-label" for="atp45">ATP-45 model</label>
+                        <div class="model-accordion-content">
+                            <li class="nav-item">
+                                <a class="nav-link" href="$(Genie.Router.linkto(:preloaded_atp_prediction))">
+                                    <span>Preloaded ATP-45</span>
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" href="$(Genie.Router.linkto(:realtime_atp_prediction))">
+                                    <span>Real time ATP-45</span>
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" href="$(Genie.Router.linkto(:archive_data))">
+                                    <span>Archive data retrieval</span>
+                                </a>
+                            </li>
+                        </div>
+                    </div>
+                    <hr class="sidebar-divider">
+                    <div>
+                        <input class="model-accordion-input" type="checkbox" name="flexpart" id="flexpart">
+                        <label class="model-accordion-label" for="flexpart">Flexpart model</label>
+                        <div class="model-accordion-content">
+                            <li class="nav-item">
+                                <a class="nav-link" href="$(Genie.Router.linkto(:extract_met_data))">
+                                    <span>Extract met data</span>
+                                </a>
+                            </li>
+                        </div>
+                    </div>
+                </div>
+
                 <hr class="sidebar-divider">
                 <div class="user-info">
                     $(user_info())
@@ -104,7 +126,7 @@
     <!-- End of Page Wrapper -->
 
 
-    <script src="/js/genie/jquery.min.js"></script>
+    <!-- <script src="/js/genie/jquery.min.js"></script> -->
     <!-- <script src="/js/external/jquery.datetimepicker.full.min.js"></script> -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
         integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
