@@ -38,8 +38,7 @@
     </tbody>
   </table>
 
-  <form class="loaded-data-form atp-prediction-form" action="" method="post">
-    <div class="alert alert-danger" id="error_lonlat_input"></div>
+  <form class="loaded-data-form atp-prediction-form checkedform">
     <div class="form-group form-item">
       <label for="lat">Latitude</label>
       <input class="form-control lonlat" type="text" name="lat" id="lat" required>
@@ -84,6 +83,6 @@
   </div>
 </div>
 
-<div class="mymap-container">
-  <div id="mapid"></div>
-</div>
+<%
+partial(joinpath(Genie.config.path_resources, "shared", "_map.jl.html"))
+%>

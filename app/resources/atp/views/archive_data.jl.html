@@ -26,9 +26,9 @@
     </div>
 </div>
 
-<div class="mymap-container">
-    <div id="mapid"></div>
-</div>
+<%
+partial(joinpath(Genie.config.path_resources, "shared", "_map.jl.html"))
+%>
 
 <script>
     let archive_date = document.getElementById("archive_date")

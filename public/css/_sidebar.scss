@@ -17,14 +17,8 @@
     //     padding-top: 1em;
     // }
 
-    .model-accordion-input {
-        display: none;
-    }
-
     .model-accordion-label {
-        display: block;
         cursor: pointer;
-        position: relative;
         color: white;
         font-weight: 700;
         padding: 0.5em;
@@ -33,31 +27,6 @@
         &:hover{
             background: rgba(0, 0, 0, 0.1);
         }
-    }
-
-    .model-accordion-label::after {
-        content: "";
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        right: 20px;
-        width: 12px;
-        height: 6px;
-        background-image: url('data:image/svg+xml;utf8,<svg width="100" height="50" xmlns="http://www.w3.org/2000/svg"><polygon points="0,0 100,0 50,50" style="fill:%23FFFFFF99;" /></svg>');
-        background-size: contain;
-        transition: transform 0.4s;
-    }
-
-    .model-accordion-input:checked ~ .model-accordion-content {
-        display: block;
-    }
-
-    .model-accordion-input:checked ~ .model-accordion-label::after {
-        transform: translateY(-50%) rotate(0.5turn);
-    }
-
-    .model-accordion-content {
-        display: none;
     }
 
     .nav-item.active .nav-link {

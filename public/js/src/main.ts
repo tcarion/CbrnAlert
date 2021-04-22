@@ -40,11 +40,22 @@ $(() => {
 
     $(`input[type=checkbox]#${location.pathname.split('/')[1]}`).prop("checked", "true")
 
+    $(".flexpart-selection-input").on("change", function (this:any) {
+        if (this.checked) {
+            $(".flexpart-selection-input:checked ~ .flexpart-selection-label").get(0).scrollIntoView({
+                behavior: 'smooth',
+                alignToTop: 'false'
+          });
+        }
+    })
+
     let atp_map;
     if ($(".archive-form").length) {
         atp_map = new ATP_map('mapid', [50.82, 4.35], 8, false);
     } else if ($(".flexextract-form").length) {
         atp_map = new ATP_map('mapid', [50.82, 4.35], 8, false, true);
+    } else if ($(".flexpart-preloaded-form").length) {
+        atp_map = new ATP_map('mapid', [50.82, 4.35], 8, true, true);
     }
     else {
         atp_map = new ATP_map('mapid', [50.82, 4.35], 8, true);

@@ -174,13 +174,22 @@ html {
     font: 11px/1.5 "Helvetica Neue", Arial, Helvetica, sans-serif;
 }
 
+.even-wrap {
+    display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+    align-items: flex-start;
+}
+
 @import "./variables";
+@import "./accordions";
 @import "./authentication";
 @import "./sidebar";
 @import "./dashboard";
 @import "./forms";
 @import "./realtime";
 @import "./topbar";
+@import "./flexpart_preloaded";
 
 /* MAP STYLE */
 .mymap-container {

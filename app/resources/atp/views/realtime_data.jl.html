@@ -1,6 +1,5 @@
 <div class="realtime-wrapper">
-    <form class="realtime-form atp-prediction-form" action="" method="">
-        <div class="alert alert-danger" id="error_lonlat_input"></div>
+    <form class="realtime-form atp-prediction-form checkedform">
         <div class="form-item">
             <label for="forecast_dt">Forecast step selection</label>
             <select class="form-control" name="forecast_dt" id="forecast_dt">
@@ -24,9 +23,8 @@
     </form>
 </div>
 
-<div class="mymap-container">
-    <div id="mapid"></div>
-
-</div>
+<%
+partial(joinpath(Genie.config.path_resources, "shared", "_map.jl.html"))
+%>
 
 $(channels_js_script)

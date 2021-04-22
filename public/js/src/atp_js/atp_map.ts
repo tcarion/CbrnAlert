@@ -2,11 +2,13 @@ import { Layer, LeafletEvent, LeafletEventHandlerFn, LeafletMouseEvent } from "l
 
 let L = require('leaflet')
 let leafletDraw = require('leaflet-draw')
+let HeatmapOverlay = require('leaflet-heatmap')
 export default class ATP_map implements ATP_map {
     map: any;
     drawn_shapes: ShapeData[];
     marker: any;
     area_rect: any;
+    heatmapLayer: any;
 
     constructor(mapid: string, center: Array<string | number>, zoom: number | string, public clickable: boolean = false, public drawnable: boolean = false) {
 
@@ -20,6 +22,29 @@ export default class ATP_map implements ATP_map {
         L.control.scale().addTo(this.map);
         this.marker = null;
         this.area_rect = null;
+        
+        let cfg = {
+            // radius should be small ONLY if scaleRadius is true (or small radius is intended)
+            // if scaleRadius is false it will be the constant radius used in pixels
+            "radius": 50,
+            "maxOpacity": .8,
+            // scales the radius based on map zoom
+            "scaleRadius": false,
+            // if set to false the heatmap uses the global maximum for colorization
+            // if activated: uses the data maximum within the current map boundaries
+            //   (there will always be a red spot with useLocalExtremas true)
+            "useLocalExtrema": true,
+            // which field name in your data represents the latitude - default "lat"
+            latField: 'lat',
+            // which field name in your data represents the longitude - default "lng"
+            lngField: 'lng',
+            // which field name in your data represents the data value - default "value"
+            valueField: 'val'
+        };
+
+        this.heatmapLayer = new HeatmapOverlay(cfg);
+
+        this.heatmapLayer.addTo(this.map)
 
         if (drawnable) {
             L.drawLocal.draw.toolbar.buttons.rectangle = 'Area selection for data retrieval';
@@ -97,6 +122,20 @@ export default class ATP_map implements ATP_map {
         }
         this.area_rect = rect;
         this.area_rect.addTo(this.map)
+    }
+
+    drawHeatmap(lons: string[], lats: string[], values: string[]) {
+        let to_plot = {
+            data: [] as any
+          };
+        values.map((e:string, i:number) => {
+            to_plot.data.push({
+                lng: parseFloat(lons[i]),
+                lat: parseFloat(lats[i]),
+                val: parseFloat(e)
+            })
+        })
+        this.heatmapLayer.setData(to_plot);
     }
 
     _initMousePos() {

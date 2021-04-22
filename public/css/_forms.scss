@@ -9,6 +9,24 @@
     }
 }
 
+.checkedform {
+    position: relative;
+
+    .error-notif {
+        position: absolute;
+        justify-self: center;
+        width: 300px;
+        font-weight: 700;
+        font-size: 0.7rem;
+        color: #721c24;
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+        border-radius: 5px;
+        padding: 1em 1.5em;
+        display: none;
+    }
+}
+
 .loaded-data-info {
     position: relative;
     border-collapse: collapse;
@@ -158,10 +176,18 @@
 }
 .flexextract-form {
     margin: auto;
+
+    .flexextract-btn {
+        grid-column: span 2;
+    }
+}
+
+.grid-form {
     min-width: 300px;
     max-width: 550px;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    // grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     column-gap: 1em;
     row-gap: 1em;
     label {
@@ -181,9 +207,5 @@
     input:focus {
         border-color: dodgerblue;
         box-shadow: 0 0 4px 0 dodgerblue;
-    }
-
-    .flexextract-btn {
-        grid-column: span 2;
     }
 }

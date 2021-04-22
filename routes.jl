@@ -26,6 +26,13 @@ route("/atp45/mars_request", ATPController.mars_request, method = POST, named = 
 route("/flexpart/extract_met_data", FlexpartController.extract_met_data, named= :extract_met_data)
 
 route("/flexpart/flexextract_request", FlexpartController.flexextract_request, method = POST, named= :flexextract_request)
+
+route("/flexpart/flexpart_preloaded", FlexpartController.flexpart_preloaded, method = GET, named= :flexpart_preloaded)
+
+route("/flexpart/flexpart_run_request", FlexpartController.flexpart_run_request, method = POST, named= :flexpart_run_request)
+
+route("/flexpart/flexpart_run_output", FlexpartController.flexpart_run_output, method = POST, named= :flexpart_run_output)
+
 # channel("/:default_ch/:client_ch") do 
 #     "def_ch = $(payload(:default_ch))       payload : $(@params(:payload))"
 # end

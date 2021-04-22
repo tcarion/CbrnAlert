@@ -45,11 +45,11 @@
                 <!-- Divider -->
                 <hr class="sidebar-divider">
 
-                <div class="model-accordion">
+                <div class="model-accordion accordion">
                     <div>
-                        <input class="model-accordion-input" type="checkbox" name="atp45" id="atp45">
-                        <label class="model-accordion-label" for="atp45">ATP-45 model</label>
-                        <div class="model-accordion-content">
+                        <input class="model-accordion-input accordion-input" type="checkbox" name="atp45" id="atp45">
+                        <label class="model-accordion-label accordion-label" for="atp45">ATP-45 model</label>
+                        <div class="model-accordion-content accordion-content">
                             <li class="nav-item">
                                 <a class="nav-link" href="$(Genie.Router.linkto(:preloaded_atp_prediction))">
                                     <span>Preloaded ATP-45</span>
@@ -71,12 +71,17 @@
                     </div>
                     <hr class="sidebar-divider">
                     <div>
-                        <input class="model-accordion-input" type="checkbox" name="flexpart" id="flexpart">
-                        <label class="model-accordion-label" for="flexpart">Flexpart model</label>
-                        <div class="model-accordion-content">
+                        <input class="model-accordion-input accordion-input" type="checkbox" name="flexpart" id="flexpart">
+                        <label class="model-accordion-label accordion-label" for="flexpart">Flexpart model</label>
+                        <div class="model-accordion-content accordion-content">
                             <li class="nav-item">
                                 <a class="nav-link" href="$(Genie.Router.linkto(:extract_met_data))">
                                     <span>Extract met data</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="$(Genie.Router.linkto(:flexpart_preloaded))">
+                                    <span>Run Flexpart with preloaded data</span>
                                 </a>
                             </li>
                         </div>

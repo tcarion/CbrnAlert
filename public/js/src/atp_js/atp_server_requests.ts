@@ -58,9 +58,40 @@ export async function flexextractRequest(to_send: FlexextractForm) {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(to_send)
-    })
+    });
 
     if (response.ok) {
         alert('The flexetract has been sent and is processing')
     }
 };
+
+export async function flexpartRunRequest(to_send: FlexpartForm) {
+    let response = await fetch('/flexpart/flexpart_run_request', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(to_send)
+    });
+
+    if (response.ok) {
+        alert('Flexpart has been run')
+    }
+}
+
+export async function flexpartGetDataToPlot(to_send: any) {
+    let response = await fetch('/flexpart/flexpart_run_output', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(to_send)
+    });
+
+    let data_to_plot;
+    if (response.ok) {
+        data_to_plot = await response.json();
+    } else {
+        let error = await response.json();
+        alert(error.info);
+        return;
+    }
+
+    return data_to_plot;
+}

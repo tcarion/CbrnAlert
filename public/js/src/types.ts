@@ -8,6 +8,7 @@ interface ATP_map {
     drawShapes(shape_data: ShapeData, map: any): void;
     newMarker(lon: string | number, lat: string | number) : void;
     newRectangle(rect:any) : void;
+    drawHeatmap(lons:string[], lats:string[], values:string[]): void;
 }
 interface Form_view {
     form: Form | undefined;
@@ -23,10 +24,26 @@ interface Form_view {
     flexextract_timestep_selector: string
     flexextract_gridres_selector: string
     flexextract_area_selector: string
+    flexextract_request_selector: string
+
+    flexpart_startdatetime_selector: string
+    flexpart_enddatetime_selector: string
+    flexpart_releasestartdatetime_selector: string
+    flexpart_releaseenddatetime_selector: string
+    flexpart_releaseheight_selector: string
+    flexpart_timestep_selector: string
+    flexpart_gridres_selector: string
+    flexpart_area_selector: string
+    flexpart_particules_selector: string
+    flexpart_run_selector: string
+
+    flexpart_plot_time: string
+    flexpart_plot_height: string
 
     getForm : Form;
     initEvents(): void;
-    verifyLonLatInput(): string[];
+    updateOptions(selector: string, new_val: string[]): void;
+    checkFormValidity(): string[];
 }
 
 interface MapForm_interactions {
@@ -64,6 +81,11 @@ interface ShapeData {
 interface Form {
 }
 
+interface ModelForm extends Form {
+    lon: string,
+    lat: string,
+}
+
 interface ATP45Form extends Form {
     date: string,
     time: string,
@@ -71,9 +93,7 @@ interface ATP45Form extends Form {
 interface ArchiveForm extends ATP45Form {
 }
 
-interface PredictionForm extends ATP45Form {
-    lon: string,
-    lat: string,
+interface PredictionForm extends ATP45Form, ModelForm {
     step: string
 }
 
@@ -85,4 +105,21 @@ interface FlexextractForm extends Form {
     timestep: string,
     gridres: string,
     area: string
+}
+
+interface FlexpartForm extends Form, ModelForm {
+    startdatetime: string,
+    enddatetime: string,
+    releasestartdatetime: string,
+    releaseenddatetime: string,
+    releaseheight: string,
+    timestep: string,
+    gridres: string,
+    area: string,
+    particules: string
+}
+
+interface FlexpartPlotForm extends Form {
+    time: string,
+    height: string,
 }

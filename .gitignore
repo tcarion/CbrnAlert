@@ -51,6 +51,8 @@ public/grib_files
 
 public/extracted_met_data
 
+public/flexpart_runs
+
 sessions/
 tmp/*
 log/*

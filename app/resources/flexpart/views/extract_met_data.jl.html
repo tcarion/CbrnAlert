@@ -1,4 +1,4 @@
-<div class="flexextract-form">
+<div class="flexextract-form grid-form checkedform">
     <label for="flexextract_startdate" title="Starting date ">Starting date</label>
     <input type="date" id="flexextract_startdate">
 
@@ -74,14 +74,14 @@
         <option value="2">2</option>
     </select>
     <label class="qmark" for="flexextract_area" title="Select an area on the map by clicking on the square in the toolbar map">Area to retrieve</label>
-    <input type="text" id="flexextract_area" value="[]" disabled>
+    <input class="text-area" type="text" id="flexextract_area" value="" disabled>
 
     <button class="send-btn flexextract-btn" id="flexextract_req_btn">Request met data</button>
 </div>
 
-<div class="mymap-container">
-    <div id="mapid"></div>
-</div>
+<%
+partial(joinpath(Genie.config.path_resources, "shared", "_map.jl.html"))
+%>
 
 <script>
     let dates = document.getElementsByTagName("input")
