@@ -1,0 +1,6 @@
+<h4> {{ post.title }} </h4> <br>
+<p> {{ post.content }} </p>
+<div> {{ post.created_at | date }} </div>
+<div> Love : {{post.loveIts}} </div>
+<button (click)="onAddLove()">Add love</button>
+<button (click)="onSubLove()">Remove love</button>

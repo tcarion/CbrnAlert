@@ -9,6 +9,9 @@ route("/") do
     Genie.Renderer.redirect(:dashboard) 
 end
 
+route("/ngapp") do 
+    serve_static_file("ngapp/dist/ngapp/index.html")
+end
 route("/dashboard", DashboardController.dashboard, named = :dashboard)
 
 route("/atp45/load", ATPController.preloaded_atp_prediction, named = :preloaded_atp_prediction)
