@@ -53,6 +53,8 @@ public/extracted_met_data
 
 public/flexpart_runs
 
+public/ng_tests
+
 sessions/
 tmp/*
 log/*
