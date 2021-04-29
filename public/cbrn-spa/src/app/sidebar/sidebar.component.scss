@@ -1,0 +1,125 @@
+a {
+    text-decoration: none;
+}
+
+input {
+    display: none;
+}
+
+li {
+    list-style: none;
+}
+
+ul {
+    padding: 0;
+    margin: 0;
+}
+
+nav {
+    // width: clamp(var(--sideBarMinWidth), 14em, 4em);
+    width: 14em;
+    background-color: var(--sidebarBackground);
+    background-image: linear-gradient(rgb(78, 115, 223) 10%, rgb(34, 74, 190) 100%);
+    background-size: cover;
+    letter-spacing: 0.05rem;
+    height: 100vh;
+    line-height: 21px;
+    .sidebar-brand-text {
+        color: #fff;
+        text-transform: uppercase;
+        text-align: center;
+        font-weight: 800;
+        padding: 16px 16px;
+    }
+
+    .model-accordion-label {
+        cursor: pointer;
+        color: white;
+        font-weight: 700;
+        padding: 0.5em;
+        margin: 0;
+        transition: background 0.3s;
+        &:hover{
+            background: rgba(0, 0, 0, 0.1);
+        }
+    }
+
+    .nav-item.active .nav-link {
+        font-weight: 700;
+        color: white;
+    }
+
+    a.nav-link {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.85rem;
+        padding: 0.7em;
+        padding-left: 1.5em;
+        display: block;
+        letter-spacing: -0.02rem;
+        &:hover{
+            color: rgba(255, 255, 255, 1);
+            cursor: pointer;
+        }
+    }
+    a.logout {
+        margin: 0.5em;
+        margin-top: 1em;
+        padding: 0.5em;
+        text-align: center;
+        background-color: rgba($color: #eb3f3f, $alpha: 0.6);
+        border-radius: 4px;
+    }
+    .user-info {
+        color: rgba(255, 255, 255, 1);
+        padding: 1em;
+        div:nth-child(odd) {
+            font-size: 0.8rem;
+        }
+        div:nth-child(even) {
+            font-size: 1rem;
+            padding-left: 8px;
+        }
+    }
+}
+
+.sidebar-divider {
+    box-sizing: border-box;
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 0;
+    margin: 0 1em;   
+}
+
+@media all and (max-width: var(--widthForSidebarChange)) {
+    .hamburger {
+        position: fixed;
+        top: 5px;
+        left: 5px;
+        background: var(--sidebarBackground);
+        border-radius: 5px;
+        width: 35px;
+        cursor: pointer;
+        z-index: 1000000;
+        .line {
+            height: 3px;
+            background: #fff;
+            margin: 5px 8px;
+            border-radius: 5px;
+        }
+    }
+
+    .sidebar {
+        // @include sidebar;
+        position: absolute;
+        left: 0px;
+        width: 14rem;
+        z-index: 100000;
+        transform: translateX(-14rem);
+        // transition: transform 0.5s ease-in;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+        transition: transform 0.5s ease-in;
+    }
+}

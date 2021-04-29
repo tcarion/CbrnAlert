@@ -1,1 +1,63 @@
 /* You can add global styles to this file, and also import other style files */
+:root {
+  --sidebarMinWidth: 14rem;
+  --sidebarBackground: rgb(78, 115, 223);
+  --smallWidth: 320px;
+  --widthForDisplayChange: 780px;
+  --widthForSidebarChange: 1024px;
+  --formFontSize: 12px;
+}
+
+@mixin flexDir($dir) {
+    display: flex;
+    flex-direction: $dir;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 14px;
+    min-height: 100vh;
+    min-width: 100vw;
+    position: relative;
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+
+    body {
+        color: rgb(133, 135, 150);
+        min-height: 100%;
+        margin: 0;
+
+        #wrapper {
+            display: flex;
+            flex-direction: row;
+            align-items: stretch;
+            min-height: 100vh;
+
+            #content-wrapper {
+                background-color: rgb(248, 249, 252);
+                width: 100%;
+                height: 100vh;
+
+                #content {
+                    background-color: rgb(248, 249, 252);
+                    width: 100%;
+                    height: 100%;
+                    @include flexDir(column);
+
+                    .container-fluid {
+                        height: 100%;
+                        padding-top: 1em;
+                        padding-bottom: 1em;
+                        @include flexDir(column);
+                        align-items: flex-start;
+                    }
+                }
+            }
+        }
+    }
+}
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

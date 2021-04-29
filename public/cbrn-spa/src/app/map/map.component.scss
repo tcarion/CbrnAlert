@@ -1,0 +1,23 @@
+:host {
+    height: 100%;
+    width: 100%;
+}
+
+.mymap-container {
+    height: 100%;
+    width: 100%;
+    // min-width: 500px;
+    // min-height: 500px;
+    flex: 3 1 auto;
+    margin-top: 1em;
+    border-style: ridge;
+    border: 5px ridge;
+
+    // @media (max-width: $widthForDisplayChange) {
+    //     min-width: none;
+    // }
+    #mapid {
+        height: 100%;
+        // background-color: blue;
+    }
+}
