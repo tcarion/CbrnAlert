@@ -1,0 +1,39 @@
+<div class="spinner-container" *ngIf="dataSource.data.length == 0">
+    <mat-spinner></mat-spinner>
+</div>
+<div [ngStyle]= "{display: dataSource.data.length ? 'block' : 'none'}">
+    <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
+
+        <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef>
+            </th>
+            <td mat-cell *matCellDef="let row">
+                <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(row) : null"
+                    [checked]="selection.isSelected(row)">
+                </mat-checkbox>
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="startdate">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Start Date </th>
+            <td mat-cell *matCellDef="let element"> {{element.startdate | date:'YYYY-MM-dd @ HH:mm'}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="duration">
+            <th mat-header-cell *matHeaderCellDef> Fc duration </th>
+            <td mat-cell *matCellDef="let element"> {{element.duration}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="area">
+            <th mat-header-cell *matHeaderCellDef> Area </th>
+            <td mat-cell *matCellDef="let element"> {{element.area.join(', ')}} </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+</div>
+
+<app-preloaded-form [selection]="selection"></app-preloaded-form>

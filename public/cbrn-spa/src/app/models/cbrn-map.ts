@@ -1,3 +1,4 @@
+import { Shape, ShapeData } from './../interfaces/atp45/shape-data';
 import * as L from 'leaflet'
 
 const iconRetinaUrl = 'assets/marker-icon-2x.png';
@@ -23,6 +24,9 @@ export class CbrnMap {
     public map: any;
     private markerLocation: LonLat | undefined;
     private markerLayer: L.Marker | undefined;
+    private atp45Results: ShapeData[] = [];
+    private availableArea: L.Layer;
+
     constructor() {
 
     }
@@ -56,5 +60,26 @@ export class CbrnMap {
             this.markerLayer = L.marker([lonlat.lat, lonlat.lon]);
             this.markerLayer.addTo(this.map)
         }
+    }
+
+    drawShapes(shape_data: ShapeData) {
+        const shapes_color = ['blue', 'red', 'yellow']
+        shape_data.shapes.forEach((shape: any, i: number) => {
+            L.polygon(shape.coords, { color: shapes_color[i] }).addTo(this.map).bindPopup(shape.text);
+        });
+        this.atp45Results.push(shape_data);
+    }
+
+    newAvailableArea(area: number[]) {
+        const corner1 = L.latLng(area[0], area[1]);
+        const corner2 = L.latLng(area[2], area[3]);
+        const bounds = L.latLngBounds(corner1, corner2);
+        const options = { interactive: false, fillOpacity: 0 };
+        const rect = L.rectangle(bounds, options);
+        if (this.availableArea !== undefined) {
+            this.map.removeLayer(this.availableArea)
+        }
+        this.availableArea = rect;
+        this.availableArea.addTo(this.map)
     }
 }

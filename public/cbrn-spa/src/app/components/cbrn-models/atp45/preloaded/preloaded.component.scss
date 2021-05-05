@@ -1,0 +1,24 @@
+:host {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+table {
+    width: clamp(365px, 550px, 600px);
+
+}
+
+.mat-row {
+    height: auto;
+}
+.mat-cell {
+    font-size: var(--formFontSize);
+    padding-top: 1em;
+    padding-bottom: 1em;
+}
+
+.mat-column-select {
+    overflow: initial;
+}

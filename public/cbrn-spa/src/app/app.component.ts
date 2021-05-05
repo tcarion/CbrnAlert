@@ -1,34 +1,22 @@
 import { FormItem } from './interfaces/form-item';
-import { Component } from '@angular/core';
-import { wrongLatValidator, wrongLonValidator } from './shared/validators';
-import { Validators } from '@angular/forms';
+import { ChangeDetectorRef, Component } from '@angular/core';
+import { BreakpointObserver, MediaMatcher } from '@angular/cdk/layout';
 
-let preloadedForm: FormItem[] = [
-    {
-        controlName: 'lat',
-        label: 'Release latitude [°]',
-        type: 'input',
-        hint: '[-90.0°, 90.0°]',
-        validators: [wrongLatValidator(), Validators.required]
-    },
-    {
-        controlName: 'lon',
-        label: 'Release longitude [°]',
-        type: 'input',
-        hint: '[-180°, 180°]',
-        validators: [wrongLonValidator(), Validators.required]
-    },
-    {
-        controlName: 'datetime',
-        label: 'Forecast step selection: ',
-        type: 'select',
-    },
-]
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  forms = {preloadedForm};
+    mobileQuery: MediaQueryList;
+
+    private _mobileQueryListener: () => void;
+
+    constructor(private brealpointObserver: BreakpointObserver, mediaMatcher: MediaMatcher) {
+        this.mobileQuery = mediaMatcher.matchMedia('(max-width: 600px)');
+      }
+
+    ngOnDestroy(): void {
+    }
 }

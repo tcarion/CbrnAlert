@@ -27,7 +27,7 @@
 // }
 
 :host {
-    width: clamp(var(--smallWidth), 800px, 100%);
+    min-width: var(--smallWidth);
     font-size: var(--formFontSize);
 }
 
@@ -36,7 +36,8 @@
 }
 
 mat-form-field {
-    width: clamp(100px, 170px, 200px);
+    // width: clamp(100px, 170px, 200px);
+    min-width: 170px;
 }
 ::ng-deep .mat-form-field-flex > .mat-form-field-infix { padding: 0.4em 0px !important;}
 ::ng-deep .mat-form-field-label-wrapper { top: -1.5em; }

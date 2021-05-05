@@ -3,6 +3,8 @@ using ATPController
 using FlexpartController
 using DashboardController
 
+using Atp45sController
+
 Genie.config.websockets_server = true # enable the websocket server
 
 route("/") do 
@@ -25,6 +27,14 @@ route("/atp45/archive_data", ATPController.archive_data, named = :archive_data)
 route("/atp45/atp_shape_request", ATPController.atp_shape_request, method = POST, named = :atp_shape_request)
 
 route("/atp45/mars_request", ATPController.mars_request, method = POST, named = :mars_request)
+
+
+route("/atp45/available_steps", Atp45sController.available_steps, method = POST, named = :available_steps)
+
+route("/atp45/available_gribfiles", Atp45sController.available_grib_files, method = GET, named = :available_grib_files)
+
+route("/atp45/prediction_request", Atp45sController.prediction_request, method = POST, named = :prediction_request)
+
 
 route("/flexpart/extract_met_data", FlexpartController.extract_met_data, named= :extract_met_data)
 

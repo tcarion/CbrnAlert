@@ -1,8 +1,8 @@
 import { FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { FormService } from './../services/form.service';
-import { MapService } from './../services/map.service';
-import { CbrnMap } from './../models/cbrn-map';
+import { FormService } from '../../services/form.service';
+import { MapService } from '../../services/map.service';
+import { CbrnMap } from '../../models/cbrn-map';
 import { AfterViewInit, Component, OnInit } from '@angular/core';
 
 @Component({
