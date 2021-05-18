@@ -1,34 +1,28 @@
-<!-- <div id="wrapper">
-    <app-sidebar></app-sidebar>
-    <div id="content-wrapper">
-        <div id="content">
-            <nav class="topbar static-top shadow">
-                <div title="Click here to display/hide the notification bar" class="box-arrow toggle-topbar">
-                    <div class="arrow"></div>
-                </div>
-                <ul>
-                </ul>
-            </nav>
-            <div class="container-fluid">
-                <app-preloaded [formItems]="forms.preloadedForm" fxLayout="row wrap" fxLayoutAlign="space-around"></app-preloaded>
-                <router-outlet></router-outlet>
-                <app-map></app-map>
-            </div>
-        </div>
-    </div>
-</div> -->
-
 <div class="container" [class.is-mobile]="mobileQuery.matches">
     <mat-toolbar class="toolbar">
-        <button mat-icon-button (click)="snav.toggle()">
-            <mat-icon>menu</mat-icon>
-        </button>
-        <h1 class="app-name">CBRN Dispersion app</h1>
+        <div class="toolbar-title">
+            <button mat-icon-button (click)="snav.toggle()">
+                <mat-icon>menu</mat-icon>
+            </button>
+            <h1 class="app-name">CBRN Dispersion app</h1>
+        </div>
+        <div class="toolbar-icons">
+            <button mat-icon-button (click)="showNotifs = !showNotifs">
+                <mat-icon>notifications</mat-icon>
+            </button>
+        </div>
+        <div class="notif-container" *ngIf="showNotifs">
+            <app-notification></app-notification>
+        </div>
     </mat-toolbar>
-
-    <mat-sidenav-container class="sidenav-container" [style.marginTop.px]="mobileQuery.matches ? 56 : 0">
-        <mat-sidenav class="sidenav" role="navigation" #snav [mode]="mobileQuery.matches ? 'over' : 'side'"
-            [fixedInViewport]="mobileQuery.matches" fixedTopGap="56" opened="true">
+    
+    <mat-sidenav-container class="sidenav-container" [style.marginTop.px]="mobileQuery.matches ? 40 : 0">
+        <mat-sidenav 
+            class="sidenav" 
+            role="navigation" 
+            #snav 
+            [mode]="mobileQuery.matches ? 'over' : 'side'"
+            [fixedInViewport]="mobileQuery.matches" fixedTopGap="40" opened="true">
             <mat-nav-list>
                 <mat-list-item>
                     Dashboard
@@ -49,11 +43,11 @@
                             Preloaded data
                         </mat-list-item>
 
-                        <mat-list-item routerLink=".">
+                        <mat-list-item routerLink="realtime">
                             Real-time data
                         </mat-list-item>
 
-                        <mat-list-item routerLink=".">
+                        <mat-list-item routerLink="archive">
                             Archive data retrieval
                         </mat-list-item>
                     </mat-expansion-panel>

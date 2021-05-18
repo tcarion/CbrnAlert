@@ -1,3 +1,4 @@
+import { Atp45RequestService } from './services/atp45-request.service';
 import { MapService } from './services/map.service';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
@@ -12,6 +13,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatTableModule } from '@angular/material/table';
 import { PreloadedComponent } from './components/cbrn-models/atp45/preloaded/preloaded.component';
 import { MatPaginatorModule } from '@angular/material/paginator';
@@ -23,8 +25,13 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
-import {MatExpansionModule} from '@angular/material/expansion';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { ArchiveComponent } from './components/cbrn-models/atp45/archive/archive.component';
+import { MatNativeDateModule } from '@angular/material/core';
+import { JoinPipe } from './pipes/join.pipe';
+import { AroundPipe } from './pipes/around.pipe';
+import { NotificationComponent } from './components/notification/notification.component';
+import { RealtimeComponent } from './components/cbrn-models/atp45/realtime/realtime.component';
 
 @NgModule({
     declarations: [
@@ -34,6 +41,10 @@ import { ArchiveComponent } from './components/cbrn-models/atp45/archive/archive
         MapComponent,
         PreloadedComponent,
         ArchiveComponent,
+        JoinPipe,
+        AroundPipe,
+        NotificationComponent,
+        RealtimeComponent,
     ],
     imports: [
         BrowserModule,
@@ -44,6 +55,8 @@ import { ArchiveComponent } from './components/cbrn-models/atp45/archive/archive
         BrowserAnimationsModule,
         MatFormFieldModule,
         MatInputModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
         MatTableModule,
         MatPaginatorModule,
         MatSortModule,
@@ -56,7 +69,7 @@ import { ArchiveComponent } from './components/cbrn-models/atp45/archive/archive
         MatIconModule,
         MatExpansionModule,
     ],
-    providers: [MapService],
+    providers: [MapService, Atp45RequestService],
     bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -9,14 +9,14 @@ using JSON
 using Dates
 using Sockets
 using UUIDs
-# using GenieAuthentication
+using GenieAuthentication
 using SearchLight
 using Users
 using ViewHelper
 import Genie.Exceptions.ExceptionalResponse
 # using Router
 
-# before() =  authenticated() || throw(ExceptionalResponse(redirect(:show_login)))
+before() =  authenticated() || throw(ExceptionalResponse(redirect(:show_login)))
 
 const ec = EarthCompute
 const LIB_PATH = joinpath(pwd(), "lib")
@@ -325,7 +325,6 @@ function atp_shape_request()
   if grib_to_read != ""
     filename = joinpath(pwd(), "public", "grib_files", grib_to_read)
   else
-
     req = MarsRequest(date, time, step, wrap_coord(lon, lat))
     channel_info = request_data["channel_info"]
     for n_attempts in 1:2

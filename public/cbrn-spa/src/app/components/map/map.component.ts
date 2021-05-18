@@ -3,14 +3,14 @@ import { Subscription } from 'rxjs';
 import { FormService } from '../../services/form.service';
 import { MapService } from '../../services/map.service';
 import { CbrnMap } from '../../models/cbrn-map';
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit, OnDestroy } from '@angular/core';
 
 @Component({
     selector: 'app-map',
     templateUrl: './map.component.html',
     styleUrls: ['./map.component.scss']
 })
-export class MapComponent implements AfterViewInit {
+export class MapComponent implements AfterViewInit, OnDestroy {
 
     formSubscription: Subscription;
 
@@ -18,7 +18,7 @@ export class MapComponent implements AfterViewInit {
 
     ngAfterViewInit(): void {
         this.mapService.cbrnMap.mapInit('mapid', [50.82, 4.35], 8);
-        this.mapService.onClickInit();
+        // this.mapService.onClickInit();
 
         this.formSubscription = this.formService.currentFormSubject.subscribe(
             (currentForm: FormGroup) => {
@@ -26,5 +26,9 @@ export class MapComponent implements AfterViewInit {
                 this.mapService.cbrnMap.marker = lonlat;
             }
         )
+    }
+
+    ngOnDestroy() {
+        this.formService.currentFormSubject.unsubscribe();
     }
 }

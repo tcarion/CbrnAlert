@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { MapFormService } from './map-form.service';
+import { RequestService } from './request.service';
 
-describe('MapFormService', () => {
-  let service: MapFormService;
+describe('RequestService', () => {
+  let service: RequestService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(MapFormService);
+    service = TestBed.inject(RequestService);
   });
 
   it('should be created', () => {

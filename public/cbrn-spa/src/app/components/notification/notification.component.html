@@ -1,0 +1,17 @@
+<mat-action-list>
+  <span *ngFor="let notif of notifs">
+    <mat-list-item class="notif-item">
+      <button mat-list-item (click)="onShowNotif(notif)">
+        {{ notif.title }}
+      </button>
+    </mat-list-item>
+    <div class="userfb" *ngIf="notif.showed">
+      <code> <div *ngFor="let line of notif.content"> {{ line }} </div> </code>
+    </div>
+  </span>
+</mat-action-list>
+
+<div 
+  *ngIf="showedNotif()" 
+  class="backdrop"
+  (click)="hideNotifs()"></div>

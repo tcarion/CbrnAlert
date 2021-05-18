@@ -7,7 +7,9 @@ using ReadGrib
 using ComputeShapes
 using EarthCompute
 
+
 const ec = EarthCompute
+const WIND_THRESHOLD = 10 # km/h
 
 struct Wind
     u::Float64
@@ -20,13 +22,38 @@ end
 Structure to represent one ATP model instance. `shapes` contains all to shapes related to the ATP instance (release area, hazard area etc.). 
 The other fields are data related to the instance
 """
-struct ShapeData
+mutable struct ShapeData
+    lon::Float64
+    lat::Float64
     shapes::Vector{ComputeShapes.Shape}
     wind::Wind
+    datetime::DateTime
+    step::Int
+end
+
+struct MarsRequest
     date::String
     time::String
-    step::String
+    step::Array{Int64,1}
+    area::String
+    target_file::String
+    datetime::DateTime
 end
+MarsRequest(date, time, step, area::Array) = MarsRequest(date, time, step, join(area, "/"))
+MarsRequest(date, time, step, area::String) = MarsRequest(date, time, step, area,  "public/grib_files/$(date)_$(time)_$(replace(area, "/" => "-")).grib", DateTime(date * time, dateformat"yyyymmddHHMM"))
+
+request_to_string(date, time, step, area, target_file="public/grib_files/$(date)_$(time)_$(replace(area, "/" => "-")).grib") = """retrieve,
+                                      type    = fc,
+                                      date    = $date,
+                                      time    = $time,
+                                      step    = $(join(step, "/")),
+                                      levtype = sfc,
+                                      param   = 10u/10v,
+                                      area    = $area,
+                                      target  = "$target_file"
+                                      """
+                                      
+request_to_string(req::MarsRequest) = request_to_string(req.date, req.time, req.step, req.area, req.target_file)
 
 """
     to_dict(arg::Union{Wind, ShapeData})
@@ -72,7 +99,7 @@ julia> steps_to_datetimes("19930212T12:00:00", [0, 3, 6], "yyyymmddTH:M:S")
  1993-02-12T18:00:00
 ```
 """
-function steps_to_datetimes(toParse, steps::Array{Int}, df)
+function steps_to_datetimes(toParse, steps::Array{Int}, df)::DateTime[]
     start_d = DateTime(toParse, df)
     return map(step -> start_d + Dates.Hour(step), steps)
 end
@@ -82,10 +109,33 @@ steps_to_datetimes(start_d::DateTime, steps::Array{Int}) = map(step -> start_d +
 
 searchdir(path,key) = filter(x -> occursin(key, x), readdir(path))
 
+wrap_coord(lon, lat) = [ceil(Int, lat) + 1, floor(Int, lon) - 1, floor(Int, lat) - 1, ceil(Int, lon) + 1]
+
+function broadcast_mars_output(req::MarsRequest, ws_info)
+    str_req = request_to_string(req)
+    cmd = pipeline(`echo $str_req`, `mars`)
+    # cmd = `./test/sleeping_script.sh`
+    process = open(cmd)
+    while !eof(process)
+        r = readline(process)
+        info_to_send = Dict(:displayed => r, :backid => ws_info["backid"])
+        Genie.WebChannels.broadcast(ws_info["channel"], info_to_send)
+        # try
+        # catch e
+        #     println("COULDN'T BROADCAST TO WEBCHANNEL")
+        #     throw(e)
+        # end
+    end
+    if process.processes[2].exitcode == 1
+        throw(ProcessFailedException(process.processes[2]))
+    end
+    close(process)
+end
+
 function available_steps()
     payload = jsonpayload()
     filename = payload["filename"]
-    grib_to_read = joinpath(pwd(), "public", "grib_files", filename*".grib")
+    grib_to_read = joinpath(pwd(), "public", "grib_files", filename * ".grib")
 
     if !isfile(grib_to_read)
         throw(Genie.Exceptions.RuntimeException("Available steps not retrived", "The grib file hasn't been found", 1))
@@ -100,15 +150,18 @@ function available_steps()
     time = (time == "0" || time == 0) ? "0000" : string(time)
     m = match(r"(?<h>\d{2}).?(?<m>\d{2})", time)
     time = !isnothing(m) ? m[:h] * ":" * m[:m] : error("time is in unreadable format")
-    available_datetimes = steps_to_datetimes(date * "T" * time, steps, "yyyymmddTH:M")
+    startdate = DateTime(date * "T" * time, "yyyymmddTHH:MM")
+    available_datetimes = steps_to_datetimes(startdate, steps)
     available_datetimes_str = map(x -> Dates.format(x, "yyyy-mm-ddTHH:MM:SS"), available_datetimes)
     available_steps = [Dict(:datetime => dt, :step => step) for (dt, step) in zip(available_datetimes_str, steps)]
-    Genie.Renderer.Json.json(available_steps)
+    
+    forecast = Dict(:startdate => Dates.format(startdate, "yyyy-mm-ddTHH:MM:SS"), :steps => available_steps)
+    Genie.Renderer.Json.json(forecast)
 end
 
 function available_grib_files()
     grib_files = searchdir(joinpath(pwd(), "public", "grib_files"), ".grib")
-    availabe_data = Array{Dict, 1}()
+    availabe_data = Array{Dict,1}()
     for f in grib_files
         grib_to_read = joinpath(pwd(), "public", "grib_files", f)
         date = ReadGrib.get_key_values(grib_to_read, "date")[1]
@@ -154,24 +207,83 @@ function prediction_request()
     time = Dates.format(datetime_start, "HHMM")
     date = Dates.format(datetime_start, "yyyymmdd")
 
-    grib_to_read = haskey(request_data, "loaded_file") ? request_data["loaded_file"] : ""
-
-    area = request_data["area"]
-            
+    grib_to_read = request_data["loaded_file"]
     filename = joinpath(pwd(), "public", "grib_files", grib_to_read * ".grib")
 
-    time = time == "0000" ? "0" : time
+    time_grib = time == "0000" ? "0" : time
 
     keys_to_select = Dict(
         "date" => date,
         "step" => step,
-        "time" => time,
+        "time" => time_grib,
         "level" => "0",
     )
 
+    run_dt = steps_to_datetimes(datetime_start, [step])[1]
+    shape_data = ShapeData(lon, lat, Vector{ComputeShapes.Shape}(), Wind(0, 0), run_dt, step)
+
+    shape_data = calc_prediction(filename, keys_to_select, shape_data)
+
+    return to_dict(shape_data) |> Genie.Renderer.Json.json
+end
+
+function realtime_prediction_request()
+    request_data = jsonpayload()
+    lat = typeof(request_data["lat"]) == String ? parse(Float64, request_data["lat"]) : request_data["lat"]
+    lon = typeof(request_data["lon"]) == String ? parse(Float64, request_data["lon"]) : request_data["lon"]
+    step = request_data["step"]
+    datetime_start = Dates.DateTime(request_data["datetime"][1:22])
+    time = Dates.format(datetime_start, "HHMM")
+    date = Dates.format(datetime_start, "yyyymmdd")
+
+    req = MarsRequest(date, time, [step], wrap_coord(lon, lat))
+    ws_info = request_data["ws_info"]
+    for n_attempts in 1:2
+        broadcast_mars_output(req, ws_info)
+        if isfile(req.target_file)
+            filename = req.target_file
+            break
+        else
+            prev_date = DateTime(req.date * req.time, dateformat"yyyymmddHHMM")
+            new_date = prev_date - Dates.Hour(12)
+            new_step = parse(Int, req.step) + 12
+            req = MarsRequest(Dates.format(new_date, "yyyymmdd"), Dates.format(new_date, "HHMM"), string(new_step), req.area)
+        end
+    end
+
+    if !isfile(req.target_file)
+        throw(Genie.Exceptions.RuntimeException("Mars request not completed", "The grib file hasn't been found", 1))
+    end
+    
+    date = req.date
+    time = req.time
+    step = req.step[1]
+
+    filename = joinpath(pwd(), req.target_file)
+
+    time_grib = time == "0000" ? "0" : time
+    keys_to_select = Dict(
+        "date" => date,
+        "step" => step,
+        "time" => time_grib,
+        "level" => "0",
+    )
+
+    run_dt = steps_to_datetimes(datetime_start, [step])[1]
+    shape_data = ShapeData(lon, lat, Vector{ComputeShapes.Shape}(), Wind(0, 0), run_dt, step)
+
+    shape_data = calc_prediction(filename, keys_to_select, shape_data)
+
+    return to_dict(shape_data) |> Genie.Renderer.Json.json
+end
+
+function calc_prediction(filename, keys_to_select, shape_data::ShapeData)
+    lon = shape_data.lon
+    lat = shape_data.lat
+
     surroundings = Dict()
     try 
-    surroundings = ReadGrib.find_nearest_wind(filename, keys_to_select, lon, lat)
+        surroundings = ReadGrib.find_nearest_wind(filename, keys_to_select, lon, lat)
     catch e
         if isa(e, ReadGrib.OutOfBoundAreaError)
             throw(Genie.Exceptions.RuntimeException("$(e)", sprint(showerror, e), 500))
@@ -194,11 +306,10 @@ function prediction_request()
 
     wind = Wind(u_wind, v_wind)
 
-    step = isa(step, Int) && string(step)
-    shape_data = ShapeData(Vector{ComputeShapes.Shape}(), wind, date, time, step)
+    shape_data.wind = wind
 
     resolution = 25
-    thres_wind = 10 / 3.6
+    thres_wind = WIND_THRESHOLD / 3.6
     if wind.speed < thres_wind
         haz_area = ComputeShapes.ATP_circle(lat, lon, 10., resolution)
         haz_area.label = "Hazard Area"
@@ -215,7 +326,62 @@ function prediction_request()
         push!(shape_data.shapes, rel_area)
     end
 
-    return to_dict(shape_data) |> Genie.Renderer.Json.json
+    shape_data
+end
+"""
+    mars_request()
+Send a mars request for archive data with the requested date, time and area
+
+Needed from json request :
+  @`date_request`, @`times_request`
+"""
+function archive_retrieval()
+    request_data = jsonpayload()
+    
+    area = request_data["area"]
+    area = convert.(Int, round.(area))
+    datetime_start = Dates.DateTime(request_data["datetime"][1:22])
+    time = Dates.format(datetime_start, "HHMM")
+    date = Dates.format(datetime_start, "yyyymmdd")
+    req = MarsRequest(date, time, collect(0:6:240), area)
+    
+    # str_req = request_to_string(req)
+    # cmd = pipeline(`echo $str_req`, `mars`)
+    # run(cmd)
+
+    try
+        ws_info = request_data["ws_info"]
+        broadcast_mars_output(req, ws_info)
+    catch e
+        if isa(e, ProcessFailedException)
+            throw(Genie.Exceptions.RuntimeException("$(e)", "Error in mars, probably because the forecast is not available yet", 1))
+        else
+            throw(e)
+        end
+    end
+
+    Genie.Renderer.Json.json(Dict(:res => "Retrieval done"))
+end
+
+function realtime_available_steps()
+    today = Dates.today()
+    today_midnight = Dates.DateTime(today)
+    today_noon = today_midnight + Dates.Hour(12)
+    yesterday_noon = today_midnight - Dates.Hour(12)
+    if Dates.now() > Dates.DateTime(Dates.year(today), Dates.month(today), Dates.day(today), 18, 55)
+      start_date = today_noon
+    elseif Dates.now() > Dates.DateTime(Dates.year(today), Dates.month(today), Dates.day(today), 6, 55)
+      start_date = today_midnight
+    else
+      start_date = yesterday_noon
+    end
+  
+    steps =  collect(0:6:240)
+    available_dt = steps_to_datetimes(start_date, steps)
+    available_dt_str = map(x -> Dates.format(x, "yyyy-mm-ddTHH:MM:SS"), available_dt)
+    available_time_dict = [Dict(:datetime => x, :step => y) for (x, y) in zip(available_dt_str, steps)]
+  
+    Genie.Renderer.Json.json(available_time_dict)
 end
 
 end

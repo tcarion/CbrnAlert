@@ -1,6 +1,6 @@
 export interface Shape {
-    lon: number[],
-    lat: number[],
+    lons: number[],
+    lats: number[],
     type: string,
     label: string
     coords?: number[][],

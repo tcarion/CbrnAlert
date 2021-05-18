@@ -20,7 +20,7 @@
             floatLabel="never">
             <mat-label> {{ formItem.label }} </mat-label>
             <select matNativeControl [formControlName]="formItem.controlName">
-                <option *ngFor="let val of formItem.placeholder" [ngValue]="val"> {{val}} </option>
+                <option *ngFor="let val of formItem.placeholder" [ngValue]="val"> {{val.datetime | date:'YYYY-MM-dd @ HH:mm'}} </option>
             </select>
             <mat-hint *ngIf="formItem.hint !== undefined">{{ formItem.hint }}</mat-hint>
             <!-- <mat-error *ngIf="formItem.controlName.invalid"> error ! </mat-error> -->

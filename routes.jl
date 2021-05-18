@@ -5,6 +5,8 @@ using DashboardController
 
 using Atp45sController
 
+using UUIDs
+
 Genie.config.websockets_server = true # enable the websocket server
 
 route("/") do 
@@ -35,6 +37,12 @@ route("/atp45/available_gribfiles", Atp45sController.available_grib_files, metho
 
 route("/atp45/prediction_request", Atp45sController.prediction_request, method = POST, named = :prediction_request)
 
+route("/atp45/archive_retrieval", Atp45sController.archive_retrieval, method = POST, named = :archive_retrieval)
+
+route("/atp45/realtime_available_steps", Atp45sController.realtime_available_steps, method = GET, named = :realtime_available_steps)
+
+route("/atp45/realtime_prediction_request", Atp45sController.realtime_prediction_request, method = POST, named = :realtime_prediction_request)
+
 
 route("/flexpart/extract_met_data", FlexpartController.extract_met_data, named= :extract_met_data)
 
@@ -46,6 +54,16 @@ route("/flexpart/flexpart_run_request", FlexpartController.flexpart_run_request,
 
 route("/flexpart/flexpart_run_output", FlexpartController.flexpart_run_output, method = POST, named= :flexpart_run_output)
 
+route("/getchannel", method = GET) do
+    channel = "$(uuid4())"
+    Genie.Assets.channels_support(channel)
+    Genie.Renderer.Json.json(Dict(:channel => channel))
+end
+
+# route("/initws", method = POST) do
+#     Genie.Assets.channels_support(jsonpayload()["channel"])
+#     Genie.Renderer.Json.json(Dict(:channel => jsonpayload()["channel"]))
+# end
 # channel("/:default_ch/:client_ch") do 
 #     "def_ch = $(payload(:default_ch))       payload : $(@params(:payload))"
 # end
@@ -66,3 +84,7 @@ route("/flexpart/flexpart_run_output", FlexpartController.flexpart_run_output, m
 # channel("/coucou/mess") do 
 #     "RECEIVED : $(@params(:WS_CLIENT))"
 # end
+
+channel("") do 
+    println("message received")
+end

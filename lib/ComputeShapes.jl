@@ -3,15 +3,15 @@ module ComputeShapes
 const earthRad = 6371.0
 
 mutable struct Shape
-	lon::Vector{Float64}
-	lat::Vector{Float64}
+	lons::Vector{Float64}
+	lats::Vector{Float64}
 	type::String
 	label::String
 	Shape(lon, lat, type) = new(lon, lat, type, "")
 end
 
 function to_coords(s::Shape)
-	return [[e[1], e[2]] for e in zip(s.lat, s.lon)]
+	return [[e[1], e[2]] for e in zip(s.lats, s.lons)]
 end
 
 function to_dict(s::Shape)
@@ -79,14 +79,14 @@ end
 
 function ATP_triangle(lat_center, lon_center, length_line, radius, alpha)
 	out_circle = ATP_line_angle(lat_center, lon_center, 2 * radius, alpha + 180.)
-	lon_start = out_circle.lon[end]
-	lat_start = out_circle.lat[end]
+	lon_start = out_circle.lons[end]
+	lat_start = out_circle.lats[end]
 
 	hyp_length = (length_line + 2 * radius) / (sqrt(3) / 2)
 	top_line = ATP_line_angle(lat_start, lon_start, hyp_length, alpha + 30.)
 	bot_line = ATP_line_angle(lat_start, lon_start, hyp_length, alpha - 30.)
-	lonL = [lon_start, top_line.lon[2], bot_line.lon[2]]
-	latL = [lat_start, top_line.lat[2], bot_line.lat[2]]
+	lonL = [lon_start, top_line.lons[2], bot_line.lons[2]]
+	latL = [lat_start, top_line.lats[2], bot_line.lats[2]]
 	return Shape(lonL, latL, "triangle")
 end
 

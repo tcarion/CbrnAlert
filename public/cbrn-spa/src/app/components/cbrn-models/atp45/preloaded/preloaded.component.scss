@@ -5,20 +5,38 @@
     flex-wrap: wrap;
     justify-content: space-around;
 }
-table {
-    width: clamp(365px, 550px, 600px);
+// tbody {
+//     display: block;
+//     height: 100px !important;
+//     overflow-y: auto;
+// }
 
+.table-container {
+    min-height: 140px;
+    max-height: 180px;
+    overflow: auto;
+    box-shadow: 0px 5px 5px -3px rgb(0 0 0 / 20%), 0px 8px 10px 1px rgb(0 0 0 / 14%), 0px 3px 14px 2px rgb(0 0 0 / 12%);
 }
 
-.mat-row {
+.mat-row, .mat-header-row {
     height: auto;
+}
+
+.mat-row:hover {
+    cursor: pointer;
+    background: rgba(0, 0, 0, 0.1);
 }
 .mat-cell {
     font-size: var(--formFontSize);
-    padding-top: 1em;
-    padding-bottom: 1em;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
 }
 
-.mat-column-select {
-    overflow: initial;
+.mat-header-cell {
+    padding-top: 0.8em;
+    padding-bottom: 0.8em;
 }
+
+// .mat-column-select {
+//     overflow: initial;
+// }
