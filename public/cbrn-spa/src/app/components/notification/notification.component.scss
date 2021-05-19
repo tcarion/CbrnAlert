@@ -2,10 +2,34 @@
     position: relative;
 }
 
-.notif-item button {
-    color: white;
-    font-size: 0.8em;
+.notif-item {
+    position: relative;
+    button {
+        color: white;
+        font-size: 0.8em;
+    
+        &.succeeded {
+            color: #28a745;
+        }
+    
+        &.failed {
+            color: #e22d3e
+        }
+    }
+    .spinner {
+        top: 4px;
+        right: 4px;
+        width:15px;
+        height: 15px;
+
+    }
+
+    .mat-spinner::ng-deep circle {
+        stroke: #fff;
+      }
+
 }
+
 .userfb {
     position: fixed;
     top: 50%;

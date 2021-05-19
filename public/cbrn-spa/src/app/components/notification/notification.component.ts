@@ -1,6 +1,6 @@
 import { NotificationService } from './../../services/notification.service';
 import { Notif } from './../../interfaces/notif';
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 
 @Component({
     selector: 'app-notification',
@@ -12,6 +12,7 @@ export class NotificationComponent implements OnInit {
     // @Input() notif: any;
 
     notifs = this.notificationService.notifs;
+    // @Output() newNotifEvent: EventEmitter<boolean> = this.notificationService.newNotifEvent;
 
     constructor(
         private notificationService: NotificationService,

@@ -25,7 +25,7 @@ export class FormService {
 
     newCurrentForm(newForm: FormGroup) {
         this.currentForm = newForm;
-        this.emitCurrentForm()
+        this.emitCurrentForm();
     }
 
     initForm(form: Form): FormGroup {
@@ -52,5 +52,28 @@ export class FormService {
             step = ${shapeData.step}`;
         });
         return shapeData;
+    }
+
+    formToObject() {
+        let obj: { [k:string]: any} = {};
+        const controls = this.currentForm.controls;
+        for (const p in controls) {
+            let val = this.currentForm.controls[p].value;
+            if (val instanceof Date) {
+                val = this.removeTimeZone(val);
+            }
+            obj[p] = val;
+        }
+        return obj;
+    }
+
+    removeTimeZone(date: Date) {
+        var userTimezoneOffset = date.getTimezoneOffset() * 60000;
+        return new Date(date.getTime() - userTimezoneOffset)
+    }
+
+    toDate(day: Date, time: string): Date {
+        const dateStr = formatDate(day, 'yyyy-MM-dd', 'en-US');
+        return new Date(dateStr + 'T' + time);
     }
 }

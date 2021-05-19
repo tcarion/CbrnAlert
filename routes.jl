@@ -1,13 +1,14 @@
 using Genie.Router, Genie.Requests, Genie.Assets
 using ATPController
 using FlexpartController
+using FlexpartsController
 using DashboardController
 
 using Atp45sController
 
 using UUIDs
 
-Genie.config.websockets_server = true # enable the websocket server
+Genie.config.websockets_server = true
 
 route("/") do 
     Genie.Renderer.redirect(:dashboard) 
@@ -42,6 +43,8 @@ route("/atp45/archive_retrieval", Atp45sController.archive_retrieval, method = P
 route("/atp45/realtime_available_steps", Atp45sController.realtime_available_steps, method = GET, named = :realtime_available_steps)
 
 route("/atp45/realtime_prediction_request", Atp45sController.realtime_prediction_request, method = POST, named = :realtime_prediction_request)
+
+route("/flexpart/metdata_retrieval", FlexpartsController.flexextract_request, method = POST, named = :metdata_retrieval)
 
 
 route("/flexpart/extract_met_data", FlexpartController.extract_met_data, named= :extract_met_data)

@@ -61,20 +61,16 @@ function update_available(available_path::String, fe_output_path::String)
 end
 
 function flexextract_options(options)
-    startdate = options["startdate"]
-    enddate = options["enddate"]
-    starttime = options["starttime"]
-    endtime = options["endtime"]
-    timestep = options["timestep"]
-    gridres = options["gridres"]
-    area = split(options["area"], '/')
+    startdate = options[:startdate]
+    enddate = options[:enddate]
+    timestep = options[:timestep]
+    gridres = options[:gridres]
+    area = options[:area]
     df = "yyyy-mm-ddTHH"
 
-    startdt = Dates.DateTime(startdate*'T'*starttime, df)
-    enddt = Dates.DateTime(enddate*'T'*endtime, df)
-    hour_nbr = Dates.Hour(enddt - startdt).value
+    hour_nbr = Dates.Hour(enddate - startdate).value
 
-    stepdt = startdt:Dates.Hour(timestep):enddt
+    stepdt = startdate:Dates.Hour(timestep):enddate
     type_ctrl = []
     time_ctrl = []
     step_ctrl = []
@@ -92,8 +88,8 @@ function flexextract_options(options)
         last_available = yesterday_noon
     end
 
-    if startdt <= last_available
-        if (Dates.Hour(startdt) == Hour(0) || Dates.Hour(startdt) == Hour(12))
+    if startdate <= last_available
+        if (Dates.Hour(startdate) == Hour(0) || Dates.Hour(startdate) == Hour(12))
             for (i, st) in enumerate(stepdt)
                 push!(time_ctrl, div(Dates.Hour(st).value, 12) * 12 |> format_opt)
                 step = Dates.Hour(st).value .% 12
@@ -105,16 +101,16 @@ function flexextract_options(options)
     end
 
     Dict(
-        "START_DATE" => replace(startdate, "-" =>  ""), 
+        "START_DATE" => Dates.format(startdate, "yyyymmdd"), 
         "TYPE" => join(type_ctrl, " "),
         "TIME" => join(time_ctrl, " "), 
         "STEP" => join(step_ctrl, " "), 
-        "GRID" => gridres, 
-        "DTIME" => timestep, 
-        "LOWER" => area[3],
-        "UPPER" => area[1],
-        "LEFT" => area[2],
-        "RIGHT" => area[4]
+        "GRID" => gridres isa String || string(gridres), 
+        "DTIME" => timestep isa String || string(timestep), 
+        "LOWER" => area[3] isa String || string(area[3]), 
+        "UPPER" => area[1] isa String || string(area[1]), 
+        "LEFT" => area[2] isa String || string(area[2]), 
+        "RIGHT" => area[4] isa String || string(area[4]), 
         )
 end
 

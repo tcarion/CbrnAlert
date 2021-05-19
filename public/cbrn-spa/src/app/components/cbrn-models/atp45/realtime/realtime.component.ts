@@ -88,15 +88,11 @@ export class RealtimeComponent implements OnInit, OnDestroy {
     }
 
     onSubmit() {
-        this.notificationService.nRealtimeNotif++;
-        const notifTitle = `ATP45 Prediction ${this.notificationService.nRealtimeNotif}`;
-        this.notificationService.addNotif(notifTitle);
-
-        const date = this.form.get('startdate').placeholder[0].datetime;
-        var userTimezoneOffset = date.getTimezoneOffset() * 60000;
+        const notifTitle = this.notificationService.addNotif('ATP45 Prediction', 'atp45Request');
+        this.notificationService.changeStatus(notifTitle, 'pending');
 
         const atp45Input = {
-            datetime: new Date(date.getTime() - userTimezoneOffset),
+            datetime: this.formService.removeTimeZone(this.form.get('startdate').placeholder[0].datetime),
             lat: this.formGroup.get('lat')?.value,
             lon: this.formGroup.get('lon')?.value,
             step: this.formGroup.get('startdate')?.value.step,
@@ -107,8 +103,10 @@ export class RealtimeComponent implements OnInit, OnDestroy {
             next: (shapeData: any) => {
                 shapeData = this.formService.handlePredictionResponse(shapeData);
                 this.mapService.cbrnMap.drawShapes(shapeData);
+                this.notificationService.changeStatus(notifTitle, 'succeeded');
             },
             error: (error: HttpErrorResponse) => {
+                this.notificationService.changeStatus(notifTitle, 'failed');
                 alert(error.message);
             }
         })

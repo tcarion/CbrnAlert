@@ -6,7 +6,6 @@ import { Atp45RequestService } from './../../../../services/atp45-request.servic
 import { CbrnMap } from './../../../../models/cbrn-map';
 import { Subscription } from 'rxjs';
 import { MapService } from './../../../../services/map.service';
-import { FormItem } from './../../../../interfaces/form-item';
 import { Validators, FormGroup, FormBuilder } from '@angular/forms';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { formatDate } from '@angular/common';
@@ -66,7 +65,7 @@ export class ArchiveComponent implements OnInit, OnDestroy {
                 let area = cbrnMap.layerToArea(cbrnMap.areaSelection);
                 area = area.map((e) => Math.round(e * 100) / 100)
                 this.formGroup.get('areaToRetrieve')?.patchValue(area.join(', '))
-                this.formItems[2].placeholder = area;
+                this.form.get('areaToRetrieve').placeholder = area;
             }
         });
 
@@ -74,17 +73,13 @@ export class ArchiveComponent implements OnInit, OnDestroy {
     }
 
     onSubmit() {
-        this.notificationService.nArchiveNotif++;
-        const notifTitle = `Archive Request ${this.notificationService.nArchiveNotif}`;
-        this.notificationService.addNotif(notifTitle);
+        const notifTitle = this.notificationService.addNotif('Archive Request', 'archiveRequest');
+        this.notificationService.changeStatus(notifTitle, 'pending');
 
-        const dateStr = formatDate(this.formGroup.get('forecastDate')?.value, 'yyyy-MM-dd', 'en-US');
-        const timeStr = this.formGroup.get('forecastTime')?.value;
-        const datetime = new Date(dateStr + 'T' + timeStr);
-        var timezoneOffset = datetime.getTimezoneOffset() * 60000;
+        const datetime = this.formService.toDate(this.formGroup.get('forecastDate')?.value, this.formGroup.get('forecastTime')?.value);
 
         const archiveInput = {
-            datetime: new Date(datetime.getTime() - timezoneOffset),
+            datetime: this.formService.removeTimeZone(datetime),
             area: this.formItems[2].placeholder,
             ws_info: {channel: this.websocketService.channel, backid: notifTitle},
         }
@@ -92,9 +87,12 @@ export class ArchiveComponent implements OnInit, OnDestroy {
         this.atp45RequestService.archiveRetrieval(archiveInput).subscribe({
             next: () => {
                 alert("Archive data have been received");
+                this.notificationService.changeStatus(notifTitle, 'succeeded');
+
             },
             error: (error) => {
                 console.log(error);
+                this.notificationService.changeStatus(notifTitle, 'failed');
             }
         })
     }

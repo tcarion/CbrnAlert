@@ -26,12 +26,14 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
+import {MatBadgeModule} from '@angular/material/badge';
 import { ArchiveComponent } from './components/cbrn-models/atp45/archive/archive.component';
 import { MatNativeDateModule } from '@angular/material/core';
 import { JoinPipe } from './pipes/join.pipe';
 import { AroundPipe } from './pipes/around.pipe';
 import { NotificationComponent } from './components/notification/notification.component';
 import { RealtimeComponent } from './components/cbrn-models/atp45/realtime/realtime.component';
+import { MetDataComponent } from './components/cbrn-models/flexpart/met-data/met-data.component';
 
 @NgModule({
     declarations: [
@@ -45,6 +47,7 @@ import { RealtimeComponent } from './components/cbrn-models/atp45/realtime/realt
         AroundPipe,
         NotificationComponent,
         RealtimeComponent,
+        MetDataComponent,
     ],
     imports: [
         BrowserModule,
@@ -68,6 +71,7 @@ import { RealtimeComponent } from './components/cbrn-models/atp45/realtime/realt
         MatListModule,
         MatIconModule,
         MatExpansionModule,
+        MatBadgeModule,
     ],
     providers: [MapService, Atp45RequestService],
     bootstrap: [AppComponent]

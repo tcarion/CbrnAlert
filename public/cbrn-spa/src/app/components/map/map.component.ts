@@ -22,8 +22,12 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
         this.formSubscription = this.formService.currentFormSubject.subscribe(
             (currentForm: FormGroup) => {
-                let lonlat = {lon: currentForm.get('lon')?.value, lat: currentForm.get('lat')?.value};
-                this.mapService.cbrnMap.marker = lonlat;
+                const lon = currentForm.get('lon')?.value;
+                const lat = currentForm.get('lat')?.value;
+                if (lon !== undefined && lat !== undefined) {
+                    let lonlat = {lon: currentForm.get('lon')?.value, lat: currentForm.get('lat')?.value};
+                    this.mapService.cbrnMap.marker = lonlat;
+                }
             }
         )
     }
