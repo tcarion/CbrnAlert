@@ -89,14 +89,11 @@ function flexextract_options(options)
     end
 
     if startdate <= last_available
-        if (Dates.Hour(startdate) == Hour(0) || Dates.Hour(startdate) == Hour(12))
-            for (i, st) in enumerate(stepdt)
-                push!(time_ctrl, div(Dates.Hour(st).value, 12) * 12 |> format_opt)
-                step = Dates.Hour(st).value .% 12
-                step == 0 ? push!(type_ctrl, "AN") : push!(type_ctrl, "FC")
-                push!(step_ctrl, step |> format_opt)
-            end
-
+        for (i, st) in enumerate(stepdt)
+            push!(time_ctrl, div(Dates.Hour(st).value, 12) * 12 |> format_opt)
+            step = Dates.Hour(st).value .% 12
+            step == 0 ? push!(type_ctrl, "AN") : push!(type_ctrl, "FC")
+            push!(step_ctrl, step |> format_opt)
         end
     end
 
@@ -112,6 +109,45 @@ function flexextract_options(options)
         "LEFT" => area[2] isa String || string(area[2]), 
         "RIGHT" => area[4] isa String || string(area[4]), 
         )
+end
+
+function control_to_dict(filepath)
+    d = Dict{String, String}()
+    f = open(filepath, "r")
+    for line in eachline(f)
+        m = match(r"^(.*?)\s(.*)", line)
+        push!(d, m.captures[1] => m.captures[2])
+    end
+    close(f)
+    return d
+end
+
+function flexextract_metadata(filepath)
+    if !isfile(filepath) return end
+    control = control_to_dict(filepath)
+    startday = Dates.DateTime(control["START_DATE"], dateformat"yyyymmdd")
+    times = parse.(Int, split(control["TIME"], " "))
+    steps = parse.(Int, split(control["STEP"], " "))
+    gridres = parse(Float32, control["GRID"])
+    timestep = steps[2] - steps[1]
+    area = [
+        control["UPPER"],
+        control["LEFT"],
+        control["LOWER"],
+        control["RIGHT"]
+    ]
+    area = parse.(Float32, area)
+
+    startdate = startday + Dates.Hour(times[1])
+    enddate = startday + Dates.Hour(times[end])
+
+    return Dict(
+        :startDate => startdate,
+        :endDate => enddate,
+        :gridRes => gridres,
+        :timeStep => timestep,
+        :area => area
+    )
 end
 
 function format_opt(opt::Int)

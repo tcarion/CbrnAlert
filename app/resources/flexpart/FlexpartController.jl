@@ -109,6 +109,7 @@ function flexpart_preloaded()
     available_met_data_dir = filter(x -> isdir(x), readdir(joinpath(pwd(), "public", "extracted_met_data"), join=true))
     available_met_data = Array{Dict, 1}()
     for dirname in available_met_data_dir
+        isfile(joinpath(dirname, "metadata.json")) || break
         open(joinpath(dirname, "metadata.json"), "r") do f
             parsed_metadata = JSON.parse(f)
             push!(available_met_data, Dict(

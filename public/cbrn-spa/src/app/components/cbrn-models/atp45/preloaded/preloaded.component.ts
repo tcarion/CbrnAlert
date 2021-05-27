@@ -1,12 +1,10 @@
+import { ApiRequestsService } from './../../../../services/api-requests.service';
 import { GribData } from './../../../../interfaces/atp45/grib-data';
-import { MatPaginator } from '@angular/material/paginator';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Atp45RequestService } from './../../../../services/atp45-request.service';
-import { FormItem } from './../../../../interfaces/form-item';
 import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/core';
-import { MatTableDataSource } from '@angular/material/table';
-import { MatSort } from '@angular/material/sort';
-import { SelectionModel } from '@angular/cdk/collections';
+import { AbstractSelectionTableComponent } from 'src/app/abstract-classes/abstract-selection-table-component';
+import { DatePipe } from '@angular/common';
+import { AroundPipe } from 'src/app/pipes/around.pipe';
 
 @Component({
     selector: 'app-preloaded',
@@ -14,42 +12,57 @@ import { SelectionModel } from '@angular/cdk/collections';
     styleUrls: ['./preloaded.component.scss']
 })
 
-export class PreloadedComponent implements OnInit, AfterViewInit {
+export class PreloadedComponent extends AbstractSelectionTableComponent<GribData> implements OnInit, AfterViewInit {
 
-    @Input() formItems: FormItem[];
-    availableGribFiles: GribData[];
-    dataSource: MatTableDataSource<GribData> = new MatTableDataSource<GribData>();;
-    displayedColumns: string[] = ['select', 'startdate', 'duration', 'area'];
-    selection = new SelectionModel<GribData>(false, []);
-
-    @ViewChild(MatPaginator) paginator: MatPaginator;
-    @ViewChild(MatSort) sort: MatSort;
-
-    constructor(private atp45Service: Atp45RequestService) { }
+    constructor(public requestService: ApiRequestsService) {
+        super(requestService);
+    }
 
     ngOnInit(): void {
-        this.getAvailableGribFiles()
-    }
-
-    ngAfterViewInit() {
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
-    }
-
-    getAvailableGribFiles() {
-        this.atp45Service.getAvailableGribFiles().subscribe(
-            (data: any) => {
-                let gribdata = data;
-                gribdata.forEach((element: any) => {
-                    element.startdate = new Date(element.startdate)
-                });
-                // this.availableGribFiles = gribdata;
-                this.dataSource.data = gribdata;
+        this.displayedColumns = ['select', 'startDate', 'duration', 'area'];
+        this.columnInfo = [
+            {
+                name: 'startDate',
+                text: 'Start Date',
+                width: 140,
+                withPipe: { pipe: DatePipe, arg: ["YYYY-MM-dd @ HH:mm"] },
+                sort: true
             },
-            (error: HttpErrorResponse) => {
-                console.error(error.error);
+            {
+                name: 'duration',
+                text: 'Duration',
+                width: 70,
+            },
+            {
+                name: 'area',
+                text: 'Area',
+                width: 140,
+                withPipe: { pipe: AroundPipe }
             }
-        )
+        ]
+        // this.getAvailableGribFiles();
+        this.populateWithRequest("atp45", "available_gribfiles", (data: any) => {
+            data.forEach((element: any) => {
+                element.startdate = new Date(element.startdate);
+            });
+            return data;
+        });
     }
+
+    // getAvailableGribFiles() {
+    //     const payload = {request: "available_gribfiles"}
+    //     this.requestService.atp45Request(payload).subscribe(
+    //         (data: any) => {
+    //             let gribdata = data;
+    //             gribdata.forEach((element: any) => {
+    //                 element.startdate = new Date(element.startdate);
+    //             });
+    //             this.populateTable(gribdata);
+    //         },
+    //         (error: HttpErrorResponse) => {
+    //             console.error(error.error);
+    //         }
+    //     )
+    // }
 
 }

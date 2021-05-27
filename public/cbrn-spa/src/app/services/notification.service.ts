@@ -1,4 +1,4 @@
-import { Notif, NotifStatus } from './../interfaces/notif';
+import { Notif, NotifStatus, NotifType } from './../interfaces/notif';
 import { EventEmitter, Injectable, Output } from '@angular/core';
 import { Subject } from 'rxjs';
 
@@ -44,13 +44,14 @@ export class NotificationService {
 
     constructor() { }
 
-    addNotif(title: string, type: 'atp45Request' | 'archiveRequest' | 'metDataRequest'): string {
+    addNotif(title: string, type: NotifType): string {
         this.notifTypes[type]++;
         const tit = `${title} ${this.notifTypes[type]}`
         this.notifs.push({
             title: tit,
             content: [],
             status: 'none',
+            type: type,
             showed: false
         })
         this.newNotifSubject.next(true);
@@ -76,5 +77,11 @@ export class NotificationService {
         let notif = this.getNotif(title);
         if(notif !== undefined) {notif.status = st};
         this.newNotifSubject.next(true);
+    }
+
+    runNotif(title: string, st: NotifType): string {
+        const notifTitle = this.addNotif(title, st);
+        this.changeStatus(notifTitle, 'pending');
+        return notifTitle;
     }
 }

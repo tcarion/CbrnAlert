@@ -1,22 +1,28 @@
 import { CbrnMap } from './../models/cbrn-map';
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
-import { LeafletMouseEvent } from 'leaflet';
 
+type mapEvent = 'newMarker' | 'areaSelection'
 @Injectable({
     providedIn: 'root'
 })
+
 export class MapService {
     cbrnMap = new CbrnMap();
 
     mapSubject = new Subject<CbrnMap>();
+    mapEventSubject = new Subject<mapEvent>();
 
     constructor() { 
 
     }
 
     emitMapSubject() {
-        this.mapSubject.next(this.cbrnMap)
+        this.mapSubject.next(this.cbrnMap);
+    }
+
+    emitEventSubject(event: mapEvent) {
+        this.mapEventSubject.next(event);
     }
 
     onClickInit() {
@@ -26,6 +32,7 @@ export class MapService {
             let lon = Math.round(latlng.lng * 1000) / 1000;
             this.cbrnMap.marker = {lon, lat};
             this.emitMapSubject();
+            this.emitEventSubject('newMarker');
         })
     }
 
@@ -34,9 +41,10 @@ export class MapService {
     }
 
     onAreaSelectionInit() {
-        this.cbrnMap.map.on('draw:created', (e: any) => {
+        this.cbrnMap.map.on('draw:created', (e) => {
             this.cbrnMap.newAreaSelection(e.layer);
             this.emitMapSubject();
+            this.emitEventSubject('areaSelection');
         });
     }
 

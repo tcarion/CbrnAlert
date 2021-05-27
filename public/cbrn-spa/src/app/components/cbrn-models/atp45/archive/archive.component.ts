@@ -1,21 +1,23 @@
+import { AroundPipe } from 'src/app/pipes/around.pipe';
+import { ApiRequestsService } from './../../../../services/api-requests.service';
 import { WebsocketService } from './../../../../services/websocket.service';
 import { NotificationService } from './../../../../services/notification.service';
 import { FormService } from './../../../../services/form.service';
-import { Form } from './../../../../models/form';
-import { Atp45RequestService } from './../../../../services/atp45-request.service';
 import { CbrnMap } from './../../../../models/cbrn-map';
 import { Subscription } from 'rxjs';
 import { MapService } from './../../../../services/map.service';
 import { Validators, FormGroup, FormBuilder } from '@angular/forms';
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { formatDate } from '@angular/common';
+import { AbstractWsComponent } from 'src/app/abstract-classes/abstract-ws-component';
+import { FormComponent } from 'src/app/components/form/form.component';
 
 @Component({
     selector: 'app-archive',
     templateUrl: './archive.component.html',
     styleUrls: ['./archive.component.scss']
 })
-export class ArchiveComponent implements OnInit, OnDestroy {
+export class ArchiveComponent extends AbstractWsComponent implements OnInit, OnDestroy, AfterViewInit {
     formItems: any[] = [
         {
             controlName: 'forecastDate',
@@ -28,63 +30,75 @@ export class ArchiveComponent implements OnInit, OnDestroy {
             controlName: 'forecastTime',
             label: 'Forecast starting time',
             type: 'select',
-            placeholder: ["00:00:00", "12:00:00"],
+            value: {
+                obj: ["00:00:00", "12:00:00"], 
+                display: ["00:00:00", "12:00:00"]
+            },
             validators: [Validators.required]
         },
         {
             controlName: 'areaToRetrieve',
             label: 'Area to retrieve',
             type: 'input',
-            validators: [Validators.required]
+            value: {
+                obj: [], 
+                display: [], 
+                withPipe: { pipe: AroundPipe }
+            },
+            validators: [Validators.required],
+            pipe: AroundPipe,
         },
     ]
 
-    form: Form = new Form(this.formItems);
+    @ViewChild('appForm') appForm: FormComponent;
 
-    formGroup: FormGroup;
     mapSubscription: Subscription;
-    wsSubscription: Subscription;
 
     constructor(
-        private formService: FormService,
+        public formService: FormService,
         private mapService: MapService,
-        private atp45RequestService: Atp45RequestService,
-        private notificationService: NotificationService,
-        private websocketService: WebsocketService) { }
-
-    ngOnInit(): void {
-        this.formGroup = this.formService.initForm(this.form);
-        this.formGroup.get('areaToRetrieve')?.disable();
-        this.formGroup.get('forecastTime')?.patchValue(this.formItems[1].placeholder[0]);
-
-        this.mapService.cbrnMap.addDrawControl();
-        this.mapService.onAreaSelectionInit();
+        private requestService: ApiRequestsService,
+        public notificationService: NotificationService,
+        public websocketService: WebsocketService) {
+            super(websocketService, notificationService);
+         }
+    
+    
+    ngAfterViewInit() {
+        this.appForm.formGroup.get('areaToRetrieve')?.disable();
+        this.appForm.formGroup.get('forecastTime')?.patchValue(this.appForm.form.get('forecastTime')?.value?.obj[0]);
 
         this.mapSubscription = this.mapService.mapSubject.subscribe({
             next: (cbrnMap: CbrnMap) => {
                 let area = cbrnMap.layerToArea(cbrnMap.areaSelection);
-                area = area.map((e) => Math.round(e * 100) / 100)
-                this.formGroup.get('areaToRetrieve')?.patchValue(area.join(', '))
-                this.form.get('areaToRetrieve').placeholder = area;
+                this.appForm.form.newVal('areaToRetrieve', area);
             }
         });
 
-        this.initWsSubscription();
+    }
+
+    ngOnInit(): void {
+        super.ngOnInit();
+        this.mapService.cbrnMap.addDrawControl();
+        this.mapService.onAreaSelectionInit();
     }
 
     onSubmit() {
-        const notifTitle = this.notificationService.addNotif('Archive Request', 'archiveRequest');
-        this.notificationService.changeStatus(notifTitle, 'pending');
+        const notifTitle =  this.notificationService.addNotif('Archive Request', 'archiveRequest');
 
-        const datetime = this.formService.toDate(this.formGroup.get('forecastDate')?.value, this.formGroup.get('forecastTime')?.value);
+        const datetime = this.formService.toDate(this.appForm.formGroup.get('forecastDate')?.value, this.appForm.formGroup.get('forecastTime')?.value);
 
         const archiveInput = {
             datetime: this.formService.removeTimeZone(datetime),
-            area: this.formItems[2].placeholder,
+            area: this.appForm.form.get("areaToRetrieve")?.value?.obj,
             ws_info: {channel: this.websocketService.channel, backid: notifTitle},
         }
 
-        this.atp45RequestService.archiveRetrieval(archiveInput).subscribe({
+        const payload = {
+            ...archiveInput,
+            request: "archive_retrieval"
+        }
+        this.requestService.atp45Request(payload).subscribe({
             next: () => {
                 alert("Archive data have been received");
                 this.notificationService.changeStatus(notifTitle, 'succeeded');
@@ -97,23 +111,11 @@ export class ArchiveComponent implements OnInit, OnDestroy {
         })
     }
 
-    initWsSubscription() {
-        this.wsSubscription = this.websocketService.connection$.subscribe(
-            msg => {
-                if (msg.payload !== undefined) {
-                    this.notificationService.addContent(msg.payload.backid, msg.payload.displayed);
-                }
-            },
-            err => console.error("Error in receiving archive request output" + err)
-        );
-    }
-
     ngOnDestroy() {
+        super.ngOnDestroy();
         this.mapService.cbrnMap.removeDrawControl();
         this.mapService.cbrnMap.removeLayer(this.mapService.cbrnMap.areaSelection);
         this.mapSubscription.unsubscribe();
-
-        this.wsSubscription.unsubscribe();
     }
 
 }

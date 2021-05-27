@@ -95,6 +95,12 @@ export class CbrnMap {
         this.availableArea.addTo(this.map)
     }
 
+    removeAvailableArea() {
+        if (this.availableArea !== undefined) {
+            this.map.removeLayer(this.availableArea)
+        }
+    }
+
     newAreaSelection(rect: L.Rectangle) {
         if (this.areaSelection !== undefined) {
             this.map.removeLayer(this.areaSelection);

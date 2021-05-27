@@ -1,28 +1,24 @@
-import { ShapeData } from './../../../../../interfaces/atp45/shape-data';
+import { FormComponent } from 'src/app/components/form/form.component';
+import { ApiRequestsService } from './../../../../../services/api-requests.service';
+import { AbstractFormComponent } from './../../../../../abstract-classes/abstract-form-component';
 import { Forecast } from './../../../../../interfaces/forecast';
-import { Form } from './../../../../../models/form';
-import { FormItem } from './../../../../../interfaces/form-item';
 import { GribData } from './../../../../../interfaces/atp45/grib-data';
-import { Atp45RequestService } from '../../../../../services/atp45-request.service';
 import { MapService } from '../../../../../services/map.service';
 import { FormService } from '../../../../../services/form.service';
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { Component, Input, OnDestroy, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { SelectionModel } from '@angular/cdk/collections';
-import { Shape } from 'src/app/interfaces/atp45/shape-data';
-import { formatDate } from '@angular/common';
 import { Validators } from '@angular/forms';
 import { wrongLatValidator, wrongLonValidator } from 'src/app/shared/validators';
+import { DatePipe } from '@angular/common';
 
 @Component({
     selector: 'app-preloaded-form',
     templateUrl: './preloaded-form.component.html',
     styleUrls: ['./preloaded-form.component.scss']
 })
-export class PreloadedFormComponent implements OnInit, OnDestroy {
-    // @Input() formItems: any;
+export class PreloadedFormComponent extends AbstractFormComponent implements OnInit, OnDestroy, AfterViewInit {
     formItems: any = [
         {
             controlName: 'lat',
@@ -43,44 +39,50 @@ export class PreloadedFormComponent implements OnInit, OnDestroy {
             label: 'Forecast step selection: ',
             type: 'select',
             validators: [Validators.required],
-            placeholder: <Forecast>{startdate: new Date, steps: []}
+            value: {
+                obj: [],
+                display: [],
+                withPipe: { pipe: DatePipe, arg: ["YYYY-MM-dd @ HH:mm"] }
+            }
         },
     ]
 
-    form: Form = new Form(this.formItems);
-
     @Input() selection: SelectionModel<GribData>;
 
-    formGroup: FormGroup;
     mapSubscription: Subscription;
-    // availableSteps: any;
+
+    @ViewChild('appForm') appForm: FormComponent;
 
     constructor(
-        private formService: FormService,
+        public formService: FormService,
         private mapService: MapService, 
-        private atp45Service: Atp45RequestService) { }
+        private requestService: ApiRequestsService) { 
+            super(formService);
+        }
+    
+    ngAfterViewInit() {
+        this.appForm.formGroup.get('lat')?.valueChanges.subscribe(() => {
+            this.formService.emitIfLonLatValid();
+        });
+
+        this.appForm.formGroup.get('lon')?.valueChanges.subscribe(() => {
+            this.formService.emitIfLonLatValid();
+        });
+    }
 
     ngOnInit(): void {
-        this.formGroup = this.formService.initForm(this.form)
+        super.ngOnInit()
         this.mapService.onClickInit();
         
         this.mapSubscription = this.mapService.mapSubject.subscribe(
             (cbrnMap: any) => {
                 let marker = cbrnMap.marker;
-                this.formGroup.patchValue({
+                this.appForm.formGroup.patchValue({
                     lon: `${marker.lon}`,
                     lat: `${marker.lat}`
                 });
             }
         );
-
-        this.formGroup.get('lat')?.valueChanges.subscribe( () => {
-            this.emitIfValid();
-        });
-
-        this.formGroup.get('lon')?.valueChanges.subscribe( () => {
-            this.emitIfValid();
-        });
 
         this.selection.changed.subscribe({
             next: (s) => {
@@ -89,48 +91,60 @@ export class PreloadedFormComponent implements OnInit, OnDestroy {
                 this.mapService.cbrnMap.newAvailableArea(newGribata.area)
             }
         });
-
-        this.formService.newCurrentForm(this.formGroup);
-        
     }
 
     emitIfValid() {
-        if (this.formGroup.get('lat')?.valid && this.formGroup.get('lon')?.valid) {
+        if (this.appForm.formGroup.get('lat')?.valid && this.appForm.formGroup.get('lon')?.valid) {
             this.formService.emitCurrentForm();
         }
     }
 
     updateStepSelection(gribData: GribData) {
-        this.atp45Service.getAvailableSteps(gribData).subscribe(
+        const payload = {
+            ...gribData,
+            request: "available_steps"
+        };
+
+        this.requestService.atp45Request(payload).subscribe(
             (data: any) => {
                 let forecast = data;
                 forecast.startdate = new Date(forecast.startdate)
                 forecast.steps.forEach((element: {step: number, datetime: Date}) => {
                     element.datetime = new Date(element.datetime)
                 });
-                this.form.get('forecast').placeholder = <Forecast>forecast;
-                this.formGroup.get('forecast')?.setValue(forecast.steps[0]);
+                
+                this.appForm.form.get('forecast').value = {
+                    ...this.appForm.form.get('forecast').value,
+                    obj: forecast.steps.map((e:any) => {return e}),
+                    display: forecast.steps.map((e:any) => {return e.datetime}),
+                    metadata: <Forecast>forecast,
+                }
+                this.appForm.formGroup.get('forecast')?.setValue(forecast.steps[0]);
             },
             (error: HttpErrorResponse) => {
                 console.error(error.error);
             }
-        )
+        );
     }
 
-    onGetAtp45Prediction() {
-        const date = this.form.get('forecast').placeholder.startdate;
-        var userTimezoneOffset = date.getTimezoneOffset() * 60000;
+    onSubmit() {
+        // const date = this.appForm.form.get('forecast').placeholder.startdate;
+        const date = this.appForm.form.get('forecast')?.value?.metadata.startdate;
           
         const atp45Input = {
-            datetime: new Date(date.getTime() - userTimezoneOffset),
-            lat: this.formGroup.get('lat')?.value,
-            lon: this.formGroup.get('lon')?.value,
-            step: this.formGroup.get('forecast')?.value.step,
+            datetime:  this.formService.removeTimeZone(date),
+            lat: this.appForm.formGroup.get('lat')?.value,
+            lon: this.appForm.formGroup.get('lon')?.value,
+            step: this.appForm.formGroup.get('forecast')?.value.step,
             loaded_file: this.selection.selected[0].filename,
             area: this.selection.selected[0].area
-        }
+        };
 
-        this.atp45Service.getAtp45Prediction(atp45Input).subscribe({
+        const payload = {
+            ...atp45Input,
+            request: "prediction_request"
+        };
+        this.requestService.atp45Request(payload).subscribe({
             next: (shapeData: any) => {
                 shapeData = this.formService.handlePredictionResponse(shapeData);
                 this.mapService.cbrnMap.drawShapes(shapeData);
@@ -138,12 +152,14 @@ export class PreloadedFormComponent implements OnInit, OnDestroy {
             error: (error: HttpErrorResponse) => {
                 alert(error.message);
             }
-        })
+        });
     }
 
     ngOnDestroy() {
+        super.ngOnDestroy();
         this.mapSubscription.unsubscribe();
         this.mapService.offClickEvent();
+        this.mapService.cbrnMap.removeAvailableArea();
     }
 
 }

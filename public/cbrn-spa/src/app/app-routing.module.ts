@@ -1,3 +1,4 @@
+import { FlexpartPreloadedComponent } from './components/cbrn-models/flexpart/flexpart-preloaded/flexpart-preloaded.component';
 import { MetDataComponent } from './components/cbrn-models/flexpart/met-data/met-data.component';
 import { RealtimeComponent } from './components/cbrn-models/atp45/realtime/realtime.component';
 import { ArchiveComponent } from './components/cbrn-models/atp45/archive/archive.component';
@@ -10,6 +11,7 @@ const routes: Routes = [
     { path: 'archive', component: ArchiveComponent },
     { path: 'realtime', component: RealtimeComponent },
     { path: 'metdata', component: MetDataComponent },
+    { path: 'run-flexpart', component: FlexpartPreloadedComponent }
 ];
 
 @NgModule({

@@ -132,8 +132,7 @@ function broadcast_mars_output(req::MarsRequest, ws_info)
     close(process)
 end
 
-function available_steps()
-    payload = jsonpayload()
+function available_steps(payload)
     filename = payload["filename"]
     grib_to_read = joinpath(pwd(), "public", "grib_files", filename * ".grib")
 
@@ -156,10 +155,10 @@ function available_steps()
     available_steps = [Dict(:datetime => dt, :step => step) for (dt, step) in zip(available_datetimes_str, steps)]
     
     forecast = Dict(:startdate => Dates.format(startdate, "yyyy-mm-ddTHH:MM:SS"), :steps => available_steps)
-    Genie.Renderer.Json.json(forecast)
+    return forecast
 end
 
-function available_grib_files()
+function available_grib_files(payload)
     grib_files = searchdir(joinpath(pwd(), "public", "grib_files"), ".grib")
     availabe_data = Array{Dict,1}()
     for f in grib_files
@@ -176,13 +175,13 @@ function available_grib_files()
         start_date = Dates.DateTime(date * "T" * time, "yyyymmddTH:M")
 
         push!(availabe_data, Dict(
-            :startdate => start_date,
+            :startDate => start_date,
             :duration => steps[end],
             :area => round.(ReadGrib.get_area(grib_to_read), digits=3),
             :filename => split(basename(grib_to_read), '.')[1]
         ))
     end
-    Genie.Renderer.Json.json(availabe_data)
+    return availabe_data
 end
 
 """
@@ -196,8 +195,8 @@ Needed from json request :
 Data return as json :
   @`shape_data` 
 """
-function prediction_request()
-    request_data = jsonpayload()
+function prediction_request(payload)
+    request_data = payload
     lat = typeof(request_data["lat"]) == String ? parse(Float64, request_data["lat"]) : request_data["lat"]
     lon = typeof(request_data["lon"]) == String ? parse(Float64, request_data["lon"]) : request_data["lon"]
 
@@ -224,11 +223,11 @@ function prediction_request()
 
     shape_data = calc_prediction(filename, keys_to_select, shape_data)
 
-    return to_dict(shape_data) |> Genie.Renderer.Json.json
+    return to_dict(shape_data)
 end
 
-function realtime_prediction_request()
-    request_data = jsonpayload()
+function realtime_prediction_request(payload)
+    request_data = payload
     lat = typeof(request_data["lat"]) == String ? parse(Float64, request_data["lat"]) : request_data["lat"]
     lon = typeof(request_data["lon"]) == String ? parse(Float64, request_data["lon"]) : request_data["lon"]
     step = request_data["step"]
@@ -274,7 +273,8 @@ function realtime_prediction_request()
 
     shape_data = calc_prediction(filename, keys_to_select, shape_data)
 
-    return to_dict(shape_data) |> Genie.Renderer.Json.json
+    rm(filename)
+    return to_dict(shape_data)
 end
 
 function calc_prediction(filename, keys_to_select, shape_data::ShapeData)
@@ -335,8 +335,8 @@ Send a mars request for archive data with the requested date, time and area
 Needed from json request :
   @`date_request`, @`times_request`
 """
-function archive_retrieval()
-    request_data = jsonpayload()
+function archive_retrieval(payload)
+    request_data = payload
     
     area = request_data["area"]
     area = convert.(Int, round.(area))
@@ -360,10 +360,10 @@ function archive_retrieval()
         end
     end
 
-    Genie.Renderer.Json.json(Dict(:res => "Retrieval done"))
+    return Dict(:res => "Retrieval done")
 end
 
-function realtime_available_steps()
+function realtime_available_steps(payload)
     today = Dates.today()
     today_midnight = Dates.DateTime(today)
     today_noon = today_midnight + Dates.Hour(12)
@@ -381,7 +381,7 @@ function realtime_available_steps()
     available_dt_str = map(x -> Dates.format(x, "yyyy-mm-ddTHH:MM:SS"), available_dt)
     available_time_dict = [Dict(:datetime => x, :step => y) for (x, y) in zip(available_dt_str, steps)]
   
-    Genie.Renderer.Json.json(available_time_dict)
+    return available_time_dict
 end
 
 end

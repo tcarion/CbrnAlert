@@ -17,6 +17,9 @@ const FLEX_EXTRACT_CONTROL_PATH = joinpath(FLEX_EXTRACT_RUN_PATH, "Control", FLE
 const FLEX_EXTRACT_EXEC_PATH = joinpath(FLEX_EXTRACT_RUN_PATH, "run_local.sh")
 const FLEX_EXTRACT_SUBMIT_PATH = joinpath(FLEX_EXTRACT_SOURCE_PYTHON_PATH, "submit.py")
 
+const EXTRACTED_MET_DATA_DIR = joinpath(pwd(), "public", "extracted_met_data")
+const CONTROL_FILE_NAME = "CONTROL_OD.OPER.FC.eta.highres.app"
+
 FLEXPART_RUN_TEMPLATE_PATH = "/home/tcarion/flexpart/flexpart_run_template_tests"
 
 function round_area(area)
@@ -43,8 +46,36 @@ function run_flexextract(output_path, params, ws_info)
     close(log_file)
 end
 
-function flexextract_request()
-    request_data = jsonpayload()
+function run_flexpart(run_dir_path, ws_info)
+    cur_dir = pwd()
+    try
+        cd(run_dir_path)
+        cmd = `FLEXPART`
+        log_file = open(joinpath(run_dir_path, "output.log"), "w")
+        process = open(cmd)
+        cd(cur_dir)
+        while !eof(process)
+            line = readline(process, keep=true)
+            Genie.WebChannels.broadcast(ws_info["channel"], Dict(:displayed => line, :backid => ws_info["backid"]))
+            write(log_file, line) 
+            flush(log_file)
+        end
+
+        if process.exitcode == 1
+            throw(ProcessFailedException(process))
+        end
+
+        close(process)
+        close(log_file)
+    catch e
+        throw(e)
+    finally
+        cd(cur_dir)
+    end
+end
+
+function flexextract_request(payload)
+    request_data = payload
     startdate = Dates.DateTime(request_data["startDate"][1:22])
     enddate = Dates.DateTime(request_data["endDate"][1:22])
     timestep = request_data["timeStep"]
@@ -72,12 +103,12 @@ function flexextract_request()
 
     formated_options = FlexFiles.flexextract_options(options)
 
-    open(joinpath(dir_path, "metadata.json"), "w") do f
-        options[:area] = join(options[:area], ", ")
-        JSON.print(f, options)
-    end
+    # open(joinpath(dir_path, "metadata.json"), "w") do f
+    #     # options[:area] = join(options[:area], ", ")
+    #     JSON.print(f, options)
+    # end
 
-    @show formated_options
+    # @show formated_options
 
     ctrl_file_path = FlexFiles.update_flexfile(FLEX_EXTRACT_CONTROL_PATH, formated_options, "controlfile", dest=dir_path)
 
@@ -89,7 +120,106 @@ function flexextract_request()
     end
     
     run_flexextract(dir_path, params, request_data["ws_info"])
+end
 
+function available_flexpart_input(payload)
+    metdata_dir = readdir(EXTRACTED_MET_DATA_DIR, join=true)
+    control_files = joinpath.(metdata_dir, CONTROL_FILE_NAME)
+    metadata = FlexFiles.flexextract_metadata.(control_files)
+    # metadata = metadata[(!).(isnothing.(metadata))]
+    dirnames = map(x -> split(x, "/")[end], metdata_dir)
+    
+    response = Dict[]
+    for (index, md) in enumerate(metadata)
+        if !isnothing(md) 
+            push!(md, :dataDirname => dirnames[index])
+            push!(response, md)
+        end
+    end
+    # response = [push!(x, :dataDirname => dir) for (x, dir) in zip(metadata, dirnames)]
+    @show response
+    return response
+end
+
+function flexpart_run(payload)
+    request_data = payload
+    @show request_data
+
+    startdate = Dates.DateTime(request_data["startDate"][1:22])
+    enddate = Dates.DateTime(request_data["endDate"][1:22])
+    releasestartdate = Dates.DateTime(request_data["releaseStartDate"][1:22])
+    releaseenddate = Dates.DateTime(request_data["releaseEndDate"][1:22])
+    releaseheight = request_data["releaseHeight"]
+    timestep = request_data["timeStep"]
+    gridres = request_data["gridRes"]
+    area = request_data["area"]
+    rel_lon = request_data["lon"]
+    rel_lat = request_data["lat"]
+    particules = request_data["particulesNumber"]
+    metdata_dirname = request_data["dataDirname"]
+
+    area = round_area(area)
+
+    run_dir_name = Dates.format(startdate, dateformat"yyyymmdd_HH")*"_"*Dates.format(enddate, dateformat"yyyymmdd_HH")*"_"*particules
+    run_dir_path = joinpath(pwd(), "public", "flexpart_runs", run_dir_name)
+    mkpath(run_dir_path)
+    cp(FLEXPART_RUN_TEMPLATE_PATH, run_dir_path, force=true)
+
+    options_dir_path = joinpath(run_dir_path, "options")
+
+    command_options = Dict(
+        "IBDATE" => Dates.format(startdate, "yyyymmdd"),
+        "IBTIME" => Dates.format(startdate, "HHMMSS"),
+        "IEDATE" => Dates.format(enddate, "yyyymmdd"),
+        "IETIME" => Dates.format(enddate, "HHMMSS"),
+        )
+    
+    releases_options = Dict(
+        "IDATE1" => Dates.format(releasestartdate, "yyyymmdd"),
+        "ITIME1" => Dates.format(releasestartdate, "HHMMSS"),
+        "IDATE2" => Dates.format(releaseenddate, "yyyymmdd"),
+        "ITIME2" => Dates.format(releaseenddate, "HHMMSS"),
+        "LON1" => rel_lon,
+        "LON2" => rel_lon,
+        "LAT1" => rel_lat,
+        "LAT2" => rel_lat,
+        "Z1" => releaseheight,
+        "Z2" => releaseheight,
+        "PARTS" => particules
+    )
+
+    outlon0 = area[2]
+    outlat0 = area[3]
+    deltalon = area[4] - outlon0
+    deltalat = area[1] - outlat0
+    nx = convert(Int, deltalon/gridres)
+    ny = convert(Int, deltalat/gridres)
+
+    outgrid_options = Dict(
+        "OUTLON0" => outlon0,
+        "OUTLAT0" => outlat0,
+        "NUMXGRID" => nx,
+        "NUMYGRID" => ny,
+        "DXOUT" => gridres,
+        "DYOUT" => gridres
+    )
+
+    FlexFiles.update_flexfile(joinpath(options_dir_path, "COMMAND"), command_options, "namelist")
+    FlexFiles.update_flexfile(joinpath(options_dir_path, "RELEASES"), releases_options, "namelist")
+    FlexFiles.update_flexfile(joinpath(options_dir_path, "OUTGRID"), outgrid_options, "namelist")
+
+    metdata_dirname = joinpath(pwd(), "public", "extracted_met_data", metdata_dirname, "output/")
+
+    pathnames_path = joinpath(pwd(), run_dir_path, "pathnames")
+    pathnames = readlines(pathnames_path)
+    pathnames[3] = metdata_dirname
+    open(pathnames_path, "w") do f
+        for l in pathnames write(f, l*"\n") end
+    end
+
+    FlexFiles.update_available(joinpath(pwd(), run_dir_path, "AVAILABLE"), metdata_dirname)
+
+    run_flexpart(run_dir_path, request_data["ws_info"])
 end
 
 end

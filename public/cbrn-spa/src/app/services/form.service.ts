@@ -12,9 +12,9 @@ import { Subject } from 'rxjs';
 })
 export class FormService {
 
-    currentFormSubject = new Subject<FormGroup>();
+    currentFormSubject = new Subject<{formGroup: FormGroup, form: Form}>();
 
-    currentForm = new FormGroup({});
+    currentForm = {formGroup: new FormGroup({}), form: new Form([])};
     constructor(
         private formBuilder: FormBuilder
     ) { }
@@ -23,8 +23,8 @@ export class FormService {
         this.currentFormSubject.next(this.currentForm);
     }
 
-    newCurrentForm(newForm: FormGroup) {
-        this.currentForm = newForm;
+    newCurrentForm(formGroup: FormGroup, form: Form) {
+        this.currentForm = {formGroup, form};
         this.emitCurrentForm();
     }
 
@@ -32,9 +32,15 @@ export class FormService {
         let formControls: { [k: string]: any } = {};
         form.formItems.forEach((formItem: FormItem) => {
             let validators = formItem.validators === undefined ? [] : formItem.validators
-            formControls[formItem.controlName] = [formItem.placeholder === undefined ? '' : formItem.placeholder, validators]
+            formControls[formItem.controlName] = [formItem.value === undefined ? '' : formItem.value.display, validators]
         });
         return this.formBuilder.group(formControls);
+    }
+
+    emitIfLonLatValid() {
+        if (this.currentForm.formGroup.get('lat')?.valid && this.currentForm.formGroup.get('lon')?.valid) {
+            this.emitCurrentForm();
+        }
     }
 
     handlePredictionResponse(shapeData: any): ShapeData {
@@ -56,13 +62,19 @@ export class FormService {
 
     formToObject() {
         let obj: { [k:string]: any} = {};
-        const controls = this.currentForm.controls;
+        const controls = this.currentForm.formGroup.controls;
+        const form = this.currentForm.form;
         for (const p in controls) {
-            let val = this.currentForm.controls[p].value;
-            if (val instanceof Date) {
-                val = this.removeTimeZone(val);
+            let formItem = form.get(p);
+            if (formItem.type == "input" && formItem.value !== undefined) {
+                obj[p] = formItem.value?.obj
+            } else {
+                let val = this.currentForm.formGroup.controls[p].value;
+                if (val instanceof Date) {
+                    val = this.removeTimeZone(val);
+                }
+                obj[p] = val;
             }
-            obj[p] = val;
         }
         return obj;
     }

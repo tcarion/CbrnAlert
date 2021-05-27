@@ -10,6 +10,44 @@ using UUIDs
 
 Genie.config.websockets_server = true
 
+
+atp45_routes = Dict(
+    "available_steps" => Atp45sController.available_steps,
+    "available_gribfiles" => Atp45sController.available_grib_files,
+    "prediction_request" => Atp45sController.prediction_request,
+    "archive_retrieval" => Atp45sController.archive_retrieval,
+    "realtime_available_steps" => Atp45sController.realtime_available_steps,
+    "realtime_prediction_request" => Atp45sController.realtime_prediction_request,
+)
+
+flexpart_routes = Dict(
+    "metdata_retrieval" => FlexpartsController.flexextract_request,
+    "available_flexpart_input" => FlexpartsController.available_flexpart_input,
+    "flexpart_run" => FlexpartsController.flexpart_run,
+)
+
+route("/atp45", method = POST) do
+    payload = jsonpayload()
+    request = payload["request"]
+    @info request
+    if haskey(atp45_routes, request)
+        return Genie.Renderer.Json.json(atp45_routes[request](payload))
+    else
+        return Genie.Renderer.Json.json(nothing)
+    end
+end
+
+route("/flexpart", method = POST) do
+    payload = jsonpayload()
+    request = payload["request"]
+    @info request
+    if haskey(flexpart_routes, request)
+        return Genie.Renderer.Json.json(flexpart_routes[request](payload))
+    else
+        return Genie.Renderer.Json.json(nothing)
+    end
+end
+
 route("/") do 
     Genie.Renderer.redirect(:dashboard) 
 end
@@ -31,20 +69,21 @@ route("/atp45/atp_shape_request", ATPController.atp_shape_request, method = POST
 
 route("/atp45/mars_request", ATPController.mars_request, method = POST, named = :mars_request)
 
+# route("/atp45/available_steps", Atp45sController.available_steps, method = POST, named = :available_steps)
 
-route("/atp45/available_steps", Atp45sController.available_steps, method = POST, named = :available_steps)
+# route("/atp45/available_gribfiles", Atp45sController.available_grib_files, method = GET, named = :available_grib_files)
 
-route("/atp45/available_gribfiles", Atp45sController.available_grib_files, method = GET, named = :available_grib_files)
+# route("/atp45/prediction_request", Atp45sController.prediction_request, method = POST, named = :prediction_request)
 
-route("/atp45/prediction_request", Atp45sController.prediction_request, method = POST, named = :prediction_request)
+# route("/atp45/archive_retrieval", Atp45sController.archive_retrieval, method = POST, named = :archive_retrieval)
 
-route("/atp45/archive_retrieval", Atp45sController.archive_retrieval, method = POST, named = :archive_retrieval)
+# route("/atp45/realtime_available_steps", Atp45sController.realtime_available_steps, method = GET, named = :realtime_available_steps)
 
-route("/atp45/realtime_available_steps", Atp45sController.realtime_available_steps, method = GET, named = :realtime_available_steps)
+# route("/atp45/realtime_prediction_request", Atp45sController.realtime_prediction_request, method = POST, named = :realtime_prediction_request)
 
-route("/atp45/realtime_prediction_request", Atp45sController.realtime_prediction_request, method = POST, named = :realtime_prediction_request)
+# route("/flexpart/metdata_retrieval", FlexpartsController.flexextract_request, method = POST, named = :metdata_retrieval)
 
-route("/flexpart/metdata_retrieval", FlexpartsController.flexextract_request, method = POST, named = :metdata_retrieval)
+# route("/flexpart/available_flexpart_input", FlexpartsController.available_flexpart_input, method = GET, named = :available_flexpart_input)
 
 
 route("/flexpart/extract_met_data", FlexpartController.extract_met_data, named= :extract_met_data)

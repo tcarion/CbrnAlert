@@ -2,7 +2,7 @@ import { AroundPipe } from './around.pipe';
 
 describe('AroundPipe', () => {
   it('create an instance', () => {
-    const pipe = new AroundPipe();
+    const pipe = AroundPipe;
     expect(pipe).toBeTruthy();
   });
 });

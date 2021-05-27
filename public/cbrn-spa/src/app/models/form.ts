@@ -16,4 +16,20 @@ export class Form {
         }
         return fi;
     }
+
+    newVal(controlName: string, val: any) {
+        this.get(controlName).value = {
+            ...this.get(controlName).value,
+            obj: val,
+            display: val
+        }
+    }
+
+    newDistVal(controlName: string, obj: any, disp: any) {
+        this.get(controlName).value = {
+            ...this.get(controlName).value,
+            obj: obj,
+            display: disp
+        }
+    }
 }

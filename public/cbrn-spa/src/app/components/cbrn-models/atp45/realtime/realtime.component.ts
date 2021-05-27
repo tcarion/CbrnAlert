@@ -1,3 +1,5 @@
+import { FormComponent } from 'src/app/components/form/form.component';
+import { ApiRequestsService } from './../../../../services/api-requests.service';
 import { SubscriptionsContainer } from './../../../../models/subscriptions-container';
 import { NotificationService } from './../../../../services/notification.service';
 import { WebsocketService } from './../../../../services/websocket.service';
@@ -5,29 +7,37 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Form } from './../../../../models/form';
 import { FormService } from './../../../../services/form.service';
 import { FormItem } from './../../../../interfaces/form-item';
-import { Atp45RequestService } from './../../../../services/atp45-request.service';
 import { MapService } from './../../../../services/map.service';
 import {
     wrongLatValidator,
     wrongLonValidator,
 } from 'src/app/shared/validators';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { Validators, FormGroup, FormBuilder } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { AbstractWsComponent } from 'src/app/abstract-classes/abstract-ws-component';
+import { DatePipe } from '@angular/common';
 
 @Component({
     selector: 'app-realtime',
     templateUrl: './realtime.component.html',
     styleUrls: ['./realtime.component.scss'],
 })
-export class RealtimeComponent implements OnInit, OnDestroy {
-    formItems: any[] = [
+export class RealtimeComponent extends AbstractWsComponent implements OnInit, OnDestroy, AfterViewInit {
+    formItems: FormItem[] = [
         {
             controlName: 'startdate',
             label: 'Forecast step selection',
             type: 'select',
             validators: [Validators.required],
-            placeholder: [],
+            value: {
+                obj: [],
+                display: [],
+                withPipe: {
+                    pipe: DatePipe,
+                    arg: ["YYYY-MM-dd @ HH:mm"]
+                }
+            },
         },
         {
             controlName: 'lat',
@@ -45,61 +55,73 @@ export class RealtimeComponent implements OnInit, OnDestroy {
         },
     ];
 
-    form: Form = new Form(this.formItems);
-    
-    formGroup: FormGroup;
+    @ViewChild('appForm') appForm: FormComponent;
+
     mapSubscription: Subscription;
-    wsSubscription: Subscription;
+
+    _latSubscription?: Subscription;
+    _lonSubscription?: Subscription;
 
     constructor(
         private mapService: MapService,
-        private atp45Service: Atp45RequestService,
-        private formService: FormService,
-        private websocketService: WebsocketService,
-        private notificationService: NotificationService
-    ) { }
+        private requestService: ApiRequestsService,
+        public formService: FormService,
+        public websocketService: WebsocketService,
+        public notificationService: NotificationService
+    ) {
+        super(websocketService, notificationService);
+    }
+
+    ngAfterViewInit() {
+
+        this.getRealtimeAvailableSteps();
+        // this.appForm.formGroup.get('lat')?.valueChanges.subscribe(() => {
+        //     this.formService.emitIfLonLatValid();
+        // });
+
+        // this.appForm.formGroup.get('lon')?.valueChanges.subscribe(() => {
+        //     this.formService.emitIfLonLatValid();
+        // });
+        this._latSubscription = this.formService.currentForm.formGroup.get('lat')?.valueChanges.subscribe(() => {
+            this.formService.emitIfLonLatValid();
+        });
+
+        this._lonSubscription = this.formService.currentForm.formGroup.get('lon')?.valueChanges.subscribe(() => {
+            this.formService.emitIfLonLatValid();
+        });
+    }
 
     ngOnInit(): void {
-        this.formGroup = this.formService.initForm(this.form);
-        this.getRealtimeAvailableSteps();
+        super.ngOnInit();
         this.mapService.onClickInit();
 
         this.mapSubscription = this.mapService.mapSubject.subscribe(
             (cbrnMap: any) => {
                 let marker = cbrnMap.marker;
-                this.formGroup.patchValue({
+                this.appForm.formGroup.patchValue({
                     lon: `${marker.lon}`,
                     lat: `${marker.lat}`,
                 });
             }
         );
-
-        this.formGroup.get('lat')?.valueChanges.subscribe(() => {
-            this.emitIfValid();
-        });
-
-        this.formGroup.get('lon')?.valueChanges.subscribe(() => {
-            this.emitIfValid();
-        });
-
-        this.formService.newCurrentForm(this.formGroup);
-
-        this.initWsSubscription();
     }
 
     onSubmit() {
         const notifTitle = this.notificationService.addNotif('ATP45 Prediction', 'atp45Request');
-        this.notificationService.changeStatus(notifTitle, 'pending');
 
         const atp45Input = {
-            datetime: this.formService.removeTimeZone(this.form.get('startdate').placeholder[0].datetime),
-            lat: this.formGroup.get('lat')?.value,
-            lon: this.formGroup.get('lon')?.value,
-            step: this.formGroup.get('startdate')?.value.step,
-            ws_info: {channel: this.websocketService.channel, backid: notifTitle},
+            datetime: this.formService.removeTimeZone(this.appForm.form.get('startdate').value?.obj[0].datetime),
+            lat: this.appForm.formGroup.get('lat')?.value,
+            lon: this.appForm.formGroup.get('lon')?.value,
+            step: this.appForm.formGroup.get('startdate')?.value.step,
+            ws_info: { channel: this.websocketService.channel, backid: notifTitle },
         }
 
-        this.atp45Service.getAtp45RealtimePrediction(atp45Input).subscribe({
+        const payload = {
+            ...atp45Input,
+            request: "realtime_prediction_request"
+        }
+        this.requestService.atp45Request(payload).subscribe({
             next: (shapeData: any) => {
                 shapeData = this.formService.handlePredictionResponse(shapeData);
                 this.mapService.cbrnMap.drawShapes(shapeData);
@@ -112,43 +134,32 @@ export class RealtimeComponent implements OnInit, OnDestroy {
         })
     }
 
-    emitIfValid() {
-        if (this.formGroup.get('lat')?.valid && this.formGroup.get('lon')?.valid) {
-            this.formService.emitCurrentForm();
-        }
-    }
-
     getRealtimeAvailableSteps() {
-        this.atp45Service.getRealtimeAvailableSteps().subscribe({
+        const payload = { request: "realtime_available_steps" }
+        this.requestService.atp45Request(payload).subscribe({
             next: (data: any) => {
                 let steps = data;
                 steps.forEach((element: any) => {
                     element.datetime = new Date(element.datetime);
                 });
-                this.formItems.forEach((element: FormItem, index: number) => {
-                    if (element.controlName === 'startdate') {
-                        this.formItems[index].placeholder = steps;
-                    }
-                });
-                this.formGroup.get('startdate')?.setValue(steps[0]);
+
+                // this.appForm.form.get("startdate").value = {
+                //     obj: steps, 
+                //     display: steps.map((e:any) => e.datetime),
+                //     withPipe: { pipe: DatePipe, arg: ["YYYY-MM-dd @ HH:mm"] }
+                // }
+                this.appForm.form.newDistVal('startdate', steps, steps.map((e: any) => e.datetime))
+                this.appForm.formGroup.get('startdate')?.setValue(steps[0]);
             },
         });
     }
 
-    initWsSubscription() {
-        this.wsSubscription = this.websocketService.connection$.subscribe(
-            msg => {
-                if (msg.payload !== undefined) {
-                    this.notificationService.addContent(msg.payload.backid, msg.payload.displayed);
-                }
-            },
-            err => console.error("Error in receiving realtime ATP45 output" + err)
-        );
-    }
-
     ngOnDestroy() {
+        super.ngOnDestroy();
         this.mapSubscription.unsubscribe();
-        this.wsSubscription.unsubscribe();
         this.mapService.offClickEvent();
+
+        this._latSubscription?.unsubscribe();
+        this._lonSubscription?.unsubscribe();
     }
 }
