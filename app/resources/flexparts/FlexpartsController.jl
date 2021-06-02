@@ -6,6 +6,7 @@ using FlexFiles
 using JSON
 using Dates
 using ReadNcf
+using GeoJSON
 
 const PYTHON_PATH = "/opt/anaconda3/bin/python"
 # const FLEX_EXTRACT_PATH = "/home/tcarion/flexpart/flex_extract_app"
@@ -127,7 +128,7 @@ function available_flexpart_input(payload)
     control_files = joinpath.(metdata_dir, CONTROL_FILE_NAME)
     metadata = FlexFiles.flexextract_metadata.(control_files)
     # metadata = metadata[(!).(isnothing.(metadata))]
-    dirnames = map(x -> split(x, "/")[end], metdata_dir)
+    dirnames = map(x -> splitpath(x)[end], metdata_dir)
     
     response = Dict[]
     for (index, md) in enumerate(metadata)
@@ -137,13 +138,11 @@ function available_flexpart_input(payload)
         end
     end
     # response = [push!(x, :dataDirname => dir) for (x, dir) in zip(metadata, dirnames)]
-    @show response
     return response
 end
 
 function flexpart_run(payload)
     request_data = payload
-    @show request_data
 
     startdate = Dates.DateTime(request_data["startDate"][1:22])
     enddate = Dates.DateTime(request_data["endDate"][1:22])
@@ -220,6 +219,97 @@ function flexpart_run(payload)
     FlexFiles.update_available(joinpath(pwd(), run_dir_path, "AVAILABLE"), metdata_dirname)
 
     run_flexpart(run_dir_path, request_data["ws_info"])
+end
+
+"""
+    flexpart_results()
+Return meta data for a flexpart run
+
+Input payload:
+    none
+Output:
+    Dict(
+        :startDate :: Date,
+        :endDate :: Date
+        :times :: Int[],
+        :heights :: Real[],
+        :area :: Real[],
+        :dataDirname :: String,
+    )[]
+"""
+function flexpart_results(payload)
+    available_fp_runs_dir = filter(x -> isdir(x), readdir(joinpath(pwd(), "public", "flexpart_runs"), join=true))
+    available_fp_runs = Array{Dict, 1}()
+    for dir in available_fp_runs_dir
+        output_dir = joinpath(dir, "output")
+        ncf_file = filter(x->occursin(".nc",x), readdir(output_dir))
+        isempty(ncf_file) && break
+        ncf_file = ncf_file[1]
+        metadata = ReadNcf.ncfmetadata(joinpath(output_dir, ncf_file))
+        push!(metadata, :dataDirname => splitpath(dir)[end])
+        push!(available_fp_runs, metadata)
+    end
+    return available_fp_runs
+end
+
+"""
+    flexpart_conc()
+Return meta data for a flexpart run
+
+Input payload:
+    Dict(
+        :timeStep :: Int,
+        :heights :: Int
+        :dataDirname :: String,
+    )[]
+Output:
+    Dict(
+        :lons :: Real[],
+        :lats :: Real[],
+        :values :: Real[],
+    )[]
+"""
+function flexpart_conc(payload)
+    sent_data = payload
+    run_name = sent_data["dataDirname"]
+    time = sent_data["timeSteps"]
+
+    available_fp_runs = filter(x -> isdir(x), readdir(joinpath(pwd(), "public", "flexpart_runs"), join=true))
+    available_fp_runs = [splitpath(x)[end] for x in available_fp_runs]
+
+    if !(run_name in available_fp_runs)
+        throw(Genie.Exceptions.RuntimeException("Flexpart run not found", "The flexpart output hasn't been found on the server", 1))
+    end
+    
+    output_dir = joinpath(pwd(), "public", "flexpart_runs", run_name, "output")
+    ncf_file = filter(x->occursin(".nc",x), readdir(output_dir))[1]
+    ncf_file = joinpath(output_dir, ncf_file)
+    lon, lat, conc = ReadNcf.get_filtered_field(ncf_file, time)
+
+    response = Dict("lons" => lon, "lats" => lat, "values" => log10.(conc))
+    return response
+end
+
+function flexpart_geojson_conc(payload)
+    sent_data = payload
+    run_name = sent_data["dataDirname"]
+    time = sent_data["timeSteps"]
+    flexpart_result = sent_data["flexpartResult"]
+    
+    available_fp_runs = filter(x -> isdir(x), readdir(joinpath(pwd(), "public", "flexpart_runs"), join=true))
+    available_fp_runs = [splitpath(x)[end] for x in available_fp_runs]
+
+    if !(run_name in available_fp_runs)
+        throw(Genie.Exceptions.RuntimeException("Flexpart run not found", "The flexpart output hasn't been found on the server", 1))
+    end
+    
+    output_dir = joinpath(pwd(), "public", "flexpart_runs", run_name, "output")
+    ncf_file = filter(x->occursin(".nc",x), readdir(output_dir))[1]
+    ncf_file = joinpath(output_dir, ncf_file)
+    framed = ReadNcf.framed_conc(ncf_file, time, flexpart_result["dx"], flexpart_result["dy"])
+    response = ReadNcf.frame2geo_dict(framed)
+    @show response
+    response
 end
 
 end

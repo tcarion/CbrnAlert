@@ -24,6 +24,9 @@ flexpart_routes = Dict(
     "metdata_retrieval" => FlexpartsController.flexextract_request,
     "available_flexpart_input" => FlexpartsController.available_flexpart_input,
     "flexpart_run" => FlexpartsController.flexpart_run,
+    "flexpart_results" => FlexpartsController.flexpart_results,
+    "flexpart_conc" => FlexpartsController.flexpart_conc,
+    "flexpart_geojson_conc" => FlexpartsController.flexpart_geojson_conc
 )
 
 route("/atp45", method = POST) do

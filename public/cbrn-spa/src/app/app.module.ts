@@ -44,6 +44,9 @@ import { FormComponent } from './components/form/form.component';
 import { FormControlPipe } from './pipes/form-control.pipe';
 import { DynamicPipe } from './pipes/dynamic.pipe';
 import { DatePipe } from '@angular/common';
+import { SelectionTableComponent } from './components/selection-table/selection-table.component';
+import { FlexpartPlotComponent } from './components/cbrn-models/flexpart/flexpart-preloaded/flexpart-plot/flexpart-plot.component';
+import { FlexpartPlotFormComponent } from './components/cbrn-models/flexpart/flexpart-preloaded/flexpart-plot/flexpart-plot-form/flexpart-plot-form.component';
 
 @NgModule({
     declarations: [
@@ -63,6 +66,9 @@ import { DatePipe } from '@angular/common';
         FormComponent,
         DynamicPipe,
         FormControlPipe,
+        SelectionTableComponent,
+        FlexpartPlotComponent,
+        FlexpartPlotFormComponent,
     ],
     imports: [
         BrowserModule,

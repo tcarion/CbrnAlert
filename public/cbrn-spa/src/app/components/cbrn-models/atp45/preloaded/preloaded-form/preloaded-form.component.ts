@@ -6,7 +6,7 @@ import { GribData } from './../../../../../interfaces/atp45/grib-data';
 import { MapService } from '../../../../../services/map.service';
 import { FormService } from '../../../../../services/form.service';
 import { Component, Input, OnDestroy, OnInit, ViewChild, AfterViewInit } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subscription, Subject } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { SelectionModel } from '@angular/cdk/collections';
 import { Validators } from '@angular/forms';
@@ -47,9 +47,15 @@ export class PreloadedFormComponent extends AbstractFormComponent implements OnI
         },
     ]
 
-    @Input() selection: SelectionModel<GribData>;
+    @Input() newSelectionSubject: Subject<GribData>;
+    gribData: GribData;
 
     mapSubscription: Subscription;
+
+    _latSubscription?: Subscription;
+    _lonSubscription?: Subscription;
+
+    newSelectionSubscription: Subscription;
 
     @ViewChild('appForm') appForm: FormComponent;
 
@@ -61,12 +67,18 @@ export class PreloadedFormComponent extends AbstractFormComponent implements OnI
         }
     
     ngAfterViewInit() {
-        this.appForm.formGroup.get('lat')?.valueChanges.subscribe(() => {
+        this._latSubscription = this.formService.currentForm.formGroup.get('lat')?.valueChanges.subscribe(() => {
             this.formService.emitIfLonLatValid();
         });
 
-        this.appForm.formGroup.get('lon')?.valueChanges.subscribe(() => {
+        this._lonSubscription = this.formService.currentForm.formGroup.get('lon')?.valueChanges.subscribe(() => {
             this.formService.emitIfLonLatValid();
+        });
+
+        this.newSelectionSubscription = this.newSelectionSubject.subscribe((newGribata) => {
+            this.updateStepSelection(newGribata);
+            this.mapService.cbrnMap.newAvailableArea(newGribata.area);
+            this.gribData = newGribata;
         });
     }
 
@@ -83,14 +95,6 @@ export class PreloadedFormComponent extends AbstractFormComponent implements OnI
                 });
             }
         );
-
-        this.selection.changed.subscribe({
-            next: (s) => {
-                const newGribata = s.added[0];
-                this.updateStepSelection(newGribata);
-                this.mapService.cbrnMap.newAvailableArea(newGribata.area)
-            }
-        });
     }
 
     emitIfValid() {
@@ -136,8 +140,8 @@ export class PreloadedFormComponent extends AbstractFormComponent implements OnI
             lat: this.appForm.formGroup.get('lat')?.value,
             lon: this.appForm.formGroup.get('lon')?.value,
             step: this.appForm.formGroup.get('forecast')?.value.step,
-            loaded_file: this.selection.selected[0].filename,
-            area: this.selection.selected[0].area
+            loaded_file: this.gribData.filename,
+            area: this.gribData.area
         };
 
         const payload = {

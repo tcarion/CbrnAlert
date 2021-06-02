@@ -1,5 +1,5 @@
 import { CbrnMap } from './../../../../../../models/cbrn-map';
-import { Subscription } from 'rxjs';
+import { Subscription, Subject } from 'rxjs';
 import { FormItem } from './../../../../../../interfaces/form-item';
 import { AroundPipe } from './../../../../../../pipes/around.pipe';
 import { DatePipe } from '@angular/common';
@@ -146,12 +146,15 @@ export class FlexpartRunPreloadedFormComponent extends AbstractWsComponent imple
         },
     ];
 
-    @Input() selection: SelectionModel<FlexpartInput>;
+    @Input() newSelectionSubject: Subject<FlexpartInput>;
+    flexpartInput: FlexpartInput;
 
     mapSubscription: Subscription;
 
     _latSubscription?: Subscription;
     _lonSubscription?: Subscription;
+
+    newSelectionSubscription: Subscription;
 
     constructor(
         private mapService: MapService,
@@ -169,26 +172,6 @@ export class FlexpartRunPreloadedFormComponent extends AbstractWsComponent imple
 
         this.mapService.cbrnMap.addDrawControl();
         this.mapService.onAreaSelectionInit();
-
-        this.selection.changed.subscribe({
-            next: (s) => {
-                const fpInput = s.added[0];
-                const startDate = fpInput.startDate;
-                const endDate = fpInput.endDate;
-                const step = fpInput.timeStep;
-                const hour_span = (endDate.getTime() - startDate.getTime()) / 36e5;
-                let available_dates: Date[] = [startDate];
-                for (let i = step; i <= hour_span; i = i + step) {
-                    available_dates.push(new Date(startDate.getTime() + i * 36e5));
-                }
-
-                ['startDate', 'endDate', 'releaseStartDate', 'releaseEndDate'].map((e) => {
-                    this.formService.currentForm.form.newVal(e, available_dates);
-                    this.formService.currentForm.formGroup.get(e)?.patchValue(available_dates[0]);
-                })
-                this.mapService.cbrnMap.newAvailableArea(fpInput.area);
-            }
-        });
 
         this.mapSubscription = this.mapService.mapEventSubject.subscribe({
             next: (event) => {
@@ -218,6 +201,28 @@ export class FlexpartRunPreloadedFormComponent extends AbstractWsComponent imple
         this._lonSubscription = this.formService.currentForm.formGroup.get('lon')?.valueChanges.subscribe(() => {
             this.formService.emitIfLonLatValid();
         });
+
+        this.newSelectionSubscription = this.newSelectionSubject.subscribe((fpInput) => {
+            this.initForm(fpInput);
+            this.flexpartInput = fpInput;
+        });
+    }
+
+    initForm(fpInput: FlexpartInput) {
+        const startDate = fpInput.startDate;
+        const endDate = fpInput.endDate;
+        const step = fpInput.timeStep;
+        const hour_span = (endDate.getTime() - startDate.getTime()) / 36e5;
+        let available_dates: Date[] = [startDate];
+        for (let i = step; i <= hour_span; i = i + step) {
+            available_dates.push(new Date(startDate.getTime() + i * 36e5));
+        }
+
+        ['startDate', 'endDate', 'releaseStartDate', 'releaseEndDate'].map((e) => {
+            this.formService.currentForm.form.newVal(e, available_dates);
+            this.formService.currentForm.formGroup.get(e)?.patchValue(available_dates[0]);
+        })
+        this.mapService.cbrnMap.newAvailableArea(fpInput.area);
     }
 
     onSubmit(): void {
@@ -226,7 +231,7 @@ export class FlexpartRunPreloadedFormComponent extends AbstractWsComponent imple
         let formFields = this.formService.formToObject();
         formFields = {
             ...formFields,
-            dataDirname: this.selection.selected[0].dataDirname,
+            dataDirname: this.flexpartInput.dataDirname,
             ws_info: { channel: this.websocketService.channel, backid: notifTitle },
         }
         console.log(formFields);
@@ -256,6 +261,8 @@ export class FlexpartRunPreloadedFormComponent extends AbstractWsComponent imple
 
         this._latSubscription?.unsubscribe();
         this._lonSubscription?.unsubscribe();
+
+        this.newSelectionSubscription.unsubscribe();
     }
 
 }

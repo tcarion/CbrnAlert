@@ -1,36 +1,51 @@
+import { Subscription } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatSort } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
-import { Component, ViewChild, AfterViewInit, PipeTransform } from '@angular/core';
-import { ApiRequestsService } from '../services/api-requests.service';
+import { Component, ViewChild, AfterViewInit, PipeTransform, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
+import { ApiRequestsService } from 'src/app/services/api-requests.service';
+
+interface ColumnInfo {
+    name: string,
+    text: string,
+    width: number,
+    withPipe?: {
+        pipe: any,
+        arg?: any
+    },
+    sort?: boolean
+}
 
 @Component({
-    template: ''
+    selector: 'app-selection-table',
+    templateUrl: './selection-table.component.html',
+    styleUrls: ['./selection-table.component.scss']
 })
-export abstract class AbstractSelectionTableComponent<T> implements AfterViewInit {
+export class SelectionTableComponent<T> implements AfterViewInit, OnDestroy {
+
     dataSource: MatTableDataSource<T> = new MatTableDataSource<T>();;
-    displayedColumns: string[];
     selection = new SelectionModel<T>(false, []);
 
-    columnInfo: {
-        name: string, 
-        text: string, 
-        width: number, 
-        withPipe?: {
-            pipe: any, 
-            arg?: any
-        },
-        sort?: boolean
-    }[];
+    @Input() columnInfo: ColumnInfo[];
+    @Input() displayedColumns: string[];
+
+    @Output() newSelectionEvent = new EventEmitter<T>();
+
     @ViewChild(MatSort) sort: MatSort;
 
     constructor(
         public requestService: ApiRequestsService
-    ) {}
+    ) { }
+
+    ngOnInit() {
+        this.selection.changed.subscribe((s) => {
+            this.newSelectionEvent.emit(s.added[0]);
+        })
+    }
 
     populateWithRequest(api: string, request: string, postProcess: Function) {
-        const payload = {request: request}
+        const payload = { request: request }
         let req = api === "atp45" ? this.requestService.atp45Request(payload) : this.requestService.flexpartRequest(payload)
         req.subscribe(
             (data: any) => {
@@ -49,5 +64,8 @@ export abstract class AbstractSelectionTableComponent<T> implements AfterViewIni
 
     populateTable(data: T[]) {
         this.dataSource.data = data;
+    }
+
+    ngOnDestroy() {
     }
 }

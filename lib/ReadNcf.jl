@@ -1,7 +1,8 @@
 module ReadNcf
 using NetCDF
 using Dates
-file = "/home/tcarion/CBRN-dispersion-app/public/flexpart_runs/20210330_01_20210330_10_1000/output/grid_conc_20210330010000.nc"
+using GeoJSON
+file = "/home/tcarion/CBRN-dispersion-app/public/flexpart_runs/20210524_00_20210524_12_1000/output/grid_conc_20210524000000.nc"
 function get_field(file, n)
     lat = ncread(file, "latitude");
     lon = ncread(file, "longitude");
@@ -38,13 +39,82 @@ function ncfmetadata(file)
     end
     area = [maximum(lats), min_lon, minimum(lats), max_lon]
 
+    dx = round(lons[2] - lons[1], digits=3)
+    dy = round(lats[2] - lats[1], digits=3)
+
     return Dict(
         :times => times,
-        :startdatetime => Dates.format(startdatetime, "yyyy-mm-ddTHHMMSS"),
-        :enddatetime => Dates.format(enddatetime, "yyyy-mm-ddTHHMMSS"),
+        :startDate => startdatetime,
+        :endDate => enddatetime,
         :heights => ncread(file, "height"),
-        :area => join(area, "/")
+        :dx => dx,
+        :dy => dy,
+        :area => area
+    )
+end
+
+function frame_coord(lon, lat, dx, dy)
+    dx2 = dx/2
+    dy2 = dy/2
+
+    left = lon - dx2
+    right = lon + dx2
+    lower = lat - dy2
+    upper = lat + dy2
+
+    return [
+        [left, lower],
+        [left, upper],
+        [right, upper],
+        [right, lower],
+    ]
+end
+
+function framed_conc(file, n, dx, dy)
+    lons, lats, conc = get_filtered_field(file, n)
+    framed = Array{Dict, 1}()
+    for (i, c) in enumerate(conc)
+        push!(framed, Dict(
+            :corners => frame_coord(lons[i], lats[i], dx, dy),
+            :center => [lons[i], lats[i]],
+            :conc => c
+            )
         )
+    end
+    framed
+end
+
+function frame2geo_dict(framed)
+    feature_collection = Array{Dict, 1}()
+
+    for cell in framed
+        push!(feature_collection, 
+            Dict(
+                "type" => "FeatureCollection",
+                "features" => [
+                    Dict(
+                        "type" => "Feature",
+                        "geometry" => Dict(
+                            "type" => "Polygon",
+                            "coordinates" => [cell[:corners]]
+                        ),
+                        "properties" => Dict(
+                            "conc" => cell[:conc]
+                        )
+                    ),
+                    Dict(
+                        "type" => "Feature",
+                        "geometry" => Dict(
+                            "type" => "Point",
+                            "coordinates" => cell[:center]
+                        )
+                    ),
+                ]
+            )
+        )
+    end
+
+    feature_collection
 end
 
 end

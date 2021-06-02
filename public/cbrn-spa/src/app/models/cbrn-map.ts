@@ -1,6 +1,7 @@
 import { Shape, ShapeData } from './../interfaces/atp45/shape-data';
-import * as L from 'leaflet'
-import 'leaflet-draw'
+import * as L from 'leaflet';
+import 'leaflet-draw';
+import 'leaflet.heat';
 
 const iconRetinaUrl = 'assets/marker-icon-2x.png';
 const iconUrl = 'assets/marker-icon.png';
@@ -29,6 +30,12 @@ export class CbrnMap {
     public availableArea: L.Layer;
     public areaSelection: L.Rectangle;
     private drawRectangleControl?: L.Control;
+
+    private heatLayer: L.Layer;
+
+    private geojsonLayer: L.GeoJSON<any>;
+
+    private info: any;
 
     constructor() {
 
@@ -111,6 +118,83 @@ export class CbrnMap {
 
     removeLayer(layer: L.Layer | undefined) {
         layer !== undefined && this.map.removeLayer(layer);
+    }
+
+    addHeatLayer(lons: number[], lats: number[], values: number[]) {
+        let toPlot: L.HeatLatLngTuple[] = [];
+        const max = Math.max(...values)
+        values.map((e, i) => {
+            toPlot.push(<any>[
+                lats[i],
+                lons[i],
+                e/max
+            ]);
+        });
+        const options = {
+            radius : 1e10,
+            // max: max
+        };
+        this.heatLayer = L.heatLayer(toPlot, options);
+
+        // this.heatLayer = L.heatLayer([
+        //     [50.5, 30.5, 0.2], // lat, lng, intensity
+        //     [50.6, 30.4, 0.5],
+        // ], {radius: 25})
+
+        this.heatLayer.addTo(this.map);
+    }
+
+    addGeoJsonLayer(features: any) {
+        let geojsonMarkerOptions = {
+            radius: 0.5,
+            // fillColor: "#ff7800",
+            color: "black",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        };
+        let option: any = {
+            pointToLayer: function (feature: any, latlng: L.LatLng) {
+                return L.circleMarker(latlng, geojsonMarkerOptions);
+            }
+        }
+
+        this.info = new L.Control({position: 'topright'});
+        this.info.onAdd = function (map: L.Map) {
+            this._div = L.DomUtil.create('div', 'leaflet-info'); // create a div with a class "info"
+            this.update();
+            return this._div;
+        };
+
+        this.info.update = function (props:any) {
+            this._div.innerHTML = '<h4>Concentration</h4>' +  (props ?
+                '<b>' + props.conc + '</b>'
+                : 'Hover over a cell');
+        };
+
+        let info = this.info
+        function cellHover(e:L.LeafletMouseEvent) {
+            let layer = e.target;
+            info.update(layer.feature.properties)
+        }
+
+        function resetHover(e:L.LeafletMouseEvent) {
+            info.update();
+        }
+
+        function onEachFeature(feature: any, layer: L.Layer) {
+            layer.on({
+                mouseover: cellHover,
+                mouseout: resetHover,
+            });
+        }
+        option.onEachFeature = onEachFeature;
+        this.geojsonLayer = L.geoJSON(undefined, option).addTo(this.map);
+        features.forEach((feature: any) => {
+            this.geojsonLayer.addData(feature);
+        });
+
+        info.addTo(this.map);
     }
 
     addDrawControl() {
