@@ -7,6 +7,10 @@ using ReadGrib
 using ComputeShapes
 using EarthCompute
 
+using GeoInterface
+using GeoJSON
+
+global dict
 
 const ec = EarthCompute
 const WIND_THRESHOLD = 10 # km/h
@@ -25,7 +29,8 @@ The other fields are data related to the instance
 mutable struct ShapeData
     lon::Float64
     lat::Float64
-    shapes::Vector{ComputeShapes.Shape}
+    # shapes::Vector{ComputeShapes.Shape}
+    shapes::Vector{Feature}
     wind::Wind
     datetime::DateTime
     step::Int
@@ -60,30 +65,12 @@ request_to_string(req::MarsRequest) = request_to_string(req.date, req.time, req.
 
 Convert the structures in dict to be passed to Genie.Renderer.Json.json
 """
-function to_dict(w::Wind)
-    d = Dict()
-    for fn in fieldnames(typeof(w))
-        push!(d, fn => getfield(w, fn))
-    end
-    return d
-end
-
-function to_dict(sd::ShapeData)
-	d = Dict()
-    for fn in fieldnames(typeof(sd))
-        if fn == :shapes
-            list_of_dict = []
-            for shape in getfield(sd, fn)
-                push!(list_of_dict, shape |> ComputeShapes.to_dict)
-            end
-            push!(d, fn => list_of_dict)
-        elseif fn == :wind
-      push!(d, fn => getfield(sd, fn) |> to_dict)
-    else
-      push!(d, fn => getfield(sd, fn))
-        end
-	end
-	return d
+to_dict(field::Feature) = geo2dict(field)
+to_dict(field::Vector{Feature}) = geo2dict(FeatureCollection(field))
+to_dict(field) = field
+function type2dict(obj)
+    fns = fieldnames(obj |> typeof)
+    (!isempty(fns) && !isa(obj, DateTime)) ? Dict(fn => type2dict(getfield(obj, fn)) for fn in fieldnames(obj |> typeof)) : to_dict(obj)
 end
 
 """
@@ -104,7 +91,7 @@ function steps_to_datetimes(toParse, steps::Array{Int}, df)::DateTime[]
     return map(step -> start_d + Dates.Hour(step), steps)
 end
 steps_to_datetimes(toParse, steps::Tuple{Vararg}, df) = steps_to_datetimes(toParse, collect(steps), df)
-steps_to_datetimes(toParse, steps::Array{String}, df) = steps_to_datetimes(toParse, map(x -> parse(Int, x), steps), df)
+steps_to_datetimes(toParse, steps::Array{String}, df) = steps_to_datetimes(toParse, map(x -> Base.parse(Int, x), steps), df)
 steps_to_datetimes(start_d::DateTime, steps::Array{Int}) = map(step -> start_d + Dates.Hour(step), steps)
 
 searchdir(path,key) = filter(x -> occursin(key, x), readdir(path))
@@ -144,7 +131,7 @@ function available_steps(payload)
     time = ReadGrib.get_key_values(grib_to_read, "time")[1]
     steps = ReadGrib.get_key_values(grib_to_read, "step")
 
-    steps = typeof(steps[1]) != Int ? sort(map(x -> parse(Int, x), collect(steps))) : sort(collect(steps))
+    steps = typeof(steps[1]) != Int ? sort(map(x -> Base.parse(Int, x), collect(steps))) : sort(collect(steps))
 
     time = (time == "0" || time == 0) ? "0000" : string(time)
     m = match(r"(?<h>\d{2}).?(?<m>\d{2})", time)
@@ -167,7 +154,7 @@ function available_grib_files(payload)
         time = ReadGrib.get_key_values(grib_to_read, "time")[1]
         steps = ReadGrib.get_key_values(grib_to_read, "step")
 
-        steps = typeof(steps[1]) != Int ? sort(map(x -> parse(Int, x), collect(steps))) : sort(collect(steps))
+        steps = typeof(steps[1]) != Int ? sort(map(x -> Base.parse(Int, x), collect(steps))) : sort(collect(steps))
         time = (time == "0" || time == 0) ? "0000" : string(time)
         m = match(r"(?<h>\d{2}).?(?<m>\d{2})", time)
         time = !isnothing(m) ? m[:h] * ":" * m[:m] : error("time is in unreadable format")
@@ -197,8 +184,8 @@ Data return as json :
 """
 function prediction_request(payload)
     request_data = payload
-    lat = typeof(request_data["lat"]) == String ? parse(Float64, request_data["lat"]) : request_data["lat"]
-    lon = typeof(request_data["lon"]) == String ? parse(Float64, request_data["lon"]) : request_data["lon"]
+    lat = typeof(request_data["lat"]) == String ? Base.parse(Float64, request_data["lat"]) : request_data["lat"]
+    lon = typeof(request_data["lon"]) == String ? Base.parse(Float64, request_data["lon"]) : request_data["lon"]
 
     step = request_data["step"]
 
@@ -219,17 +206,18 @@ function prediction_request(payload)
     )
 
     run_dt = steps_to_datetimes(datetime_start, [step])[1]
-    shape_data = ShapeData(lon, lat, Vector{ComputeShapes.Shape}(), Wind(0, 0), run_dt, step)
+    shape_data = ShapeData(lon, lat, Vector{Feature}(), Wind(0, 0), run_dt, step)
 
     shape_data = calc_prediction(filename, keys_to_select, shape_data)
+    dict_sd = shape_data |> type2dict
 
-    return to_dict(shape_data)
+    return dict_sd
 end
 
 function realtime_prediction_request(payload)
     request_data = payload
-    lat = typeof(request_data["lat"]) == String ? parse(Float64, request_data["lat"]) : request_data["lat"]
-    lon = typeof(request_data["lon"]) == String ? parse(Float64, request_data["lon"]) : request_data["lon"]
+    lat = typeof(request_data["lat"]) == String ? Base.parse(Float64, request_data["lat"]) : request_data["lat"]
+    lon = typeof(request_data["lon"]) == String ? Base.parse(Float64, request_data["lon"]) : request_data["lon"]
     step = request_data["step"]
     datetime_start = Dates.DateTime(request_data["datetime"][1:22])
     time = Dates.format(datetime_start, "HHMM")
@@ -245,7 +233,7 @@ function realtime_prediction_request(payload)
         else
             prev_date = DateTime(req.date * req.time, dateformat"yyyymmddHHMM")
             new_date = prev_date - Dates.Hour(12)
-            new_step = parse(Int, req.step) + 12
+            new_step = Base.parse(Int, req.step) + 12
             req = MarsRequest(Dates.format(new_date, "yyyymmdd"), Dates.format(new_date, "HHMM"), string(new_step), req.area)
         end
     end
@@ -269,12 +257,14 @@ function realtime_prediction_request(payload)
     )
 
     run_dt = steps_to_datetimes(datetime_start, [step])[1]
-    shape_data = ShapeData(lon, lat, Vector{ComputeShapes.Shape}(), Wind(0, 0), run_dt, step)
+    shape_data = ShapeData(lon, lat, Vector{Feature}(), Wind(0, 0), run_dt, step)
 
     shape_data = calc_prediction(filename, keys_to_select, shape_data)
 
     rm(filename)
-    return to_dict(shape_data)
+
+    dict_sd = shape_data |> type2dict
+    return dict_sd
 end
 
 function calc_prediction(filename, keys_to_select, shape_data::ShapeData)
@@ -312,20 +302,19 @@ function calc_prediction(filename, keys_to_select, shape_data::ShapeData)
     thres_wind = WIND_THRESHOLD / 3.6
     if wind.speed < thres_wind
         haz_area = ComputeShapes.ATP_circle(lat, lon, 10., resolution)
-        haz_area.label = "Hazard Area"
         rel_area = ComputeShapes.ATP_circle(lat, lon, 2., resolution)
-        rel_area.label = "Release Area"
-        push!(shape_data.shapes, haz_area)
-        push!(shape_data.shapes, rel_area)
     else
         haz_area = ComputeShapes.ATP_triangle(lat, lon, 10., 2., wind.u, wind.v)
-        haz_area.label = "Hazard Area"
         rel_area = ComputeShapes.ATP_circle(lat, lon, 2., resolution)
-        rel_area.label = "Release Area"
-        push!(shape_data.shapes, haz_area)
-        push!(shape_data.shapes, rel_area)
+        
     end
-
+    push!(haz_area.properties, "label" => "Hazard Area")
+    push!(haz_area.properties, "color" => "	#0000FF")
+    push!(rel_area.properties, "label" => "Release Area")
+    push!(rel_area.properties, "color" => "	#FF0000")
+    push!(shape_data.shapes, haz_area)
+    push!(shape_data.shapes, rel_area)
+    
     shape_data
 end
 """

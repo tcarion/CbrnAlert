@@ -15,39 +15,6 @@
   right: 0;
 }
 
-.toolbar {
-  position: relative;
-  display: inline;
-  background-color: var(--sidebarBackground);
-  color: var(--sideColor);
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  height: 44px;
-  .toolbar-title {
-    display: flex;
-    flex-direction: row;
-
-    h1.app-name {
-      margin-left: 8px;
-      align-self: center;
-    }
-  }
-
-  .notif-container {
-    position: absolute;
-    background-color: var(--sidebarBackground);
-    // background-color: green;
-    color: white;
-    top: 40px;
-    right: 0;
-    max-width: 365px;
-    z-index: 100000;
-    // transform: translateX(-100%);
-  }
-}
-
 .sidenav {
   width: var(--sidebarMinWidth);
   mat-panel-title,

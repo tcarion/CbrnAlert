@@ -1,21 +1,5 @@
 <div class="container" [class.is-mobile]="mobileQuery.matches">
-    <mat-toolbar class="toolbar">
-        <div class="toolbar-title">
-            <button mat-icon-button (click)="snav.toggle()">
-                <mat-icon>menu</mat-icon>
-            </button>
-            <h1 class="app-name">CBRN Dispersion app</h1>
-        </div>
-        <div class="toolbar-icons">
-            <button mat-icon-button (click)="onNotif()">
-                <mat-icon>notifications</mat-icon>
-                <span *ngIf="hasNewNotif" matBadge="&#8288;" matBadgeColor="warn" matBadgeSize="small"></span>
-            </button>
-        </div>
-        <div class="notif-container" *ngIf="showNotifs">
-            <app-notification></app-notification>
-        </div>
-    </mat-toolbar>
+    <app-topbar [snav]="snav"></app-topbar>
     
     <mat-sidenav-container class="sidenav-container" [style.marginTop.px]="mobileQuery.matches ? 40 : 0">
         <mat-sidenav 

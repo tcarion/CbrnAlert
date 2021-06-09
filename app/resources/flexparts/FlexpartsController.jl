@@ -306,10 +306,14 @@ function flexpart_geojson_conc(payload)
     output_dir = joinpath(pwd(), "public", "flexpart_runs", run_name, "output")
     ncf_file = filter(x->occursin(".nc",x), readdir(output_dir))[1]
     ncf_file = joinpath(output_dir, ncf_file)
-    framed = ReadNcf.framed_conc(ncf_file, time, flexpart_result["dx"], flexpart_result["dy"])
-    response = ReadNcf.frame2geo_dict(framed)
-    @show response
-    response
+    cells, legend_data = ReadNcf.frame2geo_dict(ncf_file, time, flexpart_result["dx"], flexpart_result["dy"])
+    fp_run_data = ReadNcf.ncfmetadata(ncf_file)
+
+    Dict(
+        "flexpartResult" => fp_run_data,
+        "cells" => cells,
+        "legendData" => legend_data
+    )
 end
 
 end

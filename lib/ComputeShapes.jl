@@ -1,5 +1,6 @@
 module ComputeShapes
 
+using GeoInterface
 const earthRad = 6371.0
 
 mutable struct Shape
@@ -10,9 +11,32 @@ mutable struct Shape
 	Shape(lon, lat, type) = new(lon, lat, type, "")
 end
 
-function to_coords(s::Shape)
-	return [[e[1], e[2]] for e in zip(s.lats, s.lons)]
+function to_coords(lons::Array{Float64, 1}, lats::Array{Float64, 1})
+	return [[e[1], e[2]] for e in zip(lons, lats)]
 end
+
+# function to_coords(s::Shape)
+# 	return to_coords(s.lons, s.lats)
+# end
+
+function get_lonlat(g::AbstractPolygon)
+	coords = coordinates(g)
+	lons = [e[1] for e in coords[1]]
+	lats = [e[2] for e in coords[1]]
+	lons, lats
+end
+
+function get_lonlat(g::AbstractLineString)
+	coords = coordinates(g)
+	lons = [e[1] for e in coords]
+	lats = [e[2] for e in coords]
+	lons, lats
+end
+
+function get_lonlat(f::AbstractFeature)
+	get_lonlat(f.geometry)
+end
+
 
 function to_dict(s::Shape)
 	d = Dict()
@@ -22,7 +46,7 @@ function to_dict(s::Shape)
 	return d
 end
 
-function ATP_circle(lat, lon, radius, resolution)
+function ATP_circle(lat, lon, radius, resolution)::Feature
 	radDis = radius / earthRad
 	rLat = lat * pi / 180
 	rLon = lon * pi / 180
@@ -57,40 +81,61 @@ function ATP_circle(lat, lon, radius, resolution)
 	append!(lonL, lonL[1])
 	append!(latL, latL[1])
 
-    return Shape(lonL, latL, "circle")
+	polygon = Polygon(to_coords(lonL, latL))
+	properties = Dict(
+		"shape" => "circle"
+	)
+	return Feature(polygon, properties)
 end
 
-function ATP_line(lat, lon, line_length, we_comp, sn_comp, resolution)
+function ATP_line(lat, lon, line_length, we_comp, sn_comp, resolution)::Feature
 	step = range(0, stop=line_length, length=resolution)
 
 	norm = sqrt(we_comp^2 + sn_comp^2)
 
 	lonL = [lon, lon + line_length / (earthRad * cos(lat * pi / 180)) * 180 / pi * we_comp / norm]
 	latL = [lat, lat + line_length / earthRad * 180 / pi * sn_comp / norm]
-	return Shape(lonL, latL, "line")
+
+	linestring = LineString(to_coords(lonL, latL))
+	properties = Dict(
+		"shape" => "line"
+	)
+	return Feature(linestring, properties)
 end
 
-function ATP_line_angle(lat, lon, line_length, alpha)
+function ATP_line_angle(lat, lon, line_length, alpha)::Feature
 
 	lonL = [lon, lon + line_length / (earthRad * cos(lat * pi / 180)) * 180 / pi * cos(alpha * pi / 180)]
 	latL = [lat, lat + line_length / earthRad * 180 / pi * sin(alpha * pi / 180)]
-	return Shape(lonL, latL, "line")
+
+	linestring = LineString(to_coords(lonL, latL))
+	properties = Dict(
+		"shape" => "line"
+	)
+
+	return Feature(linestring, properties)
 end
 
-function ATP_triangle(lat_center, lon_center, length_line, radius, alpha)
+function ATP_triangle(lat_center, lon_center, length_line, radius, alpha)::Feature
 	out_circle = ATP_line_angle(lat_center, lon_center, 2 * radius, alpha + 180.)
-	lon_start = out_circle.lons[end]
-	lat_start = out_circle.lats[end]
+	lons, lats = get_lonlat(out_circle)
+	lon_start = lons[end]
+	lat_start = lats[end]
 
 	hyp_length = (length_line + 2 * radius) / (sqrt(3) / 2)
 	top_line = ATP_line_angle(lat_start, lon_start, hyp_length, alpha + 30.)
 	bot_line = ATP_line_angle(lat_start, lon_start, hyp_length, alpha - 30.)
-	lonL = [lon_start, top_line.lons[2], bot_line.lons[2]]
-	latL = [lat_start, top_line.lats[2], bot_line.lats[2]]
-	return Shape(lonL, latL, "triangle")
+	# lonL = [lon_start, get_lonlat(top_line)[1][], bot_line.lons[2]]
+	# latL = [lat_start, top_line.lats[2], bot_line.lats[2]]
+	# last_line = LineString([coordinates(top_line.geometry)[2], coordinates(bot_line.geometry)[2]])
+	polygon = Polygon([coordinates(top_line.geometry)[1], coordinates(top_line.geometry)[2], coordinates(bot_line.geometry)[2]])
+	properties = Dict(
+		"shape" => "triangle"
+	)
+	return Feature(polygon, properties)
 end
 
-function ATP_triangle(lat_center, lon_center, length_line, radius, x_comp, y_comp)
+function ATP_triangle(lat_center, lon_center, length_line, radius, x_comp, y_comp)::Feature
 	alpha = atan(y_comp, x_comp) * 180 / pi
 	return ATP_triangle(lat_center, lon_center, length_line, radius, alpha)
 end

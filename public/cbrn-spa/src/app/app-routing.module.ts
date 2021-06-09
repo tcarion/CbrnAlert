@@ -1,8 +1,8 @@
-import { FlexpartPreloadedComponent } from './components/cbrn-models/flexpart/flexpart-preloaded/flexpart-preloaded.component';
-import { MetDataComponent } from './components/cbrn-models/flexpart/met-data/met-data.component';
-import { RealtimeComponent } from './components/cbrn-models/atp45/realtime/realtime.component';
-import { ArchiveComponent } from './components/cbrn-models/atp45/archive/archive.component';
-import { PreloadedComponent } from './components/cbrn-models/atp45/preloaded/preloaded.component';
+import { FlexpartPreloadedComponent } from './flexpart/flexpart-preloaded/flexpart-preloaded.component';
+import { MetDataComponent } from './flexpart/met-data/met-data.component';
+import { RealtimeComponent } from './atp45/realtime/realtime.component';
+import { ArchiveComponent } from './atp45/archive/archive.component';
+import { PreloadedComponent } from './atp45/preloaded/preloaded.component';
 import { NgModule, Component } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 

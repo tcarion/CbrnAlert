@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { NotificationService } from '../services/notification.service';
-import { WebsocketService } from '../services/websocket.service';
+import { NotificationService } from 'src/app/core/services/notification.service';
+import { WebsocketService } from 'src/app/core/services/websocket.service';
 import { Subscription } from 'rxjs';
 
 @Component({

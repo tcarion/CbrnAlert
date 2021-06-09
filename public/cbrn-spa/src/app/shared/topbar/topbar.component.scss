@@ -1,0 +1,20 @@
+.topbar {
+    position: relative;
+    display: inline;
+    background-color: var(--sidebarBackground);
+    color: var(--sideColor);
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    height: var(--toolbarHeight);
+    .topbar-title {
+      display: flex;
+      flex-direction: row;
+  
+      h1.app-name {
+        margin-left: 8px;
+        align-self: center;
+      }
+    }
+  }

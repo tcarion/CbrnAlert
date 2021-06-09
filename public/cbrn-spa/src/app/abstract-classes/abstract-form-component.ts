@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormService } from './../services/form.service';
+import { FormService } from '../core/services/form.service';
 import { FormGroup } from '@angular/forms';
-import { Form } from './../models/form';
+import { Form } from '../core/models/form';
 
 @Component({
     template: ''

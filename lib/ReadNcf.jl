@@ -2,6 +2,11 @@ module ReadNcf
 using NetCDF
 using Dates
 using GeoJSON
+using ColorSchemes
+using Colors
+
+DEFAULT_COLOR_SCHEME = ColorSchemes.jet
+
 file = "/home/tcarion/CBRN-dispersion-app/public/flexpart_runs/20210524_00_20210524_12_1000/output/grid_conc_20210524000000.nc"
 function get_field(file, n)
     lat = ncread(file, "latitude");
@@ -29,6 +34,8 @@ function ncfmetadata(file)
     lons = ncread(file, "longitude");
     min_lon = minimum(lons)
     max_lon = maximum(lons)
+    rellon = ncread(file, "RELLNG1")
+    rellat = ncread(file, "RELLAT1")
     if min_lon > 180 || max_lon > 180
         min_lon -= 360
         max_lon -= 360
@@ -49,6 +56,8 @@ function ncfmetadata(file)
         :heights => ncread(file, "height"),
         :dx => dx,
         :dy => dy,
+        :releaseLons => rellon,
+        :releaseLats => rellat,
         :area => area
     )
 end
@@ -72,23 +81,33 @@ end
 
 function framed_conc(file, n, dx, dy)
     lons, lats, conc = get_filtered_field(file, n)
-    framed = Array{Dict, 1}()
+    colors, cbar, ticks_label = val2colors_trunc(conc)
+    
+    framed = Dict(
+        "legendData" => Dict(
+            "colorbar" => cbar,
+            "ticksLabel" => ticks_label
+        ),
+        "cells" => Array{Dict, 1}()
+    )
     for (i, c) in enumerate(conc)
-        push!(framed, Dict(
+        push!(framed["cells"], Dict(
             :corners => frame_coord(lons[i], lats[i], dx, dy),
             :center => [lons[i], lats[i]],
-            :conc => c
+            :conc => c,
+            :color => colors[i]
             )
         )
     end
     framed
 end
 
-function frame2geo_dict(framed)
-    feature_collection = Array{Dict, 1}()
+function frame2geo_dict(file, n, dx, dy)
+    framed = framed_conc(file, n, dx, dy)
+    geocells = Array{Dict, 1}()
 
-    for cell in framed
-        push!(feature_collection, 
+    for cell in framed["cells"]
+        push!(geocells, 
             Dict(
                 "type" => "FeatureCollection",
                 "features" => [
@@ -99,7 +118,8 @@ function frame2geo_dict(framed)
                             "coordinates" => [cell[:corners]]
                         ),
                         "properties" => Dict(
-                            "conc" => cell[:conc]
+                            "conc" => cell[:conc],
+                            "color" => cell[:color]
                         )
                     ),
                     Dict(
@@ -114,7 +134,58 @@ function frame2geo_dict(framed)
         )
     end
 
-    feature_collection
+    geocells, framed["legendData"]
+end
+
+function colorbar(z, n = 10)
+    logz = log10.(z)
+    scheme = DEFAULT_COLOR_SCHEME
+    @show logz
+    minlogz = minimum(logz)
+    maxlogz = maximum(logz)
+
+    ticks = range(minlogz, maxlogz, length=n+1) |> collect
+    ticks_label = 10 .^ ticks
+    cbar = get(scheme, ticks[2:end], :extrema)
+
+    return "#".*hex.(cbar), ticks_label
+end
+# function colorbar(file::String, n = 10)
+#     lons, lats, conc = get_filtered_field(file, n)
+#     @show conc
+#     cbar, ticks_label = colorbar(conc, n)
+
+#     return "#".*hex.(cbar), ticks_label
+# end
+
+function val2colors(z)
+    logz = log10.(z)
+
+    # t = normz .- minimum(normz)
+    # rescaled_normz = t ./ maximum(t)
+
+    scheme = DEFAULT_COLOR_SCHEME
+
+    cbar = get(scheme, logz, :extrema)
+    # carray = [hex(get(scheme, v)) for v in rescaled_normz]
+    carray = "#".*hex.(cbar)
+    return carray
+end
+
+function val2colors_trunc(z, n = 10)
+    cbar, ticks_label = colorbar(z, n)
+
+    trunc_colors = Array{String, 1}()
+
+    for v in z
+        which_cat = v .< ticks_label
+        i = findfirst(which_cat)
+        i = i == 1 ? 2 : i
+        push!(trunc_colors, cbar[i-1])
+    end
+
+    carray = trunc_colors
+    return carray, cbar, ticks_label
 end
 
 end
