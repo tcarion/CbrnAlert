@@ -1,14 +1,3 @@
-:host {
-    position: fixed;
-    top: var(--toolbarHeight);
-    right: 0;
-    // width: 120px;
-    background-color: var(--sidebarBackground);
-    color: white;
-    max-width: 365px;
-    z-index: 100000;    
-}
-
 .notif-item {
     // position: relative;
     button {

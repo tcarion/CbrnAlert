@@ -17,6 +17,8 @@ export class TopbarComponent implements OnInit, OnDestroy {
 
     notifSubscription: Subscription;
 
+    showPlotList: boolean = false;
+
     constructor(
         private notificationService: NotificationService,
     ) { }
@@ -34,6 +36,10 @@ export class TopbarComponent implements OnInit, OnDestroy {
     onNotif() {
         this.showNotifs = !this.showNotifs;
         this.hasNewNotif = false;
+    }
+
+    onPlotList() {
+        this.showPlotList = !this.showPlotList;
     }
 
     ngOnDestroy(): void {

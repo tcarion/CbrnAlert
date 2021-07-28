@@ -1,27 +1,34 @@
+import { MapPlot } from 'src/app/core/models/map-plot';
+import { FeatureCollection } from 'geojson';
+import { Atp45ShapeData } from './../../atp45/shape-data';
 import { Injectable } from '@angular/core';
-import { Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { Atp45Service } from 'src/app/atp45/atp45.service';
+import { MapPlotsService } from 'src/app/core/services/map-plots.service';
+// import { ShapeData } from 'src/app/atp45/shape-data';
 import { CbrnMap } from '../models/cbrn-map';
 
-type mapEvent = 'newMarker' | 'areaSelection'
+type MapEvent = 'newMarker' | 'areaSelection'
 @Injectable({
     providedIn: 'root'
 })
-
 export class MapService {
     cbrnMap = new CbrnMap();
 
     mapSubject = new Subject<CbrnMap>();
-    mapEventSubject = new Subject<mapEvent>();
+    mapEventSubject = new Subject<MapEvent>();
 
-    constructor() { 
 
-    }
+
+    constructor(
+    ) { }
 
     emitMapSubject() {
         this.mapSubject.next(this.cbrnMap);
     }
 
-    emitEventSubject(event: mapEvent) {
+    emitEventSubject(event: MapEvent) {
         this.mapEventSubject.next(event);
     }
 
@@ -50,6 +57,56 @@ export class MapService {
 
     offAreaSelectionEvent() {
         this.cbrnMap.map.off('draw:created');
+    }
+
+    // atp45ResultToLayer(): Observable<{shapeData:ShapeData, layer: L.Layer}> {
+    //     return this.atp45Service.resultsSubject
+    //         .pipe(
+    //             map((shapeData) => {
+    //                 let rawLayer = this.cbrnMap.getLayerFromShapes(shapeData.shapes);
+    //                 // let mapLayer = this.addLayerToMap(rawLayer);
+    //                 return {
+    //                     layer: rawLayer,
+    //                     shapeData
+    //                 }
+    //             })
+    //         )
+    // }
+
+    addPlotToMap(plot: MapPlot) {
+        if (plot.type === 'atp45') {
+            this.cbrnMap.addAtp45Plot(plot)
+        }
+        else if (plot.type === 'flexpart') {
+            this.cbrnMap.addFlexpartPlot(plot);
+        }
+    }
+
+    hidePlotFromMap(plot: MapPlot) {
+        if (plot.type === 'atp45') {
+            this.cbrnMap.hideAtp45Plot(plot);
+        }
+        else if (plot.type === 'flexpart') {
+            this.cbrnMap.hideFlexpartPlot(plot);
+        }
+    }
+
+    showPlotToMap(plot: MapPlot) {
+        if (plot.type === 'atp45') {
+            this.cbrnMap.showAtp45Plot(plot);
+        }
+        else if (plot.type === 'flexpart') {
+            this.cbrnMap.showFlexpartPlot(plot);
+        }
+    }
+
+    deletePlot(plot: MapPlot) {
+        if (plot.type === 'atp45') {
+            this.cbrnMap.deleteAtp45Plot(plot);
+        }
+        else if (plot.type === 'flexpart') {
+            this.cbrnMap.deleteFlexpartPlot(plot);
+        }
     }
 
 }

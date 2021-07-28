@@ -15,7 +15,7 @@ export interface Wind {
     u: number,
 }
 
-export interface ShapeData {
+export interface Atp45ShapeData {
     shapes: FeatureCollection,
     wind: Wind,
     date: string,

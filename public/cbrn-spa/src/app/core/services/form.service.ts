@@ -64,7 +64,7 @@ export class FormService {
         const form = this.currentForm.form;
         for (const p in controls) {
             let formItem = form.get(p);
-            if (formItem.type == "input" && formItem.value !== undefined) {
+            if (formItem.type == "input" && formItem.controlName.includes('area')) {
                 obj[p] = formItem.value?.obj
             } else {
                 let val = this.currentForm.formGroup.controls[p].value;

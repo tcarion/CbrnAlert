@@ -1,10 +1,10 @@
-import { Subject } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { DatePipe } from '@angular/common';
-import { FlexpartInput } from '../../flexpart-input';
+import { FlexpartInput } from '../flexpart-input';
 import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
 import { SelectionTableComponent } from 'src/app/shared/selection-table/selection-table.component';
 import { FlexpartRunPreloadedFormComponent } from './flexpart-run-preloaded-form/flexpart-run-preloaded-form.component';
-import { FlexpartService } from '../../flexpart.service';
+import { FlexpartService } from '../flexpart.service';
 
 const columnInfo = [
     {
@@ -31,23 +31,25 @@ const columnInfo = [
 export class FlexpartRunPreloadedComponent implements OnInit, OnDestroy, AfterViewInit {
 
     @ViewChild('selectionTableRef') selectionTableRef: SelectionTableComponent<FlexpartInput>;
-    @ViewChild(FlexpartRunPreloadedFormComponent) runFormComp: FlexpartRunPreloadedFormComponent;
+    // @ViewChild(FlexpartRunPreloadedFormComponent) runFormComp: FlexpartRunPreloadedFormComponent;
 
     displayedColumns = ['select', 'startDate', 'endDate'];
     columnInfo = columnInfo;
 
     newSelectionSubject = new Subject<FlexpartInput>();
 
+    inputsSubscription: Subscription;
+
     constructor(
         private flexpartService: FlexpartService
         ) {}
 
     ngOnInit(): void {
-        this.flexpartService.getInputsFromServer();
+        this.flexpartService.updateInputs();
     }
 
     ngAfterViewInit() {
-        this.flexpartService.inputsSubject.subscribe(
+        this.inputsSubscription = this.flexpartService.inputsSubject.subscribe(
             (inputs) => {
                 this.selectionTableRef.populateTable(inputs);
             }
@@ -59,7 +61,7 @@ export class FlexpartRunPreloadedComponent implements OnInit, OnDestroy, AfterVi
     }
 
     ngOnDestroy() {
-
+        this.inputsSubscription.unsubscribe();
     }
 
 }

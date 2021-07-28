@@ -3,6 +3,7 @@ import { FormService } from '../../core/services/form.service';
 import { AfterViewInit, Component, OnInit, OnDestroy } from '@angular/core';
 import { MapService } from 'src/app/core/services/map.service';
 import { Atp45Service } from 'src/app/atp45/atp45.service';
+import { MapPlotsService } from 'src/app/core/services/map-plots.service';
 
 @Component({
     selector: 'app-map',
@@ -17,7 +18,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     constructor(
         private mapService: MapService, 
         private formService: FormService,
-        private apt45Service: Atp45Service) { }
+        private mapPlotsService: MapPlotsService,
+        ) { }
 
     ngAfterViewInit(): void {
         this.mapService.cbrnMap.mapInit('mapid', [50.82, 4.35], 8);
@@ -35,13 +37,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
             }
         );
         
-        this.atp45ResultsSubscription = this.apt45Service.resultsSubject.subscribe((shapeData) => {
-            this.mapService.cbrnMap.addAtp45Result(shapeData.shapes);
-        });
+        // this.atp45ResultsSubscription = this.mapPlotsService.newAtp45Plot().subscribe((obj) => {
+        //     this.mapService.addLayerToMap(obj.layer);
+        // });
     }
 
     ngOnDestroy() {
         this.formService.currentFormSubject.unsubscribe();
-        this.atp45ResultsSubscription.unsubscribe();
+        // this.atp45ResultsSubscription.unsubscribe();
     }
 }

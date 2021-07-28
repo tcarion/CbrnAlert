@@ -9,9 +9,14 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AppPipesModule } from 'src/app/core/pipes/app-pipes.module';
 
+import {MatIconModule} from '@angular/material/icon';
+import { ClickStopPropagationDirective } from 'src/app/directives/click-stop-propagation.directive';
+import { CommonDirectivesModule } from 'src/app/directives/common-directives.module';
+import { InfoButtonComponent } from '../info-button/info-button.component';
+import { InfoButtonModule } from '../info-button/info-button.module';
 @NgModule({
   declarations: [
-    SelectionTableComponent
+    SelectionTableComponent,
   ],
   imports: [
     CommonModule,
@@ -20,7 +25,10 @@ import { AppPipesModule } from 'src/app/core/pipes/app-pipes.module';
     MatSortModule,
     MatCheckboxModule,
     MatProgressSpinnerModule,
+    MatIconModule,
     AppPipesModule,
+    CommonDirectivesModule,
+    InfoButtonModule
   ],
   exports: [
     SelectionTableComponent

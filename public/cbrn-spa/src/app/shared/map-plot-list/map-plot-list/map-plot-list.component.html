@@ -1,17 +1,13 @@
-<mat-accordion>
-    <mat-expansion-panel>
-        <mat-expansion-panel-header>
-            <mat-panel-title>
-                
-            </mat-panel-title>
-        </mat-expansion-panel-header>
+<app-map-plot-list-item 
+    class="map-plot-list"
+    title="ATP45"
+    [plots]="atp45Plots$ | async"
+    (visibilityEvent)="toggleVisibility($event)"
+    (deleteEvent)="delete($event)"></app-map-plot-list-item>
 
-        <mat-list-item routerLink="metdata">
-            Extract met data
-        </mat-list-item>
-
-        <mat-list-item routerLink="run-flexpart">
-            Run flexpart with preloaded data
-        </mat-list-item>
-    </mat-expansion-panel>
-</mat-accordion>
+<app-map-plot-list-item 
+    class="map-plot-list"
+    title="Flexpart"
+    [plots]="flexpartPlots$ | async"
+    (visibilityEvent)="toggleVisibility($event)"
+    (deleteEvent)="delete($event)"></app-map-plot-list-item>

@@ -2,18 +2,17 @@ module ReadNcf
 using NetCDF
 using Dates
 using GeoJSON
+using GeoInterface
 using ColorSchemes
 using Colors
 
 DEFAULT_COLOR_SCHEME = ColorSchemes.jet
 
-file = "/home/tcarion/CBRN-dispersion-app/public/flexpart_runs/20210524_00_20210524_12_1000/output/grid_conc_20210524000000.nc"
-function get_field(file, n)
-    lat = ncread(file, "latitude");
-    lon = ncread(file, "longitude");
-    spec = ncread(file, "spec001_mr");
-
-    return lon, lat, spec[:,:,1,n,1,1]
+file = "/home/tcarion/CBRN-dispersion-app/public/flexpart_runs/20210607_00_20210607_12_3000/output/grid_conc_20210607000000.nc"
+function get_field(file::String, n::Integer)
+    lat = ncread(file, "latitude"); lon = ncread(file, "longitude"); spec = ncread(file, "spec001_mr");
+    z = spec[:,:,1,n,1,1]
+    lon, lat, z
 end
 
 function get_filtered_field(file, n)
@@ -66,10 +65,7 @@ function frame_coord(lon, lat, dx, dy)
     dx2 = dx/2
     dy2 = dy/2
 
-    left = lon - dx2
-    right = lon + dx2
-    lower = lat - dy2
-    upper = lat + dy2
+    left = lon - dx2; right = lon + dx2; lower = lat - dy2; upper = lat + dy2
 
     return [
         [left, lower],
@@ -79,10 +75,11 @@ function frame_coord(lon, lat, dx, dy)
     ]
 end
 
-function framed_conc(file, n, dx, dy)
-    lons, lats, conc = get_filtered_field(file, n)
+function fields2cells(lons, lats, conc, dx, dy)
+    # lons, lats, conc = get_filtered_field(file, n)
     colors, cbar, ticks_label = val2colors_trunc(conc)
-    
+    # dx, dy = Flexpart.deltamesh(lons, lats)
+
     framed = Dict(
         "legendData" => Dict(
             "colorbar" => cbar,
@@ -102,36 +99,23 @@ function framed_conc(file, n, dx, dy)
     framed
 end
 
-function frame2geo_dict(file, n, dx, dy)
-    framed = framed_conc(file, n, dx, dy)
-    geocells = Array{Dict, 1}()
+function frame2geojson(framed)
+    geocells = Array{FeatureCollection, 1}()
 
     for cell in framed["cells"]
-        push!(geocells, 
-            Dict(
-                "type" => "FeatureCollection",
-                "features" => [
-                    Dict(
-                        "type" => "Feature",
-                        "geometry" => Dict(
-                            "type" => "Polygon",
-                            "coordinates" => [cell[:corners]]
-                        ),
-                        "properties" => Dict(
-                            "conc" => cell[:conc],
-                            "color" => cell[:color]
-                        )
-                    ),
-                    Dict(
-                        "type" => "Feature",
-                        "geometry" => Dict(
-                            "type" => "Point",
-                            "coordinates" => cell[:center]
-                        )
-                    ),
-                ]
-            )
-        )
+        features = [
+            Feature(
+                Polygon([cell[:corners]]),
+                Dict(
+                    "conc" => cell[:conc],
+                    "color" => cell[:color]
+                )
+            ),
+            # Feature(
+            #     Point(cell[:center])
+            # )
+        ]
+        push!(geocells, FeatureCollection(features))
     end
 
     geocells, framed["legendData"]
@@ -140,15 +124,13 @@ end
 function colorbar(z, n = 10)
     logz = log10.(z)
     scheme = DEFAULT_COLOR_SCHEME
-    @show logz
-    minlogz = minimum(logz)
-    maxlogz = maximum(logz)
+    minlogz = minimum(logz); maxlogz = maximum(logz)
 
     ticks = range(minlogz, maxlogz, length=n+1) |> collect
     ticks_label = 10 .^ ticks
     cbar = get(scheme, ticks[2:end], :extrema)
 
-    return "#".*hex.(cbar), ticks_label
+    "#".*hex.(cbar), ticks_label
 end
 # function colorbar(file::String, n = 10)
 #     lons, lats, conc = get_filtered_field(file, n)
@@ -158,19 +140,19 @@ end
 #     return "#".*hex.(cbar), ticks_label
 # end
 
-function val2colors(z)
-    logz = log10.(z)
+# function val2colors(z)
+#     logz = log10.(z)
 
-    # t = normz .- minimum(normz)
-    # rescaled_normz = t ./ maximum(t)
+#     # t = normz .- minimum(normz)
+#     # rescaled_normz = t ./ maximum(t)
 
-    scheme = DEFAULT_COLOR_SCHEME
+#     scheme = DEFAULT_COLOR_SCHEME
 
-    cbar = get(scheme, logz, :extrema)
-    # carray = [hex(get(scheme, v)) for v in rescaled_normz]
-    carray = "#".*hex.(cbar)
-    return carray
-end
+#     cbar = get(scheme, logz, :extrema)
+#     # carray = [hex(get(scheme, v)) for v in rescaled_normz]
+#     carray = "#".*hex.(cbar)
+#     return carray
+# end
 
 function val2colors_trunc(z, n = 10)
     cbar, ticks_label = colorbar(z, n)
@@ -181,6 +163,7 @@ function val2colors_trunc(z, n = 10)
         which_cat = v .< ticks_label
         i = findfirst(which_cat)
         i = i == 1 ? 2 : i
+        i = isnothing(i) ? length(ticks_label) : i
         push!(trunc_colors, cbar[i-1])
     end
 

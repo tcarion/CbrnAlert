@@ -8,7 +8,7 @@ const config = Settings(
   server_handle_static_files      = true,
   cors_headers                    = Dict(
                                       "Access-Control-Allow-Origin" => "http://localhost:4200",
-                                      "Access-Control-Allow-Headers" => "Content-Type",
+                                      "Access-Control-Allow-Headers" => "Content-Type,authorization",
                                       "Access-Control-Allow-Methods" => "GET,POST")
 )
 

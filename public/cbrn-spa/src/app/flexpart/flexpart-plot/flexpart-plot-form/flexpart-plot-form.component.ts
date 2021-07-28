@@ -7,6 +7,7 @@ import { DatePipe } from '@angular/common';
 import { ApiService } from 'src/app/core/services/api.service';
 import { MapService } from 'src/app/core/services/map.service';
 import { FormService } from 'src/app/core/services/form.service';
+import { FlexpartService } from '../../flexpart.service';
 
 const formItems: FormItem[] = [
     {
@@ -43,7 +44,7 @@ export class FlexpartPlotFormComponent implements OnInit {
 
     constructor(
         private mapService: MapService,
-        private apiService: ApiService,
+        private flexpartService: FlexpartService,
         public formService: FormService,
     ) {
     }
@@ -83,25 +84,10 @@ export class FlexpartPlotFormComponent implements OnInit {
         formFields = {
             ...formFields,
             dataDirname: this.flexpartResult.dataDirname,
-        }
-        const payload = {
-            ...formFields,
             flexpartResult: this.flexpartResult,
-            // request: "flexpart_conc",
-            request: "flexpart_geojson_conc"
-        };
-        console.log(payload);
+        }
 
-        this.apiService.flexpartRequest(payload).subscribe({
-            next: (data: any) => {
-                console.log(data);
-                this.mapService.cbrnMap.addGeoJsonLayer(data);
-                // this.mapService.cbrnMap.addHeatLayer(data.lats, data.lons, data.values)
-            },
-            error: (error) => {
-                alert(error.info);
-            }
-        })
+        this.flexpartService.newPlot(formFields);
     }
 
 }

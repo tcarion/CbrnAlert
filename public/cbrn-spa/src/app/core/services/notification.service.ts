@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 import { Notif, NotifStatus, NotifType } from '../models/notif';
 
-interface NotifCount {
-    [name: string]: number,
+type NotifCount = {
+    [K in NotifType]: number;
 }
 
 
@@ -13,28 +13,28 @@ interface NotifCount {
 export class NotificationService {
 
     notifs: Notif[] = [
-        {
-        title: 'test',
-        content: [],
-        status: 'pending',
-        showed: false,
-        type: 'archiveRequest'
-    },
-    {
-        title: 'test',
-        content: [],
-        status: 'succeeded',
-        showed: false,
-        type: 'archiveRequest'
+    //     {
+    //     title: 'test',
+    //     content: [],
+    //     status: 'pending',
+    //     showed: false,
+    //     type: 'archiveRequest'
+    // },
+    // {
+    //     title: 'test',
+    //     content: [],
+    //     status: 'succeeded',
+    //     showed: false,
+    //     type: 'archiveRequest'
 
-    },{
-        title: 'test',
-        content: [],
-        status: 'failed',
-        showed: false,
-        type: 'archiveRequest'
+    // },{
+    //     title: 'test',
+    //     content: [],
+    //     status: 'failed',
+    //     showed: false,
+    //     type: 'archiveRequest'
 
-    }
+    // }
 ];
     nRealtimeNotif = 0;
     nArchiveNotif = 0;
@@ -44,7 +44,8 @@ export class NotificationService {
     notifTypes: NotifCount = {
         'atp45Request': 0,
         'archiveRequest': 0,
-        'metDataRequest': 0
+        'metDataRequest': 0,
+        'flexpartRun': 0,
     }
 
     constructor() { }

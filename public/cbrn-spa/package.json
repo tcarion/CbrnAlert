@@ -22,6 +22,7 @@
     "@angular/platform-browser": "~11.2.11",
     "@angular/platform-browser-dynamic": "~11.2.11",
     "@angular/router": "~11.2.11",
+    "dayjs": "^1.10.6",
     "leaflet": "^1.7.1",
     "leaflet-draw": "^1.0.4",
     "leaflet.heat": "^0.2.0",

@@ -7,6 +7,8 @@ using JSON
 using Dates
 using ReadNcf
 using GeoJSON
+using GeoInterface
+using Flexpart
 
 const PYTHON_PATH = "/opt/anaconda3/bin/python"
 # const FLEX_EXTRACT_PATH = "/home/tcarion/flexpart/flex_extract_app"
@@ -102,14 +104,8 @@ function flexextract_request(payload)
         :area => area,
     )
 
+    @show options
     formated_options = FlexFiles.flexextract_options(options)
-
-    # open(joinpath(dir_path, "metadata.json"), "w") do f
-    #     # options[:area] = join(options[:area], ", ")
-    #     JSON.print(f, options)
-    # end
-
-    # @show formated_options
 
     ctrl_file_path = FlexFiles.update_flexfile(FLEX_EXTRACT_CONTROL_PATH, formated_options, "controlfile", dest=dir_path)
 
@@ -143,7 +139,6 @@ end
 
 function flexpart_run(payload)
     request_data = payload
-
     startdate = Dates.DateTime(request_data["startDate"][1:22])
     enddate = Dates.DateTime(request_data["endDate"][1:22])
     releasestartdate = Dates.DateTime(request_data["releaseStartDate"][1:22])
@@ -156,6 +151,7 @@ function flexpart_run(payload)
     rel_lat = request_data["lat"]
     particules = request_data["particulesNumber"]
     metdata_dirname = request_data["dataDirname"]
+    mass = request_data["mass"]
 
     area = round_area(area)
 
@@ -184,7 +180,8 @@ function flexpart_run(payload)
         "LAT2" => rel_lat,
         "Z1" => releaseheight,
         "Z2" => releaseheight,
-        "PARTS" => particules
+        "PARTS" => particules,
+        "MASS" => mass
     )
 
     outlon0 = area[2]
@@ -219,11 +216,38 @@ function flexpart_run(payload)
     FlexFiles.update_available(joinpath(pwd(), run_dir_path, "AVAILABLE"), metdata_dirname)
 
     run_flexpart(run_dir_path, request_data["ws_info"])
+    @show payload
+
+end
+
+
+"""
+    flexpart_options(payload)
+Return options for a flexpart run
+
+Input payload:
+    "dataDirname" :: String
+Output:
+    Dict(
+        :RELEASES => release file to dict,
+        :COMMAND => command file to dict,
+        :OUTGRID => outgrid file to dict,
+    )
+"""
+function flexpart_options(payload)
+    dirname = payload["dirname"]
+    options_dir = joinpath(pwd(), "public", "flexpart_runs", dirname, "options")
+
+    Dict(
+        :RELEASES => namelist2dict(joinpath(options_dir, "RELEASES")),
+        :COMMAND => namelist2dict(joinpath(options_dir, "COMMAND")),
+        :OUTGRID => namelist2dict(joinpath(options_dir, "OUTGRID")),
+    )
 end
 
 """
     flexpart_results()
-Return meta data for a flexpart run
+Return all flexpart runs with principal metadata
 
 Input payload:
     none
@@ -291,11 +315,13 @@ function flexpart_conc(payload)
 end
 
 function flexpart_geojson_conc(payload)
+    # @show payload
     sent_data = payload
     run_name = sent_data["dataDirname"]
     time = sent_data["timeSteps"]
+    height = sent_data["heights"]
     flexpart_result = sent_data["flexpartResult"]
-    
+
     available_fp_runs = filter(x -> isdir(x), readdir(joinpath(pwd(), "public", "flexpart_runs"), join=true))
     available_fp_runs = [splitpath(x)[end] for x in available_fp_runs]
 
@@ -306,12 +332,28 @@ function flexpart_geojson_conc(payload)
     output_dir = joinpath(pwd(), "public", "flexpart_runs", run_name, "output")
     ncf_file = filter(x->occursin(".nc",x), readdir(output_dir))[1]
     ncf_file = joinpath(output_dir, ncf_file)
-    cells, legend_data = ReadNcf.frame2geo_dict(ncf_file, time, flexpart_result["dx"], flexpart_result["dy"])
-    fp_run_data = ReadNcf.ncfmetadata(ncf_file)
 
+    lons, lats = Flexpart.mesh(ncf_file)
+    dx, dy = Flexpart.deltamesh(lons, lats)
+    dataset = conc_diskarray(ncf_file)
+
+    iheight = findall(x -> isapprox(x, height), Flexpart.heights(ncf_file))[1]
+    
+    conc = dataset[:, :, iheight, time, 1, 1]
+    flons, flats, fconc = Flexpart.filter_fields(lons, lats, conc)
+    
+    framed = ReadNcf.fields2cells(flons, flats, fconc, dx, dy)
+    # cells, legend_data = ReadNcf.frame2geojson(ncf_file, time, flexpart_result["dx"], flexpart_result["dy"])
+    cells, legend_data = ReadNcf.frame2geojson(framed)
+
+    rellons, rellats = Flexpart.relloc(ncf_file)
+    relpoints = [Feature(Point([lon, lat]), Dict("type" => "releasePoint")) for (lon, lat) in zip(rellons, rellats)]
+    push!(cells, FeatureCollection(relpoints))
+
+    fp_run_data = ReadNcf.ncfmetadata(ncf_file)
     Dict(
         "flexpartResult" => fp_run_data,
-        "cells" => cells,
+        "cells" => [cell |> geo2dict for cell in cells],
         "legendData" => legend_data
     )
 end

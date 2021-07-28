@@ -1,3 +1,4 @@
+import { MapPlotsService } from './services/map-plots.service';
 import { CommonModule } from '@angular/common';
 
 import { MapService, } from './services/map.service';
@@ -7,6 +8,7 @@ import { FormService } from './services/form.service';
 import { WebsocketService } from './services/websocket.service';
 import { NotificationService } from './services/notification.service';
 import { NgModule } from '@angular/core';
+import { AuthenticationService } from './services/authentication.service';
 
 @NgModule({
   declarations: [],
@@ -19,7 +21,8 @@ import { NgModule } from '@angular/core';
     WebsocketService,
     ApiService,
     NotificationService,
-    // FlexpartService,
+    MapPlotsService,
+    AuthenticationService,
   ]
 })
 export class CoreModule { }

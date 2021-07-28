@@ -7,13 +7,18 @@ import { MatListModule } from '@angular/material/list';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatBadgeModule } from '@angular/material/badge';
+import { MapPlotListComponent } from '../map-plot-list/map-plot-list/map-plot-list.component';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MapPlotListModule } from '../map-plot-list/map-plot-list.module';
+
 
 
 
 @NgModule({
     declarations: [
         TopbarComponent,
-        NotificationComponent
+        NotificationComponent,
+        // MapPlotListComponent,
     ],
     imports: [
         CommonModule,
@@ -21,7 +26,9 @@ import { MatBadgeModule } from '@angular/material/badge';
         MatIconModule,
         MatToolbarModule,
         MatProgressSpinnerModule,
-        MatBadgeModule
+        MatBadgeModule,
+        MatExpansionModule,
+        MapPlotListModule
     ],
     exports: [
         TopbarComponent,

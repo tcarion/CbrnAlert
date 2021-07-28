@@ -1,0 +1,21 @@
+<mat-expansion-panel>
+    <mat-expansion-panel-header>
+        <mat-panel-title>
+            {{ title }}
+        </mat-panel-title>
+    </mat-expansion-panel-header>
+    <!-- <mat-action-list> -->
+        <mat-list-item *ngFor="let plot of plots">
+            Plot {{ plot.id }} 
+            <button *ngIf="plot.visible" mat-icon-button (click)="onToggleVisibility(plot)">
+                <mat-icon>visibility</mat-icon> 
+            </button>
+            <button *ngIf="!plot.visible" mat-icon-button (click)="onToggleVisibility(plot)">
+                <mat-icon>visibility_off</mat-icon> 
+            </button>
+            <button mat-icon-button (click)="onDelete(plot)">
+                <mat-icon>delete</mat-icon>
+            </button>
+        </mat-list-item>
+    <!-- </mat-action-list> -->
+</mat-expansion-panel>

@@ -2,6 +2,7 @@ import { MatSort } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
 import { Component, ViewChild, AfterViewInit, PipeTransform, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
+import { Subscription } from 'rxjs';
 
 interface ColumnInfo {
     name: string,
@@ -24,36 +25,26 @@ export class SelectionTableComponent<T> implements AfterViewInit, OnDestroy {
     dataSource: MatTableDataSource<T> = new MatTableDataSource<T>();;
     selection = new SelectionModel<T>(false, []);
 
+    selectionSubscription: Subscription;
+
     @Input() columnInfo: ColumnInfo[];
     @Input() displayedColumns: string[];
+    @Input() hasDescriptionCol?: boolean = false;
 
     @Output() newSelectionEvent = new EventEmitter<T>();
 
     @ViewChild(MatSort) sort: MatSort;
 
     constructor(
-        // public apiService: ApiService
-    ) { }
-
+    ) { 
+    }
+    
     ngOnInit() {
-        this.selection.changed.subscribe((s) => {
-            this.newSelectionEvent.emit(s.added[0]);
+        this.hasDescriptionCol && this.displayedColumns.push("description");
+        this.selectionSubscription = this.selection.changed.subscribe((s) => {
+            s.added.length !==0 && this.newSelectionEvent.emit(s.added[0]);
         })
     }
-
-    // populateWithRequest(api: string, request: string, postProcess: Function) {
-    //     const payload = { request: request }
-    //     let req = api === "atp45" ? this.apiService.atp45Request(payload) : this.apiService.flexpartRequest(payload)
-    //     req.subscribe(
-    //         (data: any) => {
-    //             data = postProcess(data);
-    //             this.populateTable(data);
-    //         },
-    //         (error: HttpErrorResponse) => {
-    //             console.error(error.error);
-    //         }
-    //     )
-    // }
 
     ngAfterViewInit() {
         this.dataSource.sort = this.sort;
@@ -63,6 +54,10 @@ export class SelectionTableComponent<T> implements AfterViewInit, OnDestroy {
         this.dataSource.data = data;
     }
 
+    // onDescriptionClick(row: any) {
+    //     console.log(row);
+    // }
     ngOnDestroy() {
+        this.selectionSubscription.unsubscribe();
     }
 }

@@ -89,7 +89,7 @@ function ATP_circle(lat, lon, radius, resolution)::Feature
 end
 
 function ATP_line(lat, lon, line_length, we_comp, sn_comp, resolution)::Feature
-	step = range(0, stop=line_length, length=resolution)
+	# step = range(0, stop=line_length, length=resolution)
 
 	norm = sqrt(we_comp^2 + sn_comp^2)
 

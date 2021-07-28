@@ -50,7 +50,7 @@ export class PreloadedComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     ngAfterViewInit(): void {
-        this.inputsSubscription = this.atp45Service.inputsSubject.subscribe(
+        this.inputsSubscription = this.atp45Service.inputs$.subscribe(
             (inputs) => {
                 this.selectionTableRef.populateTable(inputs);
             }

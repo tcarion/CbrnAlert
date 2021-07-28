@@ -2,6 +2,7 @@ import { Feature, FeatureCollection } from 'geojson';
 import * as L from 'leaflet';
 import 'leaflet-draw';
 import 'leaflet.heat';
+import { MapPlot } from './map-plot';
 
 const iconRetinaUrl = 'assets/marker-icon-2x.png';
 const iconUrl = 'assets/marker-icon.png';
@@ -23,74 +24,171 @@ interface LonLat {
     lat: number
 }
 
+const POINT_MARKER_OPTIONS = {
+    radius: 2,
+    fillColor: "black",
+    color: "black",
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 1
+};
 
-class FlexpartPlot {
-    cellsCenterLayerStyle = {
-        radius: 0.5,
-        // fillColor: "#ff7800",
-        color: "black",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.8
-    };
+const REL_LOC_MARKER_OPTIONS = {
+    radius: 5,
+    fillColor: "red",
+    color: "red",
+    weight: 4,
+    opacity: 1,
+    fillOpacity: 1
+};
 
-    cellsLayer: L.GeoJSON<any>;
-    releaseLayer: L.Layer;
-    legendData: { 
-        colorbar: string[],
-        ticksLabel: string[]
+abstract class AbstractPlots {
+    plots: {
+        id: number,
+        layers: L.FeatureGroup,
+        legendData?: any 
+    }[] = [];
+
+    getLayers(id: number) {
+        return this.getPlot(id)?.layers;
     }
 
-    constructor(data: any, public info: any) {
-        let cellsCenterLayerStyle = {
-            radius: 0.5,
-            // fillColor: "#ff7800",
-            color: "black",
-            weight: 1,
-            opacity: 1,
-            fillOpacity: 0.8
-        };
+    getPlot(id: number) {
+        return this.plots.find(el => el.id == id);
+    }
+    setActive(id: number) {}
 
-        let releaseLayerStyle = {
-            radius: 5,
-            color: "red",
-            weight: 1,
-            opacity: 1,
-            fillOpacity: 0.8
-        };
+    // add() {}
+
+    // delete() {}
+
+    delete(mapPlot: MapPlot) {
+        this.plots = this.plots.filter(el => el.id !== mapPlot.id);
+    }
+
+}
+class Atp45Plots extends AbstractPlots {
+
+    constructor(private infoRef: any) {
+        super()
+    }
+
+    getLayerFromShapes(shapes: FeatureCollection): L.FeatureGroup {
+        let options: L.GeoJSONOptions = {
+            pointToLayer: (feature: Feature, latlng: L.LatLng) => {
+                return L.circleMarker(latlng, REL_LOC_MARKER_OPTIONS);
+            },
+            style: (feature: any) => {
+                let opt = feature.properties.color ? {color: feature.properties.color} : {}
+                return opt;
+            },
+            onEachFeature: (feature: Feature, layer: L.Layer) => {
+                if (feature.properties) layer.bindPopup(feature.properties.text);
+            }
+        }
+
+        let layer = L.geoJSON(undefined, options);
+
+        shapes.features.forEach((feature) => {
+            layer.addData(feature);
+        });
+
+        return layer;
+        // this.geojsonLayers.push(layer);
+        // layer.addTo(this.map);
+    }
+
+    add(mapPlot: MapPlot) {
+        const newPlot = {
+            id: mapPlot.id,
+            layers: this.getLayerFromShapes(<FeatureCollection>mapPlot.geojson),
+            legendData: mapPlot.metadata
+        }
+
+        newPlot.layers.on('click', (e) => {
+            this.setActive(newPlot.id);
+        })
+        this.setActive(newPlot.id);
+        this.plots.push(newPlot);
+        return newPlot;
+    }
+}
+class FlexpartPlots extends AbstractPlots {
+    plots: {
+        id: number,
+        layers: L.FeatureGroup,
+        legendData?: any 
+    }[] = [];
+    
+    constructor(private legendRef: any, private infoRef: any) {
+        super()
+    }
+
+    getLayerFromCells(cells: FeatureCollection[]): L.FeatureGroup {
         let options: L.GeoJSONOptions = {
             pointToLayer: function (feature: any, latlng: L.LatLng) {
-                return L.circleMarker(latlng, cellsCenterLayerStyle);
-            }
-        };
-
-        options = {
-            ...options,
+                if (feature.properties.type === "releasePoint") {
+                    return L.circleMarker(latlng, REL_LOC_MARKER_OPTIONS);
+                }
+                return L.circleMarker(latlng, POINT_MARKER_OPTIONS);
+            },
             style: (feature: any) => {
                 let options: L.PathOptions = {
                     stroke: false, 
                     fillOpacity: 0.4,
                 }
-                options = feature.properties ? {...options, color: feature.properties.color} : options
+                options = feature.properties ? {...options, color: feature.properties.color } : options
                 return options;
             },
+            // onEachFeature: (feature, layer) => {
+            //     layer.on({
+            //         'click': (e) => this.setActive(this.curPlot),
+            //     })
+            // }
             onEachFeature: this.cellHoverListener()
         };
-        this.cellsLayer = L.geoJSON(undefined, options);
 
-        data.cells.forEach((feature: any) => {
-            this.cellsLayer.addData(feature);
+        let layers = L.geoJSON(undefined, options);
+
+        cells.forEach((feature: any) => {
+            layers.addData(feature);
         });
 
-        let lon = data.flexpartResult.releaseLons[0];
-        let lat = data.flexpartResult.releaseLats[0];
+        return layers;
+    }
 
-        this.releaseLayer =  L.circleMarker([lat, lon], releaseLayerStyle);
-        this.legendData = data.legendData;
+    getLayers(id: number) {
+        return this.getPlot(id)?.layers;
+    }
+
+    getPlot(id: number) {
+        return this.plots.find(el => el.id == id);
+    }
+
+    setActive(id: number) {
+        const plot = this.getPlot(id);
+        plot?.layers.setStyle({fillOpacity: 0.8});
+        this.plots.filter(el => el.id !== id).forEach(el => el.layers.setStyle({fillOpacity: 0.4}));
+        plot && this.legendRef.update(plot.legendData);
+    }
+
+    add(mapPlot: MapPlot) {
+        const newPlot = {
+            id: mapPlot.id,
+            layers: this.getLayerFromCells(<FeatureCollection[]>mapPlot.geojson),
+            legendData: mapPlot.metadata
+        }
+
+        newPlot.layers.on('click', (e) => {
+            this.setActive(newPlot.id);
+        })
+        this.setActive(newPlot.id);
+        this.plots.push(newPlot);
+        return newPlot;
     }
 
     cellHoverListener() {
-        let info = this.info
+        let info = this.infoRef;
         function cellHover(e:L.LeafletMouseEvent) {
             let layer = e.target;
             info.update(layer.feature.properties)
@@ -108,7 +206,81 @@ class FlexpartPlot {
         }
         return onEachFeature;
     }
+
+//     cellsCenterLayerStyle = {
+//         radius: 0.5,
+//         // fillColor: "#ff7800",
+//         color: "black",
+//         weight: 1,
+//         opacity: 1,
+//         fillOpacity: 0.8
+//     };
+
+//     cellsLayer: L.GeoJSON<any>;
+//     releaseLayer: L.Layer;
+//     legendData: { 
+//         colorbar: string[],
+//         ticksLabel: string[]
+//     }
+
+//     constructor(data: any, public info: any) {
+//         let releaseLayerStyle = {
+//             radius: 5,
+//             color: "red",
+//             weight: 1,
+//             opacity: 1,
+//             fillOpacity: 0.8
+//         };
+//         let options: L.GeoJSONOptions = {
+//             pointToLayer: function (feature: any, latlng: L.LatLng) {
+//                 return L.circleMarker(latlng, REL_LOC_MARKER_OPTIONS);
+//             },
+//             style: (feature: any) => {
+//                 let options: L.PathOptions = {
+//                     stroke: false, 
+//                     fillOpacity: 0.4,
+//                 }
+//                 options = feature.properties ? {...options, color: feature.properties.color} : options
+//                 return options;
+//             },
+//             onEachFeature: this.cellHoverListener()
+//         };
+
+//         this.cellsLayer = L.geoJSON(undefined, options);
+
+//         data.cells.forEach((feature: any) => {
+//             this.cellsLayer.addData(feature);
+//         });
+
+//         let lon = data.flexpartResult.releaseLons[0];
+//         let lat = data.flexpartResult.releaseLats[0];
+
+//         this.releaseLayer =  L.circleMarker([lat, lon], releaseLayerStyle);
+//         this.legendData = data.legendData;
+//     }
+
+//     cellHoverListener() {
+//         let info = this.info
+//         function cellHover(e:L.LeafletMouseEvent) {
+//             let layer = e.target;
+//             info.update(layer.feature.properties)
+//         }
+
+//         function resetHover(e:L.LeafletMouseEvent) {
+//             info.update();
+//         }
+
+//         function onEachFeature(feature: any, layer: L.Layer) {
+//             layer.on({
+//                 mouseover: cellHover,
+//                 mouseout: resetHover,
+//             });
+//         }
+//         return onEachFeature;
+//     }
 }
+
+
 
 export class CbrnMap {
     public map: L.Map;
@@ -119,25 +291,32 @@ export class CbrnMap {
     public areaSelection: L.Rectangle;
     private drawRectangleControl?: L.Control;
 
-    private heatLayer: L.Layer;
+    // private heatLayer: L.Layer;
 
     // private geojsonLayer: L.GeoJSON<any>;
 
-    private flexpartPlots: FlexpartPlot[] = [];
-
-    private geojsonLayers: L.Layer[] = [];
+    private flexpartPlots: FlexpartPlots;
+    private atp45Plots: Atp45Plots;
+    // private geojsonLayers: L.Layer[] = [];
 
     private info: any;
-
     private legend: any;
 
+    curPlot: any;
     constructor() {
+        this.createLegend();
+        this.createInfo();
 
+        this.flexpartPlots = new FlexpartPlots(this.legend, this.info);
+        this.atp45Plots = new Atp45Plots(this.info);
     }
 
     mapInit(mapid: string, center: L.LatLngExpression, zoom: number) {
         this.map = L.map(mapid).setView(center, zoom);
         this.addTileLayer();
+
+        this.legend.addTo(this.map);
+        this.info.addTo(this.map);
     }
 
     addTileLayer() {
@@ -206,29 +385,29 @@ export class CbrnMap {
         layer !== undefined && this.map.removeLayer(layer);
     }
 
-    addHeatLayer(lons: number[], lats: number[], values: number[]) {
-        let toPlot: L.HeatLatLngTuple[] = [];
-        const max = Math.max(...values)
-        values.map((e, i) => {
-            toPlot.push(<any>[
-                lats[i],
-                lons[i],
-                e/max
-            ]);
-        });
-        const options = {
-            radius : 1e10,
-            // max: max
-        };
-        this.heatLayer = L.heatLayer(toPlot, options);
+    // addHeatLayer(lons: number[], lats: number[], values: number[]) {
+    //     let toPlot: L.HeatLatLngTuple[] = [];
+    //     const max = Math.max(...values)
+    //     values.map((e, i) => {
+    //         toPlot.push(<any>[
+    //             lats[i],
+    //             lons[i],
+    //             e/max
+    //         ]);
+    //     });
+    //     const options = {
+    //         radius : 1e10,
+    //         // max: max
+    //     };
+    //     this.heatLayer = L.heatLayer(toPlot, options);
 
-        // this.heatLayer = L.heatLayer([
-        //     [50.5, 30.5, 0.2], // lat, lng, intensity
-        //     [50.6, 30.4, 0.5],
-        // ], {radius: 25})
+    //     // this.heatLayer = L.heatLayer([
+    //     //     [50.5, 30.5, 0.2], // lat, lng, intensity
+    //     //     [50.6, 30.4, 0.5],
+    //     // ], {radius: 25})
 
-        this.heatLayer.addTo(this.map);
-    }
+    //     this.heatLayer.addTo(this.map);
+    // }
 
     // drawShapes(shape_data: any) {
     //     const shapes_color = ['blue', 'red', 'yellow']
@@ -238,50 +417,73 @@ export class CbrnMap {
     //     // this.atp45Results.push(shape_data);
     // }
 
-    addAtp45Result(shapes: FeatureCollection) {
-        let options: L.GeoJSONOptions = {
-            style: (feature: any) => {
-                let opt = feature.properties.color ? {color: feature.properties.color} : {}
-                return opt;
-            },
-            onEachFeature: (feature: Feature, layer: L.Layer) => {
-                if (feature.properties) layer.bindPopup(feature.properties.text);
-            }
-        }
 
-        let layer = L.geoJSON(undefined, options);
+    // setIsActive(cells: FeatureCollection[], isActive: boolean) {
+    //     cells.forEach((cell: any) => {
+    //         cell.features[0].properties.active = isActive;
+    //     })
+    //     // layers.setStyle({fillOpacity: 0.8})
+    // }
 
-        shapes.features.forEach((feature) => {
-            layer.addData(feature);
-        });
+    // setActive(layer: any) {
+    //     layer.setStyle({fillOpacity: 0.8})
+    // }
 
-        this.geojsonLayers.push(layer);
-        layer.addTo(this.map);
+    addAtp45Plot(mapPlot: MapPlot) {
+        this.atp45Plots.add(mapPlot).layers.addTo(this.map);
     }
 
-    addGeoJsonLayer(data: any) {
+    hideAtp45Plot(mapPlot: MapPlot) {
+        const layers = this.atp45Plots.getLayers(mapPlot.id);
+        layers && this.map.removeLayer(layers);
+    }
 
-        if (this.info === undefined) {
-            this.createInfo();
-            this.infoUpdateWithConc();
-            this.info.addTo(this.map);
-        }
+    showAtp45Plot(mapPlot: MapPlot) {
+        const layers = this.atp45Plots.getLayers(mapPlot.id);
+        layers && this.map.addLayer(layers);
+    }
 
-        if (this.legend === undefined) {
-            this.createLegend();
-            this.legend.addTo(this.map);
-        }
+    deleteAtp45Plot(mapPlot: MapPlot) {
+        const layers = this.atp45Plots.getLayers(mapPlot.id);
+        layers && this.map.removeLayer(layers);
+        this.flexpartPlots.delete(mapPlot);
+    }
 
-        let flexpartPlot = new FlexpartPlot(data, this.info);
-        flexpartPlot.cellsLayer.addTo(this.map);
-        flexpartPlot.releaseLayer.addTo(this.map);
+    addFlexpartPlot(mapPlot: MapPlot) {
+        this.flexpartPlots.add(mapPlot).layers.addTo(this.map);
+    }
 
-        this.legend.update(flexpartPlot.legendData);
-        this.flexpartPlots.push(flexpartPlot);
+    hideFlexpartPlot(mapPlot: MapPlot) {
+        const layers = this.flexpartPlots.getLayers(mapPlot.id);
+        layers && this.map.removeLayer(layers);
+    }
+
+    showFlexpartPlot(mapPlot: MapPlot) {
+        const layers = this.flexpartPlots.getLayers(mapPlot.id);
+        layers && this.map.addLayer(layers);
+    }
+
+    deleteFlexpartPlot(mapPlot: MapPlot) {
+        const layers = this.flexpartPlots.getLayers(mapPlot.id);
+        layers && this.map.removeLayer(layers);
+        this.flexpartPlots.delete(mapPlot);
     }
 
     createInfo() {
         this.info = new L.Control({position: 'topright'});
+
+        this.info.update = function (props:any) {
+            let conc = props && parseFloat(props.conc);
+            this._div.innerHTML = '<h4>Concentration</h4>' +  (props ?
+                '<b>' + conc.toExponential(4) + ' [ng/m3]</b>'
+                : 'Hover over a cell');
+        };
+
+        this.info.onAdd = function (map: L.Map) {
+            this._div = L.DomUtil.create('div', 'leaflet-info');
+            // this.update();
+            return this._div;
+        };
     }
 
     createLegend() {
@@ -313,27 +515,17 @@ export class CbrnMap {
         }
     }
 
-    // updateLegend(legendData: any) {
-    //     this.legend._div.innerHTML = '';
-    //     this.legend.update(legendData);
-    // }
-
-
-
-    infoUpdateWithConc() {
-        this.info.update = function (props:any) {
-            let conc = props && parseFloat(props.conc);
-            this._div.innerHTML = '<h4>Concentration</h4>' +  (props ?
-                '<b>' + conc.toExponential(4) + '</b>'
-                : 'Hover over a cell');
-        };
-
-        this.info.onAdd = function (map: L.Map) {
-            this._div = L.DomUtil.create('div', 'leaflet-info');
-            this.update();
-            return this._div;
-        };
+    updateLegend(legendData: any) {
+        this.legend._div.innerHTML = '';
+        this.legend.update(legendData);
     }
+
+
+
+    // infoUpdateWithConc() {
+        
+
+    // }
 
     addDrawControl() {
         L.drawLocal.draw.toolbar.buttons.rectangle = 'Area selection for data retrieval';

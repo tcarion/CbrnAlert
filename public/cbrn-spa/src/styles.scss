@@ -69,6 +69,17 @@ html {
     }
 }
 
+.right-side-container {
+    position: fixed;
+    top: var(--toolbarHeight);
+    right: 0;
+    // width: 120px;
+    background-color: var(--sidebarBackground);
+    color: white;
+    max-width: 365px;
+    z-index: 100000; 
+}
+
 form {
     // min-width: 320px;
     margin: auto;
@@ -143,4 +154,13 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 .legend-ticklabel:nth-of-type(2) {
     transform: translateY(11px) 
+}
+
+.map-plot-list {
+    mat-list-item {
+        height: 36px;
+    }
+//     .mat-expansion-panel-body {
+//         padding: 10px;
+//     }
 }

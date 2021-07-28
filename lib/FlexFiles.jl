@@ -1,5 +1,6 @@
 module FlexFiles
 
+export update_flexfile, update_available, flexextract_options, flexextract_metadata, namelist2dict
 using Dates
 
 function dateYY(d)
@@ -70,7 +71,7 @@ function flexextract_options(options)
 
     hour_nbr = Dates.Hour(enddate - startdate).value
 
-    stepdt = startdate:Dates.Hour(timestep):enddate
+    stepdt = startdate:Dates.Hour(timestep):(enddate - Dates.Hour(1))
     type_ctrl = []
     time_ctrl = []
     step_ctrl = []
@@ -111,7 +112,7 @@ function flexextract_options(options)
         )
 end
 
-function control_to_dict(filepath)
+function control2dict(filepath)
     d = Dict{String, String}()
     f = open(filepath, "r")
     for line in eachline(f)
@@ -122,9 +123,27 @@ function control_to_dict(filepath)
     return d
 end
 
+function namelist2dict(filepath)
+    fieldtype = Union{String, Dict, SubString{String}}
+    d = Dict{Symbol, fieldtype}()
+    f = open(filepath, "r")
+    header = ""
+    for line in eachline(f)
+        if !((m = match(r"\s*(.*?)\s*=?\s*([^\s,]*),.*", line)) |> isnothing) #captures the field name in group 1 and the value in group 2
+            dict2fill = header |> isempty ? d : d[Symbol(header)]
+            push!(dict2fill, m.captures[1] |> Symbol => m.captures[2])
+        elseif !((m = match(r"\&(\w*)", line)) |> isnothing) #captures the name of the header in group 1
+            push!(d, m.captures[1] |> Symbol => Dict{Symbol, fieldtype}())
+            header = m.captures[1]
+        end
+    end
+    close(f)
+    return d
+end
+
 function flexextract_metadata(filepath)
     if !isfile(filepath) return end
-    control = control_to_dict(filepath)
+    control = control2dict(filepath)
     startday = Dates.DateTime(control["START_DATE"], dateformat"yyyymmdd")
     times = parse.(Int, split(control["TIME"], " "))
     steps = parse.(Int, split(control["STEP"], " "))
@@ -139,7 +158,7 @@ function flexextract_metadata(filepath)
     area = parse.(Float32, area)
 
     startdate = startday + Dates.Hour(times[1])
-    enddate = startday + Dates.Hour(times[end])
+    enddate = startday + Dates.Hour((length(times) - 1) * timestep)
 
     return Dict(
         :startDate => startdate,
@@ -149,6 +168,8 @@ function flexextract_metadata(filepath)
         :area => area
     )
 end
+
+
 
 function format_opt(opt::Int)
     opt < 10 ? "0$(opt)" : "$(opt)"

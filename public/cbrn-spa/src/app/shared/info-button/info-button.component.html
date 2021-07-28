@@ -1,0 +1,18 @@
+<!-- <div #infoContainer *ngIf="isOpen" class="info-container">
+    <div class="info">
+        <strong>
+            Number of particles : 
+        </strong> 
+        100000
+    </div>
+</div> -->
+<div #infoContainer *ngIf="isOpen" [@openClose] class="info">
+    <div *ngFor="let item of content | keyvalue">
+        <strong>
+            {{item.key}} : 
+        </strong> 
+        {{item.value}}
+    </div>
+</div>
+
+<mat-icon #infoIcon class="icon" appClickStopPropagation (click)="toggleInfo()">description</mat-icon>

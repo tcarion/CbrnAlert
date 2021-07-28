@@ -1,6 +1,6 @@
 import { Subscription, Subject } from 'rxjs';
-import { FormItem } from '../../../../core/models/form-item';
-import { AroundPipe } from '../../../../core/pipes/around.pipe';
+import { FormItem } from '../../../core/models/form-item';
+import { AroundPipe } from '../../../core/pipes/around.pipe';
 import { DatePipe } from '@angular/common';
 import { wrongLatValidator, wrongLonValidator } from 'src/app/shared/validators';
 import { Validators } from '@angular/forms';
@@ -12,6 +12,7 @@ import { MapService } from 'src/app/core/services/map.service';
 import { Component, OnInit, Input, OnDestroy } from '@angular/core';
 import { AbstractWsComponent } from 'src/app/abstract-classes/abstract-ws-component';
 import { FlexpartInput } from 'src/app/flexpart/flexpart-input';
+import { FlexpartService } from '../../flexpart.service';
 
 @Component({
     selector: 'app-flexpart-run-preloaded-form',
@@ -112,6 +113,16 @@ export class FlexpartRunPreloadedFormComponent extends AbstractWsComponent imple
             validators: [Validators.required],
         },
         {
+            controlName: 'mass',
+            label: 'Particules mass [kg]',
+            type: 'input',
+            value: {
+                obj: '1.0',
+                display: '1.0',
+            },
+            validators: [Validators.required],
+        },
+        {
             controlName: 'gridRes',
             label: 'Grid res. [°]',
             type: 'select',
@@ -156,7 +167,7 @@ export class FlexpartRunPreloadedFormComponent extends AbstractWsComponent imple
 
     constructor(
         private mapService: MapService,
-        private apiService: ApiService,
+        private flexpartService: FlexpartService,
         public formService: FormService,
         public websocketService: WebsocketService,
         public notificationService: NotificationService
@@ -202,12 +213,12 @@ export class FlexpartRunPreloadedFormComponent extends AbstractWsComponent imple
 
         this.newSelectionSubscription = this.newSelectionSubject.subscribe((fpInput) => {
             console.log(fpInput);
-            this.initForm(fpInput);
+            this.updateForm(fpInput);
             this.flexpartInput = fpInput;
         });
     }
 
-    initForm(fpInput: FlexpartInput) {
+    updateForm(fpInput: FlexpartInput) {
         const startDate = fpInput.startDate;
         const endDate = fpInput.endDate;
         const step = fpInput.timeStep;
@@ -224,30 +235,16 @@ export class FlexpartRunPreloadedFormComponent extends AbstractWsComponent imple
     }
 
     onSubmit(): void {
-        const notifTitle = this.notificationService.addNotif('Met data retrieval', 'metDataRequest');
 
         let formFields = this.formService.formToObject();
         formFields = {
             ...formFields,
             dataDirname: this.flexpartInput.dataDirname,
-            ws_info: { channel: this.websocketService.channel, backid: notifTitle },
         }
         console.log(formFields);
 
-        const payload = {
-            ...formFields,
-            request: "flexpart_run"
-        }
-        this.apiService.flexpartRequest(payload).subscribe({
-            next: () => {
-                alert("Flexpart run done");
-                this.notificationService.changeStatus(notifTitle, 'succeeded');
-            },
-            error: (error) => {
-                alert(error.info);
-                this.notificationService.changeStatus(notifTitle, 'failed');
-            }
-        })
+        this.flexpartService.runFlexpart(formFields);
+        
     }
 
     ngOnDestroy(): void {

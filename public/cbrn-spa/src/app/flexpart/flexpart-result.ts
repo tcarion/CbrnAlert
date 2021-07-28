@@ -8,5 +8,7 @@ export interface FlexpartResult {
     dy: number,
     releaseLons: number[],
     releaseLats: number[],
-    dataDirname: string
+    dataDirname: string,
+    options?: any,
+    description?: {[key:string]: string },
 }

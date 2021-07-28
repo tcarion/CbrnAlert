@@ -8,4 +8,4 @@ export interface Notif {
 
 export type NotifStatus = 'succeeded' | 'failed' | 'pending' | 'none'
 
-export type NotifType = 'atp45Request' | 'archiveRequest' | 'metDataRequest'
+export type NotifType = 'atp45Request' | 'archiveRequest' | 'metDataRequest' | 'flexpartRun'

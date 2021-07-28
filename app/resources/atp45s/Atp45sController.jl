@@ -314,6 +314,8 @@ function calc_prediction(filename, keys_to_select, shape_data::ShapeData)
     push!(rel_area.properties, "color" => "	#FF0000")
     push!(shape_data.shapes, haz_area)
     push!(shape_data.shapes, rel_area)
+
+    push!(shape_data.shapes, Feature(Point([lon, lat]), Dict("type" => "releaseLocation")))
     
     shape_data
 end

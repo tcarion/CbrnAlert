@@ -1,27 +1,31 @@
 import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { ApiService } from 'src/app/core/services/api.service';
 import { GribData } from './grib-data';
-import { ShapeData } from './shape-data';
+import { Atp45ShapeData } from './shape-data';
 
 import { map } from 'rxjs/operators';
 import { formatDate } from '@angular/common';
-import { MapService } from 'src/app/core/services/map.service';
-import { Feature, FeatureCollection } from 'geojson';
+import { FeatureCollection } from 'geojson';
+import { MapPlotsService } from 'src/app/core/services/map-plots.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class Atp45Service {
     inputs: GribData[];
-    results: ShapeData[] = [];
+    results: Atp45ShapeData[] = [];
 
-    inputsSubject = new Subject<GribData[]>();
-    resultsSubject = new Subject<ShapeData>();
+    inputsSubject = new BehaviorSubject<GribData[]>([]);
+    inputs$ = this.inputsSubject.asObservable();
+    // resultSubject = new Subject<Atp45ShapeData>();
+    // result$ = this.resultSubject.asObservable();
+
 
     constructor(
         private apiService: ApiService,
-        private mapService: MapService) { }
+        private mapPlotsService: MapPlotsService,
+        ) { }
 
     getInputs(): Observable<GribData[]> {
         return this.apiService
@@ -36,7 +40,7 @@ export class Atp45Service {
             );
     }
 
-    getResult(payload: any, request: string): Observable<ShapeData> {
+    getResult(payload: any, request: string): Observable<Atp45ShapeData> {
         payload = {
             ...payload,
             request: request
@@ -52,7 +56,11 @@ export class Atp45Service {
             );
     }
 
-    responseToShapeData(shapeData: any): ShapeData {
+    /**
+     * @param  {any} shapeData
+     * @returns Atp45ShapeData
+     */
+    responseToShapeData(shapeData: any): Atp45ShapeData {
         let shapes = <FeatureCollection>shapeData.shapes;
         shapeData.datetime = new Date(shapeData.datetime);
         let speed = Math.round(shapeData.wind.speed * 3.6 * 10) / 10;
@@ -90,9 +98,10 @@ export class Atp45Service {
         })
     }
 
-    addResult(shapeData: ShapeData): void {
+    addResult(shapeData: Atp45ShapeData): void {
         this.results.push(shapeData);
-        this.emitResult(shapeData);
+        this.mapPlotsService.addAtp45Plot(shapeData);
+        // this.emitResult(shapeData);
     }
 
     emitInputsSubject() {
@@ -103,7 +112,7 @@ export class Atp45Service {
     //   this.resultsSubject.next(this.results);
     // }
 
-    emitResult(result: ShapeData): void {
-        this.resultsSubject.next(result);
-    }
+    // emitResult(result: Atp45ShapeData): void {
+    //     this.resultSubject.next(result);
+    // }
 }

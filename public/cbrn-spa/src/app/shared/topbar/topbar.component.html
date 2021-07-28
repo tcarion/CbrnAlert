@@ -6,7 +6,7 @@
         <h1 class="app-name">CBRN Dispersion app</h1>
     </div>
     <div class="topbar-icons">
-        <button mat-icon-button (click)="onNotif()">
+        <button mat-icon-button (click)="onPlotList()">
             <mat-icon>view_list</mat-icon>
         </button>
         <button mat-icon-button (click)="onNotif()">
@@ -16,4 +16,6 @@
     </div>
 </mat-toolbar>
 
-<app-notification *ngIf="showNotifs"></app-notification>
+<app-notification *ngIf="showNotifs" class="right-side-container"></app-notification>
+
+<app-map-plot-list *ngIf="showPlotList" class="right-side-container"></app-map-plot-list>

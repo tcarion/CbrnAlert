@@ -1,10 +1,9 @@
-import { Subject } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { DatePipe } from '@angular/common';
 import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
 import { SelectionTableComponent } from 'src/app/shared/selection-table/selection-table.component';
 import { FlexpartResult } from 'src/app/flexpart/flexpart-result';
-import { FlexpartPlotFormComponent } from './flexpart-plot-form/flexpart-plot-form.component';
-import { FlexpartService } from '../../flexpart.service';
+import { FlexpartService } from '../flexpart.service';
 
 const columnInfo = [
     {
@@ -21,6 +20,11 @@ const columnInfo = [
         withPipe: { pipe: DatePipe, arg: ["YYYY-MM-dd @ HH:mm"] },
         sort: true
     },
+    {
+        name: 'dataDirname',
+        text: 'Name',
+        width: 60,
+    },
 ]
 
 @Component({
@@ -28,27 +32,38 @@ const columnInfo = [
   templateUrl: './flexpart-plot.component.html',
   styleUrls: ['./flexpart-plot.component.scss']
 })
-export class FlexpartPlotComponent implements OnInit {
+export class FlexpartPlotComponent implements OnInit, OnDestroy {
 
     @ViewChild('selectionTableRef') selectionTableRef: SelectionTableComponent<FlexpartResult>;
-    @ViewChild(FlexpartPlotFormComponent) plotFormComp: FlexpartPlotFormComponent;
+    // @ViewChild(FlexpartPlotFormComponent) plotFormComp: FlexpartPlotFormComponent;
 
-    displayedColumns = ['select', 'startDate', 'endDate'];
+    displayedColumns = ['select', 'startDate', 'endDate',];
     columnInfo = columnInfo;
 
     newSelectionSubject = new Subject<FlexpartResult>();
+
+    resultsSubscription: Subscription;
 
     constructor(
         private flexpartService: FlexpartService
         ) {}
 
     ngOnInit(): void {
-        this.flexpartService.getResultsFromServer();
+        this.flexpartService.updateResults();
     }
 
     ngAfterViewInit() {
-        this.flexpartService.resultsSubject.subscribe(
+        this.resultsSubscription = this.flexpartService.resultsSubject.subscribe(
             (results) => {
+                results.forEach((result) => {
+                    if (!('description' in result)) {
+                        result.description = {
+                            "Dir name": result.dataDirname,
+                            "Grid size (dx/dy)": `${result.dx}/${result.dy}`,
+                            // "Nbr of particles": 
+                        }
+                    }
+                })
                 this.selectionTableRef.populateTable(results);
             }
         )
@@ -59,6 +74,6 @@ export class FlexpartPlotComponent implements OnInit {
     }
 
     ngOnDestroy() {
-
+        this.resultsSubscription.unsubscribe();
     }
 }

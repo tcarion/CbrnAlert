@@ -1,0 +1,55 @@
+<div class="container-login">
+    <div class="header">
+        Please authenticate
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+        <mat-form-field 
+            class="form-control" 
+            appearance="outline" 
+            floatLabel="never">
+            <mat-label> Email </mat-label>
+            <input 
+                matInput
+                formControlName="email">
+            <!-- <mat-error *ngIf="(formItem.controlName | formControl).invalid"> error ! </mat-error> -->
+        </mat-form-field>
+
+        <mat-form-field 
+            class="form-control" 
+            appearance="outline" 
+            floatLabel="never">
+            <mat-label> Password </mat-label>
+            <input 
+                matInput
+                formControlName="password">
+            <!-- <mat-error *ngIf="(formItem.controlName | formControl).invalid"> error ! </mat-error> -->
+        </mat-form-field>
+
+        <button 
+            mat-raised-button 
+            color="primary" 
+            type="submit" 
+            [disabled]="loginForm.invalid">Login</button>
+        <!-- <div class="form-group">
+            <label for="username">Username</label>
+            <input matInput type="text" formControlName="username" class="form-control" 
+            />
+            <div *ngIf="submitted && f.username.errors" class="invalid-feedback">
+                <div *ngIf="f.username.errors.required">Username is required</div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input matInput type="password" formControlName="password" class="form-control"/>
+            <div *ngIf="submitted && f.password.errors" class="invalid-feedback">
+                <div *ngIf="f.password.errors.required">Password is required</div>
+            </div>
+        </div>
+        <button [disabled]="loading" class="btn btn-primary">
+            <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span>
+            Login
+        </button>
+        <div *ngIf="error" class="alert alert-danger mt-3 mb-0">{{error}}</div> -->
+    </form>
+</div>

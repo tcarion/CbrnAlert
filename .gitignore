@@ -2,6 +2,8 @@
 build/*
 cache/*
 config/secrets.jl
+config/private.pem
+config/public.pem
 docs/build
 log/*
 session/*

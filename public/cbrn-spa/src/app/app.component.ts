@@ -11,22 +11,8 @@ import { Subscription } from 'rxjs';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
-export class AppComponent implements OnInit, OnDestroy {
-  mobileQuery: MediaQueryList;
-
-  constructor(
-    mediaMatcher: MediaMatcher,
-    private websocketService: WebsocketService,
-  ) {
-    this.mobileQuery = mediaMatcher.matchMedia('(max-width: 600px)');
-  }
+export class AppComponent implements OnInit{
 
   ngOnInit() {
-    this.websocketService.connect();
-  }
-
-
-  ngOnDestroy(): void {
-    this.websocketService.disconnect();
   }
 }
