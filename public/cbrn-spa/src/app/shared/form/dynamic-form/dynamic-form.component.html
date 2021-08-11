@@ -1,0 +1,8 @@
+<form [formGroup] = "dynamicForm">
+    <app-autoformat-select
+    *ngFor="let item of items;"
+    [label] = "item.label"
+    [formGroup] = "dynamicForm"
+    [values] = "formService.optionsToArray(item.options)"
+    ></app-autoformat-select>
+</form>

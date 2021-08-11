@@ -5,60 +5,35 @@ using GeoJSON
 using GeoInterface
 using ColorSchemes
 using Colors
+using Flexpart
 
 DEFAULT_COLOR_SCHEME = ColorSchemes.jet
 
 file = "/home/tcarion/CBRN-dispersion-app/public/flexpart_runs/20210607_00_20210607_12_3000/output/grid_conc_20210607000000.nc"
-function get_field(file::String, n::Integer)
-    lat = ncread(file, "latitude"); lon = ncread(file, "longitude"); spec = ncread(file, "spec001_mr");
-    z = spec[:,:,1,n,1,1]
-    lon, lat, z
-end
-
-function get_filtered_field(file, n)
-    lon, lat, z = get_field(file, n)
-    mask = (!).(isapprox.(0., z))
-
-    mg_lon = lon .* ones(length(lat))'
-    mg_lat = lat' .* ones(length(lon))
-
-    return mg_lon[mask], mg_lat[mask], z[mask]
-end
 
 function ncfmetadata(file)
-    times = convert.(Int, ncread(file, "time") ./ 3600)
-    startdatetime = Dates.DateTime(ncgetatt(file, "Global", "ibdate")*ncgetatt(file, "Global", "ibtime"), dateformat"yyyymmddHHMMSS")
-    enddatetime = Dates.DateTime(ncgetatt(file, "Global", "iedate")*ncgetatt(file, "Global", "ietime"), dateformat"yyyymmddHHMMSS")
-    lats = ncread(file, "latitude");
-    lons = ncread(file, "longitude");
-    min_lon = minimum(lons)
-    max_lon = maximum(lons)
-    rellon = ncread(file, "RELLNG1")
-    rellat = ncread(file, "RELLAT1")
-    if min_lon > 180 || max_lon > 180
-        min_lon -= 360
-        max_lon -= 360
-    end
-    if min_lon < -180 || max_lon < -180
-        min_lon += 360
-        max_lon += 360
-    end
-    area = [maximum(lats), min_lon, minimum(lats), max_lon]
-
-    dx = round(lons[2] - lons[1], digits=3)
-    dy = round(lats[2] - lats[1], digits=3)
-
-    return Dict(
-        :times => times,
-        :startDate => startdatetime,
-        :endDate => enddatetime,
-        :heights => ncread(file, "height"),
+    output = FlexpartOutput(file)
+    lons, lats = output.lons, output.lats
+    dx, dy = deltamesh(lons, lats)
+    v2d = variables2d(output)
+    d = Dict(
+        :times => output.metadata.times,
+        :startDate => output.metadata.startd,
+        :endDate => output.metadata.endd,
+        :heights => output.ncdataset["height"][:],
         :dx => dx,
         :dy => dy,
-        :releaseLons => rellon,
-        :releaseLats => rellat,
-        :area => area
-    )
+        :releaseLons => output.metadata.rellons,
+        :releaseLats => output.metadata.rellats,
+        :area => areamesh(lons, lats),
+        :globAttr => attrib(output),
+        :variables => keys(output.ncdataset),
+        :variables2d => Dict(
+            Symbol(v) => Flexpart.alldims(output.ncdataset, output.ncdataset[v])
+         for v in v2d),
+    ) 
+    close(output)
+    d
 end
 
 function frame_coord(lon, lat, dx, dy)
@@ -75,9 +50,9 @@ function frame_coord(lon, lat, dx, dy)
     ]
 end
 
-function fields2cells(lons, lats, conc, dx, dy)
-    # lons, lats, conc = get_filtered_field(file, n)
-    colors, cbar, ticks_label = val2colors_trunc(conc)
+function fields2cells(lons, lats, matrix, dx, dy)
+    # lons, lats, matrix = get_filtered_field(file, n)
+    colors, cbar, ticks_label = val2colors_trunc(matrix)
     # dx, dy = Flexpart.deltamesh(lons, lats)
 
     framed = Dict(
@@ -87,11 +62,11 @@ function fields2cells(lons, lats, conc, dx, dy)
         ),
         "cells" => Array{Dict, 1}()
     )
-    for (i, c) in enumerate(conc)
+    for (i, c) in enumerate(matrix)
         push!(framed["cells"], Dict(
             :corners => frame_coord(lons[i], lats[i], dx, dy),
             :center => [lons[i], lats[i]],
-            :conc => c,
+            :value => c,
             :color => colors[i]
             )
         )
@@ -107,7 +82,7 @@ function frame2geojson(framed)
             Feature(
                 Polygon([cell[:corners]]),
                 Dict(
-                    "conc" => cell[:conc],
+                    "value" => cell[:value],
                     "color" => cell[:color]
                 )
             ),

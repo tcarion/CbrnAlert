@@ -1,4 +1,49 @@
-<app-form #appForm
+<!-- <app-form #appForm
     [formItems]="formItems"
     (formSubmit)="onSubmit()"
-    ></app-form>
+    ></app-form> -->
+
+<form [formGroup]="formGroup" (ngSubmit)="onSubmit()">
+    
+    <!-- <app-autoformat-select
+    label = "Variables"
+    formControlName = "variables"
+    [values] = "varNames()"
+    ></app-autoformat-select> -->
+    <!-- <form [formGroup]="formGroup">
+        <div formGroupName="dimensionsForm">
+            <app-autoformat-select
+            *ngFor="let dim of selectedVar | keyvalue; let index;"
+            [label] = "dim.key"
+            [formControl] = "newControls[dim.key]"
+            [values] = "dim.value"
+            ></app-autoformat-select>
+        </div>
+    </form> -->
+    <app-autoformat-select
+    *ngFor="let item of formItems;"
+    [label] = "item.label"
+    [formControlName] = "item.key"
+    [values] = "formService.optionsToArray(item.options)"
+    ></app-autoformat-select>
+
+    <app-dynamic-form
+    *ngIf = "nestedItems.length !== 0"
+    [items] = "nestedItems"
+    ></app-dynamic-form>
+
+
+    <!-- <app-autoformat-select
+    *ngFor="let dim of dimensions.controls; index as i"
+    label = "dim.key"
+    [formControlName] = "dim"
+    values = "dim.value"
+    ></app-autoformat-select> -->
+    <!-- <input 
+    *ngFor="let dim of dimensions.controls;"
+    [formControlName] = "dim"
+    type="text"> -->
+
+    <button mat-raised-button color="primary" type="submit" [disabled]="formGroup.invalid">Send data request</button>
+</form>
+

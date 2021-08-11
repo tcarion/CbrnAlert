@@ -1,3 +1,4 @@
+import { Router } from '@angular/router';
 import { environment } from './../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -12,7 +13,10 @@ import * as dayjs from 'dayjs';
 })
 export class AuthenticationService {
   isAuth = true;
-  constructor(private http: HttpClient) {}
+  constructor(
+      private http: HttpClient,
+      private router: Router
+      ) {}
 
   login(email: string, password: string) {
     return this.http
@@ -37,6 +41,9 @@ export class AuthenticationService {
   logout() {
     localStorage.removeItem('id_token');
     localStorage.removeItem('expires_at');
+    this.router.navigateByUrl('/').then(() => {
+        window.location.reload();
+    });
   }
 
   public isLoggedIn() {

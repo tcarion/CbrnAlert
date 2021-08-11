@@ -3,14 +3,14 @@ using Genie.Router, Genie.Requests, Genie.Assets
 # using FlexpartController
 using Atp45sController
 using FlexpartsController
-using DashboardController
 using AuthenticationController
 using JSONWebTokens
-
+using StructTypes
 using UUIDs
 
 Genie.config.websockets_server = true
 
+StructTypes.StructType(::Type{Genie.WebChannels.ChannelMessage}) = StructTypes.Struct()
 
 atp45_routes = Dict(
     "available_steps" => Atp45sController.available_steps,
@@ -32,29 +32,20 @@ flexpart_routes = Dict(
 )
 
 route("/atp45", method = POST) do
-    notauth = AuthenticationController.isauth()
-    !isnothing(notauth) && return notauth
-    payload = jsonpayload()
-    request = payload["request"]
-    @info request
-    if haskey(atp45_routes, request)
-        return Genie.Renderer.Json.json(atp45_routes[request](payload))
-    else
-        return Genie.Renderer.Json.json(nothing)
-    end
+    process_request(atp45_routes)
 end
 # HTTP.request("POST", "http://localhost:8000/flexpart", [("Content-Type", "application/json")], """{"request":"flexpart_results"}""")
 route("/flexpart", method = POST) do
+    process_request(flexpart_routes)
+end
+
+function process_request(routes)
     notauth = AuthenticationController.isauth()
     !isnothing(notauth) && return notauth
     payload = jsonpayload()
     request = payload["request"]
     @info request
-    if haskey(flexpart_routes, request)
-        return Genie.Renderer.Json.json(flexpart_routes[request](payload))
-    else
-        return Genie.Renderer.Json.json(nothing)
-    end
+    haskey(routes, request) ? Genie.Renderer.Json.json(routes[request](payload)) : Genie.Router.error(404, "Request not found")
 end
 
 route("/login", AuthenticationController.login, method = POST)

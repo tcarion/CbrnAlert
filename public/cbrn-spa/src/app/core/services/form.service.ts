@@ -1,9 +1,10 @@
 import { formatDate } from '@angular/common';
 import { FormItem } from '../models/form-item';
 import { Form } from '../models/form';
-import { FormGroup, FormBuilder } from '@angular/forms';
+import { FormGroup, FormBuilder, FormControl, Validators } from '@angular/forms';
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
+import { FormItemBase } from 'src/app/shared/form/form-item-base';
 
 @Injectable({
     providedIn: 'root',
@@ -33,6 +34,25 @@ export class FormService {
             formControls[formItem.controlName] = [formItem.value === undefined ? '' : formItem.value.display, validators]
         });
         return this.formBuilder.group(formControls);
+    }
+
+    toFormGroup(items: FormItemBase<String>[]) {
+        const group: any = {};
+
+        items.forEach(item => {
+            group[item.key] = item.required ? new FormControl(item.value || '', Validators.required)
+                : new FormControl(item.value || '');
+        });
+        return new FormGroup(group);
+    }
+
+    arrayToOptions(array: Array<any>) {
+        return array.map(key => { return {key: key} })
+    }
+
+    optionsToArray(options: {key: string}[]) {
+        return options.map(e => { return e.key })
+
     }
 
     emitIfLonLatValid() {
@@ -75,6 +95,13 @@ export class FormService {
             }
         }
         return obj;
+    }
+
+    arrayToSelect(controlNames: string[], values: any){
+            controlNames.map((e, i) => {
+                this.currentForm.form.newVal(e, values[i]);
+                this.currentForm.formGroup.get(e)?.patchValue(values[i][0]);
+        });
     }
 
     removeTimeZone(date: Date) {

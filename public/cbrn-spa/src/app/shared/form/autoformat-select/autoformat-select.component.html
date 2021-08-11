@@ -1,0 +1,19 @@
+<mat-form-field 
+class="form-control" 
+appearance="outline" 
+floatLabel="never">
+    <mat-label> {{ label }} </mat-label>
+    <select 
+    matNativeControl
+    (change) = "changeEvent($event)"
+    >
+    <option disabled selected value> -- select an option -- </option>
+        <!-- <ng-container *ngIf="formItem.value !== undefined"> -->
+            <option *ngFor="let val of values; let i = index;" [value]="val">
+                {{ display[i] }}
+            </option>
+        <!-- </ng-container> -->
+    </select>
+    <!-- <mat-hint *ngIf="formItem.hint !== undefined">{{ formItem.hint }}</mat-hint> -->
+    <!-- <mat-error *ngIf="(controlName | formControl).invalid"> error ! </mat-error> -->
+</mat-form-field>

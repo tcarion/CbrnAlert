@@ -11,4 +11,7 @@ export interface FlexpartResult {
     dataDirname: string,
     options?: any,
     description?: {[key:string]: string },
+    variables: string[], 
+    variables2d : any,
+    globAttr: string[],
 }

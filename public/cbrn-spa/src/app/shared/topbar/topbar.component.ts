@@ -1,5 +1,6 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { AuthenticationService } from 'src/app/core/services/authentication.service';
 import { NotificationService } from 'src/app/core/services/notification.service';
 
 @Component({
@@ -21,6 +22,7 @@ export class TopbarComponent implements OnInit, OnDestroy {
 
     constructor(
         private notificationService: NotificationService,
+        private auth: AuthenticationService
     ) { }
 
     ngOnInit(): void {
@@ -40,6 +42,10 @@ export class TopbarComponent implements OnInit, OnDestroy {
 
     onPlotList() {
         this.showPlotList = !this.showPlotList;
+    }
+
+    onLogout() {
+        this.auth.logout();
     }
 
     ngOnDestroy(): void {

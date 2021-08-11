@@ -1,6 +1,5 @@
 module FlexpartsController
 using Genie.Renderer.Html, Genie.Requests
-using GenieAuthentication
 using ViewHelper
 using FlexFiles
 using JSON

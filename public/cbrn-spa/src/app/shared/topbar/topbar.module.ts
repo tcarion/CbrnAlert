@@ -10,6 +10,7 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MapPlotListComponent } from '../map-plot-list/map-plot-list/map-plot-list.component';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MapPlotListModule } from '../map-plot-list/map-plot-list.module';
+import { MatButtonModule } from '@angular/material/button';
 
 
 
@@ -28,6 +29,7 @@ import { MapPlotListModule } from '../map-plot-list/map-plot-list.module';
         MatProgressSpinnerModule,
         MatBadgeModule,
         MatExpansionModule,
+        MatButtonModule,
         MapPlotListModule
     ],
     exports: [

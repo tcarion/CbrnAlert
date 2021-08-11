@@ -16,7 +16,7 @@ import { MapPlotsService } from 'src/app/core/services/map-plots.service';
 export class FlexpartService {
     inputs: FlexpartInput[] = [];
     results: FlexpartResult[] = [];
-    plots: FlexpartPlotData[] = [];
+    // plots: FlexpartPlotData[] = [];
 
     inputsSubject = new Subject<FlexpartInput[]>();
     resultsSubject = new Subject<FlexpartResult[]>();
@@ -107,9 +107,9 @@ export class FlexpartService {
 
         this.apiService.flexpartRequest(payload).subscribe({
             next: (flexpartPlotData: any) => {
-                this.plots.push(flexpartPlotData);
+                // this.plots.push(flexpartPlotData);
                 this.mapPlotsService.addFlexpartPlot(flexpartPlotData);
-                console.log(flexpartPlotData.cells);
+                // console.log(flexpartPlotData.cells);
                 // console.log('received :' + data);
                 // this.mapService.cbrnMap.addGeoJsonLayer(data);
             },

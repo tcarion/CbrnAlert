@@ -2,7 +2,6 @@ module AuthenticationController
 
 using Genie, Genie.Renderer, Genie.Renderer.Html, Genie.Router
 using SearchLight
-using GenieAuthentication
 using ViewHelper
 using Users
 using Logging
@@ -23,9 +22,9 @@ const PUK_PATH = "config/public.pem"
 
 pairs_array_to_dict(array) = Dict(pair[1] => pair[2] for pair in array)
 
-function show_login()
-    html(:authentication, :login, context=@__MODULE__, layout=:login_layout)
-end
+# function show_login()
+#     html(:authentication, :login, context=@__MODULE__, layout=:login_layout)
+# end
 
 # function login()
 #   try
@@ -52,7 +51,7 @@ end
 typedict(x) = Dict(string(fn) => getfield(x, fn) for fn ∈ fieldnames(typeof(x)))
 
 function login()
-    exp = 10 * 60
+    exp = 60 * 60
     payload = Genie.Requests.jsonpayload()
     user = SearchLight.findone(User, email=payload["email"], password=Users.hash_password(payload["password"]))
     if !isnothing(user)
@@ -111,39 +110,39 @@ function isauth()
     end
 end
 
-function logout()
-    GenieAuthentication.deauthenticate(Genie.Sessions.session(Genie.Router.@params))
+# function logout()
+#     GenieAuthentication.deauthenticate(Genie.Sessions.session(Genie.Router.@params))
 
-    Genie.Flash.flash("Good bye! ")
+#     Genie.Flash.flash("Good bye! ")
 
-    Genie.Renderer.redirect(:show_login)
-end
+#     Genie.Renderer.redirect(:show_login)
+# end
 
-function show_register()
-    Genie.Renderer.Html.html(:authentication, :register, context=@__MODULE__)
-end
+# function show_register()
+#     Genie.Renderer.Html.html(:authentication, :register, context=@__MODULE__)
+# end
 
-function register()
-    try
-        user = User(username=Genie.Router.@params(:username),
-                password=Genie.Router.@params(:password)   |> Users.hash_password,
-                name=Genie.Router.@params(:name),
-                email=Genie.Router.@params(:email)) |> SearchLight.save!
+# function register()
+#     try
+#         user = User(username=Genie.Router.@params(:username),
+#                 password=Genie.Router.@params(:password)   |> Users.hash_password,
+#                 name=Genie.Router.@params(:name),
+#                 email=Genie.Router.@params(:email)) |> SearchLight.save!
 
-        GenieAuthentication.authenticate(user.id, Genie.Sessions.session(Genie.Router.@params))
+#         GenieAuthentication.authenticate(user.id, Genie.Sessions.session(Genie.Router.@params))
 
-        "Registration successful"
-    catch ex
-        @error ex
+#         "Registration successful"
+#     catch ex
+#         @error ex
 
-        if hasfield(typeof(ex), :msg)
-            Genie.Flash.flash(ex.msg)
-        else
-            Genie.Flash.flash(string(ex))
-        end
+#         if hasfield(typeof(ex), :msg)
+#             Genie.Flash.flash(ex.msg)
+#         else
+#             Genie.Flash.flash(string(ex))
+#         end
 
-        Genie.Renderer.redirect(:show_register)
-    end
-end
+#         Genie.Renderer.redirect(:show_register)
+#     end
+# end
 
 end

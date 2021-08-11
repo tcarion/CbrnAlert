@@ -1,3 +1,4 @@
+import { ReactiveFormsModule } from '@angular/forms';
 import { InfoButtonComponent } from './info-button/info-button.component';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -27,6 +28,7 @@ import { TopbarModule } from './topbar/topbar.module';
   ],
   exports: [
     FormTemplateModule,
+    ReactiveFormsModule,
     SelectionTableModule,
     TopbarModule,
     MapComponent,
