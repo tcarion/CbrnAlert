@@ -18,7 +18,17 @@
     <button mat-raised-button color="primary" type="submit" [disabled]="formGroup.invalid">Get ATP-45 prediction</button>
 </form> -->
 
-<app-form #appForm
+<!-- <app-form #appForm
     [formItems]="formItems"
     (formSubmit)="onSubmit()"
-    ></app-form>
+    ></app-form> -->
+
+    <form [formGroup]="formGroup" (ngSubmit)="onSubmit()">
+        <app-dynamic-form
+        *ngFor="let item of formItems.items;"
+        [formGroup]="formGroup"
+        [item]="item"
+        ></app-dynamic-form>
+        <button
+        mat-raised-button color="primary" type="submit" [disabled]="formGroup.invalid">Send data request</button>
+    </form>

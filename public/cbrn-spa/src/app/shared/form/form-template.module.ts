@@ -8,21 +8,23 @@ import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatButtonModule } from '@angular/material/button';
 
-import { FormComponent } from './form.component';
 import { FormService } from 'src/app/core/services/form.service';
 import { AppPipesModule } from 'src/app/core/pipes/app-pipes.module';
 import { AutoformatSelectComponent } from './autoformat-select/autoformat-select.component';
 import { MatOptionModule } from '@angular/material/core';
 import { DynamicFormComponent } from './dynamic-form/dynamic-form.component';
+import { MapObjectSelectComponent } from './map-object-select/map-object-select.component';
+import { MapObjectInputComponent } from './map-object-input/map-object-input.component';
 
 
 
 
 @NgModule({
   declarations: [
-    FormComponent,
     AutoformatSelectComponent,
     DynamicFormComponent,
+    MapObjectSelectComponent,
+    MapObjectInputComponent,
   ],
   imports: [
     CommonModule,
@@ -35,7 +37,6 @@ import { DynamicFormComponent } from './dynamic-form/dynamic-form.component';
     MatOptionModule,
   ],
   exports: [
-    FormComponent,
     AutoformatSelectComponent,
     DynamicFormComponent,
   ],

@@ -1,6 +1,6 @@
 
 export interface GribData {
-    startdate: Date,
+    startDate: Date,
     duration: number,
     area: number[],
     filename: string

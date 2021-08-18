@@ -65,7 +65,12 @@ function login()
 
       Genie.Renderer.Json.json(Dict(
         "idToken" => jwt, 
-        "expiresIn" => exp
+        "expiresIn" => exp,
+        "user" => Dict(
+            "id" => user.id,
+            "email" => user.email,
+            "username" => user.username,
+        )
       ))
 
       # Genie.Renderer.Json.json(cont)

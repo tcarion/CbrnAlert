@@ -2,6 +2,7 @@ module Users
 
 using SearchLight, SearchLight.Validation, UsersValidator
 using SHA
+using StructTypes
 
 export User
 
@@ -16,6 +17,9 @@ Base.@kwdef mutable struct User <: AbstractModel
   connected_with_ips::String = ""
 end
 
+StructTypes.StructType(::Type{User}) = StructTypes.Struct()
+StructTypes.StructType(::Type{DbId}) = StructTypes.Struct()
+
 Validation.validator(u::Type{User}) = ModelValidator([
   ValidationRule(:username, UsersValidator.not_empty),
   ValidationRule(:username, UsersValidator.unique),
@@ -29,6 +33,7 @@ function hash_password(password::String)
 end
 
 function add_user(username, password, email)
+    Genie.Assets.channels_subscribe(username)
     user = User(username  = username,
                 password  = password |> hash_password,
                 email = email

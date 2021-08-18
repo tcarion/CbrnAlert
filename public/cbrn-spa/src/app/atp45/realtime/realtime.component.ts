@@ -1,4 +1,4 @@
-import { FormComponent } from 'src/app/shared/form/form.component';
+
 import { ApiService } from '../../core/services/api.service';
 import { NotificationService } from 'src/app/core/services/notification.service';
 import { WebsocketService } from 'src/app/core/services/websocket.service';
@@ -11,59 +11,63 @@ import {
     wrongLonValidator,
 } from 'src/app/shared/validators';
 import { Component, OnDestroy, OnInit, ViewChild, AfterViewInit } from '@angular/core';
-import { Validators } from '@angular/forms';
+import { FormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { AbstractWsComponent } from 'src/app/abstract-classes/abstract-ws-component';
 import { DatePipe } from '@angular/common';
 import { Atp45Service } from 'src/app/atp45/atp45.service';
+import { FormItemBase } from 'src/app/shared/form/form-item-base';
+import { TextFormItem } from 'src/app/shared/form/form-item-text';
+import { SelectFormItem } from 'src/app/shared/form/form-item-select';
+import { FormItems } from 'src/app/shared/form/form-items';
 
+const formItems: FormItemBase<String>[] = [
+    new SelectFormItem({
+        key: 'step',
+        label: 'Forecast step selection',
+        type: 'mapObject',
+        required: true,
+        autoSelect: true,
+    }),
+    new TextFormItem({
+        key: 'lat',
+        label: 'Release latitude [°]',
+        type: 'mapObject',
+        hint: '[-90.0°, 90.0°]',
+        required: true,
+        validators: [wrongLatValidator],
+        mapper: (v: number) => (Math.round(v * 1000) / 1000).toString()
+    }),
+    new TextFormItem({
+        key: 'lon',
+        label: 'Release longitude [°]',
+        type: 'mapObject',
+        hint: '[-180°, 180°]',
+        required: true,
+        validators: [wrongLonValidator],
+        mapper: (v: number) => (Math.round(v * 1000) / 1000).toString()
+    }),
+]
 @Component({
     selector: 'app-realtime',
     templateUrl: './realtime.component.html',
     styleUrls: ['./realtime.component.scss'],
 })
 export class RealtimeComponent extends AbstractWsComponent implements OnInit, OnDestroy, AfterViewInit {
-    formItems: FormItem[] = [
-        {
-            controlName: 'startdate',
-            label: 'Forecast step selection',
-            type: 'select',
-            validators: [Validators.required],
-            value: {
-                obj: [],
-                display: [],
-                withPipe: {
-                    pipe: DatePipe,
-                    arg: ["YYYY-MM-dd @ HH:mm"]
-                }
-            },
-        },
-        {
-            controlName: 'lat',
-            label: 'Release latitude [°]',
-            type: 'input',
-            hint: '[-90.0°, 90.0°]',
-            validators: [wrongLatValidator(), Validators.required],
-        },
-        {
-            controlName: 'lon',
-            label: 'Release longitude [°]',
-            type: 'input',
-            hint: '[-180°, 180°]',
-            validators: [wrongLonValidator(), Validators.required],
-        },
-    ];
 
-    @ViewChild('appForm') appForm: FormComponent;
+    formItems = new FormItems(formItems);
+    formGroup: FormGroup;
+
+    lonlatGroup: FormGroup;
+    // @ViewChild('appForm') appForm: FormComponent;
 
     mapSubscription: Subscription;
 
-    _latSubscription?: Subscription;
-    _lonSubscription?: Subscription;
+    // _latSubscription?: Subscription;
+    // _lonSubscription?: Subscription;
 
     constructor(
         private mapService: MapService,
-        private apiService: ApiService,
         public formService: FormService,
         public websocketService: WebsocketService,
         public notificationService: NotificationService,
@@ -72,96 +76,57 @@ export class RealtimeComponent extends AbstractWsComponent implements OnInit, On
         super(websocketService, notificationService);
     }
 
-    ngAfterViewInit() {
-
-        this.getRealtimeAvailableSteps();
-        // this.appForm.formGroup.get('lat')?.valueChanges.subscribe(() => {
-        //     this.formService.emitIfLonLatValid();
-        // });
-
-        // this.appForm.formGroup.get('lon')?.valueChanges.subscribe(() => {
-        //     this.formService.emitIfLonLatValid();
-        // });
-        this._latSubscription = this.formService.currentForm.formGroup.get('lat')?.valueChanges.subscribe(() => {
-            this.formService.emitIfLonLatValid();
-        });
-
-        this._lonSubscription = this.formService.currentForm.formGroup.get('lon')?.valueChanges.subscribe(() => {
-            this.formService.emitIfLonLatValid();
-        });
-    }
-
     ngOnInit(): void {
         super.ngOnInit();
         this.mapService.onClickInit();
 
-        this.mapSubscription = this.mapService.mapSubject.subscribe(
-            (cbrnMap: any) => {
-                let marker = cbrnMap.marker;
-                this.appForm.formGroup.patchValue({
-                    lon: `${marker.lon}`,
-                    lat: `${marker.lat}`,
-                });
+        this.formGroup = this.formService.toFormGroup(this.formItems.items);
+
+        this.mapSubscription = this.mapService.mapEventSubject.subscribe(
+            (event) => {
+                if (event == 'newMarker') {
+                    let marker = this.mapService.cbrnMap.marker;
+                    this.formService.patchMarker(this.formGroup, marker);
+                }
             }
         );
     }
 
+    ngAfterViewInit() {
+        this.getRealtimeAvailableSteps();
+
+        this.formService.lonlatValid(this.formGroup).subscribe(() => {
+            this.mapService.cbrnMap.marker = this.formService.getLonlat(this.formGroup);
+        })
+    }
+
+
     onSubmit() {
-        const notifTitle = this.notificationService.addNotif('ATP45 Prediction', 'atp45Request');
-
+        const startdate = this.formItems.get('step').options[0].object!.datetime;
+          
         const atp45Input = {
-            datetime: this.formService.removeTimeZone(this.appForm.form.get('startdate').value?.obj[0].datetime),
-            lat: this.appForm.formGroup.get('lat')?.value,
-            lon: this.appForm.formGroup.get('lon')?.value,
-            step: this.appForm.formGroup.get('startdate')?.value.step,
-            ws_info: { channel: this.websocketService.channel, backid: notifTitle },
-        }
-
+            datetime:  this.formService.removeTimeZone(startdate),
+            lat: this.formGroup.get('lat')?.value,
+            lon: this.formGroup.get('lon')?.value,
+            step: this.formGroup.get('step')?.value.step,
+        };
         this.atp45Service.realtimeResultRequest(atp45Input);
 
-        // const payload = {
-        //     ...atp45Input,
-        //     request: "realtime_prediction_request"
-        // }
-        // this.apiService.atp45Request(payload).subscribe({
-        //     next: (shapeData: any) => {
-        //         shapeData = this.formService.handlePredictionResponse(shapeData);
-        //         this.mapService.cbrnMap.drawShapes(shapeData);
-        //         this.notificationService.changeStatus(notifTitle, 'succeeded');
-        //     },
-        //     error: (error: HttpErrorResponse) => {
-        //         this.notificationService.changeStatus(notifTitle, 'failed');
-        //         alert(error.message);
-        //     }
-        // })
     }
 
     getRealtimeAvailableSteps() {
-        const payload = { request: "realtime_available_steps" }
-        this.apiService.atp45Request(payload).subscribe({
-            next: (data: any) => {
-                let steps = data;
-                steps.forEach((element: any) => {
-                    element.datetime = new Date(element.datetime);
-                });
-
-                // this.appForm.form.get("startdate").value = {
-                //     obj: steps, 
-                //     display: steps.map((e:any) => e.datetime),
-                //     withPipe: { pipe: DatePipe, arg: ["YYYY-MM-dd @ HH:mm"] }
-                // }
-                this.appForm.form.newDistVal('startdate', steps, steps.map((e: any) => e.datetime))
-                this.appForm.formGroup.get('startdate')?.setValue(steps[0]);
-            },
-        });
+        this.atp45Service.realtimeAvailableSteps().subscribe(
+            (data) => {
+                let steps = data as {step: number, datetime:any}[]
+                let values = steps.map(step => this.formService.formatIfDate(step.datetime))
+                this.formItems.get('step').options = this.formService.mapObjectToOptions(values, steps);
+            }
+        );
     }
 
     ngOnDestroy() {
         super.ngOnDestroy();
         this.mapSubscription.unsubscribe();
         this.mapService.offClickEvent();
-
-        this._latSubscription?.unsubscribe();
-        this._lonSubscription?.unsubscribe();
     }
 }

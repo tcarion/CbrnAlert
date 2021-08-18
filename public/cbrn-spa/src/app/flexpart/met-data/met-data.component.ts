@@ -1,15 +1,91 @@
 import { AroundPipe } from 'src/app/core/pipes/around.pipe';
-import { FormComponent } from 'src/app/shared/form/form.component';
+
 import { CbrnMap } from '../../core/models/cbrn-map';
 import { Subscription } from 'rxjs';
 import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
-import { Validators } from '@angular/forms';
+import { FormGroup, Validators } from '@angular/forms';
 import { AbstractWsComponent } from 'src/app/abstract-classes/abstract-ws-component';
 import { ApiService } from 'src/app/core/services/api.service';
 import { MapService } from 'src/app/core/services/map.service';
 import { FormService } from 'src/app/core/services/form.service';
 import { WebsocketService } from 'src/app/core/services/websocket.service';
 import { NotificationService } from 'src/app/core/services/notification.service';
+
+import { FormItemBase } from 'src/app/shared/form/form-item-base';
+import { SelectFormItem } from 'src/app/shared/form/form-item-select';
+import { DatepickerFormItem } from 'src/app/shared/form/form-item-datepicker';
+import { TextFormItem } from 'src/app/shared/form/form-item-text';
+import { FormItems } from 'src/app/shared/form/form-items';
+import { FlexpartService } from '../flexpart.service';
+
+
+const formItems: FormItemBase<String>[] = [
+
+    new DatepickerFormItem({
+        key: 'startDay',
+        label: 'Starting day',
+        required: true,
+        minmax: {max: new Date()}
+    }),
+    new SelectFormItem({
+        key: 'startTime',
+        label: 'Starting time',
+        required: true,
+        autoSelect: true,
+        options: [
+            {key: "00:00:00"},
+            {key: "12:00:00"},
+        ]
+    }),
+    new DatepickerFormItem({
+        key: 'endDay',
+        label: 'End day',
+        required: true,
+        minmax: {max: new Date()}
+    }),
+    new SelectFormItem({
+        key: 'endTime',
+        label: 'End time',
+        required: true,
+        autoSelect: true,
+        options: [
+            {key: "00:00:00"},
+            {key: "12:00:00"},
+        ]
+    }),
+    new SelectFormItem({
+        key: 'timeStep',
+        label: 'Time step [h]',
+        required: true,
+        autoSelect: true,
+        options: [
+            {key: 1},
+            {key: 3},
+            {key: 6},
+        ]
+    }),
+    new SelectFormItem({
+        key: 'gridRes',
+        label: 'Grid res. [°]',
+        required: true,
+        autoSelect: true,
+        options: [
+            {key: 0.1},
+            {key: 0.2},
+            {key: 0.5},
+            {key: 1.},
+            {key: 2.},
+        ]
+    }),
+    new TextFormItem({
+        key: 'area',
+        label: 'Area to retrieve',
+        type: 'mapObject',
+        required: true,
+        disabled: true,
+        mapper: (a: number[]) => a.map(e => Math.round(e * 100)/100).join(', ')
+    }),
+]
 
 @Component({
     selector: 'app-met-data',
@@ -18,81 +94,15 @@ import { NotificationService } from 'src/app/core/services/notification.service'
 })
 export class MetDataComponent extends AbstractWsComponent implements OnInit, OnDestroy, AfterViewInit {
 
-    formItems: any[] = [
-        {
-            controlName: 'startDay',
-            label: 'Starting day',
-            type: 'datepicker',
-            validators: [Validators.required],
-            minMaxDate: {max: new Date()}
-        },
-        {
-            controlName: 'startTime',
-            label: 'Starting time',
-            type: 'select',
-            value: {
-                obj: ["00:00:00", "12:00:00"], 
-                display: ["00:00:00", "12:00:00"]
-            },
-            validators: [Validators.required],
-        },
-        {
-            controlName: 'endDay',
-            label: 'End day',
-            type: 'datepicker',
-            validators: [Validators.required],
-            minMaxDate: {max: new Date()}
-        },
-        {
-            controlName: 'endTime',
-            label: 'End time',
-            type: 'select',
-            value: {
-                obj: ["00:00:00", "12:00:00"], 
-                display: ["00:00:00", "12:00:00"]
-            },
-            validators: [Validators.required],
-        },
-        {
-            controlName: 'timeStep',
-            label: 'Time step [h]',
-            type: 'select',
-            value: {
-                obj: [1, 3, 6],
-                display: [1, 3, 6],
-            },
-            validators: [Validators.required],
-        },
-        {
-            controlName: 'gridRes',
-            label: 'Grid res. [°]',
-            type: 'select',
-            value: {
-                obj: [0.1, 0.2, 0.5, 1., 2.], 
-                display: [0.1, 0.2, 0.5, 1., 2.]
-            },
-            validators: [Validators.required],
-        },
-        {
-            controlName: 'areaToRetrieve',
-            label: 'Area to retrieve',
-            type: 'input',
-            value: {
-                obj: [], 
-                display: [], 
-                withPipe: { pipe: AroundPipe }
-            },
-            validators: [Validators.required],
-        },
-    ];
+    formItems = new FormItems(formItems);
 
-    @ViewChild('appForm') appForm: FormComponent;
-    
+    formGroup: FormGroup;
+
     mapSubscription: Subscription;
 
     constructor(
         private mapService: MapService,
-        private apiService: ApiService,
+        private flexpartService: FlexpartService,
         public formService: FormService,
         public websocketService: WebsocketService,
         public notificationService: NotificationService
@@ -101,51 +111,31 @@ export class MetDataComponent extends AbstractWsComponent implements OnInit, OnD
     }
 
     ngAfterViewInit() {
-        this.appForm.formGroup.get('areaToRetrieve')?.disable();
-
-        this.mapSubscription = this.mapService.mapSubject.subscribe({
-            next: (cbrnMap: CbrnMap) => {
-                let area = cbrnMap.layerToArea(cbrnMap.areaSelection);
-                this.appForm.form.newVal('areaToRetrieve', area);
+        this.mapSubscription = this.mapService.mapEventSubject.subscribe({
+            next: (event) => {
+                if (event == 'areaSelection') {
+                    let area = this.mapService.cbrnMap.layerToArea(this.mapService.cbrnMap.areaSelection);
+                    this.formGroup.get('area')?.patchValue(area);
+                }
             }
         });
     }
 
     ngOnInit(): void {
         super.ngOnInit();
+        this.formGroup = this.formService.toFormGroup(this.formItems.items);
 
-
-        this.mapService.cbrnMap.addDrawControl();
+        this.mapService.addDrawControl();
         this.mapService.onAreaSelectionInit();
     }
 
     onSubmit() {
-        const notifTitle = this.notificationService.addNotif('Met data retrieval', 'metDataRequest');
-
-        let formFields = this.formService.formToObject();
+        let formFields = this.formGroup.value;
         
         formFields.startDate = this.formService.removeTimeZone(this.formService.toDate(formFields.startDay, formFields.startTime));
         formFields.endDate = this.formService.removeTimeZone(this.formService.toDate(formFields.endDay, formFields.endTime));
 
-        formFields = {
-            ...formFields,
-            ws_info: {channel: this.websocketService.channel, backid: notifTitle},
-        }
-        console.log(formFields);
-        const payload = {
-            ...formFields,
-            request: "metdata_retrieval"
-        }
-        this.apiService.flexpartRequest(payload).subscribe({
-            next: () => {
-                alert("Meteorological data has been retrieved");
-                this.notificationService.changeStatus(notifTitle, 'succeeded');
-            },
-            error: (error) => {
-                alert(error.info);
-                this.notificationService.changeStatus(notifTitle, 'failed');
-            }
-        })
+        this.flexpartService.metDataRetrieval(formFields);
     }
 
     ngOnDestroy() {

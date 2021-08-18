@@ -1,6 +1,7 @@
 import { HostListener, Injectable } from '@angular/core';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket'
 import { ApiService } from './api.service';
+import { AuthenticationService } from './authentication.service';
 
 @Injectable({
     providedIn: 'root'
@@ -24,7 +25,10 @@ export class WebsocketService {
     //     }
     // };
 
-    constructor(private apiService: ApiService) { }
+    constructor(
+        private apiService: ApiService,
+        private authenticationService: AuthenticationService,
+        ) { }
 
     connect() {
         this.connection$ = webSocket({
@@ -41,7 +45,9 @@ export class WebsocketService {
         });
         // this.connection$.subscribe();
         // this.initHandler();
-        this.initChannel();
+        // this.initChannel();
+        this.channel = this.authenticationService.currentUserValue.username
+        this.channelSubscribe(this.channel)
         console.log("connected to ws");
     }
 
@@ -88,14 +94,14 @@ export class WebsocketService {
     //     )
     // }
 
-    initChannel() {
-        this.apiService.getChannel().subscribe({
-            next: (res: any) => {
-                this.channel = res.channel;
-                this.channelSubscribe(this.channel);
-            }
-        })
-    }
+    // initChannel() {
+    //     this.apiService.getChannel().subscribe({
+    //         next: (res: any) => {
+    //             this.channel = res.channel;
+    //             this.channelSubscribe(this.channel);
+    //         }
+    //     })
+    // }
 
     // initGenie() {
     //     this.Genie.Settings = { 

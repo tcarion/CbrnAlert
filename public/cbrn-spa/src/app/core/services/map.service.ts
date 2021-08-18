@@ -1,11 +1,6 @@
 import { MapPlot } from 'src/app/core/models/map-plot';
-import { FeatureCollection } from 'geojson';
-import { Atp45ShapeData } from './../../atp45/shape-data';
 import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { Atp45Service } from 'src/app/atp45/atp45.service';
-import { MapPlotsService } from 'src/app/core/services/map-plots.service';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 // import { ShapeData } from 'src/app/atp45/shape-data';
 import { CbrnMap } from '../models/cbrn-map';
 
@@ -14,31 +9,63 @@ type MapEvent = 'newMarker' | 'areaSelection'
     providedIn: 'root'
 })
 export class MapService {
-    cbrnMap = new CbrnMap();
+    private map = new CbrnMap();
 
-    mapSubject = new Subject<CbrnMap>();
+    mapSubject: BehaviorSubject<CbrnMap>;
+    map$: Observable<CbrnMap>;
     mapEventSubject = new Subject<MapEvent>();
 
 
 
     constructor(
-    ) { }
+    ) { 
+        this.mapSubject = new BehaviorSubject(this.map);
+        this.map$ = this.mapSubject.asObservable();
+    }
 
-    emitMapSubject() {
-        this.mapSubject.next(this.cbrnMap);
+    // emitMapSubject() {
+    //     this.mapSubject.next(this.cbrnMap);
+    // }
+
+    get cbrnMap() { 
+        return this.mapSubject.value
     }
 
     emitEventSubject(event: MapEvent) {
         this.mapEventSubject.next(event);
     }
 
+    initMap(id: string) {
+        this.cbrnMap.mapInit(id, [50.82, 4.35], 8);
+        this.mapSubject.next(this.cbrnMap);
+    }
+
+    isMapInitialized(timeout: number) {
+        var start = Date.now();
+        let waitForMapInit = (resolve: Function, reject: Function) => {
+            if (this.cbrnMap.map)
+                resolve(this.cbrnMap.map);
+            else if (timeout && (Date.now() - start) >= timeout)
+                reject(new Error("timeout"));
+            else
+                setTimeout(waitForMapInit.bind(this, resolve, reject), 30);
+        }
+        return new Promise(waitForMapInit);
+    }
+
     onClickInit() {
+        this.isMapInitialized(3000).then(() => {
+            this.emitWhenClicked();
+        });
+    }
+
+    emitWhenClicked() {
         this.cbrnMap.map.on('click', (e: L.LeafletMouseEvent) => {
             let latlng = e.latlng;
-            let lat = Math.round(latlng.lat * 1000) / 1000;
-            let lon = Math.round(latlng.lng * 1000) / 1000;
+            let lat = latlng.lat;
+            let lon = latlng.lng;
             this.cbrnMap.marker = {lon, lat};
-            this.emitMapSubject();
+            // this.emitMapSubject();
             this.emitEventSubject('newMarker');
         })
     }
@@ -48,15 +75,23 @@ export class MapService {
     }
 
     onAreaSelectionInit() {
-        this.cbrnMap.map.on('draw:created', (e) => {
-            this.cbrnMap.newAreaSelection(e.layer);
-            this.emitMapSubject();
-            this.emitEventSubject('areaSelection');
+        this.isMapInitialized(3000).then(() => {
+            this.cbrnMap.map.on('draw:created', (e) => {
+                this.cbrnMap.newAreaSelection(e.layer);
+                // this.emitMapSubject();
+                this.emitEventSubject('areaSelection');
+            });
         });
     }
 
     offAreaSelectionEvent() {
         this.cbrnMap.map.off('draw:created');
+    }
+
+    addDrawControl() {
+        this.isMapInitialized(3000).then(() => {
+            this.cbrnMap.addDrawControl();
+        });
     }
 
     // atp45ResultToLayer(): Observable<{shapeData:ShapeData, layer: L.Layer}> {

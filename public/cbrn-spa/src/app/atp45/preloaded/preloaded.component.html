@@ -5,5 +5,6 @@
     (newSelectionEvent)="emitSelection($event)"
     ></app-selection-table>
 
-<app-preloaded-form 
-    [newSelectionSubject]="newSelectionSubject"></app-preloaded-form>
+<app-preloaded-form
+    *ngIf="gribData"
+    [gribData]="gribData"></app-preloaded-form>

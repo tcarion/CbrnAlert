@@ -42,7 +42,7 @@ export class SelectionTableComponent<T> implements AfterViewInit, OnDestroy {
     ngOnInit() {
         this.hasDescriptionCol && this.displayedColumns.push("description");
         this.selectionSubscription = this.selection.changed.subscribe((s) => {
-            s.added.length !==0 && this.newSelectionEvent.emit(s.added[0]);
+            s.added.length !==0 ? this.newSelectionEvent.emit(s.added[0]) : this.newSelectionEvent.emit(undefined);
         })
     }
 

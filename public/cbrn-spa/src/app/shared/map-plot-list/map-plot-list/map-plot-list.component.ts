@@ -12,7 +12,7 @@ import { map, takeUntil } from 'rxjs/operators';
 })
 
 export class MapPlotListComponent implements OnInit, OnDestroy {
-    private readonly onDestroy = new Subject<void>();
+    // private readonly onDestroy = new Subject<void>();
 
     atp45Plots$: Observable<MapPlot[]> = this.mapPlotsService.mapPlots$.pipe(map((plots) => plots.filter((plot) => plot.type === 'atp45')));
     flexpartPlots$: Observable<MapPlot[]> = this.mapPlotsService.mapPlots$.pipe(map((plots) => plots.filter((plot) => plot.type === 'flexpart')));
@@ -47,7 +47,7 @@ export class MapPlotListComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy() {
-        this.onDestroy.next();
-        this.onDestroy.complete();
+        // this.onDestroy.next();
+        // this.onDestroy.complete();
     }
 }

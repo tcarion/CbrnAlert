@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { FlexpartPreloadedComponent } from './flexpart-preloaded.component';
+import { MapObjectSelectComponent } from './map-object-select.component';
 
-describe('FlexpartPreloadedComponent', () => {
-  let component: FlexpartPreloadedComponent;
-  let fixture: ComponentFixture<FlexpartPreloadedComponent>;
+describe('MapObjectSelectComponent', () => {
+  let component: MapObjectSelectComponent;
+  let fixture: ComponentFixture<MapObjectSelectComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ FlexpartPreloadedComponent ]
+      declarations: [ MapObjectSelectComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(FlexpartPreloadedComponent);
+    fixture = TestBed.createComponent(MapObjectSelectComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

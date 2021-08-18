@@ -1,8 +1,10 @@
-import { Input, OnChanges, Self, SimpleChanges } from '@angular/core';
+import { FormItemBase } from 'src/app/shared/form/form-item-base';
+import { Input, OnChanges, Self, SimpleChanges, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
 import { formatDate } from '@angular/common';
-import { ControlValueAccessor, NgControl, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { ControlValueAccessor, FormControl, NgControl, NG_VALUE_ACCESSOR, ValidationErrors, AbstractControl } from '@angular/forms';
 import { from, Observable } from 'rxjs';
+import { SelectFormItem } from 'src/app/shared/form/form-item-select';
 
 @Component({
     selector: 'app-autoformat-select',
@@ -16,12 +18,10 @@ import { from, Observable } from 'rxjs';
         // }
       ]
 })
-export class AutoformatSelectComponent implements OnInit, OnChanges, ControlValueAccessor {
-    @Input() label: string;
-    @Input() values: Array<string | Date | number> = [];
-    display: string[] = [];
-
+export class AutoformatSelectComponent implements OnInit, AfterViewInit, ControlValueAccessor {
+    @Input() item: FormItemBase<String>;
     // valuesObs: Observable<string | Date | number>;
+    @ViewChild('eselect') select: ElementRef; 
 
     onChange = (values: any) => { };
 
@@ -37,25 +37,32 @@ export class AutoformatSelectComponent implements OnInit, OnChanges, ControlValu
     }
 
     ngOnInit(): void {
-
+        this.controlDir.control!.setValidators([this.validate.bind(this)]);
+        // this.controlDir.control!.updateValueAndValidity();
+    }
+    
+    ngAfterViewInit(): void {
+        this.item.autoSelect && this.item.options.length !== 0 && this.controlDir.control?.setValue(this.item.options[0].key, {onlySelf: false})
+        // this.controlDir.control && this.controlDir.control.updateValidity();
     }
 
-    ngOnChanges(changes: SimpleChanges) {
-        if (changes.values) {
-            this.display = [];
-            const newVal = changes.values.currentValue
-            for (let i = 0; i < newVal.length; i++) {
-                if (newVal[0] instanceof Date) {
-                    this.display.push(formatDate(newVal[i], 'YYYY-MM-dd @ HH:mm', "en-US"));
-                } else {
-                    this.display.push(newVal[i].toString());
-                }
-            }
-        }
-    }
+    // ngOnChanges(changes: SimpleChanges) {
+    //     const item = changes.item ? changes.item.currentValue as SelectFormItem : undefined
+    //     if (item && item.options.length !== 0 && (item.options[0].value === undefined)) {
+    //         for (let i = 0; i < item.options.length; i++) {
+    //             if (item.options[0].key instanceof Date) {
+    //                 const formated = formatDate(item.options[i].key, 'YYYY-MM-dd @ HH:mm', "en-US")
+    //                 item.options[i].value = formated;
+    //             } else {
+    //                 item.options[i].value = item.options[i].key.toString();
+    //             }
+    //         }
+    //     }
+    // }
 
-    writeValue(values: any) {
-        // this.controlDir.control?.setValue(this.values[0], {onlySelf: true})
+    writeValue(value: any) {
+        if (value !== "") this.select.nativeElement.value = value;
+        // this.controlDir.control?.setValue(values, {onlySelf: true})
     }
 
     registerOnChange(onChange: any) {
@@ -67,7 +74,18 @@ export class AutoformatSelectComponent implements OnInit, OnChanges, ControlValu
     }
 
     changeEvent(event:any) {
-        this.controlDir.control?.setValue(event.target.value, {onlySelf: true})
+        // this.writeValue(event.target.value)
+        // this.controlDir.control?.setValue(event.target.value, {onlySelf: true})
+        this.onChange(event.target.value);
+        this.onTouched();
+    }
+
+    validate() : ValidationErrors | null {
+        const isNotValid = this.select.nativeElement.value === 'default';
+        if (isNotValid) {
+            return {defaultSelect : 'default'}
+        }
+        return null
     }
 
 }

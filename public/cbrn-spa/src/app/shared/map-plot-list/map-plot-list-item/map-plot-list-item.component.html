@@ -7,12 +7,12 @@
     <!-- <mat-action-list> -->
         <mat-list-item *ngFor="let plot of plots">
             Plot {{ plot.id }} 
-            <button *ngIf="plot.visible" mat-icon-button (click)="onToggleVisibility(plot)">
-                <mat-icon>visibility</mat-icon> 
+            <button mat-icon-button (click)="onToggleVisibility(plot)">
+                <mat-icon> {{ plot.visible ? 'visibility_off' : 'visibility' }} </mat-icon> 
             </button>
-            <button *ngIf="!plot.visible" mat-icon-button (click)="onToggleVisibility(plot)">
+            <!-- <button *ngIf="!plot.visible" mat-icon-button (click)="onToggleVisibility(plot)">
                 <mat-icon>visibility_off</mat-icon> 
-            </button>
+            </button> -->
             <button mat-icon-button (click)="onDelete(plot)">
                 <mat-icon>delete</mat-icon>
             </button>

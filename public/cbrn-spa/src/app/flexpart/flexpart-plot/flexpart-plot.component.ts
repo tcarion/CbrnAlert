@@ -40,7 +40,7 @@ export class FlexpartPlotComponent implements OnInit, OnDestroy {
     displayedColumns = ['select', 'startDate', 'endDate',];
     columnInfo = columnInfo;
 
-    newSelectionSubject = new Subject<FlexpartResult>();
+    fpResult: FlexpartResult;
 
     resultsSubscription: Subscription;
 
@@ -69,8 +69,8 @@ export class FlexpartPlotComponent implements OnInit, OnDestroy {
         )
     }
 
-    emitSelection(fpInput: FlexpartResult) {
-        this.newSelectionSubject.next(fpInput);
+    emitSelection(fpResult: FlexpartResult) {
+        this.fpResult = fpResult;
     }
 
     ngOnDestroy() {

@@ -24,6 +24,8 @@ const CONTROL_FILE_NAME = "CONTROL_OD.OPER.FC.eta.highres.app"
 
 FLEXPART_RUN_TEMPLATE_PATH = "/home/tcarion/flexpart/flexpart_run_template_tests"
 
+global pl = 0
+
 function round_area(area)
     return [ceil(area[1]), floor(area[2]), floor(area[3]), ceil(area[4])]
 end
@@ -36,7 +38,8 @@ function run_flexextract(output_path, params, ws_info)
     process = open(cmd)
     while !eof(process)
         line = readline(process, keep=true)
-        Genie.WebChannels.broadcast(ws_info["channel"], Dict(:displayed => line, :backid => ws_info["backid"]))
+        to_send = Dict(:displayed => line, :backid => ws_info["backid"])
+        Genie.WebChannels.broadcast(ws_info["channel"], "flexpart", to_send)
         write(log_file, line) 
         flush(log_file)
     end
@@ -58,7 +61,8 @@ function run_flexpart(run_dir_path, ws_info)
         cd(cur_dir)
         while !eof(process)
             line = readline(process, keep=true)
-            Genie.WebChannels.broadcast(ws_info["channel"], Dict(:displayed => line, :backid => ws_info["backid"]))
+            to_send = Dict(:displayed => line, :backid => ws_info["backid"])
+            Genie.WebChannels.broadcast(ws_info["channel"], "flexpart", to_send)
             write(log_file, line) 
             flush(log_file)
         end
@@ -314,12 +318,13 @@ function flexpart_conc(payload)
 end
 
 function flexpart_geojson_conc(payload)
-    # @show payload
-    sent_data = payload
-    run_name = sent_data["dataDirname"]
-    time = sent_data["timeSteps"]
-    height = sent_data["heights"]
-    flexpart_result = sent_data["flexpartResult"]
+    global pl = payload
+    received = payload
+    var = received["variable"]
+    dims = received["dimensions"]
+    dims =  dims isa Dict ? received["dimensions"] : Base.copy(received["dimensions"]) # convert to Dict in case of JSON3.Object
+    run_name = received["dataDirname"]
+
 
     available_fp_runs = filter(x -> isdir(x), readdir(joinpath(pwd(), "public", "flexpart_runs"), join=true))
     available_fp_runs = [splitpath(x)[end] for x in available_fp_runs]
@@ -332,15 +337,25 @@ function flexpart_geojson_conc(payload)
     ncf_file = filter(x->occursin(".nc",x), readdir(output_dir))[1]
     ncf_file = joinpath(output_dir, ncf_file)
 
-    lons, lats = Flexpart.mesh(ncf_file)
-    dx, dy = Flexpart.deltamesh(lons, lats)
-    dataset = conc_diskarray(ncf_file)
+    # lons, lats = Flexpart.mesh(ncf_file)
+    # dx, dy = Flexpart.deltamesh(lons, lats)
+    # dataset = conc_diskarray(ncf_file)
 
-    iheight = findall(x -> isapprox(x, height), Flexpart.heights(ncf_file))[1]
+    output = FlexpartOutput(ncf_file)
+    Flexpart.select!(output, var)
+    Flexpart.select!(output, dims)
+
+    # iheight = findall(x -> isapprox(x, height), Flexpart.heights(ncf_file))[1]
     
-    conc = dataset[:, :, iheight, time, 1, 1]
-    flons, flats, fconc = Flexpart.filter_fields(lons, lats, conc)
-    
+    # conc = dataset[:, :, iheight, time, 1, 1]
+    lons = output.lons
+    lats = output.lats
+    dataset = output.dataset
+    close(output)
+    flons, flats, fconc = Flexpart.filter_fields(lons, lats, dataset)
+    isempty(fconc) && return Genie.Router.error(1, "The requested field is empty", "application/json")
+    dx, dy = deltamesh(lons, lats)
+
     framed = ReadNcf.fields2cells(flons, flats, fconc, dx, dy)
     # cells, legend_data = ReadNcf.frame2geojson(ncf_file, time, flexpart_result["dx"], flexpart_result["dy"])
     cells, legend_data = ReadNcf.frame2geojson(framed)
@@ -351,7 +366,7 @@ function flexpart_geojson_conc(payload)
 
     fp_run_data = ReadNcf.ncfmetadata(ncf_file)
     Dict(
-        "flexpartResult" => fp_run_data,
+        # "flexpartResult" => fp_run_data,
         "cells" => [cell |> geo2dict for cell in cells],
         "legendData" => legend_data
     )

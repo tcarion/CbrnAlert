@@ -1,4 +1,5 @@
 using Genie.Router, Genie.Requests, Genie.Assets
+using SearchLight
 # using ATPController
 # using FlexpartController
 using Atp45sController
@@ -8,9 +9,15 @@ using JSONWebTokens
 using StructTypes
 using UUIDs
 
+# using SearchLight
+# using Users
+# for user in SearchLight.all(User)
+#     Genie.Assets.channels_subscribe(user.username)
+# end
+
 Genie.config.websockets_server = true
 
-StructTypes.StructType(::Type{Genie.WebChannels.ChannelMessage}) = StructTypes.Struct()
+# StructTypes.StructType(::Type{Genie.WebChannels.ChannelMessage}) = StructTypes.Struct()
 
 atp45_routes = Dict(
     "available_steps" => Atp45sController.available_steps,
@@ -50,21 +57,26 @@ end
 
 route("/login", AuthenticationController.login, method = POST)
 
-route("/") do 
-    Genie.Renderer.redirect(:dashboard) 
-end
+# route("/") do 
+#     Genie.Renderer.redirect(:dashboard) 
+# end
 
-route("/ngapp") do 
-    serve_static_file("ngapp/dist/ngapp/index.html")
-end
+# route("/ngapp") do 
+#     serve_static_file("ngapp/dist/ngapp/index.html")
+# end
 
-route("/getchannel", method = GET) do
-    notauth = AuthenticationController.isauth()
-    !isnothing(notauth) && return notauth
-    channel = "$(uuid4())"
-    Genie.Assets.channels_support(channel)
-    Genie.Renderer.Json.json(Dict(:channel => channel))
-end
+# route("/getchannel", method = GET) do
+#     notauth = AuthenticationController.isauth()
+#     !isnothing(notauth) && return notauth
+#     channel = "$(uuid4())"
+#     # Genie.Assets.channels_support(channel)
+#     Genie.Assets.channels_subscribe(channel)
+#     # @show Genie.Requests.wsclient()
+#     Genie.Renderer.Json.json(Dict(:channel => channel))
+# end
+
+
+
 # route("/dashboard", DashboardController.dashboard, named = :dashboard)
 
 # route("/atp45/load", ATPController.preloaded_atp_prediction, named = :preloaded_atp_prediction)

@@ -36,7 +36,7 @@ export class FlexpartRunPreloadedComponent implements OnInit, OnDestroy, AfterVi
     displayedColumns = ['select', 'startDate', 'endDate'];
     columnInfo = columnInfo;
 
-    newSelectionSubject = new Subject<FlexpartInput>();
+    fpInput: FlexpartInput;
 
     inputsSubscription: Subscription;
 
@@ -57,7 +57,7 @@ export class FlexpartRunPreloadedComponent implements OnInit, OnDestroy, AfterVi
     }
 
     emitSelection(fpInput: FlexpartInput) {
-        this.newSelectionSubject.next(fpInput);
+        this.fpInput = fpInput;
     }
 
     ngOnDestroy() {

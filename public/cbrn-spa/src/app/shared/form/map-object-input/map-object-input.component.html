@@ -1,0 +1,14 @@
+<mat-form-field 
+class="form-control" 
+appearance="outline" 
+floatLabel="never">
+    <mat-label> {{ item.label }} </mat-label>
+    <input
+    #input
+    matInput
+    (change) = "changeEvent($event)"
+    [value]="item.value || '' "
+    [disabled]= "disabled">
+    <mat-hint>{{ item.hint }}</mat-hint>
+    <!-- <mat-error *ngIf="(item.key | formControl).invalid"> error ! </mat-error> -->
+</mat-form-field>

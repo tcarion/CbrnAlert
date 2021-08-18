@@ -31,6 +31,6 @@ export abstract class AbstractWsComponent {
     }
 
     ngOnDestroy() {
-        this.wsSubscription.unsubscribe();
+        // this.wsSubscription.unsubscribe();
     }
 }

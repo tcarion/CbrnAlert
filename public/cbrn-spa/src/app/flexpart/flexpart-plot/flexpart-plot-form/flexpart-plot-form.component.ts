@@ -1,3 +1,4 @@
+import { FormItems } from 'src/app/shared/form/form-items';
 import { Subject, Subscription } from 'rxjs';
 import { FormBuilder, FormGroup, Validators, FormControl, FormArray } from '@angular/forms';
 import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges } from '@angular/core';
@@ -64,15 +65,16 @@ const formItems = [
     templateUrl: './flexpart-plot-form.component.html',
     styleUrls: ['./flexpart-plot-form.component.scss']
 })
-export class FlexpartPlotFormComponent implements OnInit, OnDestroy {
-    formItems;
+export class FlexpartPlotFormComponent implements OnInit, OnChanges {
+    formItems = new FormItems(formItems);
+
     nestedItems: FormItemBase<String>[] = [];
 
     formGroup: FormGroup;
 
-    @Input() newSelectionSubject: Subject<FlexpartResult>;
+    @Input() flexpartResult: FlexpartResult;
 
-    flexpartResult: FlexpartResult;
+    // flexpartResult: FlexpartResult;
     variables = [];
     selectedVar: { [key: string]: (string | number | Date)[] };
 
@@ -83,35 +85,52 @@ export class FlexpartPlotFormComponent implements OnInit, OnDestroy {
         private mapService: MapService,
         private flexpartService: FlexpartService,
         public formService: FormService,
-        private formBuilder: FormBuilder,
     ) {
-        this.formItems = formItems;
     }
 
     ngOnInit(): void {
-        this.formGroup = this.formService.toFormGroup(formItems);
+        this.formGroup = this.formService.toFormGroup(this.formItems.items);
+
+        // this.mapService.cbrnMap.newAvailableArea(this.flexpartResult.area);
+        // this.variables = this.flexpartResult.variables2d;
+        // this.formItems.forEach((item) => {
+        //     item.options = item.key == 'variables' ? this.formService.arrayToOptions(Object.keys(this.flexpartResult.variables2d)) : []
+        // })
 
         this.formGroup.controls.variables.valueChanges.subscribe((value) => {
+            
+            this.nestedItems.forEach((item) => {
+                this.formGroup.removeControl(item.key);
+            })
+
             this.nestedItems = [];
+
             const dims = this.variables[value];
-            // this.selectedVar = dims;
             for (const [key, value] of Object.entries(dims)) {
-                this.nestedItems.push(new SelectFormItem({
+                const newItem = new SelectFormItem({
                     key: key,
                     label: key,
-                    options: (value as Array<string>).map((e) => { return {key: e} }),
+                    options: value ? this.formService.arrayToOptions(value as Array<string | number | Date>) : [],
                     required: true,
-                }))
+                    autoSelect: true,
+                });
+                this.formGroup.addControl(key, this.formService.toControl(newItem));
+                this.nestedItems.push(newItem);
             }
-            // this.formGroup = this.formService.toFormGroup(formItems);
-            // this.formGroup = this.formBuilder.group({
-            //     ...this.formGroup.controls,
-            //     ...this.newControls
-            // });
         })
 
     }
 
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes.flexpartResult) {
+            this.nestedItems = [];
+            const flexpartResult = changes.flexpartResult.currentValue;
+    
+            this.mapService.cbrnMap.newAvailableArea(flexpartResult.area);
+            this.variables = flexpartResult.variables2d;
+            this.formItems.get('variables').options = this.formService.arrayToOptions(Object.keys(flexpartResult.variables2d))
+        }
+    }
     // addControls(keys: string[]) {
     //     const group: any = {};
     //     for (const key of keys) {
@@ -122,34 +141,24 @@ export class FlexpartPlotFormComponent implements OnInit, OnDestroy {
     //     // this.newControls = group;
     // }
 
-    ngAfterViewInit() {
-        this.newSelectionSubscription = this.newSelectionSubject.subscribe((fpResult) => {
-            this.mapService.cbrnMap.newAvailableArea(fpResult.area);
-            this.flexpartResult = fpResult;
-            this.variables = fpResult.variables2d;
-            this.formItems.forEach((item) => {
-                item.options = item.key == 'variables' ? this.formService.arrayToOptions(Object.keys(fpResult.variables2d)) : []
-            })
-        });
-    }
-
     varNames() {
         return Object.keys(this.variables)
     }
 
     onSubmit() {
-        let formFields = this.formService.formToObject();
+        // let formFields = this.formService.formToObject();
+        let formFields = this.formGroup.value;
+        const asArray = Object.entries(formFields);
+        const filtered = asArray.filter(([key, value]) => key !== this.formItems.get('variables').key);
+        const dimensions = Object.fromEntries(filtered);
         formFields = {
-            ...formFields,
+            variable: formFields.variables,
+            dimensions: dimensions,
             dataDirname: this.flexpartResult.dataDirname,
-            flexpartResult: this.flexpartResult,
+            // flexpartResult: this.flexpartResult,
         }
-
+        // console.log(formFields);
         this.flexpartService.newPlot(formFields);
-    }
-
-    ngOnDestroy() {
-        this.newSelectionSubject.unsubscribe();
     }
 
 }

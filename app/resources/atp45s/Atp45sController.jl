@@ -106,7 +106,7 @@ function broadcast_mars_output(req::MarsRequest, ws_info)
     while !eof(process)
         r = readline(process)
         info_to_send = Dict(:displayed => r, :backid => ws_info["backid"])
-        Genie.WebChannels.broadcast(ws_info["channel"], info_to_send)
+        Genie.WebChannels.broadcast(ws_info["channel"], "atp45" ,info_to_send)
         # try
         # catch e
         #     println("COULDN'T BROADCAST TO WEBCHANNEL")
@@ -187,9 +187,9 @@ function prediction_request(payload)
     lat = typeof(request_data["lat"]) == String ? Base.parse(Float64, request_data["lat"]) : request_data["lat"]
     lon = typeof(request_data["lon"]) == String ? Base.parse(Float64, request_data["lon"]) : request_data["lon"]
 
-    step = request_data["step"]
+    step = request_data["step"] isa String ? Base.parse(Int64, request_data["step"]) : request_data["step"]
 
-    datetime_start = Dates.DateTime(request_data["datetime"][1:22])
+    datetime_start = Dates.DateTime(request_data["datetime"][1:19])
     time = Dates.format(datetime_start, "HHMM")
     date = Dates.format(datetime_start, "yyyymmdd")
 

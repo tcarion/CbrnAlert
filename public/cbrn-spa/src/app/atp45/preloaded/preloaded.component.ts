@@ -39,7 +39,8 @@ export class PreloadedComponent implements OnInit, AfterViewInit, OnDestroy {
     displayedColumns = ['select', 'startDate', 'duration', 'area'];
     columnInfo = columnInfo;
 
-    newSelectionSubject = new Subject<GribData>();
+    // newSelectionSubject = new Subject<GribData>();
+    gribData: GribData;
 
     inputsSubscription: Subscription;
 
@@ -57,8 +58,8 @@ export class PreloadedComponent implements OnInit, AfterViewInit, OnDestroy {
         )
     }
 
-    emitSelection(fpInput: GribData) {
-        this.newSelectionSubject.next(fpInput);
+    emitSelection(gribData: GribData) {
+        this.gribData = gribData;
     }
 
     ngOnDestroy() {

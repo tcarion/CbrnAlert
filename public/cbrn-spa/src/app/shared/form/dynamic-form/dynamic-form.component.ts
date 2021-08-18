@@ -8,17 +8,10 @@ import { FormItemBase } from '../form-item-base';
     templateUrl: './dynamic-form.component.html',
     styleUrls: ['./dynamic-form.component.scss']
 })
-export class DynamicFormComponent implements OnInit {
-    @Input() items: FormItemBase<String>[];
+export class DynamicFormComponent {
+    @Input() item: FormItemBase<String>;
+    @Input() formGroup!: FormGroup;
 
-    dynamicForm: FormGroup;
-
-    constructor(
-        public formService: FormService,
-    ) { }
-
-    ngOnInit(): void {
-        this.dynamicForm = this.formService.toFormGroup(this.items);
-    }
+    get isValid() { return this.formGroup.controls[this.item.key].valid; }
 
 }

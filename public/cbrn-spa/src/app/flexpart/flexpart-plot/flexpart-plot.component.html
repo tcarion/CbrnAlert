@@ -6,5 +6,6 @@
     [hasDescriptionCol]="true"
     ></app-selection-table>
 
-<app-flexpart-plot-form 
-    [newSelectionSubject]="newSelectionSubject"></app-flexpart-plot-form >
+<app-flexpart-plot-form
+    *ngIf="fpResult"
+    [flexpartResult]="fpResult"></app-flexpart-plot-form >

@@ -57,6 +57,28 @@ export class FlexpartService {
             );
     }
 
+    metDataRetrieval(payload: any) {
+        const notifTitle = this.notificationService.addNotif('Met data retrieval', 'metDataRequest');
+
+        const plWs = {...payload,
+            ws_info: { channel: this.websocketService.channel, backid: notifTitle },
+        }
+
+        console.log(plWs);
+
+        this.apiService.flexpartRequest({...plWs, request: "metdata_retrieval"}).subscribe({
+            next: () => {
+                alert("Meteorological data has been retrieved");
+                this.notificationService.changeStatus(notifTitle, 'succeeded');
+
+            },
+            error: (error) => {
+                console.log(error);
+                this.notificationService.changeStatus(notifTitle, 'failed');
+            }
+        })
+    }
+
     getFlexpartOptions(args : {dataDirname: string}) {
         let payload = {...args, request: 'flexpart_options'}
         return this.apiService

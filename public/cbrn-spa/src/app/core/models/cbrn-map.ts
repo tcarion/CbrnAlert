@@ -473,7 +473,7 @@ export class CbrnMap {
         this.info = new L.Control({position: 'topright'});
 
         this.info.update = function (props:any) {
-            let conc = props && parseFloat(props.conc);
+            let conc = props && parseFloat(props.value);
             this._div.innerHTML = '<h4>Concentration</h4>' +  (props ?
                 '<b>' + conc.toExponential(4) + ' [ng/m3]</b>'
                 : 'Hover over a cell');
