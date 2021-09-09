@@ -15,6 +15,9 @@
     </ng-container>
 
     <button
-    mat-raised-button color="primary" type="submit" [disabled]="formGroup.invalid">Send data request</button>
+    mat-raised-button color="primary" type="submit" [disabled]="formGroup.invalid">Plot on map</button>
 </form>
+
+<button
+mat-raised-button color="primary" (click)="onDailyAverage()">Calc. daily average</button>
 

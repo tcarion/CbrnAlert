@@ -2,9 +2,9 @@ import { FormItemBase } from "./form-item-base";
 
 export class FormItems<T> {
 
-    constructor(public items: FormItemBase<T>[]) {}
+    constructor(public items: FormItemBase[]) {}
 
-    get(key: string): FormItemBase<T> {
+    get(key: string): FormItemBase {
         let fi;
         this.items.forEach((element) => {
             if(element.key === key) {

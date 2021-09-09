@@ -1,3 +1,4 @@
+import { wrongLonValidator } from 'src/app/shared/validators';
 import { WebsocketService } from 'src/app/core/services/websocket.service';
 import { NotificationService } from 'src/app/core/services/notification.service';
 import { FormService } from '../../core/services/form.service';
@@ -13,7 +14,7 @@ import { TextFormItem } from 'src/app/shared/form/form-item-text';
 import { FormItems } from 'src/app/shared/form/form-items';
 import { Atp45Service } from '../atp45.service';
 
-const formItems: FormItemBase<String>[] = [
+const formItems: FormItemBase[] = [
 
     new DatepickerFormItem({
         key: 'forecastDate',

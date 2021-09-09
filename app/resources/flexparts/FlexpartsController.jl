@@ -24,6 +24,12 @@ const CONTROL_FILE_NAME = "CONTROL_OD.OPER.FC.eta.highres.app"
 
 FLEXPART_RUN_TEMPLATE_PATH = "/home/tcarion/flexpart/flexpart_run_template_tests"
 
+const JsonPayload = Dict{Symbol, Any}
+const Output = JsonPayload
+const Result = JsonPayload
+
+FLEXPART_RUNS_DIR = joinpath(pwd(), "public", "flexpart_runs")
+
 global pl = 0
 
 function round_area(area)
@@ -63,7 +69,7 @@ function run_flexpart(run_dir_path, ws_info)
             line = readline(process, keep=true)
             to_send = Dict(:displayed => line, :backid => ws_info["backid"])
             Genie.WebChannels.broadcast(ws_info["channel"], "flexpart", to_send)
-            write(log_file, line) 
+            write(log_file, line)
             flush(log_file)
         end
 
@@ -81,36 +87,42 @@ function run_flexpart(run_dir_path, ws_info)
 end
 
 function flexextract_request(payload)
-    request_data = payload
-    startdate = Dates.DateTime(request_data["startDate"][1:22])
-    enddate = Dates.DateTime(request_data["endDate"][1:22])
-    timestep = request_data["timeStep"]
-    gridres = request_data["gridRes"]
-    area = request_data["areaToRetrieve"]
+    global pl = payload
+
+    startdate = Dates.DateTime(payload["startDate"][1:22])
+    enddate = Dates.DateTime(payload["endDate"][1:22])
+    timestep = payload["timeStep"]
+    gridres = payload["gridRes"]
+    area = payload["area"]
     area = round_area(area)
 
     area_str = join(convert.(Int, area .|> round), "_")
 
     dir_name = Dates.format(startdate, "yyyymmdd_HHMM") * "_" * area_str
-    dir_path = joinpath(pwd(), "public", "extracted_met_data", dir_name)
+    dir_path = joinpath(EXTRACTED_MET_DATA_DIR, dir_name)
     mkpath(dir_path)
     inputdir = joinpath(dir_path, "input")
     outputdir = joinpath(dir_path, "output")
     mkpath(inputdir)
     mkpath(outputdir)
 
-    options = Dict(
-        :startdate => startdate,
-        :enddate => enddate,
-        :timestep => timestep,
-        :gridres => gridres,
-        :area => area,
-    )
+    # options = Dict(
+    #     :startdate => startdate,
+    #     :enddate => enddate,
+    #     :timestep => timestep,
+    #     :gridres => gridres,
+    #     :area => area,
+    # )
+    # @show options
+    # formated_options =  FlexFiles.flexextract_options(options)
 
-    @show options
-    formated_options = FlexFiles.flexextract_options(options)
+    # ctrl_file_path = FlexFiles.update_flexfile(FLEX_EXTRACT_CONTROL_PATH, formated_options, "controlfile", dest=dir_path)
 
-    ctrl_file_path = FlexFiles.update_flexfile(FLEX_EXTRACT_CONTROL_PATH, formated_options, "controlfile", dest=dir_path)
+    fcontrol = FlexControl(FLEX_EXTRACT_CONTROL_PATH)
+    fcontrol[:GRID] = gridres
+    set_area!(fcontrol, area)
+    set_steps!(fcontrol, startdate, enddate, timestep)
+    ctrl_file_path = write(fcontrol, dir_path)
 
     formated_exec = Dict("inputdir" => inputdir, "outputdir" => outputdir, "controlfile" => ctrl_file_path)
     params = []
@@ -119,7 +131,7 @@ function flexextract_request(payload)
         push!(params, v)
     end
     
-    run_flexextract(dir_path, params, request_data["ws_info"])
+    # run_flexextract(dir_path, params, request_data["ws_info"])
 end
 
 function available_flexpart_input(payload)
@@ -142,6 +154,7 @@ end
 
 function flexpart_run(payload)
     request_data = payload
+    global pl = payload
     startdate = Dates.DateTime(request_data["startDate"][1:22])
     enddate = Dates.DateTime(request_data["endDate"][1:22])
     releasestartdate = Dates.DateTime(request_data["releaseStartDate"][1:22])
@@ -150,13 +163,12 @@ function flexpart_run(payload)
     timestep = request_data["timeStep"]
     gridres = request_data["gridRes"]
     area = request_data["area"]
+    area = area isa Dict ? area : Base.copy(area) 
     rel_lon = request_data["lon"]
     rel_lat = request_data["lat"]
     particules = request_data["particulesNumber"]
     metdata_dirname = request_data["dataDirname"]
     mass = request_data["mass"]
-
-    area = round_area(area)
 
     run_dir_name = Dates.format(startdate, dateformat"yyyymmdd_HH")*"_"*Dates.format(enddate, dateformat"yyyymmdd_HH")*"_"*particules
     run_dir_path = joinpath(pwd(), "public", "flexpart_runs", run_dir_name)
@@ -165,47 +177,39 @@ function flexpart_run(payload)
 
     options_dir_path = joinpath(run_dir_path, "options")
 
+    options = FlexpartOptions(FLEXPART_RUN_TEMPLATE_PATH)
+
     command_options = Dict(
-        "IBDATE" => Dates.format(startdate, "yyyymmdd"),
-        "IBTIME" => Dates.format(startdate, "HHMMSS"),
-        "IEDATE" => Dates.format(enddate, "yyyymmdd"),
-        "IETIME" => Dates.format(enddate, "HHMMSS"),
-        )
-    
+        :ibdate => Dates.format(startdate, "yyyymmdd"),
+        :ibtime => Dates.format(startdate, "HHMMSS"),
+        :iedate => Dates.format(enddate, "yyyymmdd"),
+        :ietime => Dates.format(enddate, "HHMMSS"),
+         )
+    Flexpart.set(options["COMMAND"][:command], command_options)
+
     releases_options = Dict(
-        "IDATE1" => Dates.format(releasestartdate, "yyyymmdd"),
-        "ITIME1" => Dates.format(releasestartdate, "HHMMSS"),
-        "IDATE2" => Dates.format(releaseenddate, "yyyymmdd"),
-        "ITIME2" => Dates.format(releaseenddate, "HHMMSS"),
-        "LON1" => rel_lon,
-        "LON2" => rel_lon,
-        "LAT1" => rel_lat,
-        "LAT2" => rel_lat,
-        "Z1" => releaseheight,
-        "Z2" => releaseheight,
-        "PARTS" => particules,
-        "MASS" => mass
+        :idate1 => Dates.format(releasestartdate, "yyyymmdd"),
+        :itime1 => Dates.format(releasestartdate, "HHMMSS"),
+        :idate2 => Dates.format(releaseenddate, "yyyymmdd"),
+        :itime2 => Dates.format(releaseenddate, "HHMMSS"),
+        :lon1 => rel_lon,
+        :lon2 => rel_lon,
+        :lat1 => rel_lat,
+        :lat2 => rel_lat,
+        :z1 => releaseheight,
+        :z2 => releaseheight,
+        :parts => particules,
+        :mass => mass
     )
+    Flexpart.set(options["RELEASES"][:release], releases_options)
 
-    outlon0 = area[2]
-    outlat0 = area[3]
-    deltalon = area[4] - outlon0
-    deltalat = area[1] - outlat0
-    nx = convert(Int, deltalon/gridres)
-    ny = convert(Int, deltalat/gridres)
+    Flexpart.set(options["OUTGRID"][:outgrid], area2outgrid(area, gridres))
 
-    outgrid_options = Dict(
-        "OUTLON0" => outlon0,
-        "OUTLAT0" => outlat0,
-        "NUMXGRID" => nx,
-        "NUMYGRID" => ny,
-        "DXOUT" => gridres,
-        "DYOUT" => gridres
-    )
+    write(options, run_dir_path)
 
-    FlexFiles.update_flexfile(joinpath(options_dir_path, "COMMAND"), command_options, "namelist")
-    FlexFiles.update_flexfile(joinpath(options_dir_path, "RELEASES"), releases_options, "namelist")
-    FlexFiles.update_flexfile(joinpath(options_dir_path, "OUTGRID"), outgrid_options, "namelist")
+    # FlexFiles.update_flexfile(joinpath(options_dir_path, "COMMAND"), command_options, "namelist")
+    # FlexFiles.update_flexfile(joinpath(options_dir_path, "RELEASES"), releases_options, "namelist")
+    # FlexFiles.update_flexfile(joinpath(options_dir_path, "OUTGRID"), outgrid_options, "namelist")
 
     metdata_dirname = joinpath(pwd(), "public", "extracted_met_data", metdata_dirname, "output/")
 
@@ -219,7 +223,6 @@ function flexpart_run(payload)
     FlexFiles.update_available(joinpath(pwd(), run_dir_path, "AVAILABLE"), metdata_dirname)
 
     run_flexpart(run_dir_path, request_data["ws_info"])
-    @show payload
 
 end
 
@@ -265,7 +268,7 @@ Output:
     )[]
 """
 function flexpart_results(payload)
-    available_fp_runs_dir = filter(x -> isdir(x), readdir(joinpath(pwd(), "public", "flexpart_runs"), join=true))
+    available_fp_runs_dir = filter(x -> isdir(x), readdir(FLEXPART_RUNS_DIR, join=true))
     available_fp_runs = Array{Dict, 1}()
     for dir in available_fp_runs_dir
         output_dir = joinpath(dir, "output")
@@ -279,6 +282,58 @@ function flexpart_results(payload)
     return available_fp_runs
 end
 
+"""
+    get_results()
+Return all flexpart runs
+
+Output:
+    Dict(
+        :id :: String,
+        :output :: Output
+    )[]
+"""
+function get_results()
+    available_fp_runs_dir = filter(x -> isdir(x), readdir(FLEXPART_RUNS_DIR, join=true))
+    function f(x)
+        id = basename(x)
+        ncfs = try
+            ncf_files(x)
+        catch
+            return Dict(:id => id, :outputs => nothing)
+        end
+        isempty(ncfs) && return Dict(:id => id, :outputs => nothing)
+        return Dict(
+            :id => id,
+            :outputs => [output2dict(x) for x in ncfs]
+        )
+    end
+    map(f, available_fp_runs_dir)
+end
+
+function output2dict(outpath)
+    output = FlexpartOutput(outpath)
+    lons, lats = output.lons, output.lats
+    dx, dy = deltamesh(lons, lats)
+    v2d = variables2d(output)
+    d = Dict(
+        :id => basename(outpath),
+        :times => output.metadata.times,
+        :startDate => output.metadata.startd,
+        :endDate => output.metadata.endd,
+        :dx => dx,
+        :dy => dy,
+        :releaseLons => output.metadata.rellons,
+        :releaseLats => output.metadata.rellats,
+        :area => areamesh(lons, lats),
+        :globAttr => attrib(output),
+        :variables => keys(output.ncdataset),
+        :variables2d => Dict(
+            Symbol(v) => Flexpart.alldims(output.ncdataset, output.ncdataset[v])
+         for v in v2d),
+    ) 
+    close(output)
+    d
+end
 """
     flexpart_conc()
 Return meta data for a flexpart run
@@ -296,29 +351,30 @@ Output:
         :values :: Real[],
     )[]
 """
-function flexpart_conc(payload)
-    sent_data = payload
-    run_name = sent_data["dataDirname"]
-    time = sent_data["timeSteps"]
+# function flexpart_conc(payload)
+#     sent_data = payload
+#     run_name = sent_data["dataDirname"]
+#     time = sent_data["timeSteps"]
 
-    available_fp_runs = filter(x -> isdir(x), readdir(joinpath(pwd(), "public", "flexpart_runs"), join=true))
-    available_fp_runs = [splitpath(x)[end] for x in available_fp_runs]
+#     available_fp_runs = filter(x -> isdir(x), readdir(FLEXPART_RUNS_DIR, join=true))
+#     available_fp_runs = [splitpath(x)[end] for x in available_fp_runs]
 
-    if !(run_name in available_fp_runs)
-        throw(Genie.Exceptions.RuntimeException("Flexpart run not found", "The flexpart output hasn't been found on the server", 1))
-    end
+#     if !(run_name in available_fp_runs)
+#         throw(Genie.Exceptions.RuntimeException("Flexpart run not found", "The flexpart output hasn't been found on the server", 1))
+#     end
     
-    output_dir = joinpath(pwd(), "public", "flexpart_runs", run_name, "output")
-    ncf_file = filter(x->occursin(".nc",x), readdir(output_dir))[1]
-    ncf_file = joinpath(output_dir, ncf_file)
-    lon, lat, conc = ReadNcf.get_filtered_field(ncf_file, time)
+#     output_dir = Flexpart
+#     ncf_file = filter(x->occursin(".nc",x), readdir(output_dir))[1]
+#     ncf_file = joinpath(output_dir, ncf_file)
+#     lon, lat, conc = ReadNcf.get_filtered_field(ncf_file, time)
 
-    response = Dict("lons" => lon, "lats" => lat, "values" => log10.(conc))
-    return response
-end
+#     response = Dict("lons" => lon, "lats" => lat, "values" => log10.(conc))
+#     return response
+# end
 
 function flexpart_geojson_conc(payload)
     global pl = payload
+    @show payload["dimensions"]
     received = payload
     var = received["variable"]
     dims = received["dimensions"]
@@ -326,21 +382,21 @@ function flexpart_geojson_conc(payload)
     run_name = received["dataDirname"]
 
 
-    available_fp_runs = filter(x -> isdir(x), readdir(joinpath(pwd(), "public", "flexpart_runs"), join=true))
+    available_fp_runs = filter(x -> isdir(x), readdir(FLEXPART_RUNS_DIR, join=true))
     available_fp_runs = [splitpath(x)[end] for x in available_fp_runs]
 
     if !(run_name in available_fp_runs)
         throw(Genie.Exceptions.RuntimeException("Flexpart run not found", "The flexpart output hasn't been found on the server", 1))
     end
     
-    output_dir = joinpath(pwd(), "public", "flexpart_runs", run_name, "output")
-    ncf_file = filter(x->occursin(".nc",x), readdir(output_dir))[1]
-    ncf_file = joinpath(output_dir, ncf_file)
+    # output_dir = joinpath(pwd(), "public", "flexpart_runs", run_name, "output")
+    # ncf_file = filter(x->occursin(".nc",x), readdir(output_dir))[1]
+    path = get_fpdir(run_name)
+    ncf_file = ncf_files(get_fpdir(run_name); onlynested=false)[1]
 
     # lons, lats = Flexpart.mesh(ncf_file)
     # dx, dy = Flexpart.deltamesh(lons, lats)
     # dataset = conc_diskarray(ncf_file)
-
     output = FlexpartOutput(ncf_file)
     Flexpart.select!(output, var)
     Flexpart.select!(output, dims)
@@ -370,6 +426,22 @@ function flexpart_geojson_conc(payload)
         "cells" => [cell |> geo2dict for cell in cells],
         "legendData" => legend_data
     )
+end
+
+function flexpart_daily_average(payload)
+    run_name = payload["dataDirname"]
+    path = get_fpdir(run_name)
+    ncf_file = ncf_files(path; onlynested=false)[3]
+    output = FlexpartOutput(ncf_file)
+    Flexpart.select!(output, "spec001_mr")
+    Flexpart.select!(output, (time=:, height=1, pointspec=1, nageclass=1))
+    Flexpart.write_daily_average!(output, copy=false)
+    close(output)
+    "Daily average"
+end
+
+function get_fpdir(run_name)
+    joinpath(FLEXPART_RUNS_DIR, run_name)
 end
 
 end

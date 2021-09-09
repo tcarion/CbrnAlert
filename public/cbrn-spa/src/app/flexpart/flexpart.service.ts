@@ -14,6 +14,7 @@ import { MapPlotsService } from 'src/app/core/services/map-plots.service';
     providedIn: 'root'
 })
 export class FlexpartService {
+
     inputs: FlexpartInput[] = [];
     results: FlexpartResult[] = [];
     // plots: FlexpartPlotData[] = [];
@@ -138,6 +139,23 @@ export class FlexpartService {
             error: (error) => {
                 alert(error.info);
             }
+        })
+    }
+
+    dailyAverage(dirname: string) {
+        const payload = {
+            dataDirname: dirname,
+            request: "flexpart_daily_average"
+        };
+
+        this.apiService.flexpartRequest(payload).subscribe({
+            next: (flexpartPlotData: any) => {
+                // this.plots.push(flexpartPlotData);
+                alert("Average added");
+                // console.log(flexpartPlotData.cells);
+                // console.log('received :' + data);
+                // this.mapService.cbrnMap.addGeoJsonLayer(data);
+            },
         })
     }
 

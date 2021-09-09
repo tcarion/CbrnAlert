@@ -15,6 +15,7 @@ import { MatOptionModule } from '@angular/material/core';
 import { DynamicFormComponent } from './dynamic-form/dynamic-form.component';
 import { MapObjectSelectComponent } from './map-object-select/map-object-select.component';
 import { MapObjectInputComponent } from './map-object-input/map-object-input.component';
+import { TextFieldModule } from '@angular/cdk/text-field';
 
 
 
@@ -35,6 +36,7 @@ import { MapObjectInputComponent } from './map-object-input/map-object-input.com
     MatDatepickerModule,
     MatButtonModule,
     MatOptionModule,
+    TextFieldModule,
   ],
   exports: [
     AutoformatSelectComponent,

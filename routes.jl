@@ -9,6 +9,8 @@ using JSONWebTokens
 using StructTypes
 using UUIDs
 
+FLEXPART_RUNS_DIR = joinpath(pwd(), "public", "flexpart_runs")
+
 # using SearchLight
 # using Users
 # for user in SearchLight.all(User)
@@ -34,9 +36,19 @@ flexpart_routes = Dict(
     "flexpart_run" => FlexpartsController.flexpart_run,
     "flexpart_options" => FlexpartsController.flexpart_options,
     "flexpart_results" => FlexpartsController.flexpart_results,
-    "flexpart_conc" => FlexpartsController.flexpart_conc,
+    # "flexpart_conc" => FlexpartsController.flexpart_conc,
     "flexpart_geojson_conc" => FlexpartsController.flexpart_geojson_conc,
+    "flexpart_daily_average" => FlexpartsController.flexpart_daily_average,
 )
+
+route("/api/flexpart/results", method = GET, FlexpartsController.get_results())
+route("/api/flexpart/results/:id", method = POST, FlexpartsController.get_results())
+#     notauth = AuthenticationController.isauth()
+#     !isnothing(notauth) && return notauth
+#     # println(get(params, :test, ""))
+#     # println(params(:test))
+#     readdir(FLEXPART_RUNS_DIR) |> Genie.Renderer.Json.json
+# end
 
 route("/atp45", method = POST) do
     process_request(atp45_routes)

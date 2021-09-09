@@ -1,6 +1,6 @@
 import { ValidationErrors } from '@angular/forms';
-export class FormItemBase<T> {
-    value: T | undefined;
+export class FormItemBase {
+    value?: string | number;
     key: string;
     label: string;
     required: boolean;
@@ -16,7 +16,7 @@ export class FormItemBase<T> {
     minmax?: { min?: any, max?: any };
 
     constructor(options: {
-        value?: T;
+        value?: string | number;
         key?: string;
         label?: string;
         required?: boolean;

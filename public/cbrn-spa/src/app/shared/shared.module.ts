@@ -11,6 +11,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MapComponent } from './map/map.component';
 import { MatListModule } from '@angular/material/list';
 import { TopbarModule } from './topbar/topbar.module';
+import { SelectionDialogModule } from 'src/app/shared/selection-dialog/selection-dialog.module';
 
 
 @NgModule({
@@ -25,12 +26,14 @@ import { TopbarModule } from './topbar/topbar.module';
     MatListModule,
     FormTemplateModule,
     SelectionTableModule,
+    SelectionDialogModule,
   ],
   exports: [
     FormTemplateModule,
     ReactiveFormsModule,
     SelectionTableModule,
     TopbarModule,
+    SelectionDialogModule,
     MapComponent,
     // InfoButtonComponent,
   ]

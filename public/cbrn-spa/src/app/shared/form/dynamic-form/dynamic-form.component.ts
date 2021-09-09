@@ -9,7 +9,7 @@ import { FormItemBase } from '../form-item-base';
     styleUrls: ['./dynamic-form.component.scss']
 })
 export class DynamicFormComponent {
-    @Input() item: FormItemBase<String>;
+    @Input() item: FormItemBase;
     @Input() formGroup!: FormGroup;
 
     get isValid() { return this.formGroup.controls[this.item.key].valid; }

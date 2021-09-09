@@ -68,7 +68,7 @@ const formItems = [
 export class FlexpartPlotFormComponent implements OnInit, OnChanges {
     formItems = new FormItems(formItems);
 
-    nestedItems: FormItemBase<String>[] = [];
+    nestedItems: FormItemBase[] = [];
 
     formGroup: FormGroup;
 
@@ -159,6 +159,10 @@ export class FlexpartPlotFormComponent implements OnInit, OnChanges {
         }
         // console.log(formFields);
         this.flexpartService.newPlot(formFields);
+    }
+
+    onDailyAverage() {
+        this.flexpartService.dailyAverage(this.flexpartResult.dataDirname);
     }
 
 }

@@ -4,6 +4,9 @@ import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit, ElementRef } fr
 import { SelectionTableComponent } from 'src/app/shared/selection-table/selection-table.component';
 import { FlexpartResult } from 'src/app/flexpart/flexpart-result';
 import { FlexpartService } from '../flexpart.service';
+import { MatDialog } from '@angular/material/dialog';
+import { SelectionDialogComponent } from 'src/app/shared/selection-dialog/selection-dialog.component';
+import { ApiService } from 'src/app/core/services/api.service';
 
 const columnInfo = [
     {
@@ -45,11 +48,14 @@ export class FlexpartPlotComponent implements OnInit, OnDestroy {
     resultsSubscription: Subscription;
 
     constructor(
-        private flexpartService: FlexpartService
+        public dialog: MatDialog,
+        private flexpartService: FlexpartService,
+        private apiService: ApiService,
         ) {}
 
     ngOnInit(): void {
         this.flexpartService.updateResults();
+        this.apiService.get('/flexpart/results').subscribe(res => console.log(res))
     }
 
     ngAfterViewInit() {
@@ -71,6 +77,18 @@ export class FlexpartPlotComponent implements OnInit, OnDestroy {
 
     emitSelection(fpResult: FlexpartResult) {
         this.fpResult = fpResult;
+    }
+
+    openDialog() {
+        const dialogRef = this.dialog.open(SelectionDialogComponent, {
+            data: {
+                dataKey: ["dqsqds", "aeazaeaze"]
+            }
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+            console.log(result)
+        })
     }
 
     ngOnDestroy() {

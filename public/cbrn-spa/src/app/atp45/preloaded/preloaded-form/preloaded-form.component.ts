@@ -14,7 +14,7 @@ import { SelectFormItem } from 'src/app/shared/form/form-item-select';
 import { OnChanges } from '@angular/core';
 import { FormItems } from 'src/app/shared/form/form-items';
 
-const formItems: FormItemBase<String>[] = [
+const formItems: FormItemBase[] = [
     new TextFormItem({
         key: 'lat',
         label: 'Release latitude [°]',

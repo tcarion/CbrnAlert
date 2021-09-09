@@ -9,7 +9,7 @@ import { FormItemBase } from '../form-item-base';
 })
 export class MapObjectSelectComponent implements OnInit, AfterViewInit, ControlValueAccessor {
 
-    @Input() item: FormItemBase<String>;
+    @Input() item: FormItemBase;
     object: any;
     // valuesObs: Observable<string | Date | number>;
     @ViewChild('eselect') select: ElementRef; 
@@ -33,15 +33,15 @@ export class MapObjectSelectComponent implements OnInit, AfterViewInit, ControlV
     }
     
     ngAfterViewInit(): void {
-        this.item.autoSelect && this.item.options.length !== 0 && this.controlDir.control?.setValue(this.item.options[0].key, {onlySelf: false})
+        this.item.autoSelect && this.item.options.length !== 0 && this.controlDir.control?.setValue(this.item.options[0].object, {onlySelf: false})
     }
 
 
     writeValue(value: any) {
         if (value !== "") {
-            const index = this.select.nativeElement.selectedIndex;
-            this.object = this.item.options[index].object!;
-            this.select.nativeElement.value = value;
+            const index = this.item.options.findIndex(e => e.object == value);
+            this.object = this.item.options[index]
+            this.select.nativeElement.selectedIndex = index + 1;
         }
     }
 
@@ -54,9 +54,10 @@ export class MapObjectSelectComponent implements OnInit, AfterViewInit, ControlV
     }
 
     changeEvent(event:any) {
-        const index = event.target.selectedIndex;
+        const index = event.target.selectedIndex - 1;
         // debugger
-        this.onChange(this.item.options[index].object);
+        this.object = this.item.options[index].object;
+        this.onChange(this.object);
         this.onTouched();
     }
 

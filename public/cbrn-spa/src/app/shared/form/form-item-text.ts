@@ -1,7 +1,7 @@
 import { FormItemBase } from "./form-item-base";
 
 
-export class TextFormItem extends FormItemBase<string> {
+export class TextFormItem extends FormItemBase {
   controlType = 'textbox';
 }
 

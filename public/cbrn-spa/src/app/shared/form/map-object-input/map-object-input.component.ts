@@ -1,18 +1,25 @@
-import { ValidationErrors, NgControl, ControlValueAccessor, ValidatorFn, Validators } from '@angular/forms';
-import { Component, ElementRef, Input, OnInit, Renderer2, Self, ViewChild } from '@angular/core';
+import { ValidationErrors, NgControl, ControlValueAccessor, ValidatorFn, Validators, FormControl, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { Component, ElementRef, Input, OnInit, Renderer2, Self, ViewChild, AfterViewInit, forwardRef } from '@angular/core';
 import { FormItemBase } from '../form-item-base';
+import { AutofillMonitor } from '@angular/cdk/text-field';
 
 @Component({
     selector: 'map-object-input',
     templateUrl: './map-object-input.component.html',
-    styleUrls: ['./map-object-input.component.scss']
+    styleUrls: ['./map-object-input.component.scss'],
+    providers: [     
+        {       provide: NG_VALUE_ACCESSOR, 
+                useExisting: forwardRef(() => MapObjectInputComponent),
+                multi: true     
+        }
+    ]
 })
 export class MapObjectInputComponent implements OnInit, ControlValueAccessor {
-    @Input() item: FormItemBase<String>;
+    @Input() item: FormItemBase;
     object: any;
+    mapped: string;
 
-    @ViewChild('input') _input: ElementRef; 
-
+    // control: FormControl;
 
     onChange = (values: any) => { };
 
@@ -20,27 +27,31 @@ export class MapObjectInputComponent implements OnInit, ControlValueAccessor {
 
     touched = false;
 
+    touchable = true;
     disabled = false;
-
     constructor(
-        @Self() public controlDir: NgControl,
+        // @Self() public controlDir: NgControl,
         ) {
-        controlDir.valueAccessor = this;
+        // controlDir.valueAccessor = this;
         // this.valuesObs = from(this.values);
     }
 
     ngOnInit(): void {
-        let validators = [this.validate.bind(this)]
-        // this.item.validators?.forEach(v => validators.push(<() => ValidationErrors | null>v));
+        // let validators = [this.validate.bind(this)]
+        // // this.item.validators?.forEach(v => validators.push(<() => ValidationErrors | null>v));
         // this.controlDir.control!.addValidators(validators);
-        this.disabled = this.item.disabled;
-        this.controlDir.control!.updateValueAndValidity();
+        this.touchable = !this.item.disabled;
+        // this.controlDir.control!.updateValueAndValidity();
+        // this.control = <FormControl>this.controlDir.control!;
     }
 
     writeValue(value: any) {
-        if (this._input) {
+        if (value == '') {
+            this.object = undefined;
+            this.mapped = '';
+        } else {
             this.object = value;
-            this._input.nativeElement.value = this.item.mapper && this._input ? this.item.mapper(value) : '';
+            this.mapped = this.item.mapper ? this.item.mapper(value) : '';
         }
     }
 
@@ -58,7 +69,8 @@ export class MapObjectInputComponent implements OnInit, ControlValueAccessor {
     }
 
     changeEvent(event: any) {
-        this.onChange(event.target.value)
+        this.object = event.target.value;
+        this.onChange(this.object)
     }
 
     validate() : ValidationErrors | null {

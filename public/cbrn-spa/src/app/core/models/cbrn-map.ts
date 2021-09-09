@@ -473,10 +473,24 @@ export class CbrnMap {
         this.info = new L.Control({position: 'topright'});
 
         this.info.update = function (props:any) {
+            while(this._div.firstChild){
+                this._div.firstChild.remove();
+            }
             let conc = props && parseFloat(props.value);
-            this._div.innerHTML = '<h4>Concentration</h4>' +  (props ?
-                '<b>' + conc.toExponential(4) + ' [ng/m3]</b>'
-                : 'Hover over a cell');
+            const name = document.createElement('h4'); name.innerText = 'Concentration';
+            let content;
+            if (props) {
+                content = document.createElement('b'); content.innerText = conc.toExponential(4) + ' [ng/m3]'
+            } else {
+                content = document.createElement('span'); content.innerText = 'Hover over a cell';
+            }
+            this._div.append(name)
+            this._div.append(content);
+
+            // let conc = props && parseFloat(props.value);
+            // this._div.innerHTML = '<h4>Concentration</h4>' +  (props ?
+            //     '<b>' + conc.toExponential(4) + ' [ng/m3]</b>'
+            //     : 'Hover over a cell');
         };
 
         this.info.onAdd = function (map: L.Map) {

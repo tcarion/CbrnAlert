@@ -15,7 +15,8 @@ import { FormItemBase } from 'src/app/shared/form/form-item-base';
 import * as dayjs from 'dayjs';
 import { MapService } from './map.service';
 import { CbrnMap } from '../models/cbrn-map';
-import { map } from 'rxjs/operators';
+import { filter, map, tap } from 'rxjs/operators';
+import { LonlatControl } from 'src/app/shared/form/lonlat-control';
 
 @Injectable({
     providedIn: 'root',
@@ -24,7 +25,10 @@ export class FormService {
     // currentFormSubject = new Subject<{ formGroup: FormGroup; form: Form }>();
 
     // currentForm = { formGroup: new FormGroup({}), form: new Form([]) };
-    constructor(private formBuilder: FormBuilder) { }
+    constructor(
+        private formBuilder: FormBuilder,
+        private mapService: MapService,
+        ) { }
 
     // emitCurrentForm() {
     //     this.currentFormSubject.next(this.currentForm);
@@ -59,7 +63,16 @@ export class FormService {
         const lonlatControls = Object.entries(formGroup.controls).filter(e => (e[0] == 'lat' || e[0] == 'lon'))
         const lonlatGroup = new FormGroup(Object.fromEntries(lonlatControls));
         return lonlatGroup.statusChanges.pipe(
-            map(status => status === 'VALID')
+            filter(status => status === 'VALID')
+        );
+    }
+
+    lonlatValid2(formGroup: FormGroup): Observable<any> {
+        return formGroup.statusChanges.pipe(
+            filter(status => status === 'VALID'), 
+            tap(() => {
+                this.mapService.cbrnMap.marker = this.getLonlat(formGroup);
+            })
         );
     }
 
@@ -69,13 +82,13 @@ export class FormService {
         return {lon, lat};
     }
 
-    toControl(item: FormItemBase<String>) {
+    toControl(item: FormItemBase) {
         let validators = item.required ? [Validators.required] : []
         item.validators?.forEach(validator => {validators.push(validator)})
         return new FormControl(item.value || '', validators);
     }
 
-    toFormGroup(items: FormItemBase<String>[]) {
+    toFormGroup(items: FormItemBase[]) {
         const group: any = {};
 
         items.forEach((item) => {
@@ -83,6 +96,12 @@ export class FormService {
         });
 
         return new FormGroup(group);
+    }
+
+    lonlatControlArray() {
+        return this.formBuilder.array([
+            this.formBuilder.group(new LonlatControl())
+        ])
     }
 
     arrayToOptions(array: Array<any>) {
@@ -210,6 +229,18 @@ export class FormService {
     removeTimeZone(date: Date) {
         var userTimezoneOffset = date.getTimezoneOffset() * 60000;
         return new Date(date.getTime() - userTimezoneOffset);
+    }
+
+    adjustDates(object: any) {
+        for (const key in object) {
+            if (Object.prototype.hasOwnProperty.call(object, key)) {
+                const element = object[key];
+                if (element instanceof Date) {
+                    object[key] = this.removeTimeZone(element);
+                }
+                
+            }
+        }
     }
 
     toDate(day: Date, time: string): Date {

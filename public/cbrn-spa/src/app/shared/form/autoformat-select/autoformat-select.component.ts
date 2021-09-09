@@ -19,7 +19,7 @@ import { SelectFormItem } from 'src/app/shared/form/form-item-select';
       ]
 })
 export class AutoformatSelectComponent implements OnInit, AfterViewInit, ControlValueAccessor {
-    @Input() item: FormItemBase<String>;
+    @Input() item: FormItemBase;
     // valuesObs: Observable<string | Date | number>;
     @ViewChild('eselect') select: ElementRef; 
 

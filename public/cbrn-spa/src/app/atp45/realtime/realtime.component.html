@@ -4,6 +4,18 @@
     [formGroup]="formGroup"
     [item]="item"
     ></app-dynamic-form>
+    <div formArrayName="lonlats">
+        <div *ngFor= "let lonlat of lonlats.controls, let i = index" [formGroupName]= "i">
+            <app-dynamic-form
+            [formGroup]="$any(lonlat)"
+            [item]="latItem"
+            ></app-dynamic-form>
+            <app-dynamic-form
+            [formGroup]="$any(lonlat)"
+            [item]="lonItem"
+            ></app-dynamic-form>
+        </div>
+    </div>
     <button
     mat-raised-button color="primary" type="submit" [disabled]="formGroup.invalid">Send data request</button>
 </form>

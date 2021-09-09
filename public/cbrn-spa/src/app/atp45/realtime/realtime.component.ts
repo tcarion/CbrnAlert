@@ -11,7 +11,7 @@ import {
     wrongLonValidator,
 } from 'src/app/shared/validators';
 import { Component, OnDestroy, OnInit, ViewChild, AfterViewInit } from '@angular/core';
-import { FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { AbstractWsComponent } from 'src/app/abstract-classes/abstract-ws-component';
 import { DatePipe } from '@angular/common';
@@ -21,7 +21,7 @@ import { TextFormItem } from 'src/app/shared/form/form-item-text';
 import { SelectFormItem } from 'src/app/shared/form/form-item-select';
 import { FormItems } from 'src/app/shared/form/form-items';
 
-const formItems: FormItemBase<String>[] = [
+const formItems: FormItemBase[] = [
     new SelectFormItem({
         key: 'step',
         label: 'Forecast step selection',
@@ -29,24 +29,25 @@ const formItems: FormItemBase<String>[] = [
         required: true,
         autoSelect: true,
     }),
-    new TextFormItem({
-        key: 'lat',
-        label: 'Release latitude [°]',
-        type: 'mapObject',
-        hint: '[-90.0°, 90.0°]',
-        required: true,
-        validators: [wrongLatValidator],
-        mapper: (v: number) => (Math.round(v * 1000) / 1000).toString()
-    }),
-    new TextFormItem({
-        key: 'lon',
-        label: 'Release longitude [°]',
-        type: 'mapObject',
-        hint: '[-180°, 180°]',
-        required: true,
-        validators: [wrongLonValidator],
-        mapper: (v: number) => (Math.round(v * 1000) / 1000).toString()
-    }),
+    // new TextFormItem({
+    //     key: 'lat',
+    //     label: 'Release latitude [°]',
+    //     type: 'mapObject',
+    //     hint: '[-90.0°, 90.0°]',
+    //     required: true,
+    //     validators: [wrongLatValidator],
+    //     mapper: (v: string) => (Math.round(parseFloat(v) * 1000) / 1000).toString()
+    // }),
+    // new TextFormItem({
+    //     key: 'lon',
+    //     value: '8.0',
+    //     label: 'Release longitude [°]',
+    //     type: 'mapObject',
+    //     hint: '[-180°, 180°]',
+    //     required: true,
+    //     validators: [wrongLonValidator],
+    //     mapper: (v: string) => (Math.round(parseFloat(v) * 1000) / 1000).toString()
+    // }),
 ]
 @Component({
     selector: 'app-realtime',
@@ -54,11 +55,29 @@ const formItems: FormItemBase<String>[] = [
     styleUrls: ['./realtime.component.scss'],
 })
 export class RealtimeComponent extends AbstractWsComponent implements OnInit, OnDestroy, AfterViewInit {
+    latItem = new TextFormItem({
+        key: 'lat',
+        label: 'Release latitude [°]',
+        type: 'mapObject',
+        hint: '[-90.0°, 90.0°]',
+        required: true,
+        mapper: (v: string) => (Math.round(parseFloat(v) * 1000) / 1000).toString()
+    })
+
+    lonItem = new TextFormItem({
+        key: 'lon',
+        value: '8.0',
+        label: 'Release longitude [°]',
+        type: 'mapObject',
+        hint: '[-180°, 180°]',
+        required: true,
+        mapper: (v: string) => (Math.round(parseFloat(v) * 1000) / 1000).toString()
+    })
 
     formItems = new FormItems(formItems);
     formGroup: FormGroup;
 
-    lonlatGroup: FormGroup;
+    lonlatFormArray: FormArray;
     // @ViewChild('appForm') appForm: FormComponent;
 
     mapSubscription: Subscription;
@@ -82,11 +101,13 @@ export class RealtimeComponent extends AbstractWsComponent implements OnInit, On
 
         this.formGroup = this.formService.toFormGroup(this.formItems.items);
 
+        this.formGroup.addControl('lonlats', this.formService.lonlatControlArray());
+
         this.mapSubscription = this.mapService.mapEventSubject.subscribe(
             (event) => {
                 if (event == 'newMarker') {
                     let marker = this.mapService.cbrnMap.marker;
-                    this.formService.patchMarker(this.formGroup, marker);
+                    this.formService.patchMarker((this.formGroup.get('lonlats') as FormGroup).controls[0] as FormGroup, marker);
                 }
             }
         );
@@ -95,19 +116,23 @@ export class RealtimeComponent extends AbstractWsComponent implements OnInit, On
     ngAfterViewInit() {
         this.getRealtimeAvailableSteps();
 
-        this.formService.lonlatValid(this.formGroup).subscribe(() => {
-            this.mapService.cbrnMap.marker = this.formService.getLonlat(this.formGroup);
-        })
+        this.formService.lonlatValid2(this.lonlats.controls[0] as FormGroup).subscribe()
     }
 
+    get lonlats() {
+        return this.formGroup.get('lonlats') as FormArray;
+    }
+
+    getArrayElem(i: number) {
+        return this.lonlats.controls[i] as FormGroup
+    }
 
     onSubmit() {
         const startdate = this.formItems.get('step').options[0].object!.datetime;
-          
+        const lonlat = this.formService.getLonlat(this.getArrayElem(0))
         const atp45Input = {
-            datetime:  this.formService.removeTimeZone(startdate),
-            lat: this.formGroup.get('lat')?.value,
-            lon: this.formGroup.get('lon')?.value,
+            datetime: this.formService.removeTimeZone(startdate),
+            ...lonlat,
             step: this.formGroup.get('step')?.value.step,
         };
         this.atp45Service.realtimeResultRequest(atp45Input);
@@ -117,7 +142,7 @@ export class RealtimeComponent extends AbstractWsComponent implements OnInit, On
     getRealtimeAvailableSteps() {
         this.atp45Service.realtimeAvailableSteps().subscribe(
             (data) => {
-                let steps = data as {step: number, datetime:any}[]
+                let steps = data as { step: number, datetime: any }[]
                 let values = steps.map(step => this.formService.formatIfDate(step.datetime))
                 this.formItems.get('step').options = this.formService.mapObjectToOptions(values, steps);
             }

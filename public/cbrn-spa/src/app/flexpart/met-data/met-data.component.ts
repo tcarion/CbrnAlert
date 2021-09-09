@@ -19,7 +19,7 @@ import { FormItems } from 'src/app/shared/form/form-items';
 import { FlexpartService } from '../flexpart.service';
 
 
-const formItems: FormItemBase<String>[] = [
+const formItems: FormItemBase[] = [
 
     new DatepickerFormItem({
         key: 'startDay',
