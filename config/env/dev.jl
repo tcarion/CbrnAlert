@@ -6,6 +6,7 @@ const config = Settings(
   log_level                       = Logging.Info,
   log_to_file                     = false,
   server_handle_static_files      = true,
+  cache_storage                   = :File,
   cors_headers                    = Dict(
                                       "Access-Control-Allow-Origin" => "http://localhost:4200",
                                       "Access-Control-Allow-Headers" => "Content-Type,authorization",

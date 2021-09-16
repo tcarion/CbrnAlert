@@ -11,6 +11,7 @@ import { FlexpartService } from '../../flexpart.service';
 import { SelectFormItem } from 'src/app/shared/form/form-item-select';
 import { FormItemBase } from 'src/app/shared/form/form-item-base';
 import { FlexpartOutput } from '../../flexpart-output';
+import { ActivatedRoute, ActivatedRouteSnapshot, Router } from '@angular/router';
 
 // const formItems: FormItem[] = [
 //     {
@@ -61,18 +62,18 @@ const formItems = [
     }),
 ]
 @Component({
-    selector: 'app-flexpart-plot-form',
-    templateUrl: './flexpart-plot-form.component.html',
-    styleUrls: ['./flexpart-plot-form.component.scss']
+    selector: 'app-output-form',
+    templateUrl: './output-form.component.html',
+    styleUrls: ['./output-form.component.scss']
 })
-export class FlexpartPlotFormComponent implements OnInit, OnChanges {
+export class OutputFormComponent implements OnInit {
     formItems = new FormItems(formItems);
 
     nestedItems: FormItemBase[] = [];
 
     formGroup: FormGroup;
 
-    @Input() flexpartOutput: FlexpartOutput;
+    fpOutput: FlexpartOutput;
 
     // flexpartResult: FlexpartResult;
     variables = [];
@@ -85,13 +86,23 @@ export class FlexpartPlotFormComponent implements OnInit, OnChanges {
         private mapService: MapService,
         private flexpartService: FlexpartService,
         public formService: FormService,
+        private router: Router,
+        private route: ActivatedRoute,
     ) {
+        const fpOutput = this.router.getCurrentNavigation()?.extras.state?.fpOutput; 
+        if (fpOutput) {
+            this.fpOutput = fpOutput;
+        } else {
+            this.router.navigate(['flexpart', 'results', this.route.snapshot.params['fpResultId']])
+        }
     }
 
     ngOnInit(): void {
         this.formGroup = this.formService.toFormGroup(this.formItems.items);
 
-        // this.mapService.cbrnMap.newAvailableArea(this.flexpartResult.area);
+        this.mapService.cbrnMap.newAvailableArea(this.fpOutput.area);
+        this.variables = this.fpOutput.variables2d;
+        this.formItems.get('variables').options = this.formService.arrayToOptions(Object.keys(this.fpOutput.variables2d))
         // this.variables = this.flexpartResult.variables2d;
         // this.formItems.forEach((item) => {
         //     item.options = item.key == 'variables' ? this.formService.arrayToOptions(Object.keys(this.flexpartResult.variables2d)) : []
@@ -101,6 +112,7 @@ export class FlexpartPlotFormComponent implements OnInit, OnChanges {
             
             this.nestedItems.forEach((item) => {
                 this.formGroup.removeControl(item.key);
+                this.formGroup.updateValueAndValidity();
             })
 
             this.nestedItems = [];
@@ -122,16 +134,16 @@ export class FlexpartPlotFormComponent implements OnInit, OnChanges {
 
     }
 
-    ngOnChanges(changes: SimpleChanges) {
-        if (changes.flexpartOutput) {
-            this.nestedItems = [];
-            const flexpartOutput = changes.flexpartOutput.currentValue;
+    // ngOnChanges(changes: SimpleChanges) {
+    //     if (changes.flexpartOutput) {
+    //         this.nestedItems = [];
+    //         const flexpartOutput = changes.flexpartOutput.currentValue;
     
-            this.mapService.cbrnMap.newAvailableArea(flexpartOutput.area);
-            this.variables = flexpartOutput.variables2d;
-            this.formItems.get('variables').options = this.formService.arrayToOptions(Object.keys(flexpartOutput.variables2d))
-        }
-    }
+    //         this.mapService.cbrnMap.newAvailableArea(flexpartOutput.area);
+    //         this.variables = flexpartOutput.variables2d;
+    //         this.formItems.get('variables').options = this.formService.arrayToOptions(Object.keys(flexpartOutput.variables2d))
+    //     }
+    // }
     // addControls(keys: string[]) {
     //     const group: any = {};
     //     for (const key of keys) {
@@ -158,18 +170,18 @@ export class FlexpartPlotFormComponent implements OnInit, OnChanges {
         formFields = {
             variable: formFields.variables,
             dimensions: dimensions,
-            output: this.flexpartOutput,
+            // output: this.fpOutput,
             // dataDirname: this.flexpartOutput.id,
             // flexpartOutput: this.flexpartOutput,
         }
         
         this.formService.adjustDateRecursive(formFields);
         console.log(formFields);
-        this.flexpartService.newPlot(this.flexpartOutput.resultId, this.flexpartOutput.id, formFields);
+        this.flexpartService.newPlot(this.route.snapshot.parent!.params['fpResultId'], this.route.snapshot.params['fpOutputId'], formFields);
     }
 
     onDailyAverage() {
-        // this.flexpartService.dailyAverage(this.flexpartOutput.resultId + '/' + this.flexpartOutput.id);
+        this.flexpartService.dailyAverage(this.route.snapshot.parent!.params['fpResultId'], this.route.snapshot.params['fpOutputId']);
     }
 
 }

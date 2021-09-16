@@ -32,7 +32,15 @@ export class ApiService {
     }
 
     get(path: string, params: HttpParams = new HttpParams()): Observable<any> {
-        return this.http.get(`${environment.apiUrl}/api${path}`, { params: {test : 'message'} })
+        return this.http.get(`${environment.apiUrl}/api${path}`, { params })
           .pipe(catchError(this.formatErrors));
-      }
+    }
+
+    post(path: string, body: Object = {}): Observable<any> {
+        return this.http.post(
+          `${environment.apiUrl}/api${path}`,
+        //   JSON.stringify(body)
+        body
+        ).pipe(catchError(this.formatErrors));
+    }
 }

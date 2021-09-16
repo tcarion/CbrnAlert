@@ -7,6 +7,11 @@ import { MetDataComponent } from './met-data/met-data.component';
 import { FlexpartRunPreloadedComponent } from './flexpart-run-preloaded/flexpart-run-preloaded.component';
 import { FlexpartRunPreloadedFormComponent } from './flexpart-run-preloaded/flexpart-run-preloaded-form/flexpart-run-preloaded-form.component';
 import { SharedModule } from '../shared/shared.module';
+import { FlexpartService } from './flexpart.service';
+import { FlexpartRoutingModule } from './flexpart-routing.module';
+import { ChooseOutputComponent } from './flexpart-plot/choose-output/choose-output.component';
+import { ResultResolverService } from './result-resolver.service';
+import { OutputFormComponent } from './flexpart-plot/output-form/output-form.component';
 
 
 
@@ -16,9 +21,16 @@ import { SharedModule } from '../shared/shared.module';
         FlexpartRunPreloadedComponent,
         FlexpartRunPreloadedFormComponent,
         FlexpartPlotComponent,
-        FlexpartPlotFormComponent
+        FlexpartPlotFormComponent,
+        ChooseOutputComponent,
+        OutputFormComponent
+    ],
+    providers: [
+        FlexpartService,
+        ResultResolverService,
     ],
     imports: [
+        FlexpartRoutingModule,
         CommonModule,
         SharedModule,
         MatTabsModule

@@ -295,19 +295,34 @@ Output:
 function get_results()
     available_fp_runs_dir = filter(x -> isdir(x), readdir(FLEXPART_RUNS_DIR, join=true))
     function f(x)
-        id = basename(x)
-        ncfs = try
-            ncf_files(x)
-        catch
-            return Dict(:id => id, :outputs => nothing)
-        end
-        isempty(ncfs) && return Dict(:id => id, :outputs => nothing)
         return Dict(
-            :id => id,
-            :outputs => [output2dict(x) for x in ncfs]
+            :id => basename(x),
+            # :outputs => fp_outputs(x)
         )
     end
-    map(f, available_fp_runs_dir)
+    results = map(x -> Dict(:id => basename(x), :outputs => fp_outputs(x)), available_fp_runs_dir)
+    results |> json
+end
+
+# Genie.config.cache_duration = 60
+
+# Genie.Cache.withcache(:flexpart_results) do
+#     get_results()
+# end
+
+function get_result()
+    result_path = joinpath(FLEXPART_RUNS_DIR, Genie.Router.params(:result_id))
+    Dict(:id => basename(result_path), :outputs => fp_outputs(result_path)) |> json
+end
+
+function fp_outputs(result_path)
+    ncfs = try
+        ncf_files(result_path)
+    catch
+        return nothing
+    end
+    isempty(ncfs) && return nothing
+    return [output2dict(x) for x in ncfs]
 end
 
 function output2dict(outpath)
@@ -316,7 +331,7 @@ function output2dict(outpath)
     dx, dy = deltamesh(lons, lats)
     v2d = variables2d(output)
     d = Dict(
-        :id => basename(outpath),
+        :id => splitext(basename(outpath))[1],
         :times => output.metadata.times,
         :startDate => output.metadata.startd,
         :endDate => output.metadata.endd,
@@ -428,16 +443,71 @@ function flexpart_geojson_conc(payload)
     )
 end
 
-function flexpart_daily_average(payload)
-    run_name = payload["dataDirname"]
-    path = get_fpdir(run_name)
-    ncf_file = ncf_files(path; onlynested=false)[3]
+function get_plot()
+    received = Genie.Requests.jsonpayload()
+    global pl = received
+    @show received["dimensions"]
+    var = received["variable"]
+    dims = received["dimensions"]
+    dims =  dims isa Dict ? received["dimensions"] : Base.copy(received["dimensions"]) # convert to Dict in case of JSON3.Object
+    run_name = Genie.Router.params(:result_id)
+    output_name = Genie.Router.params(:output_id)
+
+    available_fp_runs = filter(x -> isdir(x), readdir(FLEXPART_RUNS_DIR, join=true))
+    available_fp_runs = [splitpath(x)[end] for x in available_fp_runs]
+    if !(run_name in available_fp_runs)
+        throw(Genie.Exceptions.RuntimeException("Flexpart run not found", "The flexpart output hasn't been found on the server", 1))
+    end
+
+    ncf_file = joinpath(FLEXPART_RUNS_DIR, run_name, "output", output_name * ".nc")
+    output = FlexpartOutput(ncf_file)
+    Flexpart.select!(output, var)
+    Flexpart.select!(output, dims)
+
+    lons = output.lons
+    lats = output.lats
+    dataset = output.dataset
+    close(output)
+    flons, flats, fconc = Flexpart.filter_fields(lons, lats, dataset)
+    isempty(fconc) && return Genie.Router.error(1, "The requested field is empty", "application/json")
+    dx, dy = deltamesh(lons, lats)
+
+    framed = ReadNcf.fields2cells(flons, flats, fconc, dx, dy)
+    cells, legend_data = ReadNcf.frame2geojson(framed)
+
+    rellons, rellats = Flexpart.relloc(ncf_file)
+    relpoints = [Feature(Point([lon, lat]), Dict("type" => "releasePoint")) for (lon, lat) in zip(rellons, rellats)]
+    push!(cells, FeatureCollection(relpoints))
+
+    Dict(
+        "cells" => [cell |> geo2dict for cell in cells],
+        "legendData" => legend_data
+    ) |> Genie.Renderer.Json.json
+end
+
+# function flexpart_daily_average(payload)
+#     run_name = payload["dataDirname"] 
+#     path = get_fpdir(run_name)
+#     ncf_file = ncf_files(path; onlynested=false)[3]
+#     output = FlexpartOutput(ncf_file)
+#     Flexpart.select!(output, "spec001_mr")
+#     Flexpart.select!(output, (time=:, height=1, pointspec=1, nageclass=1))
+#     Flexpart.write_daily_average!(output, copy=false)
+#     close(output)
+#     "Daily average"
+# end
+
+function daily_average()
+    # run_name = payload["dataDirname"] 
+    # path = get_fpdir(run_name)
+    params = Genie.Router.params
+    ncf_file = joinpath(FLEXPART_RUNS_DIR, params(:result_id), "output", params(:output_id) * ".nc")
     output = FlexpartOutput(ncf_file)
     Flexpart.select!(output, "spec001_mr")
     Flexpart.select!(output, (time=:, height=1, pointspec=1, nageclass=1))
     Flexpart.write_daily_average!(output, copy=false)
     close(output)
-    "Daily average"
+    "Daily average" |> Genie.Renderer.Json.json
 end
 
 function get_fpdir(run_name)

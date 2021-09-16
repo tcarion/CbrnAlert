@@ -44,18 +44,23 @@ export class FlexpartService {
             );
     }
 
-    getResultsFromServer(): Observable<FlexpartResult[]> {
-        return this.apiService
-            .flexpartRequest({request: 'flexpart_results'})
-            .pipe(
-                map((data: any) => {
-                    data.forEach((element: any) => {
-                        element.startDate = new Date(element.startDate);
-                        element.endDate = new Date(element.endDate);
-                    });
-                    return <FlexpartResult[]>data;
-                })
-            );
+    getResults(): Observable<FlexpartResult[]> {
+        // return this.apiService
+        //     .flexpartRequest({request: 'flexpart_results'})
+        //     .pipe(
+        //         map((data: any) => {
+        //             data.forEach((element: any) => {
+        //                 element.startDate = new Date(element.startDate);
+        //                 element.endDate = new Date(element.endDate);
+        //             });
+        //             return <FlexpartResult[]>data;
+        //         })
+        //     );
+        return this.apiService.get('/flexpart/results')
+    }
+
+    getResult(id: string): Observable<FlexpartResult> {
+        return this.apiService.get('/flexpart/results/' + id)
     }
 
     metDataRetrieval(payload: any) {
@@ -93,12 +98,12 @@ export class FlexpartService {
         });
     }
 
-    updateResults(): void {
-        this.getResultsFromServer().subscribe((flexpartResults) => {
-            this.results = flexpartResults;
-            this.emitResultsSubject();
-        });
-    }
+    // updateResults(): void {
+    //     this.getResultsFromServer().subscribe((flexpartResults) => {
+    //         this.results = flexpartResults;
+    //         this.emitResultsSubject();
+    //     });
+    // }
 
     runFlexpart(formFields: any): void {
         const notifTitle = this.notificationService.addNotif('Flexpart Run', 'flexpartRun');
@@ -120,36 +125,40 @@ export class FlexpartService {
         })
     }
 
-    newPlot(formFields: any): void {
-        console.log(formFields);
+    // newPlot(formFields: any): void {
+    //     console.log(formFields);
 
-        const payload = {
-            ...formFields,
-            request: "flexpart_geojson_conc"
-        };
+    //     const payload = {
+    //         ...formFields,
+    //         request: "flexpart_geojson_conc"
+    //     };
 
-        this.apiService.flexpartRequest(payload).subscribe({
+    //     this.apiService.flexpartRequest(payload).subscribe({
+    //         next: (flexpartPlotData: any) => {
+    //             // this.plots.push(flexpartPlotData);
+    //             this.mapPlotsService.addFlexpartPlot(flexpartPlotData);
+    //             // console.log(flexpartPlotData.cells);
+    //             // console.log('received :' + data);
+    //             // this.mapService.cbrnMap.addGeoJsonLayer(data);
+    //         },
+    //         error: (error) => {
+    //             alert(error.info);
+    //         }
+    //     })
+    // }
+
+    newPlot(resultId:string, outputId:string,formFields: any): void {
+        this.apiService.post('/flexpart/results/'+resultId+'/output/'+outputId, formFields).subscribe({
             next: (flexpartPlotData: any) => {
-                // this.plots.push(flexpartPlotData);
                 this.mapPlotsService.addFlexpartPlot(flexpartPlotData);
-                // console.log(flexpartPlotData.cells);
-                // console.log('received :' + data);
-                // this.mapService.cbrnMap.addGeoJsonLayer(data);
-            },
-            error: (error) => {
-                alert(error.info);
             }
         })
     }
 
-    dailyAverage(dirname: string) {
-        const payload = {
-            dataDirname: dirname,
-            request: "flexpart_daily_average"
-        };
+    dailyAverage(resultId:string, outputId:string) {
 
-        this.apiService.flexpartRequest(payload).subscribe({
-            next: (flexpartPlotData: any) => {
+        this.apiService.post('/flexpart/results/'+resultId+'/output/'+outputId).subscribe({
+            next: () => {
                 // this.plots.push(flexpartPlotData);
                 alert("Average added");
                 // console.log(flexpartPlotData.cells);
@@ -158,6 +167,23 @@ export class FlexpartService {
             },
         })
     }
+
+        // dailyAverage(dirname: string) {
+    //     const payload = {
+    //         dataDirname: dirname,
+    //         request: "flexpart_daily_average"
+    //     };
+
+    //     this.apiService.flexpartRequest(payload).subscribe({
+    //         next: (flexpartPlotData: any) => {
+    //             // this.plots.push(flexpartPlotData);
+    //             alert("Average added");
+    //             // console.log(flexpartPlotData.cells);
+    //             // console.log('received :' + data);
+    //             // this.mapService.cbrnMap.addGeoJsonLayer(data);
+    //         },
+    //     })
+    // }
 
     emitInputsSubject() {
         this.inputsSubject.next(this.inputs);

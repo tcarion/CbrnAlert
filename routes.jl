@@ -18,7 +18,7 @@ FLEXPART_RUNS_DIR = joinpath(pwd(), "public", "flexpart_runs")
 # end
 
 Genie.config.websockets_server = true
-
+# Genie.Cache.init()
 # StructTypes.StructType(::Type{Genie.WebChannels.ChannelMessage}) = StructTypes.Struct()
 
 atp45_routes = Dict(
@@ -37,12 +37,21 @@ flexpart_routes = Dict(
     "flexpart_options" => FlexpartsController.flexpart_options,
     "flexpart_results" => FlexpartsController.flexpart_results,
     # "flexpart_conc" => FlexpartsController.flexpart_conc,
-    "flexpart_geojson_conc" => FlexpartsController.flexpart_geojson_conc,
-    "flexpart_daily_average" => FlexpartsController.flexpart_daily_average,
+    # "flexpart_geojson_conc" => FlexpartsController.flexpart_geojson_conc,
+    # "flexpart_daily_average" => FlexpartsController.flexpart_daily_average,
 )
 
-route("/api/flexpart/results", method = GET, FlexpartsController.get_results())
-route("/api/flexpart/results/:id", method = POST, FlexpartsController.get_results())
+
+# route("/api/flexpart/results", method = GET, FlexpartsController.get_results)
+route("/api/flexpart/results", method = GET, FlexpartsController.get_results, named = :get_flexaprt_results)
+route("/api/flexpart/results/:result_id::String", method = GET, FlexpartsController.get_result, named = :get_flexpart_result)
+# route("/api/flexpart/results/:result_id::String/output/:output_id::String", method = GET, FlexpartsController.get_plot)
+route("/api/flexpart/results/:result_id::String/output/:output_id::String", method = POST, FlexpartsController.get_plot)
+route("/api/flexpart/results/:result_id::String/output/:output_id::String/daily_average", method = POST, FlexpartsController.daily_average)
+# route("/api/flexpart/results/:result_id", method = POST) do
+#     println(params(:result_id))
+# end
+# route("/api/flexpart/results/:result_id::String/:output_id::String", method = GET, FlexpartsController.get_output)
 #     notauth = AuthenticationController.isauth()
 #     !isnothing(notauth) && return notauth
 #     # println(get(params, :test, ""))

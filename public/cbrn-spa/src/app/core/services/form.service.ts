@@ -150,7 +150,7 @@ export class FormService {
         return options;
     }
 
-    formatIfDate(value: any) {
+    formatIfDate(value: any): string {
         const re = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
         const format = 'YYYY-MM-DD @ HH:mm';
         let nvalue = value;
@@ -166,6 +166,30 @@ export class FormService {
             nvalue = nvalue.toString();
         }
         return nvalue;
+    }
+
+    strToDate(str: string) {
+        const re = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
+        const match = str.match(re);
+        return match ? dayjs(match[0], 'YYYY-MM-DDTHH:mm:ss').toDate() : undefined
+    }
+
+    adjustDateRecursive(obj: any) {
+        for (const k in obj) {
+            if (Object.prototype.hasOwnProperty.call(obj, k)) {
+                if (typeof obj[k] == 'object' && obj[k] !== null) {
+                    this.adjustDateRecursive(obj[k])
+                } else if (obj[k] instanceof Date) {
+                    // obj[k] = this.removeTimeZone(obj[k])
+                    obj[k] = dayjs(obj[k]).add(4, 'h').toDate()
+                } else if (typeof obj[k] == 'string' ) {
+                    const toD = this.strToDate(obj[k]);
+                    // obj[k] = toD ? this.removeTimeZone(toD) : obj[k]
+                    obj[k] = toD ? dayjs(toD).add(4, 'h').toDate() : obj[k]
+                }
+                
+            }
+        }
     }
 
     optionsToArray(options: { key: string }[]) {
@@ -238,7 +262,6 @@ export class FormService {
                 if (element instanceof Date) {
                     object[key] = this.removeTimeZone(element);
                 }
-                
             }
         }
     }

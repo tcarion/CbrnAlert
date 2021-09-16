@@ -15,7 +15,7 @@ import { MatIconModule } from '@angular/material/icon';
         CommonModule,
         CommonDirectivesModule,
         MatIconModule,
-        BrowserAnimationsModule,
+        // BrowserAnimationsModule,
     ],
     exports: [
         InfoButtonComponent

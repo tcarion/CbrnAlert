@@ -22,7 +22,7 @@ interface ColumnInfo {
 })
 export class SelectionTableComponent<T> implements AfterViewInit, OnDestroy {
 
-    dataSource: MatTableDataSource<T> = new MatTableDataSource<T>();;
+    dataSource: MatTableDataSource<T> = new MatTableDataSource<T>([]);
     selection = new SelectionModel<T>(false, []);
 
     selectionSubscription: Subscription;

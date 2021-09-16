@@ -1,4 +1,5 @@
 export interface FlexpartOutput {
+    resultId: string;
     id: string,
     startDate: Date,
     endDate: Date,
