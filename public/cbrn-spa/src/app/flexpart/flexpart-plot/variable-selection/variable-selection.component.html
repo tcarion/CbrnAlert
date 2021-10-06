@@ -1,0 +1,15 @@
+<app-selection-list [elements] = "fpOutputVar2D$ | async" (selected)="goToVariable($event)"></app-selection-list>
+
+<ng-container
+*ngIf="(fpOutput$ | async) as fpOutput"
+>
+    <ng-container
+    *ngIf="(selectedVar$ | async) as selectedVar"
+    >
+    <app-output-form
+        [fpOutput] = "fpOutput"
+        [selectedVar] = "selectedVar"
+    ></app-output-form>
+
+    </ng-container>
+</ng-container>

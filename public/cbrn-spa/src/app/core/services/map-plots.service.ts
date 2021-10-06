@@ -45,68 +45,70 @@ type MapPlotCount = {
     providedIn: 'root'
 })
 export class MapPlotsService {
-    mapPlots: MapPlot[] = plots;
+    // mapPlots: MapPlot[] = plots;
 
-    mapPlotsSubject = new BehaviorSubject<MapPlot[]>([]);
-    mapPlots$ = this.mapPlotsSubject.asObservable();
+    // mapPlotsSubject = new BehaviorSubject<MapPlot[]>([]);
+    // mapPlots$ = this.mapPlotsSubject.asObservable();
 
     plotsCount: MapPlotCount = {
         'atp45': 0,
         'flexpart': 0,
     }
+    count = 0;
 
     constructor(
         private mapService: MapService,
     ) { }
 
-    addPlot(type: PlotType, info?: Object): MapPlot {
+    createPlot(type: PlotType, info?: Object): MapPlot {
         this.plotsCount[type]++;
+        this.count++;
         const newPlot = {
             type,
-            id: this.plotsCount[type],
+            name: "Plot " + this.plotsCount[type],
+            id: this.count,
             info: info,
             visible: true,
+            isActive: true,
         }
-        this.mapPlots.push(newPlot);
+        // this.mapPlots.push(newPlot);
         return newPlot;
     }
 
-    addAtp45Plot(atp45ShapeData:Atp45ShapeData) {
-        let newPlot = this.addPlot('atp45', {startDate: atp45ShapeData.date});
+    createAtp45Plot(atp45ShapeData:Atp45ShapeData) {
+        let newPlot = this.createPlot('atp45', {startDate: atp45ShapeData.date});
         newPlot.geojson = atp45ShapeData.shapes;
         // let layer = this.mapService.geoJson2Layer(atp45ShapeData.shapes);
         // newPlot.layer = layer;
         this.mapService.addPlotToMap(newPlot);
-        this.emitPlots();
+        return newPlot;
+        // this.emitPlots();
     }
 
-    addFlexpartPlot(flexpartPlotData: FlexpartPlotData) {
-        let newPlot = this.addPlot('flexpart', flexpartPlotData.flexpartResult);
+    createFlexpartPlot(flexpartPlotData: FlexpartPlotData) {
+        let newPlot = this.createPlot('flexpart', flexpartPlotData.flexpartResult);
         // newPlot.isActive = true;
         newPlot.metadata = flexpartPlotData.legendData;
         newPlot.geojson = flexpartPlotData.cells;
         this.mapService.addPlotToMap(newPlot);
-        this.emitPlots();
+        return newPlot;
+        // this.emitPlots();
     }
 
     hideMapPlot(plot: MapPlot): void {
-        plot.visible = false;
         this.mapService.hidePlotFromMap(plot);
     }
 
     showMapPlot(plot: MapPlot): void {
-        plot.visible = true;
         this.mapService.showPlotToMap(plot);
+    }
+
+    setActive(plot: MapPlot): void {
+        this.mapService.setActive(plot);
     }
 
     deleteMapPlot(plot: MapPlot): void {
         this.mapService.deletePlot(plot);
-        this.mapPlots = this.mapPlots.filter(p => p !== plot);
-        this.emitPlots();
+        // this.mapPlots = this.mapPlots.filter(p => p !== plot);
     }
-
-    emitPlots() {
-        this.mapPlotsSubject.next(this.mapPlots);
-    }
-
 }

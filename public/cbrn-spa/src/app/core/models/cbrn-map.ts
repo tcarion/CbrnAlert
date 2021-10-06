@@ -179,9 +179,9 @@ class FlexpartPlots extends AbstractPlots {
             legendData: mapPlot.metadata
         }
 
-        newPlot.layers.on('click', (e) => {
-            this.setActive(newPlot.id);
-        })
+        // newPlot.layers.on('click', (e) => {
+        //     this.setActive(newPlot.id);
+        // })
         this.setActive(newPlot.id);
         this.plots.push(newPlot);
         return newPlot;
@@ -206,78 +206,6 @@ class FlexpartPlots extends AbstractPlots {
         }
         return onEachFeature;
     }
-
-//     cellsCenterLayerStyle = {
-//         radius: 0.5,
-//         // fillColor: "#ff7800",
-//         color: "black",
-//         weight: 1,
-//         opacity: 1,
-//         fillOpacity: 0.8
-//     };
-
-//     cellsLayer: L.GeoJSON<any>;
-//     releaseLayer: L.Layer;
-//     legendData: { 
-//         colorbar: string[],
-//         ticksLabel: string[]
-//     }
-
-//     constructor(data: any, public info: any) {
-//         let releaseLayerStyle = {
-//             radius: 5,
-//             color: "red",
-//             weight: 1,
-//             opacity: 1,
-//             fillOpacity: 0.8
-//         };
-//         let options: L.GeoJSONOptions = {
-//             pointToLayer: function (feature: any, latlng: L.LatLng) {
-//                 return L.circleMarker(latlng, REL_LOC_MARKER_OPTIONS);
-//             },
-//             style: (feature: any) => {
-//                 let options: L.PathOptions = {
-//                     stroke: false, 
-//                     fillOpacity: 0.4,
-//                 }
-//                 options = feature.properties ? {...options, color: feature.properties.color} : options
-//                 return options;
-//             },
-//             onEachFeature: this.cellHoverListener()
-//         };
-
-//         this.cellsLayer = L.geoJSON(undefined, options);
-
-//         data.cells.forEach((feature: any) => {
-//             this.cellsLayer.addData(feature);
-//         });
-
-//         let lon = data.flexpartResult.releaseLons[0];
-//         let lat = data.flexpartResult.releaseLats[0];
-
-//         this.releaseLayer =  L.circleMarker([lat, lon], releaseLayerStyle);
-//         this.legendData = data.legendData;
-//     }
-
-//     cellHoverListener() {
-//         let info = this.info
-//         function cellHover(e:L.LeafletMouseEvent) {
-//             let layer = e.target;
-//             info.update(layer.feature.properties)
-//         }
-
-//         function resetHover(e:L.LeafletMouseEvent) {
-//             info.update();
-//         }
-
-//         function onEachFeature(feature: any, layer: L.Layer) {
-//             layer.on({
-//                 mouseover: cellHover,
-//                 mouseout: resetHover,
-//             });
-//         }
-//         return onEachFeature;
-//     }
 }
 
 
@@ -450,7 +378,9 @@ export class CbrnMap {
     }
 
     addFlexpartPlot(mapPlot: MapPlot) {
-        this.flexpartPlots.add(mapPlot).layers.addTo(this.map);
+        const newPlot = this.flexpartPlots.add(mapPlot);
+        newPlot.layers.addTo(this.map);
+        return newPlot;
     }
 
     hideFlexpartPlot(mapPlot: MapPlot) {
@@ -461,6 +391,17 @@ export class CbrnMap {
     showFlexpartPlot(mapPlot: MapPlot) {
         const layers = this.flexpartPlots.getLayers(mapPlot.id);
         layers && this.map.addLayer(layers);
+    }
+
+    setActive(mapPlot: MapPlot) {
+        switch (mapPlot.type) {
+            case 'atp45':
+                this.atp45Plots.setActive(mapPlot.id)
+                break;
+            case 'flexpart':
+                this.flexpartPlots.setActive(mapPlot.id)
+                break;
+        }
     }
 
     deleteFlexpartPlot(mapPlot: MapPlot) {
@@ -477,10 +418,10 @@ export class CbrnMap {
                 this._div.firstChild.remove();
             }
             let conc = props && parseFloat(props.value);
-            const name = document.createElement('h4'); name.innerText = 'Concentration';
+            const name = document.createElement('h4'); name.innerText = 'Cell value: ';
             let content;
             if (props) {
-                content = document.createElement('b'); content.innerText = conc.toExponential(4) + ' [ng/m3]'
+                content = document.createElement('b'); content.innerText = conc.toExponential(4)
             } else {
                 content = document.createElement('span'); content.innerText = 'Hover over a cell';
             }
@@ -495,7 +436,6 @@ export class CbrnMap {
 
         this.info.onAdd = function (map: L.Map) {
             this._div = L.DomUtil.create('div', 'leaflet-info');
-            // this.update();
             return this._div;
         };
     }
@@ -508,7 +448,9 @@ export class CbrnMap {
             let colorbar = legendData.colorbar,
                 ticksLabel = legendData.ticksLabel;
             ticksLabel = ticksLabel.map((e:number) => {return e.toExponential(2)});
+            const specie = legendData.specie ? `(${legendData.specie})` : ''
             this._div.innerHTML = '';
+            this._div.innerHTML = `<span> ${legendData.name} ${specie} [${legendData.units}]</span>`;
             for (var i = 0; i < colorbar.length; i++) {
                 let span = (i===0) ? `<span class="legend-ticklabel">${ticksLabel[i]}</span>` : '';
                 this._div.innerHTML +=

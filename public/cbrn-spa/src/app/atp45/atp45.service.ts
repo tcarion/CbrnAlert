@@ -90,20 +90,16 @@ export class Atp45Service {
         });
     }
 
-    preloadedResultRequest(payload: any): void {
-        this.getResult(payload, 'prediction_request').subscribe((shapeData) => {
-            this.addResult(shapeData);
-        })
+    preloadedResultRequest(payload: any) {
+        return this.getResult(payload, 'prediction_request')
     }
 
-    realtimeResultRequest(payload: any): void {
+    realtimeResultRequest(payload: any) {
         const notifTitle = this.notificationService.addNotif('ATP45 Prediction', 'atp45Request');
         const plWs = {...payload,
             ws_info: { channel: this.websocketService.channel, backid: notifTitle },
         }
-        this.getResult(plWs, 'realtime_prediction_request').subscribe((shapeData) => {
-            this.addResult(shapeData);
-        })
+        return this.getResult(plWs, 'realtime_prediction_request');
     }
 
     availablesSteps(gribData: GribData) {
@@ -138,11 +134,11 @@ export class Atp45Service {
         })
     }
 
-    addResult(shapeData: Atp45ShapeData): void {
-        this.results.push(shapeData);
-        this.mapPlotsService.addAtp45Plot(shapeData);
-        // this.emitResult(shapeData);
-    }
+    // addResult(shapeData: Atp45ShapeData): void {
+    //     this.results.push(shapeData);
+    //     this.mapPlotsService.addAtp45Plot(shapeData);
+    //     // this.emitResult(shapeData);
+    // }
 
     emitInputsSubject() {
         this.inputsSubject.next(this.inputs);

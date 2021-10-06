@@ -5,6 +5,9 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MapPlotListItemComponent } from './map-plot-list-item/map-plot-list-item.component';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatRippleModule } from '@angular/material/core';
 
 
 
@@ -17,7 +20,10 @@ import { MatIconModule } from '@angular/material/icon';
     CommonModule,
     MatExpansionModule,
     MatListModule,
-    MatIconModule
+    MatButtonModule,
+    MatIconModule,
+    MatCheckboxModule,
+    MatRippleModule,
   ],
   exports: [
     MapPlotListComponent

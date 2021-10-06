@@ -20,6 +20,8 @@ import { FormItemBase } from 'src/app/shared/form/form-item-base';
 import { TextFormItem } from 'src/app/shared/form/form-item-text';
 import { SelectFormItem } from 'src/app/shared/form/form-item-select';
 import { FormItems } from 'src/app/shared/form/form-items';
+import { Store } from '@ngxs/store';
+import { MapPlotAction } from 'src/app/core/state/actions/map-plot.actions';
 
 const formItems: FormItemBase[] = [
     new SelectFormItem({
@@ -91,6 +93,7 @@ export class RealtimeComponent extends AbstractWsComponent implements OnInit, On
         public websocketService: WebsocketService,
         public notificationService: NotificationService,
         private atp45Service: Atp45Service,
+        private store: Store,
     ) {
         super(websocketService, notificationService);
     }
@@ -135,7 +138,9 @@ export class RealtimeComponent extends AbstractWsComponent implements OnInit, On
             ...lonlat,
             step: this.formGroup.get('step')?.value.step,
         };
-        this.atp45Service.realtimeResultRequest(atp45Input);
+        this.atp45Service.realtimeResultRequest(atp45Input).subscribe(res => {
+            this.store.dispatch(new MapPlotAction.Add(res, 'atp45'))
+        });
 
     }
 

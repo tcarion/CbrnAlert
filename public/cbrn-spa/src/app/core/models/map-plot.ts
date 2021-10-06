@@ -4,11 +4,12 @@ export type PlotType = 'atp45' | 'flexpart';
 
 export interface MapPlot {
     type: PlotType,
+    name: string,
     id: number,
     geojson?: FeatureCollection | FeatureCollection[],
     // layer?: L.Layer,
     info?: Object,
-    visible?: boolean,
+    visible: boolean,
     isActive?: boolean,
     metadata?: Object
 }

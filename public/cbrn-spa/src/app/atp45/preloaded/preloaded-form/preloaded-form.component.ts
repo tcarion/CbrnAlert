@@ -13,6 +13,8 @@ import { TextFormItem } from 'src/app/shared/form/form-item-text';
 import { SelectFormItem } from 'src/app/shared/form/form-item-select';
 import { OnChanges } from '@angular/core';
 import { FormItems } from 'src/app/shared/form/form-items';
+import { Store } from '@ngxs/store';
+import { MapPlotAction } from 'src/app/core/state/actions/map-plot.actions';
 
 const formItems: FormItemBase[] = [
     new TextFormItem({
@@ -54,7 +56,8 @@ export class PreloadedFormComponent implements OnInit, OnDestroy, OnChanges, Aft
     constructor(
         public formService: FormService,
         private mapService: MapService, 
-        private atp45Service: Atp45Service
+        private atp45Service: Atp45Service,
+        private store: Store,
         ) { 
         }
     
@@ -112,7 +115,9 @@ export class PreloadedFormComponent implements OnInit, OnDestroy, OnChanges, Aft
             area: this.gribData.area
         };
 
-        this.atp45Service.preloadedResultRequest(atp45Input);
+        this.atp45Service.preloadedResultRequest(atp45Input).subscribe(res => {
+            this.store.dispatch(new MapPlotAction.Add(res, 'atp45'))
+        });
     }
 
     ngOnDestroy() {

@@ -5,17 +5,37 @@
         </mat-panel-title>
     </mat-expansion-panel-header>
     <!-- <mat-action-list> -->
-        <mat-list-item *ngFor="let plot of plots">
+        <!-- <mat-list-item >
             Plot {{ plot.id }} 
             <button mat-icon-button (click)="onToggleVisibility(plot)">
-                <mat-icon> {{ plot.visible ? 'visibility_off' : 'visibility' }} </mat-icon> 
+                <mat-icon class="plot-list-icon"> {{ plot.visible ? 'visibility_off' : 'visibility' }} </mat-icon> 
             </button>
-            <!-- <button *ngIf="!plot.visible" mat-icon-button (click)="onToggleVisibility(plot)">
-                <mat-icon>visibility_off</mat-icon> 
-            </button> -->
-            <button mat-icon-button (click)="onDelete(plot)">
+            <button mat-icon-button (click)="onDelete(plot.id)">
                 <mat-icon>delete</mat-icon>
             </button>
-        </mat-list-item>
+        </mat-list-item> -->
     <!-- </mat-action-list> -->
+    <!-- <mat-selection-list>
+        <mat-list-option *ngFor="let plot of plots" checkboxPosition='before'>
+            <div class="content">
+                {{ plot.name }}             
+                <button mat-icon-button (click)="onDelete(plot.id)">
+                    <mat-icon>cancel</mat-icon>
+                </button>
+            </div>
+        </mat-list-option>
+    </mat-selection-list> -->
+    <mat-action-list dense>
+        <mat-list-item mat-ripple class="list-item" *ngFor="let plot of plots" checkboxPosition='before' [ngClass]="{'active' : plot.isActive}">
+            <div class="content">
+                <mat-checkbox [checked]="plot.visible" (change)="onToggleVisibility(plot)" click-stop-propagation></mat-checkbox>
+                <span class="clickable" (click)="onItemClick(plot.id)">
+                    {{ plot.name }}             
+                </span>
+                <button mat-icon-button (click)="onDelete(plot.id)">
+                    <mat-icon>cancel</mat-icon>
+                </button>
+            </div>
+        </mat-list-item>
+    </mat-action-list>
 </mat-expansion-panel>

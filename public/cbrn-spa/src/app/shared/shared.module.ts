@@ -12,6 +12,8 @@ import { MapComponent } from './map/map.component';
 import { MatListModule } from '@angular/material/list';
 import { TopbarModule } from './topbar/topbar.module';
 import { SelectionDialogModule } from 'src/app/shared/selection-dialog/selection-dialog.module';
+import { SelectionListComponent } from './selection-list/selection-list.component';
+import { SelectionListModule } from './selection-list/selection-list.module';
 
 
 @NgModule({
@@ -32,8 +34,9 @@ import { SelectionDialogModule } from 'src/app/shared/selection-dialog/selection
     FormTemplateModule,
     ReactiveFormsModule,
     SelectionTableModule,
-    TopbarModule,
     SelectionDialogModule,
+    SelectionListModule,
+    TopbarModule,
     MapComponent,
     // InfoButtonComponent,
   ]

@@ -20,6 +20,6 @@ import { FlexpartOutput } from "./flexpart-output";
 
 export interface FlexpartResult {
     id: string,
-    outputs: FlexpartOutput[],
+    outputs?: FlexpartOutput[],
 }
     

@@ -13,6 +13,7 @@ export interface FlexpartOutput {
     options?: any,
     description?: {[key:string]: string },
     variables: string[], 
-    variables2d : any,
+    variables2d : string[],
+    dimensions: {[key:string]: any}
     globAttr: string[],
 }

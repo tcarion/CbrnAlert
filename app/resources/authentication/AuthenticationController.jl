@@ -115,6 +115,36 @@ function isauth()
     end
 end
 
+function authenticated()
+    head = Genie.Requests.payload()[:REQUEST].headers |> pairs_array_to_dict
+    # @show head
+    if !haskey(head, "Authorization")
+      return false
+    end
+
+    bearer = head["Authorization"]
+
+    try
+      token = split(bearer, "Bearer")[2] |> strip
+      JSONWebTokens.decode(JSONWebTokens.RS256(PUK_PATH), token)
+      true
+    catch
+      return false
+    end
+end
+
+# macro authenticated!(exception = Genie.Exceptions.NotFoundException("Not authorized", "Access required authorization", 401, "dqsdqsdqs"))
+#     :(AuthenticationController.authenticated() || throw($exception))
+# end
+
+macro authenticated!(exception = Genie.Exceptions.ExceptionalResponse(Genie.Router.error(401, "Access to this API is not authorized", "application/json")))
+    :(AuthenticationController.authenticated() || throw($exception))
+end
+
+# macro authenticated!(exception = Genie.Router.error(401, "Not authorized", "application/json"))
+#     :(AuthenticationController.authenticated() || throw($exception))
+# end
+
 # function logout()
 #     GenieAuthentication.deauthenticate(Genie.Sessions.session(Genie.Router.@params))
 

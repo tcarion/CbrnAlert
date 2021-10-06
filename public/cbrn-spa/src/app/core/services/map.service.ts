@@ -1,5 +1,5 @@
 import { MapPlot } from 'src/app/core/models/map-plot';
-import { Injectable } from '@angular/core';
+import { EventEmitter, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 // import { ShapeData } from 'src/app/atp45/shape-data';
 import { CbrnMap } from '../models/cbrn-map';
@@ -14,13 +14,15 @@ export class MapService {
     mapSubject: BehaviorSubject<CbrnMap>;
     map$: Observable<CbrnMap>;
     mapEventSubject = new Subject<MapEvent>();
-
-
+    mapPlotEvent = new Subject<number>();
+    mapPlotEvent$: Observable<number>;
 
     constructor(
     ) { 
         this.mapSubject = new BehaviorSubject(this.map);
         this.map$ = this.mapSubject.asObservable();
+        this.mapPlotEvent$ = this.mapPlotEvent.asObservable();
+
     }
 
     // emitMapSubject() {
@@ -94,26 +96,15 @@ export class MapService {
         });
     }
 
-    // atp45ResultToLayer(): Observable<{shapeData:ShapeData, layer: L.Layer}> {
-    //     return this.atp45Service.resultsSubject
-    //         .pipe(
-    //             map((shapeData) => {
-    //                 let rawLayer = this.cbrnMap.getLayerFromShapes(shapeData.shapes);
-    //                 // let mapLayer = this.addLayerToMap(rawLayer);
-    //                 return {
-    //                     layer: rawLayer,
-    //                     shapeData
-    //                 }
-    //             })
-    //         )
-    // }
-
     addPlotToMap(plot: MapPlot) {
         if (plot.type === 'atp45') {
             this.cbrnMap.addAtp45Plot(plot)
         }
         else if (plot.type === 'flexpart') {
-            this.cbrnMap.addFlexpartPlot(plot);
+            const newPlot = this.cbrnMap.addFlexpartPlot(plot);
+            newPlot.layers.on('click', e => {
+                this.mapPlotEvent.next(newPlot.id);
+            })
         }
     }
 
@@ -133,6 +124,10 @@ export class MapService {
         else if (plot.type === 'flexpart') {
             this.cbrnMap.showFlexpartPlot(plot);
         }
+    }
+
+    setActive(plot: MapPlot) {
+        this.cbrnMap.setActive(plot);
     }
 
     deletePlot(plot: MapPlot) {

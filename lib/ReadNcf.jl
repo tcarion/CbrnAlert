@@ -11,31 +11,6 @@ DEFAULT_COLOR_SCHEME = ColorSchemes.jet
 
 file = "/home/tcarion/CBRN-dispersion-app/public/flexpart_runs/20210607_00_20210607_12_3000/output/grid_conc_20210607000000.nc"
 
-function ncfmetadata(file)
-    output = FlexpartOutput(file)
-    lons, lats = output.lons, output.lats
-    dx, dy = deltamesh(lons, lats)
-    v2d = variables2d(output)
-    d = Dict(
-        :times => output.metadata.times,
-        :startDate => output.metadata.startd,
-        :endDate => output.metadata.endd,
-        :heights => output.ncdataset["height"][:],
-        :dx => dx,
-        :dy => dy,
-        :releaseLons => output.metadata.rellons,
-        :releaseLats => output.metadata.rellats,
-        :area => areamesh(lons, lats),
-        :globAttr => attrib(output),
-        :variables => keys(output.ncdataset),
-        :variables2d => Dict(
-            Symbol(v) => Flexpart.alldims(output.ncdataset, output.ncdataset[v])
-         for v in v2d),
-    ) 
-    close(output)
-    d
-end
-
 function frame_coord(lon, lat, dx, dy)
     dx2 = dx/2
     dy2 = dy/2

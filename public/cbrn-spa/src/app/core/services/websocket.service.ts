@@ -65,7 +65,8 @@ export class WebsocketService {
                 'payload': {}
             }
             this.connection$.next(to_send)
-            console.log('Subscribed to channel')
+            console.log('Subscribtion asked :')
+            console.log(to_send)
         } else {
             console.error('Connection not open')
         }

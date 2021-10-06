@@ -1,4 +1,4 @@
-import { Subject, Subscription } from 'rxjs';
+import { Observable, Subject, Subscription } from 'rxjs';
 import { DatePipe } from '@angular/common';
 import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
 import { SelectionTableComponent } from 'src/app/shared/selection-table/selection-table.component';
@@ -10,6 +10,9 @@ import { ApiService } from 'src/app/core/services/api.service';
 import { map } from 'rxjs/operators';
 import { FlexpartOutput } from '../flexpart-output';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Select, Store } from '@ngxs/store';
+import { AddFlexpartResult } from 'src/app/core/state/actions/flexpart-results.actions';
+import { FlexpartResultState } from 'src/app/core/state/flexpart-result.state';
 
 const columnInfo = [
     // {
@@ -45,26 +48,35 @@ const columnInfo = [
 })
 export class FlexpartPlotComponent implements OnInit, OnDestroy {
 
-    @ViewChild('selectionTableRef') selectionTableRef: SelectionTableComponent<FlexpartResult>;
+    // @ViewChild('selectionTableRef') selectionTableRef: SelectionTableComponent<FlexpartResult>;
     // @ViewChild(FlexpartPlotFormComponent) plotFormComp: FlexpartPlotFormComponent;
 
     // displayedColumns = ['select', 'startDate', 'endDate',];
-    displayedColumns = ['select', 'id'];
-    columnInfo = columnInfo;
+    // displayedColumns = ['select', 'id'];
+    // columnInfo = columnInfo;
 
-    fpOutput: FlexpartOutput;
+    // fpOutput: FlexpartOutput;
 
-    resultsSubscription: Subscription;
+    // fpResults$: Observable<FlexpartResult[]>
+    @Select(FlexpartResultState.getFlexpartResults) fpResults$: Observable<FlexpartResult[]>
+    fpResultsId$: Observable<string[]>
+    // resultsSubscription: Subscription;
 
     constructor(
         // public dialog: MatDialog,
         private flexpartService: FlexpartService,
-        private apiService: ApiService,
         private router: Router,
-        private route: ActivatedRoute,
+        private store: Store,
         ) {}
 
     ngOnInit(): void {
+        this.store.selectSnapshot(state => state.fpResults.fpResults).length == 0 && 
+            this.flexpartService.getResults().subscribe(results => 
+                results.forEach(result => this.store.dispatch(new AddFlexpartResult(result))));
+
+        // this.fpResults$ = this.store.select(state => state.fpResults.fpResults);
+        this.fpResultsId$ = this.fpResults$.pipe(map(res => res.map(r => r.id)));
+
         // this.flexpartService.updateResults();
         // this.apiService.get('/flexpart/results').subscribe(res => console.log(res))
     }
@@ -91,13 +103,15 @@ export class FlexpartPlotComponent implements OnInit, OnDestroy {
         //     })
 
         // ).subscribe()
-        this.resultsSubscription = this.flexpartService.getResults().subscribe((results: FlexpartResult[]) => {
-            results.filter(result => result.outputs !== undefined);
-            this.selectionTableRef.populateTable(results);
-        })
+        // this.resultsSubscription = this.flexpartService.getResults().subscribe((results: FlexpartResult[]) => {
+        //     results.filter(result => result.outputs !== undefined);
+        //     results.forEach(result => this.store.dispatch(new AddFlexpartResult(result)))
+        //     this.selectionTableRef.populateTable(results);
+        // })
     }
 
-    emitSelection(fpResult: FlexpartResult) {
+    goToOuput(index: number) {
+        const fpResult = this.store.selectSnapshot(state => state.fpResults.fpResults)[index]
         if (fpResult) {
             // this.router.navigate([fpResult.id], { 
             //     relativeTo: this.route,
@@ -150,6 +164,6 @@ export class FlexpartPlotComponent implements OnInit, OnDestroy {
     // }
 
     ngOnDestroy() {
-        this.resultsSubscription.unsubscribe();
+        // this.resultsSubscription.unsubscribe();
     }
 }

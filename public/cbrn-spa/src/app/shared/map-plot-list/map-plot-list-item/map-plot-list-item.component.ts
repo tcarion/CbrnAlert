@@ -12,7 +12,8 @@ export class MapPlotListItemComponent implements OnInit {
     @Input() title: string;
     
     @Output() visibilityEvent = new EventEmitter<MapPlot>();
-    @Output() deleteEvent = new EventEmitter<MapPlot>();
+    @Output() deleteEvent = new EventEmitter<number>();
+    @Output() itemClickEvent = new EventEmitter<number>();
     constructor() { }
 
     ngOnInit(): void {
@@ -22,8 +23,12 @@ export class MapPlotListItemComponent implements OnInit {
         this.visibilityEvent.emit(plot);
     }
 
-    onDelete(plot: MapPlot) {
-        this.deleteEvent.emit(plot);
+    onItemClick(plotId: number) {
+        this.itemClickEvent.emit(plotId);
+    }
+
+    onDelete(plotId: number) {
+        this.deleteEvent.emit(plotId);
     }
 
 }

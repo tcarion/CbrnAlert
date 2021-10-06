@@ -1,0 +1,8 @@
+<div class="spinner-container" *ngIf="!elements || elements.length == 0">
+    <mat-spinner></mat-spinner>
+</div>
+<mat-selection-list class="listbox" [multiple]="false" *ngIf="elements !== null && elements.length !== 0">
+        <mat-list-option class="list-item" *ngFor="let e of elements; let index = index" (click)="selected.emit(index)">
+            {{ e }}
+        </mat-list-option>
+</mat-selection-list>

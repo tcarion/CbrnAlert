@@ -146,29 +146,31 @@ function available_steps(payload)
 end
 
 function available_grib_files(payload)
-    grib_files = searchdir(joinpath(pwd(), "public", "grib_files"), ".grib")
-    availabe_data = Array{Dict,1}()
-    for f in grib_files
-        grib_to_read = joinpath(pwd(), "public", "grib_files", f)
-        date = ReadGrib.get_key_values(grib_to_read, "date")[1]
-        time = ReadGrib.get_key_values(grib_to_read, "time")[1]
-        steps = ReadGrib.get_key_values(grib_to_read, "step")
+    Genie.Cache.withcache(:available_grib_files) do
+        grib_files = searchdir(joinpath(pwd(), "public", "grib_files"), ".grib")
+        availabe_data = Array{Dict,1}()
+        for f in grib_files
+            grib_to_read = joinpath(pwd(), "public", "grib_files", f)
+            date = ReadGrib.get_key_values(grib_to_read, "date")[1]
+            time = ReadGrib.get_key_values(grib_to_read, "time")[1]
+            steps = ReadGrib.get_key_values(grib_to_read, "step")
 
-        steps = typeof(steps[1]) != Int ? sort(map(x -> Base.parse(Int, x), collect(steps))) : sort(collect(steps))
-        time = (time == "0" || time == 0) ? "0000" : string(time)
-        m = match(r"(?<h>\d{2}).?(?<m>\d{2})", time)
-        time = !isnothing(m) ? m[:h] * ":" * m[:m] : error("time is in unreadable format")
+            steps = typeof(steps[1]) != Int ? sort(map(x -> Base.parse(Int, x), collect(steps))) : sort(collect(steps))
+            time = (time == "0" || time == 0) ? "0000" : string(time)
+            m = match(r"(?<h>\d{2}).?(?<m>\d{2})", time)
+            time = !isnothing(m) ? m[:h] * ":" * m[:m] : error("time is in unreadable format")
 
-        start_date = Dates.DateTime(date * "T" * time, "yyyymmddTH:M")
+            start_date = Dates.DateTime(date * "T" * time, "yyyymmddTH:M")
 
-        push!(availabe_data, Dict(
-            :startDate => start_date,
-            :duration => steps[end],
-            :area => round.(ReadGrib.get_area(grib_to_read), digits=3),
-            :filename => split(basename(grib_to_read), '.')[1]
-        ))
+            push!(availabe_data, Dict(
+                :startDate => start_date,
+                :duration => steps[end],
+                :area => round.(ReadGrib.get_area(grib_to_read), digits=3),
+                :filename => split(basename(grib_to_read), '.')[1]
+            ))
+        end
+        return availabe_data
     end
-    return availabe_data
 end
 
 """
@@ -351,6 +353,7 @@ function archive_retrieval(payload)
         end
     end
 
+    Genie.Cache.purge(:available_grib_files)
     return Dict(:res => "Retrieval done")
 end
 

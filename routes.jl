@@ -9,7 +9,9 @@ using JSONWebTokens
 using StructTypes
 using UUIDs
 
-FLEXPART_RUNS_DIR = joinpath(pwd(), "public", "flexpart_runs")
+using Genie.Cache
+Genie.config.cache_duration = 3600
+Genie.Cache.init()
 
 # using SearchLight
 # using Users
@@ -19,7 +21,7 @@ FLEXPART_RUNS_DIR = joinpath(pwd(), "public", "flexpart_runs")
 
 Genie.config.websockets_server = true
 # Genie.Cache.init()
-# StructTypes.StructType(::Type{Genie.WebChannels.ChannelMessage}) = StructTypes.Struct()
+StructTypes.StructType(::Type{Genie.WebChannels.ChannelMessage}) = StructTypes.Struct()
 
 atp45_routes = Dict(
     "available_steps" => Atp45sController.available_steps,
@@ -41,13 +43,36 @@ flexpart_routes = Dict(
     # "flexpart_daily_average" => FlexpartsController.flexpart_daily_average,
 )
 
+api_routes = Dict(
+    "/api/flexpart/meteo_data_request" => (f=FlexpartsController.meteo_data_request, keyargs=(method=POST, named=:meteo_data_request)),
+    "/api/flexpart/results" => (f=FlexpartsController.get_results, keyargs=(method = GET, named = :get_flexpart_results)),
+    "/api/flexpart/results/:result_id::String" => (f=FlexpartsController.get_result, keyargs=(method=GET, named=:get_flexpart_result)),
+    "/api/flexpart/results/:result_id::String/outputs" => (f=FlexpartsController.get_outputs, keyargs=(method = GET, named = :get_flexpart_outputs)),
+    "/api/flexpart/results/:result_id::String/outputs/:output_id::String" => (f=FlexpartsController.get_output, keyargs=(method = GET, named = :get_flexpart_output)),
+    "/api/flexpart/results/:result_id::String/output/:output_id::String" => (f=FlexpartsController.get_plot, keyargs=(method = POST)),
+    "/api/flexpart/results/:result_id::String/output/:output_id::String/daily_average" => (f=FlexpartsController.daily_average, keyargs=(method = POST))
+)
+
+for (url, args) in api_routes
+    route(url; args[:keyargs]...) do
+        AuthenticationController.@authenticated!
+        args[:f]()
+    end
+end
 
 # route("/api/flexpart/results", method = GET, FlexpartsController.get_results)
-route("/api/flexpart/results", method = GET, FlexpartsController.get_results, named = :get_flexaprt_results)
-route("/api/flexpart/results/:result_id::String", method = GET, FlexpartsController.get_result, named = :get_flexpart_result)
 # route("/api/flexpart/results/:result_id::String/output/:output_id::String", method = GET, FlexpartsController.get_plot)
-route("/api/flexpart/results/:result_id::String/output/:output_id::String", method = POST, FlexpartsController.get_plot)
-route("/api/flexpart/results/:result_id::String/output/:output_id::String/daily_average", method = POST, FlexpartsController.daily_average)
+
+# route("/api/flexpart/meteo_data_request", method = POST, FlexpartsController.meteo_data_request, named = :meteo_data_request)
+# route("/api/flexpart/results", method = GET, FlexpartsController.get_results, named = :get_flexaprt_results)
+# route("/api/flexpart/results/:result_id::String", method = GET, FlexpartsController.get_result, named = :get_flexpart_result)
+
+
+# route("/api/flexpart/results/:result_id::String/outputs", method = GET, FlexpartsController.get_outputs, named = :get_flexpart_outputs)
+# route("/api/flexpart/results/:result_id::String/outputs/:output_id::String", method = GET, FlexpartsController.get_output, named = :get_flexpart_output)
+
+# route("/api/flexpart/results/:result_id::String/output/:output_id::String", method = POST, FlexpartsController.get_plot)
+# route("/api/flexpart/results/:result_id::String/output/:output_id::String/daily_average", method = POST, FlexpartsController.daily_average)
 # route("/api/flexpart/results/:result_id", method = POST) do
 #     println(params(:result_id))
 # end

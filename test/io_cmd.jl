@@ -106,3 +106,73 @@ reader = @async println(read(b, String))
 
 wait(writer)
 fetch(reader)
+
+script = """
+#!/bin/sh
+echo 1
+sleep 1
+echo 2 >&2
+sleep 1
+echo 3
+sleep 1
+echo 4
+       """
+
+cmdscr = `sh -c $script`
+oc = OutputCollector(`sh -c $script`; verbose = true);
+
+out = Pipe()
+
+run(pipeline(cmdscr, stdin=devnull, stdout=out, stderr=out))
+
+c1 = Channel()
+c2 = Channel()
+
+
+task = @async while true
+    data = take!(c1)
+    write(logf, data)
+    put!(c2, data)
+end
+
+put!(c2, "TESDQS")
+take!(c2)
+
+logf = open("log.log", "w")
+p1 = Pipe()
+run(pipeline(cmd, stderr=p1))
+flush(logf)
+close(logf)
+task = @async while true
+    data = readline(p1, keep=true)
+    Base.write(logf, data)
+    flush(logf)
+    # put!(c2, data)
+end
+
+task = @async while true
+    data = readline(p1, keep=true)
+    Base.write(logf, data)
+    flush(logf)
+    # put!(c2, data)
+end
+
+open(pipeline(cmdscr, stderr=stdout)) do proc
+    while !eof(proc)
+        # f(process)
+        line = readline(proc, keep=true)
+        Base.write(logf, line)
+        flush(logf)
+    end
+end
+
+function execute(cmd::Base.Cmd)
+    out = IOBuffer()
+    err = IOBuffer()
+    process = run(pipeline(ignorestatus(cmd), stdout=out, stderr=err))
+    return (stdout = String(take!(out)),
+            stderr = String(take!(err)),
+            code = process.exitcode)
+end
+
+proc = execute(pipeline(cmd, stderr=stdout))

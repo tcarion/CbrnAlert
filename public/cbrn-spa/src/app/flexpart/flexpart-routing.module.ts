@@ -1,3 +1,4 @@
+import { VariableSelectionComponent } from './flexpart-plot/variable-selection/variable-selection.component';
 import { MetDataComponent } from './met-data/met-data.component';
 import { FlexpartPlotComponent } from './flexpart-plot/flexpart-plot.component';
 import { NgModule } from '@angular/core';
@@ -7,6 +8,7 @@ import { ChooseOutputComponent } from './flexpart-plot/choose-output/choose-outp
 import { ResultResolverService } from './result-resolver.service';
 import { FlexpartPlotFormComponent } from './flexpart-plot/flexpart-plot-form/flexpart-plot-form.component';
 import { OutputFormComponent } from './flexpart-plot/output-form/output-form.component';
+import { OutputResolverService, OutputsResolverService } from 'src/app/flexpart/output-resolver.service';
 
 
 
@@ -27,12 +29,15 @@ const routes: Routes = [
                 path: ':fpResultId',
                 component: ChooseOutputComponent,
                 resolve: {
-                    fpResult: ResultResolverService,
+                    fpOutputs: OutputsResolverService,
                 },
                 children: [
                     {
                         path: ':fpOutputId',
-                        component: OutputFormComponent,
+                        component: VariableSelectionComponent,
+                        resolve: {
+                            fpOutput: OutputResolverService,
+                        },
                     },
                 ]
             }

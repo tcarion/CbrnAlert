@@ -12,6 +12,7 @@ import { FlexpartRoutingModule } from './flexpart-routing.module';
 import { ChooseOutputComponent } from './flexpart-plot/choose-output/choose-output.component';
 import { ResultResolverService } from './result-resolver.service';
 import { OutputFormComponent } from './flexpart-plot/output-form/output-form.component';
+import { VariableSelectionComponent } from './flexpart-plot/variable-selection/variable-selection.component';
 
 
 
@@ -23,7 +24,8 @@ import { OutputFormComponent } from './flexpart-plot/output-form/output-form.com
         FlexpartPlotComponent,
         FlexpartPlotFormComponent,
         ChooseOutputComponent,
-        OutputFormComponent
+        OutputFormComponent,
+        VariableSelectionComponent
     ],
     providers: [
         FlexpartService,

@@ -12,6 +12,9 @@ import { SelectFormItem } from 'src/app/shared/form/form-item-select';
 import { FormItemBase } from 'src/app/shared/form/form-item-base';
 import { FlexpartOutput } from '../../flexpart-output';
 import { ActivatedRoute, ActivatedRouteSnapshot, Router } from '@angular/router';
+import { Store } from '@ngxs/store';
+import { MapPlotAction } from 'src/app/core/state/actions/map-plot.actions';
+import { FlexpartOutputAction } from 'src/app/core/state/actions/flexpart-output.actions';
 
 // const formItems: FormItem[] = [
 //     {
@@ -53,34 +56,32 @@ import { ActivatedRoute, ActivatedRouteSnapshot, Router } from '@angular/router'
 //     required: true,
 // }]
 
-const formItems = [
-    new SelectFormItem({
-        key: 'variables',
-        label: 'Variables',
-        options: [],
-        required: true,
-    }),
-]
+// const formItems = [
+//     new SelectFormItem({
+//         key: 'variables',
+//         label: 'Variables',
+//         options: [],
+//         required: true,
+//     }),
+// ]
 @Component({
     selector: 'app-output-form',
     templateUrl: './output-form.component.html',
     styleUrls: ['./output-form.component.scss']
 })
-export class OutputFormComponent implements OnInit {
-    formItems = new FormItems(formItems);
+export class OutputFormComponent implements OnInit, OnChanges {
+    // formItems = new FormItems(formItems);
 
-    nestedItems: FormItemBase[] = [];
+    formItems = new FormItems([]);
 
     formGroup: FormGroup;
 
-    fpOutput: FlexpartOutput;
-
+    @Input() fpOutput: FlexpartOutput;
+    @Input() selectedVar: string;
     // flexpartResult: FlexpartResult;
-    variables = [];
-    selectedVar: { [key: string]: (string | number | Date)[] };
+    // variables = [];
+    // selectedVar: { [key: string]: (string | number | Date)[] };
 
-    mapSubscription: Subscription;
-    newSelectionSubscription: Subscription;
 
     constructor(
         private mapService: MapService,
@@ -88,50 +89,84 @@ export class OutputFormComponent implements OnInit {
         public formService: FormService,
         private router: Router,
         private route: ActivatedRoute,
+        private store: Store,
     ) {
-        const fpOutput = this.router.getCurrentNavigation()?.extras.state?.fpOutput; 
-        if (fpOutput) {
-            this.fpOutput = fpOutput;
-        } else {
-            this.router.navigate(['flexpart', 'results', this.route.snapshot.params['fpResultId']])
-        }
+        // const fpOutput = this.router.getCurrentNavigation()?.extras.state?.fpOutput; 
+        // if (fpOutput) {
+        //     this.fpOutput = fpOutput;
+        // } else {
+        //     this.router.navigate(['flexpart', 'results', this.route.snapshot.params['fpResultId']])
+        // }
+        // this.route.data.subscribe(data => {
+        //     this.fpOutput = data.fpOutput;
+        //     this.store.dispatch(new FlexpartOutputAction.Add(this.fpOutput));
+        // })
     }
 
     ngOnInit(): void {
-        this.formGroup = this.formService.toFormGroup(this.formItems.items);
-
-        this.mapService.cbrnMap.newAvailableArea(this.fpOutput.area);
-        this.variables = this.fpOutput.variables2d;
-        this.formItems.get('variables').options = this.formService.arrayToOptions(Object.keys(this.fpOutput.variables2d))
+        // this.updateForm();
+        // this.mapService.cbrnMap.newAvailableArea(this.fpOutput.area);
+        // this.variables = this.fpOutput.variables2d;
+        // this.formItems.get('variables').options = this.formService.arrayToOptions(this.fpOutput.variables2d)
         // this.variables = this.flexpartResult.variables2d;
         // this.formItems.forEach((item) => {
         //     item.options = item.key == 'variables' ? this.formService.arrayToOptions(Object.keys(this.flexpartResult.variables2d)) : []
         // })
 
-        this.formGroup.controls.variables.valueChanges.subscribe((value) => {
+        // this.formGroup.controls.variables.valueChanges.subscribe((value) => {
             
-            this.nestedItems.forEach((item) => {
+        //     this.nestedItems.forEach((item) => {
+        //         this.formGroup.removeControl(item.key);
+        //         this.formGroup.updateValueAndValidity();
+        //     })
+
+        //     this.nestedItems = [];
+
+        //     const dims = this.variables[value];
+        //     for (const [key, value] of Object.entries(dims)) {
+        //         const newItem = new SelectFormItem({
+        //             key: key,
+        //             label: key,
+        //             options: value ? this.formService.arrayToOptions(value as Array<string | number | Date>) : [],
+        //             required: true,
+        //             autoSelect: true,
+        //             // type: 'mapObject',
+        //         });
+        //         this.formGroup.addControl(key, this.formService.toControl(newItem));
+        //         this.nestedItems.push(newItem);
+        //     }
+        // })
+
+    }
+
+    updateForm() {
+        this.formGroup = this.formService.toFormGroup(this.formItems.items);
+
+        const dims = this.fpOutput.dimensions[this.selectedVar];
+        for (const [key, value] of Object.entries(dims)) {
+            const newItem = new SelectFormItem({
+                key: key,
+                label: key,
+                options: value ? this.formService.arrayToOptions(value as Array<string | number | Date>) : [],
+                required: true,
+                autoSelect: true,
+                // type: 'mapObject',
+            });
+            this.formGroup.addControl(key, this.formService.toControl(newItem));
+            this.formItems.items.push(newItem);
+        }
+    }
+
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes.selectedVar) {
+            this.formItems = new FormItems([]);
+            
+            this.formItems.items.forEach((item) => {
                 this.formGroup.removeControl(item.key);
-                this.formGroup.updateValueAndValidity();
+                // this.formGroup.updateValueAndValidity();
             })
-
-            this.nestedItems = [];
-
-            const dims = this.variables[value];
-            for (const [key, value] of Object.entries(dims)) {
-                const newItem = new SelectFormItem({
-                    key: key,
-                    label: key,
-                    options: value ? this.formService.arrayToOptions(value as Array<string | number | Date>) : [],
-                    required: true,
-                    autoSelect: true,
-                    // type: 'mapObject',
-                });
-                this.formGroup.addControl(key, this.formService.toControl(newItem));
-                this.nestedItems.push(newItem);
-            }
-        })
-
+            this.updateForm();
+        }
     }
 
     // ngOnChanges(changes: SimpleChanges) {
@@ -154,22 +189,22 @@ export class OutputFormComponent implements OnInit {
     //     // this.newControls = group;
     // }
 
-    varNames() {
-        return Object.keys(this.variables)
-    }
+    // varNames() {
+    //     return Object.keys(this.variables)
+    // }
 
     onSubmit() {
         // let formFields = this.formService.formToObject();
         let formFields = this.formGroup.value;
-        const asArray = Object.entries(formFields);
-        const filtered = asArray.filter(([key, value]) => key !== this.formItems.get('variables').key);
+        // const asArray = Object.entries(formFields);
+        // const filtered = asArray.filter(([key, value]) => key !== this.formItems.get('variables').key);
 
-        const dimensions = Object.fromEntries(filtered);
+        // const dimensions = Object.fromEntries(filtered);
 
         
         formFields = {
-            variable: formFields.variables,
-            dimensions: dimensions,
+            variable: this.selectedVar,
+            dimensions: formFields,
             // output: this.fpOutput,
             // dataDirname: this.flexpartOutput.id,
             // flexpartOutput: this.flexpartOutput,
@@ -177,7 +212,10 @@ export class OutputFormComponent implements OnInit {
         
         this.formService.adjustDateRecursive(formFields);
         console.log(formFields);
-        this.flexpartService.newPlot(this.route.snapshot.parent!.params['fpResultId'], this.route.snapshot.params['fpOutputId'], formFields);
+        this.flexpartService.newPlot(this.route.snapshot.parent!.params['fpResultId'], this.route.snapshot.params['fpOutputId'], formFields)
+            .subscribe(data => {
+                this.store.dispatch(new MapPlotAction.Add(data, 'flexpart'))
+            });
     }
 
     onDailyAverage() {

@@ -4,6 +4,8 @@ import { AfterViewInit, Component, OnInit, OnDestroy } from '@angular/core';
 import { MapService } from 'src/app/core/services/map.service';
 import { Atp45Service } from 'src/app/atp45/atp45.service';
 import { MapPlotsService } from 'src/app/core/services/map-plots.service';
+import { Store } from '@ngxs/store';
+import { MapPlotAction } from 'src/app/core/state/actions/map-plot.actions';
 
 @Component({
     selector: 'app-map',
@@ -16,11 +18,16 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     // atp45ResultsSubscription: Subscription;
 
     constructor(
-        private mapService: MapService, 
+        private mapService: MapService,
+        private store: Store,
         ) { }
 
     ngAfterViewInit(): void {
         this.mapService.initMap('mapid');
+
+        this.mapService.mapPlotEvent$.subscribe(id => {
+            this.store.dispatch(new MapPlotAction.SetActive(id));
+        })
         // this.mapService.onClickInit();
 
         // this.formSubscription = this.formService.currentFormSubject.subscribe(

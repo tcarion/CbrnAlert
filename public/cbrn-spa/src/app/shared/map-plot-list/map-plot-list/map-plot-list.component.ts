@@ -1,8 +1,11 @@
+import { MapPlotState } from './../../../core/state/map-plot.state';
 import { Observable, Subject } from 'rxjs';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { MapPlot } from 'src/app/core/models/map-plot';
 import { MapPlotsService } from 'src/app/core/services/map-plots.service';
 import { map, takeUntil } from 'rxjs/operators';
+import { Select, Store } from '@ngxs/store';
+import { MapPlotAction } from 'src/app/core/state/actions/map-plot.actions';
 
 
 @Component({
@@ -14,13 +17,14 @@ import { map, takeUntil } from 'rxjs/operators';
 export class MapPlotListComponent implements OnInit, OnDestroy {
     // private readonly onDestroy = new Subject<void>();
 
-    atp45Plots$: Observable<MapPlot[]> = this.mapPlotsService.mapPlots$.pipe(map((plots) => plots.filter((plot) => plot.type === 'atp45')));
-    flexpartPlots$: Observable<MapPlot[]> = this.mapPlotsService.mapPlots$.pipe(map((plots) => plots.filter((plot) => plot.type === 'flexpart')));
+    @Select(MapPlotState.filterType('atp45')) atp45Plots$: Observable<MapPlot[]>
+    @Select(MapPlotState.filterType('flexpart')) flexpartPlots$: Observable<MapPlot[]>
+    // flexpartPlots$: Observable<MapPlot[]> = this.mapPlotsService.mapPlots$.pipe(map((plots) => plots.filter((plot) => plot.type === 'flexpart')));
 
     // flexpartPlots: MapPlot[] = [];
 
     constructor(
-        private mapPlotsService: MapPlotsService,
+        private store: Store,
     ) { }
 
     ngOnInit(): void {
@@ -37,12 +41,17 @@ export class MapPlotListComponent implements OnInit, OnDestroy {
     // }
 
     toggleVisibility(plot: MapPlot) {
-        plot.visible ? this.mapPlotsService.hideMapPlot(plot) : this.mapPlotsService.showMapPlot(plot);
+        plot.visible ? this.store.dispatch(new MapPlotAction.Hide(plot.id)) : this.store.dispatch(new MapPlotAction.Show(plot.id));
         
     }
 
-    delete(plot: MapPlot) {
-        this.mapPlotsService.deleteMapPlot(plot);
+    setActive(plotId: number) {
+        this.store.dispatch(new MapPlotAction.SetActive(plotId));
+    }
+
+    delete(plotId: number) {
+        // this.mapPlotsService.deleteMapPlot(plot);
+        this.store.dispatch(new MapPlotAction.Remove(plotId));
         // this.sortPlots(this.mapPlotsService.plots);
     }
 

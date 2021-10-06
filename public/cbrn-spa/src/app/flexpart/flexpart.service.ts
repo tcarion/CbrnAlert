@@ -1,10 +1,11 @@
-import { Observable, Subject } from 'rxjs';
+import { FlexpartOutput } from './flexpart-output';
+import { Observable, Subject, throwError } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { FlexpartInput } from 'src/app/flexpart/flexpart-input';
 import { FlexpartResult } from 'src/app/flexpart/flexpart-result';
 import { ApiService } from '../core/services/api.service';
 import { FlexpartPlotData } from './flexpart-plot-data';
-import { map } from 'rxjs/operators';
+import { catchError, filter, map, tap } from 'rxjs/operators';
 import { NotificationService } from '../core/services/notification.service';
 import { WebsocketService } from '../core/services/websocket.service';
 import { MapService } from '../core/services/map.service';
@@ -57,13 +58,23 @@ export class FlexpartService {
         //         })
         //     );
         return this.apiService.get('/flexpart/results')
+            // .pipe(map(results => results.filter((res: FlexpartResult) => res.outputs !== undefined)))
     }
 
     getResult(id: string): Observable<FlexpartResult> {
         return this.apiService.get('/flexpart/results/' + id)
     }
 
-    metDataRetrieval(payload: any) {
+    getOutputs(resultId: string): Observable<FlexpartOutput[]> {
+        return this.apiService.get('/flexpart/results/' + resultId + '/outputs')
+    }
+
+    getOutput(resultId: string, outputId: string): Observable<FlexpartOutput> {
+        return this.apiService.get('/flexpart/results/' + resultId + '/outputs/' + outputId)
+    }
+
+
+    meteoDataRetrieval(payload: any) {
         const notifTitle = this.notificationService.addNotif('Met data retrieval', 'metDataRequest');
 
         const plWs = {...payload,
@@ -72,17 +83,27 @@ export class FlexpartService {
 
         console.log(plWs);
 
-        this.apiService.flexpartRequest({...plWs, request: "metdata_retrieval"}).subscribe({
-            next: () => {
+        // this.apiService.flexpartRequest({...plWs, request: "metdata_retrieval"}).subscribe({
+        //     next: () => {
+        //         alert("Meteorological data has been retrieved");
+        //         this.notificationService.changeStatus(notifTitle, 'succeeded');
+
+        //     },
+        //     error: (error) => {
+        //         console.log(error);
+        //         this.notificationService.changeStatus(notifTitle, 'failed');
+        //     }
+        // })
+        return this.apiService.post('/flexpart/meteo_data_request', plWs).pipe(
+            catchError((err) => {
+                this.notificationService.changeStatus(notifTitle, 'failed');
+                return throwError(err);
+            }),
+            tap(() => {
                 alert("Meteorological data has been retrieved");
                 this.notificationService.changeStatus(notifTitle, 'succeeded');
-
-            },
-            error: (error) => {
-                console.log(error);
-                this.notificationService.changeStatus(notifTitle, 'failed');
-            }
-        })
+            })
+        );
     }
 
     getFlexpartOptions(args : {dataDirname: string}) {
@@ -147,12 +168,8 @@ export class FlexpartService {
     //     })
     // }
 
-    newPlot(resultId:string, outputId:string,formFields: any): void {
-        this.apiService.post('/flexpart/results/'+resultId+'/output/'+outputId, formFields).subscribe({
-            next: (flexpartPlotData: any) => {
-                this.mapPlotsService.addFlexpartPlot(flexpartPlotData);
-            }
-        })
+    newPlot(resultId:string, outputId:string,formFields: any): Observable<any> {
+        return this.apiService.post('/flexpart/results/'+resultId+'/output/'+outputId, formFields);
     }
 
     dailyAverage(resultId:string, outputId:string) {

@@ -135,7 +135,7 @@ export class MetDataComponent extends AbstractWsComponent implements OnInit, OnD
         formFields.startDate = this.formService.removeTimeZone(this.formService.toDate(formFields.startDay, formFields.startTime));
         formFields.endDate = this.formService.removeTimeZone(this.formService.toDate(formFields.endDay, formFields.endTime));
 
-        this.flexpartService.metDataRetrieval(formFields);
+        this.flexpartService.meteoDataRetrieval(formFields).subscribe();
     }
 
     ngOnDestroy() {

@@ -1,10 +1,12 @@
-<app-selection-table 
+<!-- <app-selection-table 
     #selectionTableRef
     [columnInfo]="columnInfo"
     [displayedColumns]="displayedColumns"
     (newSelectionEvent)="emitSelection($event)"
     [hasDescriptionCol]="true"
-    ></app-selection-table>
+    ></app-selection-table> -->
+
+<app-selection-list [elements] = "fpResultsId$ | async" (selected)="goToOuput($event)"></app-selection-list>
 
 <!-- <button (click)="openDialog()"> Open dialog </button> -->
 <!-- <app-flexpart-plot-form
