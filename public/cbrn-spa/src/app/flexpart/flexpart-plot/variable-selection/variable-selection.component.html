@@ -1,4 +1,4 @@
-<app-selection-list [elements] = "fpOutputVar2D$ | async" (selected)="goToVariable($event)"></app-selection-list>
+<app-selection-list class="selection" [elements] = "fpOutputVar2D$ | async" (selected)="goToVariable($event)"></app-selection-list>
 
 <ng-container
 *ngIf="(fpOutput$ | async) as fpOutput"

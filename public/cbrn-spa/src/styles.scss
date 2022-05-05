@@ -128,7 +128,12 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     color: #555;
     display: flex;
     flex-direction: column-reverse;
-    width: 70px;
+    // width: 70px;
+
+    .title {
+        padding-bottom: 1em;
+        font-size: 10px;
+    }
 }
 .legend i {
     width: 18px;

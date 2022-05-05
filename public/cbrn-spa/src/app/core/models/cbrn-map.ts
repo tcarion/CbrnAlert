@@ -450,7 +450,6 @@ export class CbrnMap {
             ticksLabel = ticksLabel.map((e:number) => {return e.toExponential(2)});
             const specie = legendData.specie ? `(${legendData.specie})` : ''
             this._div.innerHTML = '';
-            this._div.innerHTML = `<span> ${legendData.name} ${specie} [${legendData.units}]</span>`;
             for (var i = 0; i < colorbar.length; i++) {
                 let span = (i===0) ? `<span class="legend-ticklabel">${ticksLabel[i]}</span>` : '';
                 this._div.innerHTML +=
@@ -463,6 +462,7 @@ export class CbrnMap {
                     </div>
                     `;
             }
+            this._div.innerHTML += `<span class="title"> ${legendData.name} </br> ${specie} </br> [${legendData.units}]</span>`;
         };
 
         this.legend.onAdd = function (map: L.Map) {
