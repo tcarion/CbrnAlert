@@ -65,7 +65,7 @@ function get_area(file)
     end
 end
 
-function get_key_values(file, key)
+function get_key_values(file::String, key::String)
     key_values = Vector()
     GribFile(file) do reader
         for msg in reader

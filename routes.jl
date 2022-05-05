@@ -21,7 +21,7 @@ Genie.Cache.init()
 
 Genie.config.websockets_server = true
 # Genie.Cache.init()
-StructTypes.StructType(::Type{Genie.WebChannels.ChannelMessage}) = StructTypes.Struct()
+# StructTypes.StructType(::Type{Genie.WebChannels.ChannelMessage}) = StructTypes.Struct()
 
 atp45_routes = Dict(
     "available_steps" => Atp45sController.available_steps,
@@ -49,8 +49,8 @@ api_routes = Dict(
     "/api/flexpart/results/:result_id::String" => (f=FlexpartsController.get_result, keyargs=(method=GET, named=:get_flexpart_result)),
     "/api/flexpart/results/:result_id::String/outputs" => (f=FlexpartsController.get_outputs, keyargs=(method = GET, named = :get_flexpart_outputs)),
     "/api/flexpart/results/:result_id::String/outputs/:output_id::String" => (f=FlexpartsController.get_output, keyargs=(method = GET, named = :get_flexpart_output)),
-    "/api/flexpart/results/:result_id::String/output/:output_id::String" => (f=FlexpartsController.get_plot, keyargs=(method = POST)),
-    "/api/flexpart/results/:result_id::String/output/:output_id::String/daily_average" => (f=FlexpartsController.daily_average, keyargs=(method = POST))
+    "/api/flexpart/results/:result_id::String/output/:output_id::String" => (f=FlexpartsController.get_plot, keyargs=(method = POST,)),
+    "/api/flexpart/results/:result_id::String/output/:output_id::String/daily_average" => (f=FlexpartsController.daily_average, keyargs=(method = POST,))
 )
 
 for (url, args) in api_routes
