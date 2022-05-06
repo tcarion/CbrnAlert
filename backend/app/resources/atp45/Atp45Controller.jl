@@ -1,4 +1,4 @@
-module Atp45sController
+module Atp45Controller
 
 using Genie
 using Genie.Requests
