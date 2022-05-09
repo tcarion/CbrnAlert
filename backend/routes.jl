@@ -2,8 +2,8 @@ using Genie.Router, Genie.Requests, Genie.Assets
 using SearchLight
 # using ATPController
 # using FlexpartController
-using Atp45sController
-using FlexpartsController
+using Atp45Controller
+using FlexpartController
 using AuthenticationController
 using JSONWebTokens
 using StructTypes
@@ -24,33 +24,33 @@ Genie.config.websockets_server = true
 # StructTypes.StructType(::Type{Genie.WebChannels.ChannelMessage}) = StructTypes.Struct()
 
 atp45_routes = Dict(
-    "available_steps" => Atp45sController.available_steps,
-    "available_gribfiles" => Atp45sController.available_grib_files,
-    "prediction_request" => Atp45sController.prediction_request,
-    "archive_retrieval" => Atp45sController.archive_retrieval,
-    "realtime_available_steps" => Atp45sController.realtime_available_steps,
-    "realtime_prediction_request" => Atp45sController.realtime_prediction_request,
+    "available_steps" => Atp45Controller.available_steps,
+    "available_gribfiles" => Atp45Controller.available_grib_files,
+    "prediction_request" => Atp45Controller.prediction_request,
+    "archive_retrieval" => Atp45Controller.archive_retrieval,
+    "realtime_available_steps" => Atp45Controller.realtime_available_steps,
+    "realtime_prediction_request" => Atp45Controller.realtime_prediction_request,
 )
 
 flexpart_routes = Dict(
-    "metdata_retrieval" => FlexpartsController.flexextract_request,
-    "available_flexpart_input" => FlexpartsController.available_flexpart_input,
-    "flexpart_run" => FlexpartsController.flexpart_run,
-    "flexpart_options" => FlexpartsController.flexpart_options,
-    "flexpart_results" => FlexpartsController.flexpart_results,
-    # "flexpart_conc" => FlexpartsController.flexpart_conc,
-    # "flexpart_geojson_conc" => FlexpartsController.flexpart_geojson_conc,
-    # "flexpart_daily_average" => FlexpartsController.flexpart_daily_average,
+    "metdata_retrieval" => FlexpartController.flexextract_request,
+    "available_flexpart_input" => FlexpartController.available_flexpart_input,
+    "flexpart_run" => FlexpartController.flexpart_run,
+    "flexpart_options" => FlexpartController.flexpart_options,
+    "flexpart_results" => FlexpartController.flexpart_results,
+    # "flexpart_conc" => FlexpartController.flexpart_conc,
+    # "flexpart_geojson_conc" => FlexpartController.flexpart_geojson_conc,
+    # "flexpart_daily_average" => FlexpartController.flexpart_daily_average,
 )
 
 api_routes = Dict(
-    "/api/flexpart/meteo_data_request" => (f=FlexpartsController.meteo_data_request, keyargs=(method=POST, named=:meteo_data_request)),
-    "/api/flexpart/results" => (f=FlexpartsController.get_results, keyargs=(method = GET, named = :get_flexpart_results)),
-    "/api/flexpart/results/:result_id::String" => (f=FlexpartsController.get_result, keyargs=(method=GET, named=:get_flexpart_result)),
-    "/api/flexpart/results/:result_id::String/outputs" => (f=FlexpartsController.get_outputs, keyargs=(method = GET, named = :get_flexpart_outputs)),
-    "/api/flexpart/results/:result_id::String/outputs/:output_id::String" => (f=FlexpartsController.get_output, keyargs=(method = GET, named = :get_flexpart_output)),
-    "/api/flexpart/results/:result_id::String/output/:output_id::String" => (f=FlexpartsController.get_plot, keyargs=(method = POST,)),
-    "/api/flexpart/results/:result_id::String/output/:output_id::String/daily_average" => (f=FlexpartsController.daily_average, keyargs=(method = POST,))
+    "/api/flexpart/meteo_data_request" => (f=FlexpartController.meteo_data_request, keyargs=(method=POST, named=:meteo_data_request)),
+    "/api/flexpart/results" => (f=FlexpartController.get_results, keyargs=(method = GET, named = :get_flexpart_results)),
+    "/api/flexpart/results/:result_id::String" => (f=FlexpartController.get_result, keyargs=(method=GET, named=:get_flexpart_result)),
+    "/api/flexpart/results/:result_id::String/outputs" => (f=FlexpartController.get_outputs, keyargs=(method = GET, named = :get_flexpart_outputs)),
+    "/api/flexpart/results/:result_id::String/outputs/:output_id::String" => (f=FlexpartController.get_output, keyargs=(method = GET, named = :get_flexpart_output)),
+    "/api/flexpart/results/:result_id::String/output/:output_id::String" => (f=FlexpartController.get_plot, keyargs=(method = POST,)),
+    "/api/flexpart/results/:result_id::String/output/:output_id::String/daily_average" => (f=FlexpartController.daily_average, keyargs=(method = POST,))
 )
 
 for (url, args) in api_routes
@@ -60,23 +60,23 @@ for (url, args) in api_routes
     end
 end
 
-# route("/api/flexpart/results", method = GET, FlexpartsController.get_results)
-# route("/api/flexpart/results/:result_id::String/output/:output_id::String", method = GET, FlexpartsController.get_plot)
+# route("/api/flexpart/results", method = GET, FlexpartController.get_results)
+# route("/api/flexpart/results/:result_id::String/output/:output_id::String", method = GET, FlexpartController.get_plot)
 
-# route("/api/flexpart/meteo_data_request", method = POST, FlexpartsController.meteo_data_request, named = :meteo_data_request)
-# route("/api/flexpart/results", method = GET, FlexpartsController.get_results, named = :get_flexaprt_results)
-# route("/api/flexpart/results/:result_id::String", method = GET, FlexpartsController.get_result, named = :get_flexpart_result)
+# route("/api/flexpart/meteo_data_request", method = POST, FlexpartController.meteo_data_request, named = :meteo_data_request)
+# route("/api/flexpart/results", method = GET, FlexpartController.get_results, named = :get_flexaprt_results)
+# route("/api/flexpart/results/:result_id::String", method = GET, FlexpartController.get_result, named = :get_flexpart_result)
 
 
-# route("/api/flexpart/results/:result_id::String/outputs", method = GET, FlexpartsController.get_outputs, named = :get_flexpart_outputs)
-# route("/api/flexpart/results/:result_id::String/outputs/:output_id::String", method = GET, FlexpartsController.get_output, named = :get_flexpart_output)
+# route("/api/flexpart/results/:result_id::String/outputs", method = GET, FlexpartController.get_outputs, named = :get_flexpart_outputs)
+# route("/api/flexpart/results/:result_id::String/outputs/:output_id::String", method = GET, FlexpartController.get_output, named = :get_flexpart_output)
 
-# route("/api/flexpart/results/:result_id::String/output/:output_id::String", method = POST, FlexpartsController.get_plot)
-# route("/api/flexpart/results/:result_id::String/output/:output_id::String/daily_average", method = POST, FlexpartsController.daily_average)
+# route("/api/flexpart/results/:result_id::String/output/:output_id::String", method = POST, FlexpartController.get_plot)
+# route("/api/flexpart/results/:result_id::String/output/:output_id::String/daily_average", method = POST, FlexpartController.daily_average)
 # route("/api/flexpart/results/:result_id", method = POST) do
 #     println(params(:result_id))
 # end
-# route("/api/flexpart/results/:result_id::String/:output_id::String", method = GET, FlexpartsController.get_output)
+# route("/api/flexpart/results/:result_id::String/:output_id::String", method = GET, FlexpartController.get_output)
 #     notauth = AuthenticationController.isauth()
 #     !isnothing(notauth) && return notauth
 #     # println(get(params, :test, ""))
@@ -137,21 +137,21 @@ route("/login", AuthenticationController.login, method = POST)
 
 # route("/atp45/mars_request", ATPController.mars_request, method = POST, named = :mars_request)
 
-# route("/atp45/available_steps", Atp45sController.available_steps, method = POST, named = :available_steps)
+# route("/atp45/available_steps", Atp45Controller.available_steps, method = POST, named = :available_steps)
 
-# route("/atp45/available_gribfiles", Atp45sController.available_grib_files, method = GET, named = :available_grib_files)
+# route("/atp45/available_gribfiles", Atp45Controller.available_grib_files, method = GET, named = :available_grib_files)
 
-# route("/atp45/prediction_request", Atp45sController.prediction_request, method = POST, named = :prediction_request)
+# route("/atp45/prediction_request", Atp45Controller.prediction_request, method = POST, named = :prediction_request)
 
-# route("/atp45/archive_retrieval", Atp45sController.archive_retrieval, method = POST, named = :archive_retrieval)
+# route("/atp45/archive_retrieval", Atp45Controller.archive_retrieval, method = POST, named = :archive_retrieval)
 
-# route("/atp45/realtime_available_steps", Atp45sController.realtime_available_steps, method = GET, named = :realtime_available_steps)
+# route("/atp45/realtime_available_steps", Atp45Controller.realtime_available_steps, method = GET, named = :realtime_available_steps)
 
-# route("/atp45/realtime_prediction_request", Atp45sController.realtime_prediction_request, method = POST, named = :realtime_prediction_request)
+# route("/atp45/realtime_prediction_request", Atp45Controller.realtime_prediction_request, method = POST, named = :realtime_prediction_request)
 
-# route("/flexpart/metdata_retrieval", FlexpartsController.flexextract_request, method = POST, named = :metdata_retrieval)
+# route("/flexpart/metdata_retrieval", FlexpartController.flexextract_request, method = POST, named = :metdata_retrieval)
 
-# route("/flexpart/available_flexpart_input", FlexpartsController.available_flexpart_input, method = GET, named = :available_flexpart_input)
+# route("/flexpart/available_flexpart_input", FlexpartController.available_flexpart_input, method = GET, named = :available_flexpart_input)
 
 
 # route("/flexpart/extract_met_data", FlexpartController.extract_met_data, named= :extract_met_data)

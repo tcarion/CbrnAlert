@@ -1,6 +1,5 @@
 module FlexpartController
 using Genie.Renderer.Html, Genie.Requests
-using ViewHelper
 using FlexFiles
 using JSON
 using Dates
