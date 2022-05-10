@@ -7,33 +7,41 @@ using ReadNcf
 using GeoJSON
 using GeoInterface
 using Flexpart
+using Flexpart.FlexExtract
 using PyCall
 
 #### ONLY DEV
 using PrettyPrint
 
-const PYTHON_PATH = "/opt/anaconda3/bin/python"
-# const FLEX_EXTRACT_PATH = "/home/tcarion/flexpart/flex_extract_app"
-const FLEX_EXTRACT_PATH = "/home/tcarion/flexpart/flex_extract_v7.1.2"
-const FLEX_EXTRACT_CONTROL = "CONTROL_OD.OPER.FC.eta.highres.app"
-const FLEX_EXTRACT_RUN_PATH = joinpath(FLEX_EXTRACT_PATH, "Run")
-const FLEX_EXTRACT_SOURCE_PYTHON_PATH = joinpath(FLEX_EXTRACT_PATH, "Source", "Python")
-const FLEX_EXTRACT_CONTROL_PATH = joinpath(FLEX_EXTRACT_RUN_PATH, "Control", FLEX_EXTRACT_CONTROL)
-const FLEX_EXTRACT_EXEC_PATH = joinpath(FLEX_EXTRACT_RUN_PATH, "run_local.sh")
-const FLEX_EXTRACT_SUBMIT_PATH = joinpath(FLEX_EXTRACT_SOURCE_PYTHON_PATH, "submit.py")
+# const PYTHON_PATH = "/opt/anaconda3/bin/python"
+# # const FLEX_EXTRACT_PATH = "/home/tcarion/flexpart/flex_extract_app"
+# const FLEX_EXTRACT_PATH = "/home/tcarion/flexpart/flex_extract_v7.1.2"
+# const FLEX_EXTRACT_CONTROL = "CONTROL_OD.OPER.FC.eta.highres.app"
+# const FLEX_EXTRACT_RUN_PATH = joinpath(FLEX_EXTRACT_PATH, "Run")
+# const FLEX_EXTRACT_SOURCE_PYTHON_PATH = joinpath(FLEX_EXTRACT_PATH, "Source", "Python")
+# const FLEX_EXTRACT_CONTROL_PATH = joinpath(FLEX_EXTRACT_RUN_PATH, "Control", FLEX_EXTRACT_CONTROL)
+# const FLEX_EXTRACT_EXEC_PATH = joinpath(FLEX_EXTRACT_RUN_PATH, "run_local.sh")
+# const FLEX_EXTRACT_SUBMIT_PATH = joinpath(FLEX_EXTRACT_SOURCE_PYTHON_PATH, "submit.py")
 
-const EXTRACTED_WEATHER_DATA_DIR = joinpath(pwd(), "public", "extracted_met_data")
-const CONTROL_FILE_NAME = "CONTROL_OD.OPER.FC.eta.highres.app"
 
-FLEXPART_RUN_TEMPLATE_PATH = "/home/tcarion/flexpart/flexpart_run_template_tests"
+# FLEXPART_RUN_TEMPLATE_PATH = "/home/tcarion/flexpart/flexpart_run_template_tests"
 
 const JsonPayload = Dict{Symbol, Any}
 const Output = JsonPayload
 const Result = JsonPayload
 
-FLEXPART_RUNS_DIR = joinpath(pwd(), "public", "flexpart_runs")
+const CONTROL_FILE_NAME = "CONTROL_OD.OPER.FC.eta.highres.app"
+const EXTRACTED_WEATHER_DATA_DIR = joinpath(pwd(), "public", "extracted_met_data")
+const FLEXPART_RUNS_DIR = joinpath(pwd(), "public", "flexpart_runs")
 
-global pl = 0
+struct MarsDataNotAvailableError <: Exception end
+const DATA_NOT_YET_AVAILABLE = Genie.Router.error(500, "Mars Retrieval error: DATA_NOT_YET_AVAILABLE", "application/json", error_info="The data you're requesting is not yet available")
+
+struct UnknownMarsError <: Exception end
+const UNKNOWN_MARS_ERROR = Genie.Router.error(500, "Mars Retrieval error: Unknown", "application/json", error_info="Unknown error during data retrieval")
+
+global DEBUG_PAYLOAD = 0
+debug() = global DEBUG_PAYLOAD = Genie.Requests.jsonpayload()
 
 function round_area(area)
     return [ceil(area[1]), floor(area[2]), floor(area[3]), ceil(area[4])]
@@ -60,34 +68,34 @@ function run_flexextract(output_path, params, ws_info)
     close(log_file)
 end
 
-function run_flexpart(run_dir_path, ws_info)
-    cur_dir = pwd()
-    try
-        cd(run_dir_path)
-        cmd = `FLEXPART`
-        log_file = open(joinpath(run_dir_path, "output.log"), "w")
-        process = open(cmd)
-        cd(cur_dir)
-        while !eof(process)
-            line = readline(process, keep=true)
-            to_send = Dict(:displayed => line, :backid => ws_info["backid"])
-            Genie.WebChannels.broadcast(ws_info["channel"], "flexpart", to_send)
-            Base.write(log_file, line)
-            flush(log_file)
-        end
+# function run_flexpart(run_dir_path, ws_info)
+#     cur_dir = pwd()
+#     try
+#         cd(run_dir_path)
+#         cmd = `FLEXPART`
+#         log_file = open(joinpath(run_dir_path, "output.log"), "w")
+#         process = open(cmd)
+#         cd(cur_dir)
+#         while !eof(process)
+#             line = readline(process, keep=true)
+#             to_send = Dict(:displayed => line, :backid => ws_info["backid"])
+#             Genie.WebChannels.broadcast(ws_info["channel"], "flexpart", to_send)
+#             Base.write(log_file, line)
+#             flush(log_file)
+#         end
 
-        if process.exitcode == 1
-            throw(ProcessFailedException(process))
-        end
+#         if process.exitcode == 1
+#             throw(ProcessFailedException(process))
+#         end
 
-        close(process)
-        close(log_file)
-    catch e
-        throw(e)
-    finally
-        cd(cur_dir)
-    end
-end
+#         close(process)
+#         close(log_file)
+#     catch e
+#         throw(e)
+#     finally
+#         cd(cur_dir)
+#     end
+# end
 
 function log_and_broadcast(stream, ws_info, log_file::IO)
     line = readline(stream, keep=true)
@@ -97,52 +105,62 @@ function log_and_broadcast(stream, ws_info, log_file::IO)
     flush(log_file)
 end
 
-function flexextract_request(payload)
-    global pl = payload
+# function flexextract_request(payload)
+#     startdate = Dates.DateTime(payload["startDate"][1:22])
+#     enddate = Dates.DateTime(payload["endDate"][1:22])
+#     timestep = payload["timeStep"]
+#     gridres = payload["gridRes"]
+#     area = payload["area"]
+#     area = round_area(area)
 
-    startdate = Dates.DateTime(payload["startDate"][1:22])
-    enddate = Dates.DateTime(payload["endDate"][1:22])
-    timestep = payload["timeStep"]
-    gridres = payload["gridRes"]
-    area = payload["area"]
-    area = round_area(area)
+#     area_str = join(convert.(Int, area .|> round), "_")
 
-    area_str = join(convert.(Int, area .|> round), "_")
+#     dir_name = Dates.format(startdate, "yyyymmdd_HHMM") * "_" * area_str
+#     dir_path = joinpath(EXTRACTED_WEATHER_DATA_DIR, dir_name)
+#     # mkpath(dir_path)
+#     # inputdir = joinpath(dir_path, "input")
+#     # outputdir = joinpath(dir_path, "output")
+#     # mkpath(inputdir)
+#     # mkpath(outputdir)
 
-    dir_name = Dates.format(startdate, "yyyymmdd_HHMM") * "_" * area_str
-    dir_path = joinpath(EXTRACTED_WEATHER_DATA_DIR, dir_name)
-    mkpath(dir_path)
-    inputdir = joinpath(dir_path, "input")
-    outputdir = joinpath(dir_path, "output")
-    mkpath(inputdir)
-    mkpath(outputdir)
+#     # options = Dict(
+#     #     :startdate => startdate,
+#     #     :enddate => enddate,
+#     #     :timestep => timestep,
+#     #     :gridres => gridres,
+#     #     :area => area,
+#     # )
+#     # @show options
+#     # formated_options =  FlexFiles.flexextract_options(options)
 
-    # options = Dict(
-    #     :startdate => startdate,
-    #     :enddate => enddate,
-    #     :timestep => timestep,
-    #     :gridres => gridres,
-    #     :area => area,
-    # )
-    # @show options
-    # formated_options =  FlexFiles.flexextract_options(options)
+#     # ctrl_file_path = FlexFiles.update_flexfile(FLEX_EXTRACT_CONTROL_PATH, formated_options, "controlfile", dest=dir_path)
 
-    # ctrl_file_path = FlexFiles.update_flexfile(FLEX_EXTRACT_CONTROL_PATH, formated_options, "controlfile", dest=dir_path)
+#     fcontrol = FlexControl(FLEX_EXTRACT_CONTROL_PATH)
+#     fcontrol[:GRID] = gridres
+#     set_area!(fcontrol, area)
+#     set_steps!(fcontrol, startdate, enddate, timestep)
+#     ctrl_file_path = write(fcontrol, dir_path)
 
-    fcontrol = FlexControl(FLEX_EXTRACT_CONTROL_PATH)
-    fcontrol[:GRID] = gridres
-    set_area!(fcontrol, area)
-    set_steps!(fcontrol, startdate, enddate, timestep)
-    ctrl_file_path = write(fcontrol, dir_path)
-
-    formated_exec = Dict("inputdir" => inputdir, "outputdir" => outputdir, "controlfile" => ctrl_file_path)
-    params = []
-    for (k, v) in formated_exec 
-        push!(params, "--$k") 
-        push!(params, v)
-    end
+#     formated_exec = Dict("inputdir" => inputdir, "outputdir" => outputdir, "controlfile" => ctrl_file_path)
+#     params = []
+#     for (k, v) in formated_exec 
+#         push!(params, "--$k") 
+#         push!(params, v)
+#     end
     
-    # run_flexextract(dir_path, params, request_data["ws_info"])
+#     # run_flexextract(dir_path, params, request_data["ws_info"])
+# end
+
+function _check_mars_errors(filepath)
+    lines = readlines(filepath)
+    map(lines) do line
+        if occursin("DATA_NOT_YET_AVAILABLE", line)
+            throw(MarsDataNotAvailableError())
+        elseif occursin("ERROR", line)
+            throw(UnknownMarsError())
+        end
+    end
+    return 0
 end
 
 function meteo_data_request()
@@ -159,78 +177,123 @@ function meteo_data_request()
     dir_name = Dates.format(startdate, "yyyymmdd_HHMM") * "_" * area_str
     dir_path = joinpath(EXTRACTED_WEATHER_DATA_DIR, dir_name)
 
-    fcontrol = FlexControl(FLEX_EXTRACT_CONTROL_PATH)
+    fedir = FlexExtract.create(dir_path, force = true)
+    fcontrol = FeControl(fedir)
     fcontrol[:GRID] = gridres
-    fcontrol[:REQUEST] = 1
+    fcontrol[:REQUEST] = 0
     set_area!(fcontrol, area)
     set_steps!(fcontrol, startdate, enddate, timestep)
 
-    fedir = FlexextractDir(dir_path, fcontrol)
-    fesource = FeSource(FLEX_EXTRACT_PATH, PYTHON_PATH)
+    FlexExtract.write(fcontrol)
+    # fedir = FlexextractDir(dir_path, fcontrol)
+    # fesource = FeSource(FLEX_EXTRACT_PATH, PYTHON_PATH)
 
-    cmd = Flexpart.submitcmd(fedir, fesource)
+    # cmd = Flexpart.submitcmd(fedir, fesource)
     
     ################################################################################
     ######################  GENERATING MARS CSV     ################################
     ################################################################################
-    log_file = open(joinpath(fedir.path, "output_log.log"), "w")
-    println("START RUNNING $(cmd)")
-    
-    process = open(cmd)
-    try
-        while !eof(process)
-            log_and_broadcast(process, ws_info, log_file)
+    # result = try
+    log_file_path = joinpath(fedir.path, "output_log.log")
+    open(log_file_path, "w") do log_file
+        FlexExtract.submit(fedir) do stream
+            log_and_broadcast(stream, ws_info, log_file)
         end
-    catch e
-        rm(fedir.path, recursive=true)
-        throw(e)
-    finally
-        # close(log_file)
     end
+
+    try
+        _check_mars_errors(log_file_path)
+    catch e
+        if e isa MarsDataNotAvailableError
+            return DATA_NOT_YET_AVAILABLE
+        elseif e isa UnknownMarsError
+            return UNKNOWN_MARS_ERROR
+        end
+    end
+    # println("START RUNNING $(cmd)")
+    
+    # process = open(cmd)
+    # try
+    #     while !eof(process)
+    #         log_and_broadcast(process, ws_info, log_file)
+    #     end
+    # catch e
+    #     rm(fedir.path, recursive=true)
+    #     throw(e)
+    # finally
+    #     # close(log_file)
+    # end
 
     ################################################################################
     ######################    GETTING GRIB DATA     ################################
     ################################################################################
-    csv = joinpath(fedir.inpath, "mars_requests.csv")
-    mreqs = MarsRequest(csv)
+    # csv = joinpath(fedir.inpath, "mars_requests.csv")
+    # mreqs = MarsRequest(csv)
 
-    Flexpart.retrieve(fesource, mreqs) do stream
-        log_and_broadcast(stream, ws_info, log_file)
-    end
+    # Flexpart.retrieve(fesource, mreqs) do stream
+    #     log_and_broadcast(stream, ws_info, log_file)
+    # end
 
-    ################################################################################
-    #########################    PREPROCESS DATA    ################################
-    ################################################################################
-    Flexpart.prepare(fedir, fesource) do stream
-        log_and_broadcast(stream, ws_info, log_file)
-    end
+    # ################################################################################
+    # #########################    PREPROCESS DATA    ################################
+    # ################################################################################
+    # Flexpart.prepare(fedir, fesource) do stream
+    #     log_and_broadcast(stream, ws_info, log_file)
+    # end
 
-    close(log_file)
+    # close(log_file)
 end
 
 
+function _find_control_path(fedirpath)::FlexExtractDir
+    fefiles = readdir(fedirpath, join=true)
+    i = findfirst(x -> occursin("CONTROL", x), fefiles)
+    controlpath = joinpath(fedirpath, fefiles[i])
+    FlexExtractDir(fedirpath, controlpath)
+end
+function _clarify_control(fcontrol)
+    startday = Dates.DateTime(fcontrol[:START_DATE], dateformat"yyyymmdd")
+    times = Base.parse.(Int, split(fcontrol[:TIME], " "))
+    steps = Base.parse.(Int, split(fcontrol[:STEP], " "))
+    gridres = Base.parse(Float32, fcontrol[:GRID])
+    timestep = steps[2] - steps[1]
+    area = [
+        fcontrol[:UPPER],
+        fcontrol[:LEFT],
+        fcontrol[:LOWER],
+        fcontrol[:RIGHT]
+    ]
+    area = Base.parse.(Float32, area)
 
-function available_flexpart_input(payload)
-    metdata_dir = readdir(EXTRACTED_WEATHER_DATA_DIR, join=true)
-    control_files = joinpath.(metdata_dir, CONTROL_FILE_NAME)
-    metadata = FlexFiles.flexextract_metadata.(control_files)
-    # metadata = metadata[(!).(isnothing.(metadata))]
-    dirnames = map(x -> splitpath(x)[end], metdata_dir)
-    
-    response = Dict[]
-    for (index, md) in enumerate(metadata)
-        if !isnothing(md) 
-            push!(md, :dataDirname => dirnames[index])
-            push!(response, md)
-        end
+    startdate = startday + Dates.Hour(times[1])
+    enddate = startday + Dates.Hour((length(times) - 1) * timestep)
+
+    return Dict(
+        :startDate => startdate,
+        :endDate => enddate,
+        :gridRes => gridres,
+        :timeStep => timestep,
+        :area => area
+    )
+end
+_has_output(fedir) = !isempty(readdir(fedir[:output]))
+
+function available_flexpart_input()
+    metdata_dirs = readdir(EXTRACTED_WEATHER_DATA_DIR, join=true)
+    fedirs = _find_control_path.(metdata_dirs)
+    filter!(_has_output, fedirs)
+    fcontrols = FeControl.(fedirs)
+    clarified_controls = _clarify_control.(fcontrols)
+    dirnames = [basename(dir) for dir in metdata_dirs]
+    response = map(zip(clarified_controls, dirnames)) do (c, d)
+        push!(c, :dataDirname => d)
     end
-    # response = [push!(x, :dataDirname => dir) for (x, dir) in zip(metadata, dirnames)]
-    return response
+    return response |> json
 end
 
-function flexpart_run(payload)
-    request_data = payload
-    global pl = payload
+function flexpart_run()
+    debug()
+    request_data = Genie.Requests.jsonpayload()
     startdate = Dates.DateTime(request_data["startDate"][1:22])
     enddate = Dates.DateTime(request_data["endDate"][1:22])
     releasestartdate = Dates.DateTime(request_data["releaseStartDate"][1:22])
@@ -249,48 +312,50 @@ function flexpart_run(payload)
     run_dir_name = Dates.format(startdate, dateformat"yyyymmdd_HH")*"_"*Dates.format(enddate, dateformat"yyyymmdd_HH")*"_"*particules
     run_dir_path = joinpath(FLEXPART_RUNS_DIR, run_dir_name)
 
-    fpdir = Flexpart.create(run_dir_path, force=true)
+    fpdir = Flexpart.create(run_dir_path)
     # mkpath(run_dir_path)
     # cp(FLEXPART_RUN_TEMPLATE_PATH, run_dir_path, force=true)
 
     # options_dir_path = joinpath(run_dir_path, "options")
 
-    options = FlexpartOptions(fpdir)
+    fpoptions = FlexpartOption(fpdir)
 
     command_options = Dict(
-        :ibdate => Dates.format(startdate, "yyyymmdd"),
-        :ibtime => Dates.format(startdate, "HHMMSS"),
-        :iedate => Dates.format(enddate, "yyyymmdd"),
-        :ietime => Dates.format(enddate, "HHMMSS"),
+        :IBDATE => Dates.format(startdate, "yyyymmdd"),
+        :IBTIME => Dates.format(startdate, "HHMMSS"),
+        :IEDATE => Dates.format(enddate, "yyyymmdd"),
+        :IETIME => Dates.format(enddate, "HHMMSS"),
          )
-    Flexpart.set!(options["COMMAND"][:command][1], command_options)
+    Flexpart.merge!(fpoptions["COMMAND"][:COMMAND], command_options)
 
     releases_options = Dict(
-        :idate1 => Dates.format(releasestartdate, "yyyymmdd"),
-        :itime1 => Dates.format(releasestartdate, "HHMMSS"),
-        :idate2 => Dates.format(releaseenddate, "yyyymmdd"),
-        :itime2 => Dates.format(releaseenddate, "HHMMSS"),
-        :lon1 => rel_lon,
-        :lon2 => rel_lon,
-        :lat1 => rel_lat,
-        :lat2 => rel_lat,
-        :z1 => releaseheight,
-        :z2 => releaseheight,
-        :parts => particules,
-        :mass => mass
+        :IDATE1 => Dates.format(releasestartdate, "yyyymmdd"),
+        :ITIME1 => Dates.format(releasestartdate, "HHMMSS"),
+        :IDATE2 => Dates.format(releaseenddate, "yyyymmdd"),
+        :ITIME2 => Dates.format(releaseenddate, "HHMMSS"),
+        :LON1 => rel_lon,
+        :LON2 => rel_lon,
+        :LAT1 => rel_lat,
+        :LAT2 => rel_lat,
+        :Z1 => releaseheight,
+        :Z2 => releaseheight,
+        :PARTS => particules,
+        :MASS => mass
     )
-    Flexpart.set!(options["RELEASES"][:release][1], releases_options)
+    Flexpart.merge!(fpoptions["RELEASES"][:RELEASE], releases_options)
 
-    Flexpart.set!(options["OUTGRID"][:outgrid][1], area2outgrid(area, gridres))
+    Flexpart.merge!(fpoptions["OUTGRID"][:OUTGRID], Flexpart.area2outgrid(area, gridres))
 
-    Flexpart.write(options)
-
-    fedir = FlexextractDir(joinpath(EXTRACTED_WEATHER_DATA_DIR, metdata_dirname))
-
-    fpdir[:input] = fedir.outpath
-
-    Flexpart.update_available(fpdir)
-
+    
+    fedirpath = joinpath(EXTRACTED_WEATHER_DATA_DIR, metdata_dirname)
+    fedir = _find_control_path(fedirpath)
+    
+    fpdir[:input] = fedir[:output]
+    
+    avs = Available(fpdir)
+    
+    Flexpart.write(fpoptions)
+    Flexpart.write(avs)
     Flexpart.write(fpdir)
     # pathnames_path = joinpath(pwd(), run_dir_path, "pathnames")
     # pathnames = readlines(pathnames_path)
@@ -303,7 +368,13 @@ function flexpart_run(payload)
 
     # Genie.Cache.purge(:flexpart_results)
 
-    run_flexpart(run_dir_path, request_data["ws_info"])
+    # run_flexpart(run_dir_path, request_data["ws_info"])
+    open(joinpath(fpdir.path, "output.log"), "w") do logf
+        Flexpart.run(fpdir) do stream
+            log_and_broadcast(stream, request_data["ws_info"], logf)
+        end
+    end
+    return 0
 end
 
 
@@ -320,16 +391,16 @@ Output:
         :OUTGRID => outgrid file to dict,
     )
 """
-function flexpart_options(payload)
-    dirname = payload["dirname"]
-    options_dir = joinpath(pwd(), "public", "flexpart_runs", dirname, "options")
+# function flexpart_options(payload)
+#     dirname = payload["dirname"]
+#     options_dir = joinpath(pwd(), "public", "flexpart_runs", dirname, "options")
 
-    Dict(
-        :RELEASES => namelist2dict(joinpath(options_dir, "RELEASES")),
-        :COMMAND => namelist2dict(joinpath(options_dir, "COMMAND")),
-        :OUTGRID => namelist2dict(joinpath(options_dir, "OUTGRID")),
-    )
-end
+#     Dict(
+#         :RELEASES => namelist2dict(joinpath(options_dir, "RELEASES")),
+#         :COMMAND => namelist2dict(joinpath(options_dir, "COMMAND")),
+#         :OUTGRID => namelist2dict(joinpath(options_dir, "OUTGRID")),
+#     )
+# end
 
 """
     flexpart_results()
@@ -347,20 +418,20 @@ Output:
         :dataDirname :: String,
     )[]
 """
-function flexpart_results(payload)
-    available_fp_runs_dir = filter(x -> isdir(x), readdir(FLEXPART_RUNS_DIR, join=true))
-    available_fp_runs = Array{Dict, 1}()
-    for dir in available_fp_runs_dir
-        output_dir = joinpath(dir, "output")
-        ncf_file = filter(x->occursin(".nc",x), readdir(output_dir))
-        isempty(ncf_file) && break
-        ncf_file = ncf_file[1]
-        metadata = ReadNcf.ncfmetadata(joinpath(output_dir, ncf_file))
-        push!(metadata, :dataDirname => splitpath(dir)[end])
-        push!(available_fp_runs, metadata)
-    end
-    return available_fp_runs
-end
+# function flexpart_results(payload)
+#     available_fp_runs_dir = filter(x -> isdir(x), readdir(FLEXPART_RUNS_DIR, join=true))
+#     available_fp_runs = Array{Dict, 1}()
+#     for dir in available_fp_runs_dir
+#         output_dir = joinpath(dir, "output")
+#         ncf_file = filter(x->occursin(".nc",x), readdir(output_dir))
+#         isempty(ncf_file) && break
+#         ncf_file = ncf_file[1]
+#         metadata = ReadNcf.ncfmetadata(joinpath(output_dir, ncf_file))
+#         push!(metadata, :dataDirname => splitpath(dir)[end])
+#         push!(available_fp_runs, metadata)
+#     end
+#     return available_fp_runs
+# end
 
 """
     get_results()
@@ -373,24 +444,6 @@ Output:
     )[]
 """
 function get_results()
-    # # Genie.Cache.withcache(:flexpart_results) do
-    # available_fp_runs_dir = filter(x -> isdir(x), readdir(FLEXPART_RUNS_DIR, join=true))
-    # # function f(x)
-    # #     return Dict(
-    # #         :id => basename(x),
-    # #         # :outputs => fp_outputs(x)
-    # #     )
-    # # end
-    # # results = map(x -> Dict(:id => basename(x), :outputs => fp_outputs(x)), available_fp_runs_dir)
-    # results = map(available_fp_runs_dir) do x
-    #     Dict(
-    #         :type => "flexpartResultId"
-    #         :id => basename(x)
-    #     )
-    # end 
-    # results |> json
-    # # end
-
     available_fp_runs_dir = filter(x -> isdir(x), readdir(FLEXPART_RUNS_DIR, join=true))
     results = map(available_fp_runs_dir) do x
         Dict(

@@ -13,11 +13,11 @@ using Genie.Cache
 Genie.config.cache_duration = 3600
 Genie.Cache.init()
 
-# using SearchLight
-# using Users
-# for user in SearchLight.all(User)
-#     Genie.Assets.channels_subscribe(user.username)
-# end
+using SearchLight
+using Users
+for user in SearchLight.all(User)
+    Genie.Assets.channels_subscribe(user.username)
+end
 
 Genie.config.websockets_server = true
 # Genie.Cache.init()
@@ -33,11 +33,11 @@ atp45_routes = Dict(
 )
 
 flexpart_routes = Dict(
-    "metdata_retrieval" => FlexpartController.flexextract_request,
-    "available_flexpart_input" => FlexpartController.available_flexpart_input,
-    "flexpart_run" => FlexpartController.flexpart_run,
-    "flexpart_options" => FlexpartController.flexpart_options,
-    "flexpart_results" => FlexpartController.flexpart_results,
+    # "metdata_retrieval" => FlexpartController.flexextract_request,
+    # "available_flexpart_input" => FlexpartController.available_flexpart_input,
+    # "flexpart_run" => FlexpartController.flexpart_run,
+    # "flexpart_options" => FlexpartController.flexpart_options,
+    # "flexpart_results" => FlexpartController.flexpart_results,
     # "flexpart_conc" => FlexpartController.flexpart_conc,
     # "flexpart_geojson_conc" => FlexpartController.flexpart_geojson_conc,
     # "flexpart_daily_average" => FlexpartController.flexpart_daily_average,
@@ -45,6 +45,8 @@ flexpart_routes = Dict(
 
 api_routes = Dict(
     "/api/flexpart/meteo_data_request" => (f=FlexpartController.meteo_data_request, keyargs=(method=POST, named=:meteo_data_request)),
+    "/api/flexpart/inputs" => (f=FlexpartController.available_flexpart_input, keyargs=(method=GET, named=:available_flexpart_input)),
+    "/api/flexpart/run" => (f=FlexpartController.flexpart_run, keyargs=(method=POST, named=:flexpart_run)),
     "/api/flexpart/results" => (f=FlexpartController.get_results, keyargs=(method = GET, named = :get_flexpart_results)),
     "/api/flexpart/results/:result_id::String" => (f=FlexpartController.get_result, keyargs=(method=GET, named=:get_flexpart_result)),
     "/api/flexpart/results/:result_id::String/outputs" => (f=FlexpartController.get_outputs, keyargs=(method = GET, named = :get_flexpart_outputs)),
