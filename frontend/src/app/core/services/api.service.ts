@@ -27,10 +27,6 @@ export class ApiService {
         return this.http.post(environment.apiUrl + '/atp45', payload);
     }
 
-    flexpartRequest(payload: Payload) {
-        return this.http.post(environment.apiUrl + '/flexpart', payload);
-    }
-
     get(path: string, params: HttpParams = new HttpParams()): Observable<any> {
         return this.http.get(`${environment.apiUrl}/api${path}`, { params })
           .pipe(catchError(this.formatErrors));

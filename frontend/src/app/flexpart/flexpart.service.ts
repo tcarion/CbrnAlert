@@ -31,9 +31,9 @@ export class FlexpartService {
         private mapPlotsService: MapPlotsService,
     ) { }
 
-    getInputsFromServer(): Observable<FlexpartInput[]> {
+    getInputs(): Observable<FlexpartInput[]> {
         return this.apiService
-            .flexpartRequest({request: 'available_flexpart_input'})
+            .get('/flexpart/inputs')
             .pipe(
                 map((data: any) => {
                     data.forEach((element: any) => {
@@ -82,18 +82,6 @@ export class FlexpartService {
         }
 
         console.log(plWs);
-
-        // this.apiService.flexpartRequest({...plWs, request: "metdata_retrieval"}).subscribe({
-        //     next: () => {
-        //         alert("Meteorological data has been retrieved");
-        //         this.notificationService.changeStatus(notifTitle, 'succeeded');
-
-        //     },
-        //     error: (error) => {
-        //         console.log(error);
-        //         this.notificationService.changeStatus(notifTitle, 'failed');
-        //     }
-        // })
         return this.apiService.post('/flexpart/meteo_data_request', plWs).pipe(
             catchError((err) => {
                 this.notificationService.changeStatus(notifTitle, 'failed');
@@ -106,14 +94,8 @@ export class FlexpartService {
         );
     }
 
-    getFlexpartOptions(args : {dataDirname: string}) {
-        let payload = {...args, request: 'flexpart_options'}
-        return this.apiService
-            .flexpartRequest(payload);
-    }
-
     updateInputs(): void {
-        this.getInputsFromServer().subscribe((flexpartInputs) => {
+        this.getInputs().subscribe((flexpartInputs) => {
             this.inputs = flexpartInputs;
             this.emitInputsSubject();
         });
@@ -134,7 +116,7 @@ export class FlexpartService {
             request: 'flexpart_run'
         }
 
-        this.apiService.flexpartRequest(payload).subscribe({
+        this.apiService.post('/flexpart/run',payload).subscribe({
             next: () => {
                 alert("Flexpart run done");
                 this.notificationService.changeStatus(notifTitle, 'succeeded');
