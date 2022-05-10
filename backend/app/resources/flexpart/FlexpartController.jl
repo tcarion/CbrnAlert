@@ -1,6 +1,5 @@
 module FlexpartController
 using Genie.Renderer.Html, Genie.Requests
-using FlexFiles
 using JSON
 using Dates
 using ReadNcf
@@ -8,10 +7,6 @@ using GeoJSON
 using GeoInterface
 using Flexpart
 using Flexpart.FlexExtract
-using PyCall
-
-#### ONLY DEV
-using PrettyPrint
 
 # const PYTHON_PATH = "/opt/anaconda3/bin/python"
 # # const FLEX_EXTRACT_PATH = "/home/tcarion/flexpart/flex_extract_app"
