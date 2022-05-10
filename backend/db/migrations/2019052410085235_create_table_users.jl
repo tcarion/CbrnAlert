@@ -16,6 +16,7 @@ function up()
   end
 
   add_index(:users, :username)
+  add_index(:users, :email)
 end
 
 function down()
