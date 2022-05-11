@@ -10,6 +10,7 @@ import { NotificationService } from '../core/services/notification.service';
 import { WebsocketService } from '../core/services/websocket.service';
 import { MapService } from '../core/services/map.service';
 import { MapPlotsService } from 'src/app/core/services/map-plots.service';
+import { AuthenticationService } from '../core/services/authentication.service';
 
 @Injectable({
     providedIn: 'root'
@@ -29,6 +30,7 @@ export class FlexpartService {
         private notificationService: NotificationService,
         private websocketService: WebsocketService,
         private mapPlotsService: MapPlotsService,
+        private authenticationService: AuthenticationService,
     ) { }
 
     getInputs(): Observable<FlexpartInput[]> {

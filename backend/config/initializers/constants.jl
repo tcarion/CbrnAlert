@@ -1,0 +1,1 @@
+const DATE_FORMAT = "yyyy-mm-ddTHH:MM:SS"

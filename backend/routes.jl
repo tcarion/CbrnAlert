@@ -15,8 +15,10 @@ Genie.Cache.init()
 
 using SearchLight
 using Users
-for user in SearchLight.all(User)
-    Genie.Assets.channels_subscribe(user.username)
+function user_subscribe()
+    for user in SearchLight.all(User)
+        Genie.Assets.channels_subscribe(user.username)
+    end
 end
 
 Genie.config.websockets_server = true
@@ -45,7 +47,7 @@ flexpart_routes = Dict(
 
 api_routes = Dict(
     "/api/flexpart/meteo_data_request" => (f=FlexpartController.meteo_data_request, keyargs=(method=POST, named=:meteo_data_request)),
-    "/api/flexpart/inputs" => (f=FlexpartController.available_flexpart_input, keyargs=(method=GET, named=:available_flexpart_input)),
+    "/api/flexpart/inputs" => (f=FlexpartController.get_inputs, keyargs=(method=GET, named=:available_flexpart_input)),
     "/api/flexpart/run" => (f=FlexpartController.flexpart_run, keyargs=(method=POST, named=:flexpart_run)),
     "/api/flexpart/results" => (f=FlexpartController.get_results, keyargs=(method = GET, named = :get_flexpart_results)),
     "/api/flexpart/results/:result_id::String" => (f=FlexpartController.get_result, keyargs=(method=GET, named=:get_flexpart_result)),

@@ -202,7 +202,7 @@ export class FlexpartRunPreloadedFormComponent extends AbstractWsComponent imple
         let formFields = this.formGroup.value;
         formFields = {
             ...formFields,
-            dataDirname: this.flexpartInput.dataDirname,
+            name: this.flexpartInput.name,
         }
         this.formService.adjustDates(formFields)
         console.log(formFields);

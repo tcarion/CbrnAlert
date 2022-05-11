@@ -1,4 +1,4 @@
-module FlexpartRunsValidator
+module FlexpartValidator
 
 using SearchLight, SearchLight.Validation
 
@@ -15,7 +15,8 @@ function is_int(field::Symbol, m::T, args::Vararg{Any})::ValidationResult where 
 end
 
 function is_unique(field::Symbol, m::T, args::Vararg{Any})::ValidationResult where {T<:AbstractModel}
-    findone(typeof(m); NamedTuple(field => getfield(m, field))...) === nothing ||
+    samename = findone(typeof(m); NamedTuple(field => getfield(m, field))...)
+    samename === nothing || samename.id == m.id ||
         return ValidationResult(invalid, :is_unique, "already exists")
 
     ValidationResult(valid)

@@ -5,8 +5,15 @@ using Dates
 using ReadNcf
 using GeoJSON
 using GeoInterface
+using AuthenticationController: getsubject
 using Flexpart
 using Flexpart.FlexExtract
+
+using Users
+using FlexpartRuns
+using FlexpartInputs
+using SearchLight
+using SearchLight.Relationships
 
 # const PYTHON_PATH = "/opt/anaconda3/bin/python"
 # # const FLEX_EXTRACT_PATH = "/home/tcarion/flexpart/flex_extract_app"
@@ -21,19 +28,17 @@ using Flexpart.FlexExtract
 
 # FLEXPART_RUN_TEMPLATE_PATH = "/home/tcarion/flexpart/flexpart_run_template_tests"
 
-const JsonPayload = Dict{Symbol, Any}
-const Output = JsonPayload
-const Result = JsonPayload
-
 const CONTROL_FILE_NAME = "CONTROL_OD.OPER.FC.eta.highres.app"
 const EXTRACTED_WEATHER_DATA_DIR = joinpath(pwd(), "public", "extracted_met_data")
 const FLEXPART_RUNS_DIR = joinpath(pwd(), "public", "flexpart_runs")
 
-struct MarsDataNotAvailableError <: Exception end
 const DATA_NOT_YET_AVAILABLE = Genie.Router.error(500, "Mars Retrieval error: DATA_NOT_YET_AVAILABLE", "application/json", error_info="The data you're requesting is not yet available")
+const UNKNOWN_MARS_ERROR = Genie.Router.error(500, "Mars Retrieval error: Unknown", "application/json", error_info="Unknown error during data retrieval")
+const FLEXPART_RUN_FAILED = Genie.Router.error(500, "Flexpart run failed", "application/json", error_info="Flexpart run failed")
+
+struct MarsDataNotAvailableError <: Exception end
 
 struct UnknownMarsError <: Exception end
-const UNKNOWN_MARS_ERROR = Genie.Router.error(500, "Mars Retrieval error: Unknown", "application/json", error_info="Unknown error during data retrieval")
 
 global DEBUG_PAYLOAD = 0
 debug() = global DEBUG_PAYLOAD = Genie.Requests.jsonpayload()
@@ -100,6 +105,10 @@ function log_and_broadcast(stream, ws_info, log_file::IO)
     flush(log_file)
 end
 
+function _user_related(model::Type{<:AbstractModel})
+    current_user = findone(Users.User, email = getsubject())
+    related(current_user, model)
+end
 # function flexextract_request(payload)
 #     startdate = Dates.DateTime(payload["startDate"][1:22])
 #     enddate = Dates.DateTime(payload["endDate"][1:22])
@@ -172,7 +181,9 @@ function meteo_data_request()
     dir_name = Dates.format(startdate, "yyyymmdd_HHMM") * "_" * area_str
     dir_path = joinpath(EXTRACTED_WEATHER_DATA_DIR, dir_name)
 
-    fedir = FlexExtract.create(dir_path, force = true)
+    newinput = FlexpartInputs.create()
+    FlexpartInputs.assign_to_user!(getsubject(), newinput)
+    fedir = FlexExtract.create(newinput.path, force = true)
     fcontrol = FeControl(fedir)
     fcontrol[:GRID] = gridres
     fcontrol[:REQUEST] = 0
@@ -190,6 +201,7 @@ function meteo_data_request()
     ################################################################################
     # result = try
     log_file_path = joinpath(fedir.path, "output_log.log")
+    FlexpartInputs.change_status(newinput.name, "pending")
     open(log_file_path, "w") do log_file
         FlexExtract.submit(fedir) do stream
             log_and_broadcast(stream, ws_info, log_file)
@@ -198,7 +210,9 @@ function meteo_data_request()
 
     try
         _check_mars_errors(log_file_path)
+        FlexpartInputs.change_status(newinput.name, "finish")
     catch e
+        FlexpartInputs.change_status(newinput.name, "error")
         if e isa MarsDataNotAvailableError
             return DATA_NOT_YET_AVAILABLE
         elseif e isa UnknownMarsError
@@ -271,23 +285,28 @@ function _clarify_control(fcontrol)
         :area => area
     )
 end
-_has_output(fedir) = !isempty(readdir(fedir[:output]))
+# _has_output(fedir) = !isempty(readdir(fedir[:output]))
 
-function available_flexpart_input()
-    metdata_dirs = readdir(EXTRACTED_WEATHER_DATA_DIR, join=true)
+function get_inputs()
+    fpinputs = _user_related(FlexpartInput)
+    filter!(FlexpartInputs.isfinished, fpinputs)
+    metdata_dirs = [input.path for input in fpinputs]
+    names = [input.name for input in fpinputs]
     fedirs = _find_control_path.(metdata_dirs)
-    filter!(_has_output, fedirs)
+    # filter!(_has_output, fedirs)
     fcontrols = FeControl.(fedirs)
     clarified_controls = _clarify_control.(fcontrols)
-    dirnames = [basename(dir) for dir in metdata_dirs]
-    response = map(zip(clarified_controls, dirnames)) do (c, d)
-        push!(c, :dataDirname => d)
+    response = map(zip(clarified_controls, names)) do (c, n)
+        push!(c, :name => n)
     end
     return response |> json
 end
 
+function _iscompleted(fpdir)
+    lines = readlines(joinpath(fpdir.path, "output.log"))
+    any(occursin.("CONGRATULATIONS", lines))
+end
 function flexpart_run()
-    debug()
     request_data = Genie.Requests.jsonpayload()
     startdate = Dates.DateTime(request_data["startDate"][1:22])
     enddate = Dates.DateTime(request_data["endDate"][1:22])
@@ -301,13 +320,13 @@ function flexpart_run()
     rel_lon = request_data["lon"]
     rel_lat = request_data["lat"]
     particules = request_data["particulesNumber"]
-    metdata_dirname = request_data["dataDirname"]
+    input_name = request_data["name"]
     mass = request_data["mass"]
 
-    run_dir_name = Dates.format(startdate, dateformat"yyyymmdd_HH")*"_"*Dates.format(enddate, dateformat"yyyymmdd_HH")*"_"*particules
-    run_dir_path = joinpath(FLEXPART_RUNS_DIR, run_dir_name)
-
-    fpdir = Flexpart.create(run_dir_path)
+    # run_dir_name = Dates.format(startdate, dateformat"yyyymmdd_HH")*"_"*Dates.format(enddate, dateformat"yyyymmdd_HH")*"_"*particules
+    # run_dir_path = joinpath(FLEXPART_RUNS_DIR, run_dir_name)
+    fprun = FlexpartRuns.create()
+    fpdir = Flexpart.create(fprun.path)
     # mkpath(run_dir_path)
     # cp(FLEXPART_RUN_TEMPLATE_PATH, run_dir_path, force=true)
 
@@ -320,6 +339,7 @@ function flexpart_run()
         :IBTIME => Dates.format(startdate, "HHMMSS"),
         :IEDATE => Dates.format(enddate, "yyyymmdd"),
         :IETIME => Dates.format(enddate, "HHMMSS"),
+        :IOUT => 9
          )
     Flexpart.merge!(fpoptions["COMMAND"][:COMMAND], command_options)
 
@@ -342,7 +362,7 @@ function flexpart_run()
     Flexpart.merge!(fpoptions["OUTGRID"][:OUTGRID], Flexpart.area2outgrid(area, gridres))
 
     
-    fedirpath = joinpath(EXTRACTED_WEATHER_DATA_DIR, metdata_dirname)
+    fedirpath = joinpath(EXTRACTED_WEATHER_DATA_DIR, input_name)
     fedir = _find_control_path(fedirpath)
     
     fpdir[:input] = fedir[:output]
@@ -365,10 +385,24 @@ function flexpart_run()
 
     # run_flexpart(run_dir_path, request_data["ws_info"])
     open(joinpath(fpdir.path, "output.log"), "w") do logf
+        FlexpartRuns.change_status(fprun.name, "pending")
         Flexpart.run(fpdir) do stream
             log_and_broadcast(stream, request_data["ws_info"], logf)
         end
     end
+
+    if _iscompleted(fpdir)
+        FlexpartRuns.change_status(fprun.name, "finish")
+        FlexpartRuns.assign_to_user!(getsubject(), fprun)
+    else
+        @warn "Flexpart run failed"
+        FlexpartRuns.change_status(fprun.name, "error")
+        if ENV["GENIE_ENV"] == "prod"
+            rm(fpdir.path, recursive = true)
+        end
+        return FLEXPART_RUN_FAILED
+    end
+
     return 0
 end
 
@@ -439,11 +473,13 @@ Output:
     )[]
 """
 function get_results()
-    available_fp_runs_dir = filter(x -> isdir(x), readdir(FLEXPART_RUNS_DIR, join=true))
-    results = map(available_fp_runs_dir) do x
+    # available_fp_runs_dir = filter(x -> isdir(x), readdir(FLEXPART_RUNS_DIR, join=true))
+    fpruns = _user_related(FlexpartRun)
+    filter!(FlexpartRuns.isfinished, fpruns)
+    results = map(fpruns) do x
         Dict(
             :type => "flexpartResultId",
-            :id => basename(x)
+            :id => x.name
         )
     end 
     results |> json
@@ -461,7 +497,8 @@ function get_result()
 end
 
 function get_outputs()
-    fpdir = joinpath(FLEXPART_RUNS_DIR, Genie.Router.params(:result_id)) |> FlexpartDir
+    fprun = findone(FlexpartRun, name=Genie.Router.params(:result_id))
+    fpdir = FlexpartDir(fprun.path)
     [Dict(
         :type => "flexpartOutputId",
         :id => basename(outpath))
@@ -606,8 +643,6 @@ Output:
 
 function get_plot()
     received = Genie.Requests.jsonpayload()
-    global pl = received
-    @show received["dimensions"]
     var = received["variable"]
     dims = received["dimensions"]
     dims =  dims isa Dict ? received["dimensions"] : Base.copy(received["dimensions"]) # convert to Dict in case of JSON3.Object

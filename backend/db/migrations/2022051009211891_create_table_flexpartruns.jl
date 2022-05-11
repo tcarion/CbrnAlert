@@ -8,7 +8,8 @@ function up()
             pk()
             column(:name, :string)
             column(:path, :string)
-            column(:run_date, :string)
+            column(:date_created, :string)
+            column(:status, :string)
         ]
     end
 

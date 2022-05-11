@@ -22,10 +22,10 @@ StructTypes.StructType(::Type{DbId}) = StructTypes.Struct()
 
 Validation.validator(::Type{User}) = ModelValidator([
     ValidationRule(:username, UsersValidator.not_empty),
-    ValidationRule(:username, UsersValidator.unique),
+    ValidationRule(:username, UsersValidator.is_unique),
     ValidationRule(:password, UsersValidator.not_empty),
     ValidationRule(:email, UsersValidator.not_empty),
-    ValidationRule(:email, UsersValidator.unique),
+    ValidationRule(:email, UsersValidator.is_unique),
 ])
 
 function hash_password(password::String)

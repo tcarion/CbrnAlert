@@ -18,11 +18,11 @@ function login()
     payload = Genie.Requests.jsonpayload()
     user = SearchLight.findone(User, email=payload["email"], password=Users.hash_password(payload["password"]))
     if !isnothing(user)
-        @show payload
+        # @show payload
         # @show Genie.Router.@params()
         cont = Dict(
             "exp" => exp,
-            "sub" => user.id,
+            "sub" => user.email,
         )
         jwt = JSONWebTokens.encode(JSONWebTokens.RS256(PRK_PATH), cont)
 
@@ -30,9 +30,10 @@ function login()
             "idToken" => jwt,
             "expiresIn" => exp,
             "user" => Dict(
-                "id" => user.id,
+                # "id" => user.id,
                 "email" => user.email,
                 "username" => user.username,
+                "name" => user.name,
             )
         ))
 
@@ -58,17 +59,21 @@ function isauth()
     end
 end
 
-function authenticated()
+function getsubject()
+    jwt = _decode()
+    jwt["sub"]
+end
+
+function _decode()
     head = Genie.Requests.payload()[:REQUEST].headers |> pairs_array_to_dict
-    if !haskey(head, "Authorization")
-        return false
-    end
-
     bearer = head["Authorization"]
+    token = split(bearer, "Bearer")[2] |> strip
+    JSONWebTokens.decode(JSONWebTokens.RS256(PUK_PATH), token)
+end
 
+function authenticated()
     try
-        token = split(bearer, "Bearer")[2] |> strip
-        JSONWebTokens.decode(JSONWebTokens.RS256(PUK_PATH), token)
+        _decode()
         true
     catch
         return false

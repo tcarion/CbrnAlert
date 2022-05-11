@@ -4,5 +4,5 @@ export interface FlexpartInput {
     timeStep: number,
     gridRes: number,
     area: number[],
-    dataDirname: string
+    name: string
 }
