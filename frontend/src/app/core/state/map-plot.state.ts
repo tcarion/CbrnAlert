@@ -39,15 +39,8 @@ export class MapPlotState {
     @Action(MapPlotAction.Add)
     add(ctx: StateContext<MapPlotStateModel>, action : MapPlotAction.Add ) {
         const state = ctx.getState();
-        let mapPlot;
-        switch (action.type) {
-            case 'atp45':
-                mapPlot = this.mapPlotService.createAtp45Plot(action.plotData);
-                break;
-            case 'flexpart':
-                mapPlot = this.mapPlotService.createFlexpartPlot(action.plotData);
-                break;
-        }
+        let mapPlot = this.mapPlotService.addPlot(action);
+
         ctx.patchState({
             mapPlots: [...state.mapPlots, mapPlot]
         })
@@ -68,7 +61,7 @@ export class MapPlotState {
     }
 
     @Action(MapPlotAction.Hide)
-    hide(ctx: StateContext<MapPlotStateModel>, action :MapPlotAction. Hide ) {
+    hide(ctx: StateContext<MapPlotStateModel>, action :MapPlotAction.Hide ) {
         ctx.setState(produce(draft => {
             draft.mapPlots.forEach(plt => {
                 if (plt.id == action.mapPlotId) {

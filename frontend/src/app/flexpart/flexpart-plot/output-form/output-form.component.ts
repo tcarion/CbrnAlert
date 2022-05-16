@@ -14,7 +14,6 @@ import { FlexpartOutput } from '../../flexpart-output';
 import { ActivatedRoute, ActivatedRouteSnapshot, Router } from '@angular/router';
 import { Store } from '@ngxs/store';
 import { MapPlotAction } from 'src/app/core/state/actions/map-plot.actions';
-import { FlexpartOutputAction } from 'src/app/core/state/actions/flexpart-output.actions';
 
 // const formItems: FormItem[] = [
 //     {

@@ -11,8 +11,7 @@ import { map } from 'rxjs/operators';
 import { FlexpartOutput } from '../flexpart-output';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Select, Store } from '@ngxs/store';
-import { AddFlexpartResult } from 'src/app/core/state/actions/flexpart-results.actions';
-import { FlexpartResultState } from 'src/app/core/state/flexpart-result.state';
+import { FlexpartResultAction, FlexpartState } from 'src/app/core/state/flexpart.state';
 
 const columnInfo = [
     // {
@@ -58,7 +57,7 @@ export class FlexpartPlotComponent implements OnInit, OnDestroy {
     // fpOutput: FlexpartOutput;
 
     // fpResults$: Observable<FlexpartResult[]>
-    @Select(FlexpartResultState.getFlexpartResults) fpResults$: Observable<FlexpartResult[]>
+    @Select(FlexpartState.getFlexpartResults) fpResults$: Observable<FlexpartResult[]>
     fpResultsId$: Observable<string[]>
     // resultsSubscription: Subscription;
 
@@ -70,12 +69,12 @@ export class FlexpartPlotComponent implements OnInit, OnDestroy {
         ) {}
 
     ngOnInit(): void {
-        this.store.selectSnapshot(state => state.fpResults.fpResults).length == 0 && 
+        this.store.selectSnapshot(state => state.flexpart.fpResults).length == 0 && 
             this.flexpartService.getResults().subscribe(results => 
-                results.forEach(result => this.store.dispatch(new AddFlexpartResult(result))));
+                results.forEach(result => this.store.dispatch(new FlexpartResultAction.Add(result))));
 
-        // this.fpResults$ = this.store.select(state => state.fpResults.fpResults);
-        this.fpResultsId$ = this.fpResults$.pipe(map(res => res.map(r => r.id)));
+        // this.fpResults$ = this.store.select(state => state.flexpart.fpResults);
+        this.fpResultsId$ = this.fpResults$.pipe(map(res => res.map(r => r.name)));
 
         // this.flexpartService.updateResults();
         // this.apiService.get('/flexpart/results').subscribe(res => console.log(res))
@@ -111,7 +110,7 @@ export class FlexpartPlotComponent implements OnInit, OnDestroy {
     }
 
     goToOuput(index: number) {
-        const fpResult = this.store.selectSnapshot(state => state.fpResults.fpResults)[index]
+        const fpResult = this.store.selectSnapshot(state => state.flexpart.fpResults)[index]
         if (fpResult) {
             // this.router.navigate([fpResult.id], { 
             //     relativeTo: this.route,

@@ -1,4 +1,4 @@
-import { FlexpartResultState } from './state/flexpart-result.state';
+import { FlexpartState } from './state/flexpart.state';
 import { MapPlotsService } from './services/map-plots.service';
 import { CommonModule } from '@angular/common';
 
@@ -15,7 +15,6 @@ import { NgxsReduxDevtoolsPluginModule } from '@ngxs/devtools-plugin';
 import { environment } from 'src/environments/environment';
 import { NgxsLoggerPluginModule } from '@ngxs/logger-plugin';
 import { MapPlotState } from './state/map-plot.state';
-import { FlexpartOutputState } from './state/flexpart-output.state';
 
 @NgModule({
   declarations: [],
@@ -23,8 +22,7 @@ import { FlexpartOutputState } from './state/flexpart-output.state';
     CommonModule,
     NgxsModule.forRoot([
         MapPlotState,
-        FlexpartResultState,
-        FlexpartOutputState
+        FlexpartState,
     ],
     { developmentMode: !environment.production }),
     NgxsReduxDevtoolsPluginModule.forRoot(),

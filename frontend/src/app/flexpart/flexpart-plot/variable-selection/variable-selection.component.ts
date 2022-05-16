@@ -2,10 +2,9 @@ import { Observable, of, Subject } from 'rxjs';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Select, Store } from '@ngxs/store';
-import { FlexpartOutputAction } from 'src/app/core/state/actions/flexpart-output.actions';
 import { FlexpartOutput } from '../../flexpart-output';
-import { FlexpartOutputState } from 'src/app/core/state/flexpart-output.state';
 import { map } from 'rxjs/operators';
+import { FlexpartOutputAction, FlexpartState } from 'src/app/core/state/flexpart.state';
 
 @Component({
     selector: 'app-variable-selection',
@@ -14,7 +13,7 @@ import { map } from 'rxjs/operators';
 })
 export class VariableSelectionComponent implements OnInit {
 
-    @Select(FlexpartOutputState.getFlexpartOutput)
+    @Select(FlexpartState.getFlexpartOutput)
     fpOutput$: Observable<FlexpartOutput>;
     
     fpOutputVar2D$: Observable<string[]>;
@@ -38,7 +37,7 @@ export class VariableSelectionComponent implements OnInit {
     }
 
     goToVariable(i: number) {
-        this.selectedVarSub.next((this.store.selectSnapshot(state => state.fpOutput.fpOutput.variables2d[i])));
+        this.selectedVarSub.next((this.store.selectSnapshot(state => state.flexpart.fpOutput.variables2d[i])));
     }
 
 }

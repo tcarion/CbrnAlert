@@ -95,6 +95,19 @@ export class MapPlotsService {
         // this.emitPlots();
     }
 
+    addPlot({type, plotData}: any) {
+        let mapPlot;
+        switch (type) {
+            case 'atp45':
+                mapPlot = this.createAtp45Plot(plotData);
+                break;
+            case 'flexpart':
+                mapPlot = this.createFlexpartPlot(plotData);
+                break;
+        }
+        return mapPlot as MapPlot;
+    }
+
     hideMapPlot(plot: MapPlot): void {
         this.mapService.hidePlotFromMap(plot);
     }
