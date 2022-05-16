@@ -1,3 +1,4 @@
+import { Store } from '@ngxs/store';
 import { FormItems } from 'src/app/shared/form/form-items';
 import { FormItemBase } from 'src/app/shared/form/form-item-base';
 import { Subscription, Subject } from 'rxjs';
@@ -17,6 +18,7 @@ import { FlexpartInput } from 'src/app/flexpart/flexpart-input';
 import { FlexpartService } from '../../flexpart.service';
 import { TextFormItem } from 'src/app/shared/form/form-item-text';
 import { SelectFormItem } from 'src/app/shared/form/form-item-select';
+import { MapAction } from 'src/app/core/state/map.state';
 
 const formItems: FormItemBase[] = [
     new TextFormItem({
@@ -108,7 +110,7 @@ const formItems: FormItemBase[] = [
     }),
     new TextFormItem({
         key: 'area',
-        label: 'Area to retrieve',
+        label: 'Output domain',
         type: 'mapObject',
         required: true,
         disabled: true,
@@ -135,7 +137,8 @@ export class FlexpartRunPreloadedFormComponent extends AbstractWsComponent imple
         private flexpartService: FlexpartService,
         public formService: FormService,
         public websocketService: WebsocketService,
-        public notificationService: NotificationService
+        public notificationService: NotificationService,
+        private store: Store,
     ) {
         super(websocketService, notificationService);
     }
@@ -175,7 +178,8 @@ export class FlexpartRunPreloadedFormComponent extends AbstractWsComponent imple
             const fpInput = changes.flexpartInput.currentValue;
 
             console.log(fpInput);
-            this.mapService.cbrnMap.newAvailableArea(fpInput.area);
+            // this.mapService.cbrnMap.newAvailableArea(fpInput.area);
+            this.store.dispatch(new MapAction.ChangeArea(fpInput.area))
 
             this.updateForm(fpInput);
         }
@@ -213,8 +217,8 @@ export class FlexpartRunPreloadedFormComponent extends AbstractWsComponent imple
 
     ngOnDestroy(): void {
         super.ngOnDestroy();
+        this.store.dispatch(new MapAction.RemoveArea());
         this.mapService.cbrnMap.removeDrawControl();
-        this.mapService.cbrnMap.removeLayer(this.mapService.cbrnMap.areaSelection);
         this.mapSubscription.unsubscribe();
         this.mapService.offClickEvent();
     }

@@ -21,7 +21,8 @@ import { TextFormItem } from 'src/app/shared/form/form-item-text';
 import { SelectFormItem } from 'src/app/shared/form/form-item-select';
 import { FormItems } from 'src/app/shared/form/form-items';
 import { Store } from '@ngxs/store';
-import { MapPlotAction } from 'src/app/core/state/actions/map-plot.actions';
+import { MapPlotAction } from 'src/app/core/state/map-plot.state';
+
 
 const formItems: FormItemBase[] = [
     new SelectFormItem({

@@ -86,6 +86,14 @@ export class MapService {
         });
     }
 
+    changeArea(area:number[]) {
+        this.cbrnMap.newAvailableArea(area);
+    }
+
+    removeArea() {
+        this.cbrnMap.removeLayer(this.cbrnMap.areaSelection);
+    }
+
     offAreaSelectionEvent() {
         this.cbrnMap.map.off('draw:created');
     }

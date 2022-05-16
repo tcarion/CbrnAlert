@@ -5,7 +5,8 @@ import { MapPlot } from 'src/app/core/models/map-plot';
 import { MapPlotsService } from 'src/app/core/services/map-plots.service';
 import { map, takeUntil } from 'rxjs/operators';
 import { Select, Store } from '@ngxs/store';
-import { MapPlotAction } from 'src/app/core/state/actions/map-plot.actions';
+import { MapPlotAction } from 'src/app/core/state/map-plot.state';
+
 
 
 @Component({

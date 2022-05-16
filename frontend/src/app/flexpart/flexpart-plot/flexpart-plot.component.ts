@@ -57,7 +57,7 @@ export class FlexpartPlotComponent implements OnInit, OnDestroy {
     // fpOutput: FlexpartOutput;
 
     // fpResults$: Observable<FlexpartResult[]>
-    @Select(FlexpartState.getFlexpartResults) fpResults$: Observable<FlexpartResult[]>
+    @Select(FlexpartState.fpResults) fpResults$: Observable<FlexpartResult[]>
     fpResultsId$: Observable<string[]>
     // resultsSubscription: Subscription;
 

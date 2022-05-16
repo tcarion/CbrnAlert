@@ -1,3 +1,4 @@
+import { SelectInputComponent } from './select-input/select-input.component';
 import { VariableSelectionComponent } from './flexpart-plot/variable-selection/variable-selection.component';
 import { MetDataComponent } from './met-data/met-data.component';
 import { FlexpartPlotComponent } from './flexpart-plot/flexpart-plot.component';
@@ -20,6 +21,7 @@ const routes: Routes = [
     {
         path: 'run',
         component: FlexpartRunPreloadedComponent,
+        // component: SelectInputComponent,
     },
     {
         path: 'results',

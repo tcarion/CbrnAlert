@@ -13,7 +13,8 @@ import { FormItemBase } from 'src/app/shared/form/form-item-base';
 import { FlexpartOutput } from '../../flexpart-output';
 import { ActivatedRoute, ActivatedRouteSnapshot, Router } from '@angular/router';
 import { Store } from '@ngxs/store';
-import { MapPlotAction } from 'src/app/core/state/actions/map-plot.actions';
+import { MapPlotAction } from 'src/app/core/state/map-plot.state';
+
 
 // const formItems: FormItem[] = [
 //     {

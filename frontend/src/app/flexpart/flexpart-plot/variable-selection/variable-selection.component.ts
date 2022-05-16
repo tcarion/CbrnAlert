@@ -13,7 +13,7 @@ import { FlexpartOutputAction, FlexpartState } from 'src/app/core/state/flexpart
 })
 export class VariableSelectionComponent implements OnInit {
 
-    @Select(FlexpartState.getFlexpartOutput)
+    @Select(FlexpartState.fpOutput)
     fpOutput$: Observable<FlexpartOutput>;
     
     fpOutputVar2D$: Observable<string[]>;

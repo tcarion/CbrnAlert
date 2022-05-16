@@ -1,3 +1,4 @@
+import { MapState } from './state/map.state';
 import { FlexpartState } from './state/flexpart.state';
 import { MapPlotsService } from './services/map-plots.service';
 import { CommonModule } from '@angular/common';
@@ -23,6 +24,7 @@ import { MapPlotState } from './state/map-plot.state';
     NgxsModule.forRoot([
         MapPlotState,
         FlexpartState,
+        MapState,
     ],
     { developmentMode: !environment.production }),
     NgxsReduxDevtoolsPluginModule.forRoot(),

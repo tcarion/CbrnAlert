@@ -70,17 +70,17 @@ export class FlexpartState {
     ) {}
     
     @Selector()
-    static getFlexpartResults(state: FlexpartStateModel) {
+    static fpResults(state: FlexpartStateModel) {
         return state.fpResults;
     }
 
     @Selector()
-    static getFlexpartOutput(state: FlexpartStateModel) {
+    static fpOutput(state: FlexpartStateModel) {
         return state.fpOutput;
     }
 
     @Selector()
-    static getFlexpartInputs(state: FlexpartStateModel) {
+    static fpInputs(state: FlexpartStateModel) {
         return state.fpInputs;
     }
 
