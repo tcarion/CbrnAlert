@@ -9,14 +9,16 @@ using UUIDs
 using Dates
 
 export FlexpartInput
+
+# import ..UserApp: EXTRACTED_WEATHER_DATA_DIR
 const EXTRACTED_WEATHER_DATA_DIR = joinpath(pwd(), "public", "extracted_met_data")
-const DATE_FORMAT = "yyyy-mm-ddTHH:MM:SS"
+
 
 @kwdef mutable struct FlexpartInput <: AbstractModel
     id::DbId = DbId()
     name::String = ""
     path::String = ""
-    date_created::String = ""
+    date_created::DateTime = Dates.now()
     status::String = "created"
 end
 
@@ -32,7 +34,6 @@ function create()
     newentry = FlexpartInput(
         name = name,
         path = joinpath(EXTRACTED_WEATHER_DATA_DIR, name),
-        date_created = Dates.format(Dates.now(), DATE_FORMAT)
     )
     newentry |> save!
 end
