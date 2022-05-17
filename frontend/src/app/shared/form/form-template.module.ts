@@ -16,6 +16,7 @@ import { DynamicFormComponent } from './dynamic-form/dynamic-form.component';
 import { MapObjectSelectComponent } from './map-object-select/map-object-select.component';
 import { MapObjectInputComponent } from './map-object-input/map-object-input.component';
 import { TextFieldModule } from '@angular/cdk/text-field';
+import { LocationComponent } from './location/location.component';
 
 
 
@@ -26,6 +27,7 @@ import { TextFieldModule } from '@angular/cdk/text-field';
     DynamicFormComponent,
     MapObjectSelectComponent,
     MapObjectInputComponent,
+    LocationComponent,
   ],
   imports: [
     CommonModule,
@@ -40,6 +42,7 @@ import { TextFieldModule } from '@angular/cdk/text-field';
   ],
   exports: [
     AutoformatSelectComponent,
+    LocationComponent,
     DynamicFormComponent,
   ],
   providers: [

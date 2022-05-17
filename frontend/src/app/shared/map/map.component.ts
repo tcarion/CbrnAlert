@@ -6,6 +6,7 @@ import { Atp45Service } from 'src/app/atp45/atp45.service';
 import { MapPlotsService } from 'src/app/core/services/map-plots.service';
 import { Store } from '@ngxs/store';
 import { MapPlotAction } from 'src/app/core/state/map-plot.state';
+import { MapAction } from 'src/app/core/state/map.state';
 
 
 @Component({
@@ -28,6 +29,16 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
         this.mapService.mapPlotEvent$.subscribe(id => {
             this.store.dispatch(new MapPlotAction.SetActive(id));
+        })
+
+        this.mapService.cbrnMap.map.on('click', (e: L.LeafletMouseEvent) => {
+            let latlng = e.latlng;
+            let lat = latlng.lat;
+            let lon = latlng.lng;
+            // this.cbrnMap.marker = {lon, lat};
+            // this.emitMapSubject();
+            // this.emitEventSubject('newMarker');
+            this.store.dispatch(new MapAction.ChangeMarker({lon, lat}))
         })
         // this.mapService.onClickInit();
 

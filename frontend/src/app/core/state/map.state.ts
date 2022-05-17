@@ -11,6 +11,12 @@ export namespace MapAction {
         constructor(public area: number[]) {}
     }
 
+    export class ChangeMarker {
+        static readonly type = '[Map] ChangeMarker'
+    
+        constructor(public marker: {lon:number, lat:number}) {}
+    }
+
     export class RemoveArea {
         static readonly type = '[Map] RemoveArea'
     
@@ -33,7 +39,7 @@ export namespace MapAction {
 export class MapStateModel {
     area?:number[]
     areaSelection?:number[]
-    marker?:number[]
+    marker?:{lon:number, lat:number}
 }
 
 @State<MapStateModel>({
@@ -50,14 +56,27 @@ export class MapState {
     constructor(
         private mapService: MapService) {}
 
+    @Selector()
+    static marker(state: MapStateModel) {
+        return state.marker;
+    }
+
     @Action(MapAction.ChangeArea)
     changeArea(ctx: StateContext<MapStateModel>, action : MapAction.ChangeArea ) {
-        const state = ctx.getState();
-        this.mapService.changeArea(action.area)
+        this.mapService.changeArea(action.area);
         ctx.patchState({
             area: action.area
         })
 
+        // return ctx.dispatch(new MapAction.SetActive(mapPlot.id))
+    }
+
+    @Action(MapAction.ChangeMarker)
+    changeMarker(ctx: StateContext<MapStateModel>, action : MapAction.ChangeMarker ) {
+        this.mapService.cbrnMap.marker = action.marker
+        return ctx.patchState({
+            marker: action.marker
+        })
         // return ctx.dispatch(new MapAction.SetActive(mapPlot.id))
     }
 

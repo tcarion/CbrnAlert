@@ -1,0 +1,39 @@
+<div [formGroup]="formGroup">
+    <div formArrayName="locations">
+        <ng-container *ngFor= "let lonlat of locations.controls, let i = index" [formGroupName]= "i">
+            <!-- <app-dynamic-form
+            [formGroup]="$any(lonlat)"
+            [item]="latItem"
+            ></app-dynamic-form>
+            <app-dynamic-form
+            [formGroup]="$any(lonlat)"
+            [item]="lonItem"
+            ></app-dynamic-form> -->
+            <mat-form-field 
+            class="form-control"
+            appearance="outline" 
+            floatLabel="never">
+                <mat-label> Longitude </mat-label>
+                <input 
+                matInput 
+                formControlName="lon"
+                >
+                <mat-hint>[-180°, 180°]</mat-hint>
+                <!-- <mat-error *ngIf="(item.key | formControl).invalid"> error ! </mat-error> -->
+            </mat-form-field>
+
+            <mat-form-field 
+            class="form-control" 
+            appearance="outline" 
+            floatLabel="never">
+                <mat-label> Latitude </mat-label>
+                <input 
+                matInput 
+                formControlName="lat"
+                >
+                <mat-hint>[-90°, 90°]</mat-hint>
+                <!-- <mat-error *ngIf="(item.key | formControl).invalid"> error ! </mat-error> -->
+            </mat-form-field>
+        </ng-container>
+    </div>
+</div>

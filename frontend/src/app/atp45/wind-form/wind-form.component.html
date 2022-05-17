@@ -1,0 +1,24 @@
+<form [formGroup]="windForm">
+    <mat-form-field 
+        class="form-control"
+        appearance="outline" 
+        floatLabel="never">
+            <mat-label> Wind speed </mat-label>
+            <input
+            matInput 
+            formControlName="windSpeed"
+            >
+            <mat-hint>[km/h]</mat-hint>
+        </mat-form-field>
+    <mat-form-field 
+        class="form-control"
+        appearance="outline" 
+        floatLabel="never">
+            <mat-label> Azimuth </mat-label>
+            <input
+            matInput 
+            formControlName="azimuth"
+            >
+            <mat-hint>[° from North]</mat-hint>
+        </mat-form-field>
+</form>

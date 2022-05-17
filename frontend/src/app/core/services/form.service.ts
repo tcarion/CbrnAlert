@@ -67,14 +67,14 @@ export class FormService {
         );
     }
 
-    lonlatValid2(formGroup: FormGroup): Observable<any> {
-        return formGroup.statusChanges.pipe(
-            filter(status => status === 'VALID'), 
-            tap(() => {
-                this.mapService.cbrnMap.marker = this.getLonlat(formGroup);
-            })
-        );
-    }
+    // lonlatValid2(formGroup: FormGroup): Observable<any> {
+    //     return formGroup.statusChanges.pipe(
+    //         filter(status => status === 'VALID'), 
+    //         tap(() => {
+    //             // this.mapService.cbrnMap.marker = this.getLonlat(formGroup);
+    //         })
+    //     );
+    // }
 
     getLonlat(formGroup: FormGroup) {
         const lon = formGroup.get('lon')?.value;
@@ -96,12 +96,6 @@ export class FormService {
         });
 
         return new FormGroup(group);
-    }
-
-    lonlatControlArray() {
-        return this.formBuilder.array([
-            this.formBuilder.group(new LonlatControl())
-        ])
     }
 
     arrayToOptions(array: Array<any>) {

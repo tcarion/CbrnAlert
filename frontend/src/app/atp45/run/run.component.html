@@ -1,9 +1,4 @@
 <form [formGroup]="formGroup" (ngSubmit)="onSubmit()">
-    <app-dynamic-form
-    *ngFor="let item of formItems.items;"
-    [formGroup]="formGroup"
-    [item]="item"
-    ></app-dynamic-form>
     <app-location [formGroup]="formGroup"></app-location>
     <!-- <div formArrayName="lonlats">
         <div *ngFor= "let lonlat of lonlats.controls, let i = index" [formGroupName]= "i">
@@ -17,6 +12,17 @@
             ></app-dynamic-form>
         </div>
     </div> -->
-    <button
+    <mat-slide-toggle [checked]="withWind" (change)="withWind = !withWind">
+        Provide wind data
+    </mat-slide-toggle>
+    <ng-container  *ngIf="!withWind">
+        <app-dynamic-form
+            *ngFor="let item of formItems.items;"
+            [formGroup]="formGroup"
+            [item]="item"
+        ></app-dynamic-form>
+    </ng-container>
+    <app-wind-form *ngIf="withWind"  [formGroup]="formGroup"></app-wind-form>
+    <button class="w-17 h-12 self-start"
     mat-raised-button color="primary" type="submit" [disabled]="formGroup.invalid">Run ATP45 Model</button>
 </form>
