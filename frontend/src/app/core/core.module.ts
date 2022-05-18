@@ -4,7 +4,7 @@ import { MapPlotsService } from './services/map-plots.service';
 import { CommonModule } from '@angular/common';
 
 import { MapService, } from './services/map.service';
-import { ApiService } from './services/api.service';
+// import { ApiService } from './services/api.service';
 import { FormService } from './services/form.service';
 // import { FlexpartService } from './services/flexpart/flexpart.service';
 import { WebsocketService } from './services/websocket.service';
@@ -16,6 +16,8 @@ import { NgxsReduxDevtoolsPluginModule } from '@ngxs/devtools-plugin';
 import { environment } from 'src/environments/environment';
 import { NgxsLoggerPluginModule } from '@ngxs/logger-plugin';
 import { MapPlotState } from './state/map-plot.state';
+import { ApiService } from './api/services/api.service';
+import { Atp45State } from 'src/app/core/state/atp45.state';
 
 @NgModule({
   declarations: [],
@@ -23,6 +25,7 @@ import { MapPlotState } from './state/map-plot.state';
     CommonModule,
     NgxsModule.forRoot([
         MapPlotState,
+        Atp45State,
         FlexpartState,
         MapState,
     ],

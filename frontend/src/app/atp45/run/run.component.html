@@ -16,11 +16,12 @@
         Provide wind data
     </mat-slide-toggle>
     <ng-container  *ngIf="!withWind">
-        <app-dynamic-form
+        <!-- <app-dynamic-form
             *ngFor="let item of formItems.items;"
             [formGroup]="formGroup"
             [item]="item"
-        ></app-dynamic-form>
+        ></app-dynamic-form> -->
+        <app-forecast-time-select [formGroup] = "formGroup" [leadtimes]="$any(leadtimes$ | async)"></app-forecast-time-select>
     </ng-container>
     <app-wind-form *ngIf="withWind"  [formGroup]="formGroup"></app-wind-form>
     <button class="w-17 h-12 self-start"

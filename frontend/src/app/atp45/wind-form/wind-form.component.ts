@@ -9,7 +9,7 @@ import { AbstractControl, FormControl, FormGroup, ValidationErrors } from '@angu
 export class WindFormComponent implements OnInit, OnDestroy {
 
     windForm = new FormGroup({
-        windSpeed: new FormControl('8', isNumber),
+        speed: new FormControl('8', isNumber),
         azimuth: new FormControl('45', isNumber),
     });
 
@@ -18,7 +18,7 @@ export class WindFormComponent implements OnInit, OnDestroy {
     constructor() { }
 
     ngOnInit(): void {
-        this.formGroup.addControl('wind', this.windForm);
+        this.formGroup.addControl('windVelocity', this.windForm);
     }
 
     ngOnDestroy(): void {
