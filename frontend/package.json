@@ -7,7 +7,8 @@
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "generate:api": "openapi-generator-cli generate -i ../api_docs.yaml -g typescript-angular -o src/app/core/api/v1"
   },
   "private": true,
   "dependencies": {
@@ -38,6 +39,7 @@
     "@angular-devkit/build-angular": "~12.2.1",
     "@angular/cli": "~12.2.1",
     "@angular/compiler-cli": "~12.2.1",
+    "@openapitools/openapi-generator-cli": "^2.5.1",
     "@types/geojson": "^7946.0.7",
     "@types/jasmine": "~3.6.0",
     "@types/leaflet": "^1.7.0",

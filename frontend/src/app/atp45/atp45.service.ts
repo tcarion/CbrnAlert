@@ -10,6 +10,7 @@ import { FeatureCollection } from 'geojson';
 import { MapPlotsService } from 'src/app/core/services/map-plots.service';
 import { NotificationService } from '../core/services/notification.service';
 import { WebsocketService } from '../core/services/websocket.service';
+import { WindAtp45Input } from '../core/api/models';
 
 @Injectable({
     providedIn: 'root',
@@ -88,6 +89,10 @@ export class Atp45Service {
             this.inputs = gribData;
             this.emitInputsSubject();
         });
+    }
+
+    withWindAtp45Request(payload: WindAtp45Input) {
+
     }
 
     preloadedResultRequest(payload: any) {
