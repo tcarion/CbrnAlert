@@ -17,6 +17,8 @@ import { MapObjectSelectComponent } from './map-object-select/map-object-select.
 import { MapObjectInputComponent } from './map-object-input/map-object-input.component';
 import { TextFieldModule } from '@angular/cdk/text-field';
 import { LocationComponent } from './location/location.component';
+import { ForecastTimeSelectComponent } from './forecast-time-select/forecast-time-select.component';
+import { MatSelectModule } from '@angular/material/select';
 
 
 
@@ -28,6 +30,7 @@ import { LocationComponent } from './location/location.component';
     MapObjectSelectComponent,
     MapObjectInputComponent,
     LocationComponent,
+    ForecastTimeSelectComponent,
   ],
   imports: [
     CommonModule,
@@ -38,12 +41,14 @@ import { LocationComponent } from './location/location.component';
     MatDatepickerModule,
     MatButtonModule,
     MatOptionModule,
+    MatSelectModule,
     TextFieldModule,
   ],
   exports: [
     AutoformatSelectComponent,
     LocationComponent,
     DynamicFormComponent,
+    ForecastTimeSelectComponent,
   ],
   providers: [
     FormService,
