@@ -8,6 +8,10 @@ using AuthenticationController
 using JSONWebTokens
 using StructTypes
 using UUIDs
+using YAML
+
+using SwagUI
+# using SwaggerMarkdown
 
 using Genie.Cache
 Genie.config.cache_duration = 3600
@@ -46,22 +50,58 @@ flexpart_routes = Dict(
 )
 
 api_routes = Dict(
-    "/api/flexpart/meteo_data_request" => (f=FlexpartController.meteo_data_request, keyargs=(method=POST, named=:meteo_data_request)),
-    "/api/flexpart/inputs" => (f=FlexpartController.get_inputs, keyargs=(method=GET, named=:available_flexpart_input)),
-    "/api/flexpart/run" => (f=FlexpartController.flexpart_run, keyargs=(method=POST, named=:flexpart_run)),
-    "/api/flexpart/results" => (f=FlexpartController.get_results, keyargs=(method = GET, named = :get_flexpart_results)),
-    "/api/flexpart/results/:result_id::String" => (f=FlexpartController.get_result, keyargs=(method=GET, named=:get_flexpart_result)),
-    "/api/flexpart/results/:result_id::String/outputs" => (f=FlexpartController.get_outputs, keyargs=(method = GET, named = :get_flexpart_outputs)),
-    "/api/flexpart/results/:result_id::String/outputs/:output_id::String" => (f=FlexpartController.get_output, keyargs=(method = GET, named = :get_flexpart_output)),
-    "/api/flexpart/results/:result_id::String/output/:output_id::String" => (f=FlexpartController.get_plot, keyargs=(method = POST,)),
-    "/api/flexpart/results/:result_id::String/output/:output_id::String/daily_average" => (f=FlexpartController.daily_average, keyargs=(method = POST,))
+    "/atp45/run/wind" => (f=Atp45Controller.run_wind, keyargs=(method=POST,)),
+    "/atp45/run/forecast" => (f=Atp45Controller.run_forecast, keyargs=(method=POST,)),
+    "/flexpart/meteo_data_request" => (f=FlexpartController.meteo_data_request, keyargs=(method=POST, named=:meteo_data_request)),
+    "/flexpart/inputs" => (f=FlexpartController.get_inputs, keyargs=(method=GET, named=:available_flexpart_input)),
+    "/flexpart/run" => (f=FlexpartController.flexpart_run, keyargs=(method=POST, named=:flexpart_run)),
+    "/flexpart/results" => (f=FlexpartController.get_results, keyargs=(method = GET, named = :get_flexpart_results)),
+    "/flexpart/results/:result_id::String" => (f=FlexpartController.get_result, keyargs=(method=GET, named=:get_flexpart_result)),
+    "/flexpart/results/:result_id::String/outputs" => (f=FlexpartController.get_outputs, keyargs=(method = GET, named = :get_flexpart_outputs)),
+    "/flexpart/results/:result_id::String/outputs/:output_id::String" => (f=FlexpartController.get_output, keyargs=(method = GET, named = :get_flexpart_output)),
+    "/flexpart/results/:result_id::String/output/:output_id::String" => (f=FlexpartController.get_plot, keyargs=(method = POST,)),
+    "/flexpart/results/:result_id::String/output/:output_id::String/daily_average" => (f=FlexpartController.daily_average, keyargs=(method = POST,))
 )
 
 for (url, args) in api_routes
-    route(url; args[:keyargs]...) do
-        AuthenticationController.@authenticated!
+    route("/api"*url; args[:keyargs]...) do
+        # AuthenticationController.@authenticated!
         args[:f]()
     end
+end
+
+# openApi_version = "2.0"
+
+# # the info of the API, title and version of the info are required
+# info = Dict{String, Any}()
+# info["title"] = "CBRN Dispersion modeling API"
+# info["version"] = "1.0.0"
+
+# openApi = OpenAPI(openApi_version, info)
+
+# swagger_document = build(openApi)
+# swagger_json = JSON.json(swagger_document)
+
+# # @swagger """
+# # /api/flexpart/meteo_data_request:
+# #     post:
+# #         description: Run a flex_extract retrieval.
+# #         responses:
+# #         '200':
+# #             description: OK.
+# # """
+# @swagger """
+# /doge:
+#   get:
+#     description: Doge to the moon!
+#     responses:
+#       '200':
+#         description: Doge to the moon!!.
+# """
+
+route("/docs") do 
+    swagger_document = YAML.load_file("api_docs.yaml"; dicttype=Dict{String, Any})
+    render_swagger(swagger_document)
 end
 
 # route("/api/flexpart/results", method = GET, FlexpartController.get_results)
