@@ -5,7 +5,7 @@ import { Subscription } from 'rxjs';
 import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
 import { FormGroup, Validators } from '@angular/forms';
 import { AbstractWsComponent } from 'src/app/abstract-classes/abstract-ws-component';
-import { ApiService } from 'src/app/core/services/api.service';
+import { ApiService_old } from 'src/app/core/services/api.service';
 import { MapService } from 'src/app/core/services/map.service';
 import { FormService } from 'src/app/core/services/form.service';
 import { WebsocketService } from 'src/app/core/services/websocket.service';

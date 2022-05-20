@@ -6,15 +6,20 @@ function up()
   create_table(:flexpartoutputs) do
     [
       pk()
-      column(:column_name, :column_type)
       columns([
-        :column_name => :column_type
+        :uuid => :string
+        :name => :string
+        :path => :string
+        :date_created => :date
+        :filetype => :string
+        :isnested => :boolean
+        :metadata => :string
       ])
     ]
   end
 
-  add_index(:flexpartoutputs, :column_name)
-  add_indices(flexpartoutputs, :column_name_1, :column_name_2)
+  add_index(:flexpartoutputs, :path)
+  add_index(:flexpartoutputs, :uuid)
 end
 
 function down()

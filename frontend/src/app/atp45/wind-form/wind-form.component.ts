@@ -18,7 +18,7 @@ export class WindFormComponent implements OnInit, OnDestroy {
     constructor() { }
 
     ngOnInit(): void {
-        this.formGroup.addControl('windVelocity', this.windForm);
+        this.formGroup.addControl('wind', this.windForm);
     }
 
     ngOnDestroy(): void {

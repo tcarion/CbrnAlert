@@ -2,7 +2,7 @@ import { RealtimeComponent } from './atp45/realtime/realtime.component';
 import { ArchiveComponent } from './atp45/archive/archive.component';
 import { PreloadedComponent } from './atp45/preloaded/preloaded.component';
 import { NgModule, Component } from '@angular/core';
-import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+import { ExtraOptions, PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from './core/helpers/auth.guard';
 import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
@@ -47,15 +47,18 @@ const routes: Routes = [
     { path: '**', redirectTo: '' }
 ];
 
+
+export const routingConfiguration: ExtraOptions = {
+    paramsInheritanceStrategy: 'always',
+    // preload all modules; optionally we could
+    // implement a custom preloading strategy for just some
+    // of the modules (PRs welcome 😉)
+    preloadingStrategy: PreloadAllModules,
+    relativeLinkResolution: 'legacy'
+  };
+  
 @NgModule({
-  imports: [RouterModule.forRoot(routes,
-    {
-        // preload all modules; optionally we could
-        // implement a custom preloading strategy for just some
-        // of the modules (PRs welcome 😉)
-        preloadingStrategy: PreloadAllModules,
-        relativeLinkResolution: 'legacy'
-    })],
+  imports: [RouterModule.forRoot(routes,routingConfiguration)],
   exports: [RouterModule]
 })
 export class AppRoutingModule { }

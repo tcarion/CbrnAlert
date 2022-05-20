@@ -1,3 +1,6 @@
+import { MatDialog } from '@angular/material/dialog';
+import { MatListModule } from '@angular/material/list';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
 import { FlexpartPlotFormComponent } from './flexpart-plot/flexpart-plot-form/flexpart-plot-form.component';
 import { FlexpartPlotComponent } from './flexpart-plot/flexpart-plot.component';
@@ -10,11 +13,11 @@ import { SharedModule } from '../shared/shared.module';
 import { FlexpartService } from './flexpart.service';
 import { FlexpartRoutingModule } from './flexpart-routing.module';
 import { ChooseOutputComponent } from './flexpart-plot/choose-output/choose-output.component';
-import { ResultResolverService } from './result-resolver.service';
 import { OutputFormComponent } from './flexpart-plot/output-form/output-form.component';
 import { VariableSelectionComponent } from './flexpart-plot/variable-selection/variable-selection.component';
 import { FlexpartInputComponent } from './flexpart-input/flexpart-input.component';
 import { SelectInputComponent } from './select-input/select-input.component';
+import { SelectionDialogComponent } from 'src/app/flexpart/selection-dialog/selection-dialog.component';
 
 
 
@@ -29,17 +32,21 @@ import { SelectInputComponent } from './select-input/select-input.component';
         OutputFormComponent,
         VariableSelectionComponent,
         FlexpartInputComponent,
-        SelectInputComponent
+        SelectInputComponent,
+        SelectionDialogComponent,
     ],
     providers: [
         FlexpartService,
-        ResultResolverService,
+        // ResultResolverService,
     ],
     imports: [
         FlexpartRoutingModule,
         CommonModule,
         SharedModule,
-        MatTabsModule
+        MatTabsModule,
+        MatProgressSpinnerModule,
+        MatListModule,
+        // MatDialog
     ],
     exports: [
         MetDataComponent,

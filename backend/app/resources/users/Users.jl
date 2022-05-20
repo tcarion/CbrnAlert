@@ -1,5 +1,6 @@
 module Users
 
+using Genie
 using SearchLight, SearchLight.Validation, UsersValidator
 using SHA
 using StructTypes
@@ -32,11 +33,13 @@ function hash_password(password::String)
     sha256(password) |> bytes2hex
 end
 
-function add_user(username, password, email)
+function add(email, password; username = "", name= "")
     Genie.Assets.channels_subscribe(username)
-    User(username=username,
+    User(
+        username=username,
         password=password |> hash_password,
-        email=email
+        email=email,
+        name = name
     ) |> SearchLight.save!
 end
 

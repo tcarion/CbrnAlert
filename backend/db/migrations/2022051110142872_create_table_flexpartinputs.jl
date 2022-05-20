@@ -7,15 +7,18 @@ function up()
     [
       pk()
       columns([
+        :uuid => :string
         :name => :string
         :path => :string
-        :date_created => :string
+        :date_created => :date
         :status => :string
+        :control => :string
       ])
     ]
   end
 
-  add_index(:flexpartinputs, :name)
+  add_index(:flexpartinputs, :uuid)
+  add_index(:flexpartinputs, :path)
   # add_indices(flexpartinputs, :column_name_1, :column_name_2)
 end
 

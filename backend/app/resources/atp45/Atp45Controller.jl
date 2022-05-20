@@ -2,18 +2,22 @@ module Atp45Controller
 
 using Genie
 using Genie.Requests
+using Genie.Renderer.Json: json
 using Dates
 using ReadGrib
-using ComputeShapes
-using EarthCompute
+using EcmwfRequests
+using ATP45
 
 using GeoInterface
 using GeoJSON
 
 global dict
 
-const ec = EarthCompute
+const ec = 0
 const WIND_THRESHOLD = 10 # km/h
+
+global DEBUG_PAYLOAD = 0
+debug() = global DEBUG_PAYLOAD = Genie.Requests.jsonpayload()
 
 struct Wind
     u::Float64
@@ -72,27 +76,6 @@ function type2dict(obj)
     fns = fieldnames(obj |> typeof)
     (!isempty(fns) && !isa(obj, DateTime)) ? Dict(fn => type2dict(getfield(obj, fn)) for fn in fieldnames(obj |> typeof)) : to_dict(obj)
 end
-
-"""
-    steps_to_datetimes(toParse, steps::Union{Array{Int}, Tuple{Vararg}, Array{String}}, df)
-
-Return an array of `DateTime` objects for each element in `steps`. `toParse` is parsed according to `df`
-# Examples
-```julia-repl
-julia> steps_to_datetimes("19930212T12:00:00", [0, 3, 6], "yyyymmddTH:M:S")
-3-element Array{DateTime,1}:
- 1993-02-12T12:00:00
- 1993-02-12T15:00:00
- 1993-02-12T18:00:00
-```
-"""
-function steps_to_datetimes(toParse, steps::Array{Int}, df)::DateTime[]
-    start_d = DateTime(toParse, df)
-    return map(step -> start_d + Dates.Hour(step), steps)
-end
-steps_to_datetimes(toParse, steps::Tuple{Vararg}, df) = steps_to_datetimes(toParse, collect(steps), df)
-steps_to_datetimes(toParse, steps::Array{String}, df) = steps_to_datetimes(toParse, map(x -> Base.parse(Int, x), steps), df)
-steps_to_datetimes(start_d::DateTime, steps::Array{Int}) = map(step -> start_d + Dates.Hour(step), steps)
 
 searchdir(path,key) = filter(x -> occursin(key, x), readdir(path))
 
@@ -357,7 +340,31 @@ function archive_retrieval(payload)
     return Dict(:res => "Retrieval done")
 end
 
-function realtime_available_steps(payload)
+
+const AVAILABLE_STEPS = collect(0:6:240)
+"""
+    steps_to_datetimes(toParse, steps::Union{Array{Int}, Tuple{Vararg}, Array{String}}, df)
+
+Return an array of `DateTime` objects for each element in `steps`. `toParse` is parsed according to `df`
+# Examples
+```julia-repl
+julia> steps_to_datetimes("19930212T12:00:00", [0, 3, 6], "yyyymmddTH:M:S")
+3-element Array{DateTime,1}:
+ 1993-02-12T12:00:00
+ 1993-02-12T15:00:00
+ 1993-02-12T18:00:00
+```
+"""
+function steps_to_datetimes(toParse, steps::AbstractArray{Int}, df)::DateTime[]
+    start_d = DateTime(toParse, df)
+    return map(step -> start_d + Dates.Hour(step), steps)
+end
+# steps_to_datetimes(toParse, steps::Tuple{Vararg}, df) = steps_to_datetimes(toParse, collect(steps), df)
+steps_to_datetimes(toParse, steps::Array{String}, df) = steps_to_datetimes(toParse, map(x -> Base.parse(Int, x), steps), df)
+steps_to_datetimes(start_d::DateTime, steps::Array{Int}) = map(step -> start_d + Dates.Hour(step), steps)
+
+
+function available_steps()
     today = Dates.today()
     today_midnight = Dates.DateTime(today)
     today_noon = today_midnight + Dates.Hour(12)
@@ -370,12 +377,55 @@ function realtime_available_steps(payload)
       start_date = yesterday_noon
     end
   
-    steps =  collect(0:6:240)
-    available_dt = steps_to_datetimes(start_date, steps)
-    available_dt_str = map(x -> Dates.format(x, "yyyy-mm-ddTHH:MM:SS"), available_dt)
-    available_time_dict = [Dict(:datetime => x, :step => y) for (x, y) in zip(available_dt_str, steps)]
+    steps = AVAILABLE_STEPS
+    leadtimes = steps_to_datetimes(start_date, steps)
   
-    return available_time_dict
+    json(
+        Dict(
+            :start => start_date,
+            :leadtimes => leadtimes
+        )
+    )
+end
+
+
+function run_wind()
+    payload = Genie.Requests.jsonpayload()
+    global DEBUG_PAYLOAD = debug()
+    @show payload
+    locations = payload["locations"]
+    wind = payload["wind"]
+    Genie.Renderer.Json.json(
+        Dict(
+            :coordinates => locations,
+            :wind_speed => wind["speed"],
+            :azimuth => wind["azimuth"]
+            )
+        )
+    # methods(Base.parse)
+    lon = locations[1]["lon"]
+    lat = locations[1]["lat"]
+    lon = lon isa String ? Base.parse(Float64, lon) : Base.convert(Float64, lon) 
+    lat = lat isa String ? Base.parse(Float64, lat) : Base.convert(Float64, lat) 
+    speed = wind.speed
+    azimuth = wind.azimuth
+    speed = speed isa String ? Base.parse(Float64, speed) : Base.convert(Float64, speed) 
+    azimuth = azimuth isa String ? Base.parse(Float64, azimuth) : Base.convert(Float64, azimuth)
+    ATP45.simplified_proc(lon, lat, speed, azimuth) |> json
+end
+
+function run_forecast()
+    payload = Genie.Requests.jsonpayload()
+    @show payload
+    locations = payload["locations"]
+    @show locations[1]["lon"]
+    @show locations[1]["lat"]
+    # wind = payload["datetime"]
+    Genie.Renderer.Json.json(
+        Dict(
+            :coordinates => locations
+        )
+    )
 end
 
 end

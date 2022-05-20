@@ -52,7 +52,7 @@ import { HandleDateInterceptor } from './core/helpers/handle-date.interceptor';
     ],
     providers: [
         { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
-        { provide: HTTP_INTERCEPTORS, useClass: HandleDateInterceptor, multi: true },
+        // { provide: HTTP_INTERCEPTORS, useClass: HandleDateInterceptor, multi: true },
 
         JoinPipe,
         AroundPipe,

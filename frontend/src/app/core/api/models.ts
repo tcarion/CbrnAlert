@@ -6,3 +6,6 @@ export { GeoPoint } from './models/geo-point';
 export { Atp45Result } from './models/atp-45-result';
 export { ForecastAvailableSteps } from './models/forecast-available-steps';
 export { ForecastStep } from './models/forecast-step';
+export { FlexpartRun } from './models/flexpart-run';
+export { FlexpartOutput } from './models/flexpart-output';
+export { RunStatus } from './models/run-status';

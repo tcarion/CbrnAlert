@@ -1,1 +1,9 @@
+<!-- <router-outlet></router-outlet> -->
+
+<mat-selection-list class="listbox" [multiple]="false">
+    <mat-list-option class="list-item" *ngFor="let fpOutput of fpOutputs; let index = index" routerLink="outputs/{{fpOutput.uuid}}">
+        {{ fpOutput.name }}
+    </mat-list-option>
+</mat-selection-list>
+
 <router-outlet></router-outlet>

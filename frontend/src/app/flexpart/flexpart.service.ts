@@ -1,9 +1,9 @@
-import { FlexpartOutput } from './flexpart-output';
+import { ApiService } from 'src/app/core/api/services';
 import { Observable, Subject, throwError } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { FlexpartInput } from 'src/app/flexpart/flexpart-input';
 import { FlexpartResult } from 'src/app/flexpart/flexpart-result';
-import { ApiService } from '../core/services/api.service';
+import { ApiService_old } from '../core/services/api.service';
 import { FlexpartPlotData } from './flexpart-plot-data';
 import { catchError, filter, map, tap } from 'rxjs/operators';
 import { NotificationService } from '../core/services/notification.service';
@@ -11,6 +11,7 @@ import { WebsocketService } from '../core/services/websocket.service';
 import { MapService } from '../core/services/map.service';
 import { MapPlotsService } from 'src/app/core/services/map-plots.service';
 import { AuthenticationService } from '../core/services/authentication.service';
+import { FlexpartOutput, FlexpartRun } from 'src/app/core/api/models';
 
 @Injectable({
     providedIn: 'root'
@@ -26,6 +27,7 @@ export class FlexpartService {
     // plotsSubject = new Subject<FlexpartPlot>();
 
     constructor(
+        private apiService_old: ApiService_old,
         private apiService: ApiService,
         private notificationService: NotificationService,
         private websocketService: WebsocketService,
@@ -34,7 +36,7 @@ export class FlexpartService {
     ) { }
 
     getInputs(): Observable<FlexpartInput[]> {
-        return this.apiService
+        return this.apiService_old
             .get('/flexpart/inputs')
             .pipe(
                 map((data: any) => {
@@ -47,7 +49,7 @@ export class FlexpartService {
             );
     }
 
-    getResults(): Observable<FlexpartResult[]> {
+    getRuns(): Observable<FlexpartRun[]> {
         // return this.apiService
         //     .flexpartRequest({request: 'flexpart_results'})
         //     .pipe(
@@ -59,20 +61,20 @@ export class FlexpartService {
         //             return <FlexpartResult[]>data;
         //         })
         //     );
-        return this.apiService.get('/flexpart/results')
+        return this.apiService.flexpartRunsGet()
             // .pipe(map(results => results.filter((res: FlexpartResult) => res.outputs !== undefined)))
     }
 
-    getResult(id: string): Observable<FlexpartResult> {
-        return this.apiService.get('/flexpart/results/' + id)
+    getRun(runId: string): Observable<FlexpartRun> {
+        return this.apiService.flexpartRunsRunIdGet({runId})
     }
 
-    getOutputs(resultId: string): Observable<FlexpartOutput[]> {
-        return this.apiService.get('/flexpart/results/' + resultId + '/outputs')
+    getOutputs(runId: string): Observable<FlexpartOutput[]> {
+        return this.apiService.flexpartRunsRunIdOutputsGet({runId})
     }
 
-    getOutput(resultId: string, outputId: string): Observable<FlexpartOutput> {
-        return this.apiService.get('/flexpart/results/' + resultId + '/outputs/' + outputId)
+    getOutput(runId: string, outputId: string): Observable<FlexpartOutput> {
+        return this.apiService.flexpartRunsRunIdOutputsOutputIdGet({ runId, outputId })
     }
 
 
@@ -84,7 +86,7 @@ export class FlexpartService {
         }
 
         console.log(plWs);
-        return this.apiService.post('/flexpart/meteo_data_request', plWs).pipe(
+        return this.apiService_old.post('/flexpart/meteo_data_request', plWs).pipe(
             catchError((err) => {
                 this.notificationService.changeStatus(notifTitle, 'failed');
                 return throwError(err);
@@ -118,7 +120,7 @@ export class FlexpartService {
             request: 'flexpart_run'
         }
 
-        this.apiService.post('/flexpart/run',payload).subscribe({
+        this.apiService_old.post('/flexpart/run',payload).subscribe({
             next: () => {
                 alert("Flexpart run done");
                 this.notificationService.changeStatus(notifTitle, 'succeeded');
@@ -153,12 +155,12 @@ export class FlexpartService {
     // }
 
     newPlot(resultId:string, outputId:string,formFields: any): Observable<any> {
-        return this.apiService.post('/flexpart/results/'+resultId+'/output/'+outputId, formFields);
+        return this.apiService_old.post('/flexpart/results/'+resultId+'/output/'+outputId, formFields);
     }
 
     dailyAverage(resultId:string, outputId:string) {
 
-        this.apiService.post('/flexpart/results/'+resultId+'/output/'+outputId).subscribe({
+        this.apiService_old.post('/flexpart/results/'+resultId+'/output/'+outputId).subscribe({
             next: () => {
                 // this.plots.push(flexpartPlotData);
                 alert("Average added");

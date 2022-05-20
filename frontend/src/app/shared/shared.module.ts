@@ -11,7 +11,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MapComponent } from './map/map.component';
 import { MatListModule } from '@angular/material/list';
 import { TopbarModule } from './topbar/topbar.module';
-import { SelectionDialogModule } from 'src/app/shared/selection-dialog/selection-dialog.module';
+// import { SelectionDialogModule } from 'src/app/flexpart/selection-dialog/selection-dialog.module';
 import { SelectionListComponent } from './selection-list/selection-list.component';
 import { SelectionListModule } from './selection-list/selection-list.module';
 
@@ -28,13 +28,13 @@ import { SelectionListModule } from './selection-list/selection-list.module';
     MatListModule,
     FormTemplateModule,
     SelectionTableModule,
-    SelectionDialogModule,
+    // SelectionDialogModule,
   ],
   exports: [
     FormTemplateModule,
     ReactiveFormsModule,
     SelectionTableModule,
-    SelectionDialogModule,
+    // SelectionDialogModule,
     SelectionListModule,
     TopbarModule,
     MapComponent,

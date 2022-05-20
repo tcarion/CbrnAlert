@@ -6,7 +6,6 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { FlexpartRunPreloadedComponent } from './flexpart-run-preloaded/flexpart-run-preloaded.component';
 import { ChooseOutputComponent } from './flexpart-plot/choose-output/choose-output.component';
-import { ResultResolverService } from './result-resolver.service';
 import { FlexpartPlotFormComponent } from './flexpart-plot/flexpart-plot-form/flexpart-plot-form.component';
 import { OutputFormComponent } from './flexpart-plot/output-form/output-form.component';
 import { OutputResolverService, OutputsResolverService } from 'src/app/flexpart/output-resolver.service';
@@ -24,22 +23,22 @@ const routes: Routes = [
         // component: SelectInputComponent,
     },
     {
-        path: 'results',
+        path: 'runs',
         component: FlexpartPlotComponent,
         children: [
             {
-                path: ':fpResultId',
+                path: ':runId',
                 component: ChooseOutputComponent,
-                resolve: {
-                    fpOutputs: OutputsResolverService,
-                },
+                // resolve: {
+                //     fpOutputs: OutputsResolverService,
+                // },
                 children: [
                     {
-                        path: ':fpOutputId',
+                        path: 'outputs/:outputId',
                         component: VariableSelectionComponent,
-                        resolve: {
-                            fpOutput: OutputResolverService,
-                        },
+                        // resolve: {
+                        //     fpOutput: OutputResolverService,
+                        // },
                     },
                 ]
             }

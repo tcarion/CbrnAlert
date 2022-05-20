@@ -10,7 +10,7 @@ import { Validators, FormGroup } from '@angular/forms';
 import { NotificationService } from 'src/app/core/services/notification.service';
 import { WebsocketService } from 'src/app/core/services/websocket.service';
 import { FormService } from 'src/app/core/services/form.service';
-import { ApiService } from 'src/app/core/services/api.service';
+import { ApiService_old } from 'src/app/core/services/api.service';
 import { MapService } from 'src/app/core/services/map.service';
 import { Component, OnInit, Input, OnDestroy, SimpleChanges, OnChanges } from '@angular/core';
 import { AbstractWsComponent } from 'src/app/abstract-classes/abstract-ws-component';

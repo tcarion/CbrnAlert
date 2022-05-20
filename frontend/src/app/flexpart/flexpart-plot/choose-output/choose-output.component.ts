@@ -1,10 +1,9 @@
-import { FlexpartOutput } from '../../flexpart-output';
 import { ActivatedRoute, ActivatedRouteSnapshot, Router } from '@angular/router';
-import { FlexpartResult } from 'src/app/flexpart/flexpart-result';
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { SelectionDialogComponent } from 'src/app/shared/selection-dialog/selection-dialog.component';
 import { FlexpartService } from 'src/app/flexpart/flexpart.service';
+import { FlexpartOutput } from 'src/app/core/api/models';
+import { SelectionDialogComponent } from 'src/app/flexpart/selection-dialog/selection-dialog.component';
 
 @Component({
     selector: 'app-choose-output',
@@ -14,6 +13,7 @@ import { FlexpartService } from 'src/app/flexpart/flexpart.service';
 export class ChooseOutputComponent implements OnInit {
 
     fpOutput: FlexpartOutput;
+    fpOutputs: FlexpartOutput[];
 
     constructor(
         private flexpartService: FlexpartService,
@@ -31,45 +31,39 @@ export class ChooseOutputComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        // this.flexpartService.getOutputs(this.route.snapshot.params['fpResultId']).subscribe( outputs => {
+        let runId = this.route.snapshot.paramMap.get('runId') as string;
+        this.flexpartService.getOutputs(runId).subscribe(fpOutputs => {
+            // if (fpOutputs.length == 1) {
+            //     this.goToOutput(fpOutputs[0])
+            // } else {
+            //     this.openDialog(fpOutputs);
+            // }
+            this.fpOutputs = fpOutputs;
+        })
+        // this.route.data.subscribe(data => {
+        //     const outputs = data.fpOutputs;
         //     if (outputs.length == 1) {
         //         this.goToOutput(outputs[0])
         //     } else {
         //         this.openDialog(outputs);
         //     }
-        // });
-        // this.route.data.subscribe(data => {
-        //     const fpResult = data.fpResult;
-        //     if (fpResult.outputs.length == 1) {
-        //         this.goToOutput(fpResult.outputs[0])
-        //     } else {
-        //         this.openDialog(fpResult);
-        //     }
         // })
-        this.route.data.subscribe(data => {
-            const outputs = data.fpOutputs;
-            if (outputs.length == 1) {
-                this.goToOutput(outputs[0])
-            } else {
-                this.openDialog(outputs);
-            }
-        })
     }
 
-    goToOutput(fpOutput: FlexpartOutput) {
-        this.router.navigate([fpOutput.id], { 
-            relativeTo: this.route,
-            state: {
-                fpOutput
-            }
-        })
-    }
+    // goToOutput(fpOutput: FlexpartOutput) {
+    //     this.router.navigate([fpOutput.uuid], { 
+    //         relativeTo: this.route,
+    //         state: {
+    //             fpOutput
+    //         }
+    //     })
+    // }
 
-    // openDialog(fpResult: FlexpartResult) {
+    // openDialog(fpOutputs: FlexpartOutput[]) {
     //     const dialogRef = this.dialog.open(SelectionDialogComponent, {
     //         data: {
     //             title: 'Select a NetCDF file :',
-    //             items: fpResult.outputs.map(output => { return { dataKey: output.id, value: output } })
+    //             items: fpOutputs.map(output => { return { dataKey: output.uuid, value: output } })
     //         }
     //     });
 
@@ -77,16 +71,4 @@ export class ChooseOutputComponent implements OnInit {
     //         this.goToOutput(result);
     //     })
     // }
-    openDialog(fpOutputs: FlexpartOutput[]) {
-        const dialogRef = this.dialog.open(SelectionDialogComponent, {
-            data: {
-                title: 'Select a NetCDF file :',
-                items: fpOutputs.map(output => { return { dataKey: output.id, value: output } })
-            }
-        });
-
-        dialogRef.afterClosed().subscribe(result => {
-            this.goToOutput(result);
-        })
-    }
 }

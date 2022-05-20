@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { ApiService } from 'src/app/core/services/api.service';
+import { ApiService_old } from 'src/app/core/services/api.service';
 import { GribData } from './grib-data';
 import { Atp45ShapeData } from './shape-data';
 
@@ -26,7 +26,7 @@ export class Atp45Service {
 
 
     constructor(
-        private apiService: ApiService,
+        private apiService: ApiService_old,
         private mapPlotsService: MapPlotsService,
         private notificationService: NotificationService,
         private websocketService: WebsocketService,

@@ -2,9 +2,9 @@ using Genie.Router, Genie.Requests, Genie.Assets
 using SearchLight
 # using ATPController
 # using FlexpartController
+using AuthenticationController
 using Atp45Controller
 using FlexpartController
-using AuthenticationController
 using JSONWebTokens
 using StructTypes
 using UUIDs
@@ -19,22 +19,21 @@ Genie.Cache.init()
 
 using SearchLight
 using Users
-function user_subscribe()
-    for user in SearchLight.all(User)
-        Genie.Assets.channels_subscribe(user.username)
-    end
-end
+
 
 Genie.config.websockets_server = true
 # Genie.Cache.init()
 # StructTypes.StructType(::Type{Genie.WebChannels.ChannelMessage}) = StructTypes.Struct()
+for user in SearchLight.all(User)
+    Genie.Assets.channels_subscribe(user.username)
+end
 
 atp45_routes = Dict(
     "available_steps" => Atp45Controller.available_steps,
     "available_gribfiles" => Atp45Controller.available_grib_files,
     "prediction_request" => Atp45Controller.prediction_request,
     "archive_retrieval" => Atp45Controller.archive_retrieval,
-    "realtime_available_steps" => Atp45Controller.realtime_available_steps,
+    # "realtime_available_steps" => Atp45Controller.realtime_available_steps,
     "realtime_prediction_request" => Atp45Controller.realtime_prediction_request,
 )
 
@@ -50,15 +49,20 @@ flexpart_routes = Dict(
 )
 
 api_routes = Dict(
+    "/forecast/available" => (f=Atp45Controller.available_steps, keyargs=(method=GET,)),
     "/atp45/run/wind" => (f=Atp45Controller.run_wind, keyargs=(method=POST,)),
+    # "/atp45/types" => (f=Atp45Controller.TODO, keyargs=(method=GET,)),
     "/atp45/run/forecast" => (f=Atp45Controller.run_forecast, keyargs=(method=POST,)),
     "/flexpart/meteo_data_request" => (f=FlexpartController.meteo_data_request, keyargs=(method=POST, named=:meteo_data_request)),
     "/flexpart/inputs" => (f=FlexpartController.get_inputs, keyargs=(method=GET, named=:available_flexpart_input)),
     "/flexpart/run" => (f=FlexpartController.flexpart_run, keyargs=(method=POST, named=:flexpart_run)),
-    "/flexpart/results" => (f=FlexpartController.get_results, keyargs=(method = GET, named = :get_flexpart_results)),
-    "/flexpart/results/:result_id::String" => (f=FlexpartController.get_result, keyargs=(method=GET, named=:get_flexpart_result)),
-    "/flexpart/results/:result_id::String/outputs" => (f=FlexpartController.get_outputs, keyargs=(method = GET, named = :get_flexpart_outputs)),
-    "/flexpart/results/:result_id::String/outputs/:output_id::String" => (f=FlexpartController.get_output, keyargs=(method = GET, named = :get_flexpart_output)),
+    "/flexpart/runs" => (f=FlexpartController.get_runs, keyargs=(method = GET,)),
+    "/flexpart/runs/:runId::String" => (f=FlexpartController.get_run, keyargs=(method = GET,)),
+    # "/flexpart/result/:result_id::String" => (f=FlexpartController.get_result, keyargs=(method=GET, named=:get_flexpart_result)),
+    "/flexpart/runs/:runId::String/outputs" => (f=FlexpartController.get_outputs, keyargs=(method = GET,)),
+    # "/flexpart/results/:result_id::String/outputs" => (f=FlexpartController.get_outputs, keyargs=(method = GET, named = :get_flexpart_outputs)),
+    "/flexpart/runs/:runId::String/outputs/:outputId::String" => (f=FlexpartController.get_output, keyargs=(method = GET, named = :get_flexpart_output)),
+    # "/flexpart/results/:result_id::String/outputs/:output_id::String" => (f=FlexpartController.get_output, keyargs=(method = GET, named = :get_flexpart_output)),
     "/flexpart/results/:result_id::String/output/:output_id::String" => (f=FlexpartController.get_plot, keyargs=(method = POST,)),
     "/flexpart/results/:result_id::String/output/:output_id::String/daily_average" => (f=FlexpartController.daily_average, keyargs=(method = POST,))
 )

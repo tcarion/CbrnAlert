@@ -6,21 +6,23 @@ using Dates
 using ReadNcf
 using GeoJSON
 using GeoInterface
-using AuthenticationController: getsubject
+using AuthenticationController: current_user
+using AuthenticationController
 using Flexpart
 using Flexpart.FlexExtract
 
 using Users
 using FlexpartRuns
 using FlexpartInputs
+using FlexpartOutputs
+using SharedModels
+
 using SearchLight
 using SearchLight.Relationships
-
 const DATE_FORMAT = "yyyy-mm-ddTHH:MM:SS"
 
 const EXTRACTED_WEATHER_DATA_DIR = joinpath(pwd(), "public", "extracted_met_data")
 const FLEXPART_RUNS_DIR = joinpath(pwd(), "public", "flexpart_runs")
-
 
 # const PYTHON_PATH = "/opt/anaconda3/bin/python"
 # # const FLEX_EXTRACT_PATH = "/home/tcarion/flexpart/flex_extract_app"
@@ -45,8 +47,8 @@ struct MarsDataNotAvailableError <: Exception end
 
 struct UnknownMarsError <: Exception end
 
-global DEBUG_PAYLOAD = 0
-debug() = global DEBUG_PAYLOAD = Genie.Requests.jsonpayload()
+global DEBUG_PAYLOAD_FP = 0
+debug() = global DEBUG_PAYLOAD_FP = Genie.Requests.jsonpayload()
 
 function round_area(area)
     return [ceil(area[1]), floor(area[2]), floor(area[3]), ceil(area[4])]
@@ -111,8 +113,7 @@ function log_and_broadcast(stream, ws_info, log_file::IO)
 end
 
 function _user_related(model::Type{<:AbstractModel})
-    current_user = findone(Users.User, email = getsubject())
-    related(current_user, model)
+    related(current_user(), model)
 end
 # function flexextract_request(payload)
 #     startdate = Dates.DateTime(payload["startDate"][1:22])
@@ -186,9 +187,8 @@ function meteo_data_request()
     dir_name = Dates.format(startdate, "yyyymmdd_HHMM") * "_" * area_str
     dir_path = joinpath(EXTRACTED_WEATHER_DATA_DIR, dir_name)
 
-    newinput = FlexpartInputs.create()
-    FlexpartInputs.assign_to_user!(getsubject(), newinput)
-    fedir = FlexExtract.create(newinput.path, force = true)
+    newinput = FlexpartInputs.create(dir_path)
+    FlexpartInputs.assign_to_user!(current_user(), newinput)
     fcontrol = FeControl(fedir)
     fcontrol[:GRID] = gridres
     fcontrol[:REQUEST] = 0
@@ -206,7 +206,7 @@ function meteo_data_request()
     ################################################################################
     # result = try
     log_file_path = joinpath(fedir.path, "output_log.log")
-    FlexpartInputs.change_status(newinput.name, "pending")
+    FlexpartInputs.change_status(newinput.name, ONGOING)
     open(log_file_path, "w") do log_file
         FlexExtract.submit(fedir) do stream
             log_and_broadcast(stream, ws_info, log_file)
@@ -215,9 +215,9 @@ function meteo_data_request()
 
     try
         _check_mars_errors(log_file_path)
-        FlexpartInputs.change_status(newinput.name, "finish")
+        FlexpartInputs.change_status(newinput.name, FINISHED)
     catch e
-        FlexpartInputs.change_status(newinput.name, "error")
+        FlexpartInputs.change_status(newinput.name, ERRORED)
         if e isa MarsDataNotAvailableError
             return DATA_NOT_YET_AVAILABLE
         elseif e isa UnknownMarsError
@@ -262,8 +262,8 @@ end
 function _find_control_path(fedirpath)::FlexExtractDir
     fefiles = readdir(fedirpath, join=true)
     i = findfirst(x -> occursin("CONTROL", x), fefiles)
-    controlpath = joinpath(fedirpath, fefiles[i])
-    FlexExtractDir(fedirpath, controlpath)
+    # controlpath = joinpath(fedirpath, fefiles[i])
+    FlexExtractDir(fedirpath, fefiles[1])
 end
 function _clarify_control(fcontrol)
     startday = Dates.DateTime(fcontrol[:START_DATE], dateformat"yyyymmdd")
@@ -389,108 +389,54 @@ function flexpart_run()
     # Genie.Cache.purge(:flexpart_results)
 
     # run_flexpart(run_dir_path, request_data["ws_info"])
+    Flexpart.remove_unused_species!(fpoptions)
     FlexpartRuns.change_options(fprun.name, fpoptions)
     open(joinpath(fpdir.path, "output.log"), "w") do logf
-        FlexpartRuns.change_status(fprun.name, "pending")
+        FlexpartRuns.change_status(fprun.name, ONGOING)
         Flexpart.run(fpdir) do stream
             log_and_broadcast(stream, request_data["ws_info"], logf)
         end
     end
 
     if _iscompleted(fpdir)
-        FlexpartRuns.change_status(fprun.name, "finish")
-        FlexpartRuns.assign_to_user!(getsubject(), fprun)
+        FlexpartRuns.change_status(fprun.name, FINISHED)
+        FlexpartRuns.assign_to_user!(current_user(), fprun)
+
+        outfiles = Flexpart.OutputFiles(fpdir)
+        for outfile in outfiles
+            fpoutput = FlexpartOutputs.add(outfile)
+            FlexpartOutputs.assign_to_run!(fprun.uuid, fpoutput)
+            # fpoutput_ = FlexpartOutputs.add(outfile)
+            # FlexpartOutputs.assign_to_run!(fprun.uuid, fpoutput_)
+        end
     else
         @warn "Flexpart run failed"
-        FlexpartRuns.change_status(fprun.name, "error")
+        FlexpartRuns.change_status(fprun.name, ERRORED)
         if ENV["GENIE_ENV"] == "prod"
             rm(fpdir.path, recursive = true)
         end
         return FLEXPART_RUN_FAILED
     end
 
-    return 0
+    return fprun |> json
 end
 
-
-"""
-    flexpart_options(payload)
-Return options for a flexpart run
-
-Input payload:
-    "dataDirname" :: String
-Output:
-    Dict(
-        :RELEASES => release file to dict,
-        :COMMAND => command file to dict,
-        :OUTGRID => outgrid file to dict,
-    )
-"""
-# function flexpart_options(payload)
-#     dirname = payload["dirname"]
-#     options_dir = joinpath(pwd(), "public", "flexpart_runs", dirname, "options")
-
-#     Dict(
-#         :RELEASES => namelist2dict(joinpath(options_dir, "RELEASES")),
-#         :COMMAND => namelist2dict(joinpath(options_dir, "COMMAND")),
-#         :OUTGRID => namelist2dict(joinpath(options_dir, "OUTGRID")),
-#     )
-# end
-
-"""
-    flexpart_results()
-Return all flexpart runs with principal metadata
-
-Input payload:
-    none
-Output:
-    Dict(
-        :startDate :: Date,
-        :endDate :: Date
-        :times :: Int[],
-        :heights :: Real[],
-        :area :: Real[],
-        :dataDirname :: String,
-    )[]
-"""
-# function flexpart_results(payload)
-#     available_fp_runs_dir = filter(x -> isdir(x), readdir(FLEXPART_RUNS_DIR, join=true))
-#     available_fp_runs = Array{Dict, 1}()
-#     for dir in available_fp_runs_dir
-#         output_dir = joinpath(dir, "output")
-#         ncf_file = filter(x->occursin(".nc",x), readdir(output_dir))
-#         isempty(ncf_file) && break
-#         ncf_file = ncf_file[1]
-#         metadata = ReadNcf.ncfmetadata(joinpath(output_dir, ncf_file))
-#         push!(metadata, :dataDirname => splitpath(dir)[end])
-#         push!(available_fp_runs, metadata)
-#     end
-#     return available_fp_runs
-# end
-
-_fpres_to_json(x) = Dict(
+Base.Dict(x::FlexpartRun) = Dict(
     :type => "flexpartResultId",
+    :uuid => x.uuid,
     :name => x.name,
+    :status => x.status,
+    :date_created => x.date_created,
     :options => FlexpartRuns.get_options(x)
 )
-"""
-    get_results()
-Return all flexpart runs
-
-Output:
-    Dict(
-        :id :: String,
-        :output :: Output
-    )[]
-"""
-function get_results()
+function get_runs()
     # available_fp_runs_dir = filter(x -> isdir(x), readdir(FLEXPART_RUNS_DIR, join=true))
     fpruns = _user_related(FlexpartRun)
     filter!(FlexpartRuns.isfinished, fpruns)
-    results = map(fpruns) do x
-        _fpres_to_json(x)
-    end 
-    results |> json
+    # fpruns = map(fpruns) do x
+    #     _fpres_to_json(x)
+    # end
+    Dict.(fpruns) |> json
 end
 
 # Genie.config.cache_duration = 60
@@ -499,26 +445,26 @@ end
 #     get_results()
 # end
 
-function get_result()
-    result_path = joinpath(FLEXPART_RUNS_DIR, Genie.Router.params(:result_id))
-    Dict(:id => basename(result_path), :outputs => fp_outputs(result_path)) |> json
+function _get_run(id)
+    fprun = findone(FlexpartRun, uuid = id)
+    fprun
+end
+function get_run()
+    id = Genie.Router.params(:runId)
+    fprun = _get_run(id)
+    AuthenticationController.@hasaccess!(fprun)
+    Dict(fprun) |> json
 end
 
-function _outfiles(name::String)
-    fprun = findone(FlexpartRun, name=name)
-    fpdir = FlexpartDir(fprun.path)
-    OutputFiles(fpdir)
-end
 function get_outputs()
-    outfiles = _outfiles(Genie.Router.params(:result_id))
-    [Dict(
-        :type => "flexpartOutputId",
-        :id => basename(outfile.name))
-    for outfile in outfiles] |> json
+    run_id = Genie.Router.params(:runId)
+    outputs = related(_get_run(run_id), FlexpartOutput)
+    Dict.(outputs) |> json
 end
 
 function get_output()
-    output_id = Genie.Router.params(:output_id)
+    output_id = Genie.Router.params(:outputId)
+    run_id = Genie.Router.params(:runId)
     outfiles = _outfiles(Genie.Router.params(:result_id))
     outfile = filter(x -> basename(x.name) == output_id, outfiles)[1]
     outfile |> json
@@ -729,10 +675,6 @@ function daily_average()
     Flexpart.write_daily_average!(output, copy=false)
     close(output)
     "Daily average" |> Genie.Renderer.Json.json
-end
-
-function get_fpdir(run_name)
-    joinpath(FLEXPART_RUNS_DIR, run_name)
 end
 
 end

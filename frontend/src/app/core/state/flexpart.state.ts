@@ -1,10 +1,10 @@
-import { FlexpartOutput } from 'src/app/flexpart/flexpart-output';
+import { FlexpartRun } from './../api/models/flexpart-run';
 import { MapPlotsService } from '../services/map-plots.service';
 import { Injectable } from "@angular/core";
 import { Action, Selector, State, StateContext } from "@ngxs/store";
-import { FlexpartResult } from "src/app/flexpart/flexpart-result";
 import { FlexpartInput } from 'src/app/flexpart/flexpart-input';
 import { MapService } from 'src/app/core/services/map.service';
+import { FlexpartOutput } from 'src/app/core/api/models';
 
 export namespace FlexpartInputAction {
     export class Add {
@@ -20,15 +20,15 @@ export namespace FlexpartInputAction {
     }
 }
 
-export namespace FlexpartResultAction {
+export namespace FlexpartRunAction {
     export class Add {
-        static readonly type = '[FlexpartResult] Add'
+        static readonly type = '[FlexpartRun] Add'
     
-        constructor(public payload: FlexpartResult) {}
+        constructor(public payload: FlexpartRun) {}
     }
     
     export class Remove {
-        static readonly type = '[FlexpartResult] Remove'
+        static readonly type = '[FlexpartRun] Remove'
     
         constructor(public payload: string) {}
     }
@@ -50,7 +50,7 @@ export namespace FlexpartOutputAction {
 
 export class FlexpartStateModel {
     fpInputs: FlexpartInput[]
-    fpResults: FlexpartResult[]
+    runs: FlexpartRun[]
     fpOutput?: FlexpartOutput
 }
 
@@ -58,7 +58,7 @@ export class FlexpartStateModel {
     name: 'flexpart',
     defaults: {
         fpInputs: [],
-        fpResults: [],
+        runs: [],
         fpOutput: undefined,
     }
 })
@@ -71,7 +71,7 @@ export class FlexpartState {
     
     @Selector()
     static fpResults(state: FlexpartStateModel) {
-        return state.fpResults;
+        return state.runs;
     }
 
     @Selector()
@@ -84,26 +84,27 @@ export class FlexpartState {
         return state.fpInputs;
     }
 
-    @Action(FlexpartResultAction.Add)
-    addResult({getState, patchState}: StateContext<FlexpartStateModel>, { payload }: FlexpartResultAction.Add ) {
+    @Action(FlexpartRunAction.Add)
+    addRun({getState, patchState}: StateContext<FlexpartStateModel>, { payload }: FlexpartRunAction.Add ) {
         const state = getState();
-        if (state.fpResults.map(res => res.name).indexOf(payload.name) === -1) {
+        if (state.runs.map(res => res.name).indexOf(payload.name) === -1) {
             patchState({
-                fpResults: [...state.fpResults, payload]
+                runs: [...state.runs, payload]
             })
         }
     }
 
-    @Action(FlexpartResultAction.Remove)
-    removeResult({getState, patchState}: StateContext<FlexpartStateModel>, { payload }: FlexpartResultAction.Remove ) {
+    @Action(FlexpartRunAction.Remove)
+    removeResult({getState, patchState}: StateContext<FlexpartStateModel>, { payload }: FlexpartRunAction.Remove ) {
         patchState({
-            fpResults: getState().fpResults.filter(a => a.name != payload)
+            runs: getState().runs.filter(a => a.name != payload)
         })
     }
 
     @Action(FlexpartOutputAction.Add)
     addOutput({patchState}: StateContext<FlexpartStateModel>, action: FlexpartOutputAction.Add ) {
-        this.mapService.cbrnMap.newAvailableArea(action.payload.area)
+        // TODO: FIX THIS:
+        // this.mapService.cbrnMap.newAvailableArea(action.payload.area)
         patchState({
             fpOutput: action.payload
         })

@@ -11,7 +11,7 @@ components:
     BasicAtp45Input:
       type: object
       required:
-        - "coordinates"
+        - "locations"
       properties:
         locations:
           type: array
@@ -34,10 +34,9 @@ components:
           required:
             - date
           properties:
-            datetime:
-              type: string
-              format: date-time
-              description: 'Datetime of the forecast'
+            step:
+              $ref: '#/components/schemas/ForecastStep'
+              description: 'Step of the forecast'
     
     WindVelocity:
       type: object
@@ -71,6 +70,96 @@ components:
           type: array
           items: 
             $ref: '#/components/schemas/GeoPoint'
+    ForecastAvailableSteps:
+      type: object
+      required:
+        - "start"
+        - "leadtimes"
+      properties:
+        start:
+          type: string
+          format: date-time
+        leadtimes:
+          type: array
+          items:
+            type: string
+            format: date-time
+    ForecastStep:
+      type: object
+      required:
+        - "start"
+        - "leadtime"
+      properties:
+        start:
+          type: string
+          format: date-time
+        leadtime:
+          type: string
+          format: date-time
+
+    FlexpartRun:
+      type: object
+      required:
+        - "uuid"
+        - "name"
+        - "date_created"
+        - "options"
+      properties:
+        uuid:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+          $ref: '#/components/schemas/RunStatus'
+        date_created:
+          type: string
+          format: date-time
+        options:
+          type: object
+
+    FlexpartOutput:
+      type: object
+      required:
+        - "uuid"
+        - "name"
+        - "date_created"
+        - "metadata"
+      properties:
+        uuid:
+          type: string
+        name:
+          type: string
+        date_created:
+          type: string
+          format: date-time
+        metadata:
+          type: object
+
+    RunStatus:
+      type: string
+      enum:
+        - "created"
+        - "started"
+        - "ongoing"
+        - "errored"
+
+  parameters:
+    runIdParam:
+      in: path
+      name: runId
+      required: true
+      schema:
+        type: string
+      description: The flexpart run ID
+    outputIdParam:
+      in: path
+      name: outputId
+      required: true
+      schema:
+        type: string
+      description: The output ID
+  
 
   securitySchemes:
     name:
@@ -109,4 +198,81 @@ paths:
       responses:
         '200':
           description: OK
+          
+  /forecast/available:
+    get:
+      description: 'Return the last forecast datetimes available at ECMWF'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForecastAvailableSteps'
+
+  /flexpart/runs:
+    get:
+      description: 'Return all the finished Flexpart runs'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FlexpartRun'
+
+  /flexpart/runs/{runId}:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/runIdParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlexpartRun'
+
+  /flexpart/runs/{runId}/outputs:
+    get:
+      description: 'Return the outputs of the Flexpart run `id`'
+      parameters:
+        - $ref: '#/components/parameters/runIdParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FlexpartOutput'
+
+  /flexpart/runs/{runId}/outputs/{outputId}:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/runIdParam'
+        - $ref: '#/components/parameters/outputIdParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlexpartOutput'
+
+  /atp45/types:
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
 

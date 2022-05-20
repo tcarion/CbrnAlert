@@ -4,16 +4,16 @@ import { FormBuilder, FormGroup, Validators, FormControl, FormArray } from '@ang
 import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges } from '@angular/core';
 // import { FormItem } from 'src/app/core/models/form-item';
 import { DatePipe } from '@angular/common';
-import { ApiService } from 'src/app/core/services/api.service';
+import { ApiService_old } from 'src/app/core/services/api.service';
 import { MapService } from 'src/app/core/services/map.service';
 import { FormService } from 'src/app/core/services/form.service';
 import { FlexpartService } from '../../flexpart.service';
 import { SelectFormItem } from 'src/app/shared/form/form-item-select';
 import { FormItemBase } from 'src/app/shared/form/form-item-base';
-import { FlexpartOutput } from '../../flexpart-output';
 import { ActivatedRoute, ActivatedRouteSnapshot, Router } from '@angular/router';
 import { Store } from '@ngxs/store';
 import { MapPlotAction } from 'src/app/core/state/map-plot.state';
+import { FlexpartOutput } from 'src/app/core/api/models';
 
 
 // const formItems: FormItem[] = [
@@ -142,19 +142,19 @@ export class OutputFormComponent implements OnInit, OnChanges {
     updateForm() {
         this.formGroup = this.formService.toFormGroup(this.formItems.items);
 
-        const dims = this.fpOutput.dimensions[this.selectedVar];
-        for (const [key, value] of Object.entries(dims)) {
-            const newItem = new SelectFormItem({
-                key: key,
-                label: key,
-                options: value ? this.formService.arrayToOptions(value as Array<string | number | Date>) : [],
-                required: true,
-                autoSelect: true,
-                // type: 'mapObject',
-            });
-            this.formGroup.addControl(key, this.formService.toControl(newItem));
-            this.formItems.items.push(newItem);
-        }
+        // const dims = this.fpOutput.dimensions[this.selectedVar];
+        // for (const [key, value] of Object.entries(dims)) {
+        //     const newItem = new SelectFormItem({
+        //         key: key,
+        //         label: key,
+        //         options: value ? this.formService.arrayToOptions(value as Array<string | number | Date>) : [],
+        //         required: true,
+        //         autoSelect: true,
+        //         // type: 'mapObject',
+        //     });
+        //     this.formGroup.addControl(key, this.formService.toControl(newItem));
+        //     this.formItems.items.push(newItem);
+        // }
     }
 
     ngOnChanges(changes: SimpleChanges) {

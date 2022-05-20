@@ -1,6 +1,6 @@
 import { HostListener, Injectable } from '@angular/core';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket'
-import { ApiService } from './api.service';
+import { ApiService_old } from './api.service';
 import { AuthenticationService } from './authentication.service';
 
 @Injectable({
@@ -26,7 +26,7 @@ export class WebsocketService {
     // };
 
     constructor(
-        private apiService: ApiService,
+        private apiService: ApiService_old,
         private authenticationService: AuthenticationService,
         ) { }
 

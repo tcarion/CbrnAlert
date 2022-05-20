@@ -80,9 +80,24 @@ function authenticated()
     end
 end
 
+function hasaccess(model::AbstractModel)
+    if !isrelated(model, current_user())
+        return false
+    end
+    true
+end
 
 macro authenticated!(exception=Genie.Exceptions.ExceptionalResponse(Genie.Router.error(401, "Access to this API is not authorized", "application/json")))
     :(AuthenticationController.authenticated() || throw($exception))
+end
+
+macro hasaccess!(model, exception=Genie.Exceptions.ExceptionalResponse(Genie.Router.error(401, "Unauthorized", "application/json", error_info = "You don't have access to these data")))
+    :(AuthenticationController.hasaccess($model) || throw($exception))
+end
+
+function current_user()
+    email = getsubject()
+    findone(User, email = email)
 end
 
 end

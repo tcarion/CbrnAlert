@@ -4,7 +4,7 @@ import { ActivatedRouteSnapshot, Router, RouterStateSnapshot } from '@angular/ro
 import { FlexpartService } from './flexpart.service';
 import { FlexpartResult } from './flexpart-result';
 import { catchError } from 'rxjs/operators';
-import { FlexpartOutput } from 'src/app/flexpart/flexpart-output';
+import { FlexpartOutput } from 'src/app/core/api/models';
 
 @Injectable({
     providedIn: 'root'

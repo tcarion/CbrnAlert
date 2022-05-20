@@ -4,13 +4,13 @@ import { FormBuilder, FormGroup, Validators, FormControl, FormArray } from '@ang
 import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges } from '@angular/core';
 // import { FormItem } from 'src/app/core/models/form-item';
 import { DatePipe } from '@angular/common';
-import { ApiService } from 'src/app/core/services/api.service';
+import { ApiService_old } from 'src/app/core/services/api.service';
 import { MapService } from 'src/app/core/services/map.service';
 import { FormService } from 'src/app/core/services/form.service';
 import { FlexpartService } from '../../flexpart.service';
 import { SelectFormItem } from 'src/app/shared/form/form-item-select';
 import { FormItemBase } from 'src/app/shared/form/form-item-base';
-import { FlexpartOutput } from '../../flexpart-output';
+import { FlexpartOutput } from 'src/app/core/api/models';
 
 // const formItems: FormItem[] = [
 //     {
@@ -165,7 +165,7 @@ export class FlexpartPlotFormComponent implements OnInit, OnChanges {
         
         this.formService.adjustDateRecursive(formFields);
         console.log(formFields);
-        this.flexpartService.newPlot(this.flexpartOutput.resultId, this.flexpartOutput.id, formFields);
+        this.flexpartService.newPlot(this.flexpartOutput.uuid, this.flexpartOutput.uuid, formFields);
     }
 
     onDailyAverage() {

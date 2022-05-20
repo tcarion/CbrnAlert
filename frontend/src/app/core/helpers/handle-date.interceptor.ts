@@ -16,25 +16,26 @@ export class HandleDateInterceptor implements HttpInterceptor {
     constructor() { }
 
     intercept(request: HttpRequest<unknown>, next: HttpHandler) {
-        return next.handle(request).pipe(
-            map((event) => {
-                if (event instanceof HttpResponse) {
-                    let data = event.body;
-                    if (!Array.isArray(data)) {
-                        this.objToDate(data);
-                    } else {
-                        data.forEach((obj) => {
-                            this.objToDate(obj)
-                        })
-                    }
+        return next.handle(request)
+        // .pipe(
+        //     map((event) => {
+        //         if (event instanceof HttpResponse) {
+        //             let data = event.body;
+        //             if (!Array.isArray(data)) {
+        //                 this.objToDate(data);
+        //             } else {
+        //                 data.forEach((obj) => {
+        //                     this.objToDate(obj)
+        //                 })
+        //             }
 
-                    console.log(data);
-                    return event.clone({ body: data });
-                } else {
-                    return event;
-                }
-            })
-          );
+        //             // console.log(data);
+        //             return event.clone({ body: data });
+        //         } else {
+        //             return event;
+        //         }
+        //     })
+        //   );
     }
 
     objToDate(obj: any) {

@@ -1,3 +1,4 @@
+import { WindAtp45Input } from './../../core/api/models/wind-atp-45-input';
 import { Observable, Subject, BehaviorSubject } from 'rxjs';
 import { Store } from '@ngxs/store';
 import { Component, OnInit } from '@angular/core';
@@ -25,6 +26,11 @@ const formItems: FormItemBase[] = [
     }),
 ]
 
+class _WindAtp45Input {
+    public constructor(init?: Partial<WindAtp45Input>) {
+          Object.assign(this, init);
+      }
+  }
 @Component({
     selector: 'app-run',
     templateUrl: './run.component.html',
@@ -35,6 +41,9 @@ export class RunComponent implements OnInit {
     withWind: boolean = false;
     formGroup: FormGroup;
     leadtimes$ = new BehaviorSubject<string[]>(["empty"]);
+
+    types: string[];
+
     constructor(
         public formService: FormService,
         public apiService: ApiService,
@@ -48,12 +57,19 @@ export class RunComponent implements OnInit {
             this.store.dispatch(new ForecastStartAction.Update(res));
             this.leadtimes$.next(res.leadtimes)
         })
+
+        this.apiService.atp45TypesGet().subscribe(res => {
+            this.types = res;
+        })
     }
 
     onSubmit() {
         let formVals = this.formGroup.value;
         if (this.withWind) {
-            this.apiService.atp45RunWindPost({body: formVals}).subscribe(res => {
+            // TODO : Casting the form result to the types of interface. https://stackoverflow.com/questions/44708240/mapping-formgroup-to-interface-object
+            let payload = {...formVals}
+            console.log(payload)
+            this.apiService.atp45RunWindPost({body: payload}).subscribe(res => {
                 console.log(res)
             })    
         } else {

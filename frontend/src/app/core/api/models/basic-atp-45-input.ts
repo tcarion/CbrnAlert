@@ -6,5 +6,5 @@ export interface BasicAtp45Input {
   /**
    * Array of release points
    */
-  locations?: Array<GeoPoint>;
+  locations: Array<GeoPoint>;
 }

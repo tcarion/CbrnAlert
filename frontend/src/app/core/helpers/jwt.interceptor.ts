@@ -20,7 +20,7 @@ export class JwtInterceptor implements HttpInterceptor {
         // }
 
         const idToken = localStorage.getItem("id_token");
-
+        console.log(req)
         if (idToken) {
             const cloned = req.clone({
                         setHeaders: {

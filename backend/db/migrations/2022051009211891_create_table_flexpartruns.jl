@@ -6,6 +6,7 @@ function up()
     create_table(:flexpartruns) do
         [
             pk()
+            column(:uuid, :string)
             column(:name, :string)
             column(:path, :string)
             column(:date_created, :date)
@@ -14,7 +15,8 @@ function up()
         ]
     end
 
-    add_index(:flexpartruns, :name)
+    add_index(:flexpartruns, :uuid)
+    add_index(:flexpartruns, :path)
 end
 
 function down()

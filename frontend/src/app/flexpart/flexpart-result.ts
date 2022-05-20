@@ -16,7 +16,8 @@
 //     globAttr: string[],
 // }
 
-import { FlexpartOutput } from "./flexpart-output";
+import { FlexpartOutput } from "src/app/core/api/models";
+
 
 export interface FlexpartResult {
     name: string,
