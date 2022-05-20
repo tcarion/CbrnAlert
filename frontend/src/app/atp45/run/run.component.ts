@@ -63,7 +63,7 @@ export class RunComponent implements OnInit {
         })
     }
 
-    onSubmit() {
+    onSubmit(vals: WindAtp45Input) {
         let formVals = this.formGroup.value;
         if (this.withWind) {
             // TODO : Casting the form result to the types of interface. https://stackoverflow.com/questions/44708240/mapping-formgroup-to-interface-object
@@ -84,7 +84,8 @@ export class RunComponent implements OnInit {
                 console.log(res)
             })    
         }
-        console.log("Form sent from ATP45 run: %o", formVals)
+        let windinput: WindAtp45Input = vals as WindAtp45Input
+        console.log("Form sent from ATP45 run: %o", windinput )
     }
     
 }

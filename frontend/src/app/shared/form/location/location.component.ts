@@ -4,9 +4,9 @@ import { Component, Input, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { FormService } from 'src/app/core/services/form.service';
 import { filter, map, tap } from 'rxjs/operators';
-import { Coordinates } from 'src/app/core/models/coordinates';
 import { MapState, MapAction } from 'src/app/core/state/map.state';
 import { LonlatControl } from '../lonlat-control';
+import { GeoPoint } from 'src/app/core/api/models';
 
 @Component({
     selector: 'app-location',
@@ -15,10 +15,10 @@ import { LonlatControl } from '../lonlat-control';
 })
 export class LocationComponent implements OnInit {
     lonlatFormArray: FormArray;
-     
+    
     @Input() formGroup: FormGroup;
-    // @Select((state:any) => state.mapState.marker) marker$: Observable<Coordinates>;
-    @Select(MapState.marker) marker$: Observable<Coordinates>;
+    // @Select((state:any) => state.mapState.marker) marker$: Observable<GeoPoint>;
+    @Select(MapState.marker) marker$: Observable<GeoPoint>;
     constructor(
         public formService: FormService,
         public formBuilder: FormBuilder,
@@ -52,7 +52,7 @@ export class LocationComponent implements OnInit {
         ).subscribe();
     }
 
-    set values(coords:Coordinates) {
+    set values(coords:GeoPoint) {
         this.getArrayElem(0).get('lon')!.setValue(coords.lon.toString(), {emitEvent: false})
         this.getArrayElem(0).get('lat')!.setValue(coords.lat.toString(), {emitEvent: false})
     }
