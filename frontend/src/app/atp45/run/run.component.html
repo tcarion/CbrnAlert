@@ -1,27 +1,13 @@
-<form [formGroup]="formGroup" (ngSubmit)="onSubmit(formGroup.value)">
+<form [formGroup]="formGroup" (ngSubmit)="onSubmit()">
     <app-location [formGroup]="formGroup"></app-location>
-    <!-- <div formArrayName="lonlats">
-        <div *ngFor= "let lonlat of lonlats.controls, let i = index" [formGroupName]= "i">
-            <app-dynamic-form
-            [formGroup]="$any(lonlat)"
-            [item]="latItem"
-            ></app-dynamic-form>
-            <app-dynamic-form
-            [formGroup]="$any(lonlat)"
-            [item]="lonItem"
-            ></app-dynamic-form>
-        </div>
-    </div> -->
+
     <mat-slide-toggle [checked]="withWind" (change)="withWind = !withWind">
         Provide wind data
     </mat-slide-toggle>
     <ng-container  *ngIf="!withWind">
-        <!-- <app-dynamic-form
-            *ngFor="let item of formItems.items;"
-            [formGroup]="formGroup"
-            [item]="item"
-        ></app-dynamic-form> -->
-        <app-forecast-time-select [formGroup] = "formGroup" [leadtimes]="$any(leadtimes$ | async)"></app-forecast-time-select>
+
+        <!-- <app-forecast-time-select [formGroup] = "formGroup" [leadtimes]="$any(leadtimes$ | async)"></app-forecast-time-select> -->
+        <app-forecast-time-select [formGroup] = "formGroup" [leadtimes]="leadtimes"></app-forecast-time-select>
     </ng-container>
     <app-wind-form *ngIf="withWind"  [formGroup]="formGroup"></app-wind-form>
     <button class="w-17 h-12 self-start"

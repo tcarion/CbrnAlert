@@ -16,7 +16,7 @@ import * as dayjs from 'dayjs';
 import { MapService } from './map.service';
 import { CbrnMap } from '../models/cbrn-map';
 import { filter, map, tap } from 'rxjs/operators';
-import { LonlatControl } from 'src/app/shared/form/lonlat-control';
+// import { LonlatControl } from 'src/app/shared/form/lonlat-control';
 
 @Injectable({
     providedIn: 'root',
