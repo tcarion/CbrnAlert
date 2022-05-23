@@ -2,6 +2,7 @@ import { FlexpartService } from 'src/app/flexpart/flexpart.service';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { FlexpartOutput } from 'src/app/core/api/models';
+import { tap } from 'rxjs/operators';
 
 @Component({
     selector: 'app-variable-selection',
@@ -18,6 +19,7 @@ export class VariableSelectionComponent implements OnInit {
     // selectedVarSub = new Subject<string>();
     // selectedVar$: Observable<string>;
     fpOutput: FlexpartOutput
+    spatialLayers: string[];
 
     constructor(
         private flexpartService: FlexpartService,
@@ -30,11 +32,16 @@ export class VariableSelectionComponent implements OnInit {
         const params = this.route.snapshot.paramMap;
         const runId = params.get('runId');
         const outputId = params.get('outputId');
-        if (!runId || !outputId) {
-            throw new Error(`Path parameters missing: ${runId}, ${outputId}`);
-            
-        }
-        this.flexpartService.getOutput(params.get('runId') as string, params.get('outputId') as string).subscribe(fpOutput => {
+
+        this.flexpartService.getOutput(runId as string, outputId as string)
+        .pipe(
+            tap(res => {
+                this.flexpartService.getSpatialLayers(res.uuid).subscribe(layers => {
+                    this.spatialLayers = layers;
+                });
+            })
+        )
+        .subscribe(fpOutput => {
             this.fpOutput = fpOutput
         })
         // this.route.data.subscribe(data => {

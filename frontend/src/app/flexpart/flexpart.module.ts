@@ -1,4 +1,3 @@
-import { MatDialog } from '@angular/material/dialog';
 import { MatListModule } from '@angular/material/list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -18,6 +17,9 @@ import { VariableSelectionComponent } from './flexpart-plot/variable-selection/v
 import { FlexpartInputComponent } from './flexpart-input/flexpart-input.component';
 import { SelectInputComponent } from './select-input/select-input.component';
 import { SelectionDialogComponent } from 'src/app/flexpart/selection-dialog/selection-dialog.component';
+import { DimensionsFormComponent } from './flexpart-plot/dimensions-form/dimensions-form.component';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
 
 
 
@@ -34,6 +36,7 @@ import { SelectionDialogComponent } from 'src/app/flexpart/selection-dialog/sele
         FlexpartInputComponent,
         SelectInputComponent,
         SelectionDialogComponent,
+        DimensionsFormComponent,
     ],
     providers: [
         FlexpartService,
@@ -46,6 +49,8 @@ import { SelectionDialogComponent } from 'src/app/flexpart/selection-dialog/sele
         MatTabsModule,
         MatProgressSpinnerModule,
         MatListModule,
+        MatSelectModule,
+        MatButtonModule,
         // MatDialog
     ],
     exports: [

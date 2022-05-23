@@ -10,7 +10,6 @@ import {
 } from '@angular/core';
 import { SelectionTableComponent } from 'src/app/shared/selection-table/selection-table.component';
 import { FlexpartService } from '../flexpart.service';
-import { MatDialog } from '@angular/material/dialog';
 import { ApiService_old } from 'src/app/core/services/api.service';
 import { map } from 'rxjs/operators';
 import { ActivatedRoute, Router } from '@angular/router';

@@ -1,4 +1,3 @@
-import { SelectInputComponent } from './select-input/select-input.component';
 import { VariableSelectionComponent } from './flexpart-plot/variable-selection/variable-selection.component';
 import { MetDataComponent } from './met-data/met-data.component';
 import { FlexpartPlotComponent } from './flexpart-plot/flexpart-plot.component';
@@ -6,9 +5,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { FlexpartRunPreloadedComponent } from './flexpart-run-preloaded/flexpart-run-preloaded.component';
 import { ChooseOutputComponent } from './flexpart-plot/choose-output/choose-output.component';
-import { FlexpartPlotFormComponent } from './flexpart-plot/flexpart-plot-form/flexpart-plot-form.component';
-import { OutputFormComponent } from './flexpart-plot/output-form/output-form.component';
-import { OutputResolverService, OutputsResolverService } from 'src/app/flexpart/output-resolver.service';
+import { DimensionsFormComponent } from './flexpart-plot/dimensions-form/dimensions-form.component';
 
 
 
@@ -39,6 +36,12 @@ const routes: Routes = [
                         // resolve: {
                         //     fpOutput: OutputResolverService,
                         // },
+                        children: [
+                            {
+                                path: 'dimensions/:layerName',
+                                component: DimensionsFormComponent,
+                            }
+                        ],
                     },
                 ]
             }

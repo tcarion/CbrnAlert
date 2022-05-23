@@ -19,6 +19,8 @@ import { TextFieldModule } from '@angular/cdk/text-field';
 import { LocationComponent } from './location/location.component';
 import { ForecastTimeSelectComponent } from './forecast-time-select/forecast-time-select.component';
 import { MatSelectModule } from '@angular/material/select';
+import { DynFormComponent } from './dyn-form/dyn-form.component';
+import { DynFormQuestionComponent } from './dyn-form-question/dyn-form-question.component';
 
 
 
@@ -31,6 +33,8 @@ import { MatSelectModule } from '@angular/material/select';
     MapObjectInputComponent,
     LocationComponent,
     ForecastTimeSelectComponent,
+    DynFormComponent,
+    DynFormQuestionComponent,
   ],
   imports: [
     CommonModule,
@@ -43,12 +47,15 @@ import { MatSelectModule } from '@angular/material/select';
     MatOptionModule,
     MatSelectModule,
     TextFieldModule,
+    MatButtonModule,
   ],
   exports: [
     AutoformatSelectComponent,
     LocationComponent,
     DynamicFormComponent,
     ForecastTimeSelectComponent,
+    DynFormQuestionComponent,
+    DynFormComponent,
   ],
   providers: [
     FormService,

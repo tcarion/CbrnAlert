@@ -10,6 +10,7 @@ using AuthenticationController: current_user
 using AuthenticationController
 using Flexpart
 using Flexpart.FlexExtract
+using Rasters
 
 using Users
 using FlexpartRuns
@@ -312,6 +313,7 @@ function _iscompleted(fpdir)
     any(occursin.("CONGRATULATIONS", lines))
 end
 function flexpart_run()
+    debug()
     request_data = Genie.Requests.jsonpayload()
     startdate = Dates.DateTime(request_data["startDate"][1:22])
     enddate = Dates.DateTime(request_data["endDate"][1:22])
@@ -319,9 +321,10 @@ function flexpart_run()
     releaseenddate = Dates.DateTime(request_data["releaseEndDate"][1:22])
     releaseheight = request_data["releaseHeight"]
     timestep = request_data["timeStep"]
-    gridres = request_data["gridRes"]
+    gridres = Base.parse(Float64, request_data["gridRes"])
     area = request_data["area"]
-    area = area isa Dict ? area : Base.copy(area) 
+    area = area isa Dict ? area : Base.copy(area)
+    area = [51., -3, 44., 9.]
     rel_lon = request_data["lon"]
     rel_lat = request_data["lat"]
     particules = request_data["particulesNumber"]
@@ -456,6 +459,12 @@ function get_run()
     Dict(fprun) |> json
 end
 
+function _output_by_uuid()
+    output_id = Genie.Router.params(:outputId)
+    @show output_id
+    findone(FlexpartOutput, uuid = output_id)
+end
+
 function get_outputs()
     run_id = Genie.Router.params(:runId)
     outputs = related(_get_run(run_id), FlexpartOutput)
@@ -465,19 +474,67 @@ end
 function get_output()
     output_id = Genie.Router.params(:outputId)
     run_id = Genie.Router.params(:runId)
-    outfiles = _outfiles(Genie.Router.params(:result_id))
-    outfile = filter(x -> basename(x.name) == output_id, outfiles)[1]
-    outfile |> json
+    outfile = findone(FlexpartOutput, uuid = output_id)
+    Dict(outfile) |> json
 end
 
-function fp_outputs(result_path)
-    ncfs = try
-        ncf_files(result_path)
-    catch
-        return nothing
+function get_layers()
+    output_id = Genie.Router.params(:outputId)
+    outfile = findone(FlexpartOutput, uuid = output_id)
+    stack = RasterStack(outfile.path)
+    layers = keys(stack)
+    
+    isspatial = Base.parse(Bool, Genie.Router.params(:spatial, "false"))
+
+    if isspatial
+        layers = filter(layers) do layer
+            dimnames = name.(dims(stack[layer]))
+            return (:X in dimnames) && (:Y in dimnames)
+        end
     end
-    isempty(ncfs) && return nothing
-    return [output2dict(x) for x in ncfs]
+    layers |> json
+end
+
+_dims_to_dict(raster) = Dict(name(d) => collect(d) for d in dims(raster))
+
+function get_dimensions()
+    output_id = Genie.Router.params(:outputId)
+    layername = Genie.Router.params(:layer, "")
+    withhoriz = Base.parse(Bool, Genie.Router.params(:horizontal, "false"))
+    outfile = findone(FlexpartOutput, uuid = output_id)
+    raster = RasterStack(outfile.path)
+    if layername !== ""
+        raster = raster[layername]
+    end
+    d = _dims_to_dict(raster)
+    if !withhoriz
+        pop!(d, :X)
+        pop!(d, :Y)
+    end
+    d |> json
+end
+
+function _to_dim(k, v)
+    if k == "Time"
+        Ti(At(DateTime(v)))
+    elseif k == "X"
+        X(At(v))
+    elseif k == "Y"
+        Y(At(v))
+    else
+        Dim{Symbol(k)}(At(v))
+    end
+end
+
+function get_slice()
+    pl = jsonpayload()
+    fpoutput = _output_by_uuid()
+    layerName = Genie.Router.params(:layer)
+    # layerName = "spec001_mr"
+    raster = Raster(fpoutput.path, name = layerName)
+    args = [_to_dim(dname, val) for (dname, val) in pl]
+    viewed = view(raster, args...)
+    viewed |> read |> json
 end
 
 function output2dict(outpath)

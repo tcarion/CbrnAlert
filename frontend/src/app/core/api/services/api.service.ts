@@ -281,7 +281,7 @@ export class ApiService extends BaseService {
   static readonly FlexpartRunsRunIdOutputsGetPath = '/flexpart/runs/{runId}/outputs';
 
   /**
-   * Return the outputs of the Flexpart run `id`
+   * Return the outputs of the Flexpart run `runId`
    *
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
    * To access only the response body, use `flexpartRunsRunIdOutputsGet()` instead.
@@ -313,7 +313,7 @@ export class ApiService extends BaseService {
   }
 
   /**
-   * Return the outputs of the Flexpart run `id`
+   * Return the outputs of the Flexpart run `runId`
    *
    * This method provides access to only to the response body.
    * To access the full response (for headers, for example), `flexpartRunsRunIdOutputsGet$Response()` instead.
@@ -395,6 +395,242 @@ export class ApiService extends BaseService {
 
     return this.flexpartRunsRunIdOutputsOutputIdGet$Response(params).pipe(
       map((r: StrictHttpResponse<FlexpartOutput>) => r.body as FlexpartOutput)
+    );
+  }
+
+  /**
+   * Path part for operation flexpartOutputsOutputIdLayersGet
+   */
+  static readonly FlexpartOutputsOutputIdLayersGetPath = '/flexpart/outputs/{outputId}/layers';
+
+  /**
+   * Return the layers of the Flexpart output `outputId`
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `flexpartOutputsOutputIdLayersGet()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  flexpartOutputsOutputIdLayersGet$Response(params: {
+
+    /**
+     * The output ID
+     */
+    outputId: string;
+
+    /**
+     * If only spatial layers must be retrieved
+     */
+    spatial?: boolean;
+  }): Observable<StrictHttpResponse<Array<string>>> {
+
+    const rb = new RequestBuilder(this.rootUrl, ApiService.FlexpartOutputsOutputIdLayersGetPath, 'get');
+    if (params) {
+      rb.path('outputId', params.outputId, {});
+      rb.query('spatial', params.spatial, {});
+    }
+
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<Array<string>>;
+      })
+    );
+  }
+
+  /**
+   * Return the layers of the Flexpart output `outputId`
+   *
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `flexpartOutputsOutputIdLayersGet$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  flexpartOutputsOutputIdLayersGet(params: {
+
+    /**
+     * The output ID
+     */
+    outputId: string;
+
+    /**
+     * If only spatial layers must be retrieved
+     */
+    spatial?: boolean;
+  }): Observable<Array<string>> {
+
+    return this.flexpartOutputsOutputIdLayersGet$Response(params).pipe(
+      map((r: StrictHttpResponse<Array<string>>) => r.body as Array<string>)
+    );
+  }
+
+  /**
+   * Path part for operation flexpartOutputsOutputIdDimensionsGet
+   */
+  static readonly FlexpartOutputsOutputIdDimensionsGetPath = '/flexpart/outputs/{outputId}/dimensions';
+
+  /**
+   * Return the dimensions layers of the Flexpart output `outputId` with their values
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `flexpartOutputsOutputIdDimensionsGet()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  flexpartOutputsOutputIdDimensionsGet$Response(params: {
+
+    /**
+     * The output ID
+     */
+    outputId: string;
+
+    /**
+     * If the name of the layer is given, only returns the dimensions of the layer
+     */
+    layer?: string;
+
+    /**
+     * If false, don&#x27;t return the horizontal dimensions (lons and lats)
+     */
+    horizontal?: boolean;
+  }): Observable<StrictHttpResponse<{
+}>> {
+
+    const rb = new RequestBuilder(this.rootUrl, ApiService.FlexpartOutputsOutputIdDimensionsGetPath, 'get');
+    if (params) {
+      rb.path('outputId', params.outputId, {});
+      rb.query('layer', params.layer, {});
+      rb.query('horizontal', params.horizontal, {});
+    }
+
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<{
+        }>;
+      })
+    );
+  }
+
+  /**
+   * Return the dimensions layers of the Flexpart output `outputId` with their values
+   *
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `flexpartOutputsOutputIdDimensionsGet$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  flexpartOutputsOutputIdDimensionsGet(params: {
+
+    /**
+     * The output ID
+     */
+    outputId: string;
+
+    /**
+     * If the name of the layer is given, only returns the dimensions of the layer
+     */
+    layer?: string;
+
+    /**
+     * If false, don&#x27;t return the horizontal dimensions (lons and lats)
+     */
+    horizontal?: boolean;
+  }): Observable<{
+}> {
+
+    return this.flexpartOutputsOutputIdDimensionsGet$Response(params).pipe(
+      map((r: StrictHttpResponse<{
+}>) => r.body as {
+})
+    );
+  }
+
+  /**
+   * Path part for operation flexpartOutputsOutputIdSlicePost
+   */
+  static readonly FlexpartOutputsOutputIdSlicePostPath = '/flexpart/outputs/{outputId}/slice';
+
+  /**
+   * Return a slice of the `output` according to some dimensions.
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `flexpartOutputsOutputIdSlicePost()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  flexpartOutputsOutputIdSlicePost$Response(params: {
+
+    /**
+     * Name of the layer to slice
+     */
+    layer: string;
+
+    /**
+     * The output ID
+     */
+    outputId: string;
+
+    /**
+     * dimensions to be sliced along
+     */
+    body: {
+}
+  }): Observable<StrictHttpResponse<Array<any>>> {
+
+    const rb = new RequestBuilder(this.rootUrl, ApiService.FlexpartOutputsOutputIdSlicePostPath, 'post');
+    if (params) {
+      rb.query('layer', params.layer, {});
+      rb.path('outputId', params.outputId, {});
+      rb.body(params.body, 'application/json');
+    }
+
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<Array<any>>;
+      })
+    );
+  }
+
+  /**
+   * Return a slice of the `output` according to some dimensions.
+   *
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `flexpartOutputsOutputIdSlicePost$Response()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  flexpartOutputsOutputIdSlicePost(params: {
+
+    /**
+     * Name of the layer to slice
+     */
+    layer: string;
+
+    /**
+     * The output ID
+     */
+    outputId: string;
+
+    /**
+     * dimensions to be sliced along
+     */
+    body: {
+}
+  }): Observable<Array<any>> {
+
+    return this.flexpartOutputsOutputIdSlicePost$Response(params).pipe(
+      map((r: StrictHttpResponse<Array<any>>) => r.body as Array<any>)
     );
   }
 

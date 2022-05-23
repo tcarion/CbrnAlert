@@ -1,5 +1,5 @@
 import { ApiService } from 'src/app/core/api/services';
-import { Observable, Subject, throwError } from 'rxjs';
+import { Observable, of, Subject, throwError } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { FlexpartInput } from 'src/app/flexpart/flexpart-input';
 import { FlexpartResult } from 'src/app/flexpart/flexpart-result';
@@ -12,6 +12,8 @@ import { MapService } from '../core/services/map.service';
 import { MapPlotsService } from 'src/app/core/services/map-plots.service';
 import { AuthenticationService } from '../core/services/authentication.service';
 import { FlexpartOutput, FlexpartRun } from 'src/app/core/api/models';
+import { QuestionBase } from '../shared/form/question-base';
+import { DropdownQuestion } from '../shared/form/dropdown-question';
 
 @Injectable({
     providedIn: 'root'
@@ -50,19 +52,7 @@ export class FlexpartService {
     }
 
     getRuns(): Observable<FlexpartRun[]> {
-        // return this.apiService
-        //     .flexpartRequest({request: 'flexpart_results'})
-        //     .pipe(
-        //         map((data: any) => {
-        //             data.forEach((element: any) => {
-        //                 element.startDate = new Date(element.startDate);
-        //                 element.endDate = new Date(element.endDate);
-        //             });
-        //             return <FlexpartResult[]>data;
-        //         })
-        //     );
         return this.apiService.flexpartRunsGet()
-            // .pipe(map(results => results.filter((res: FlexpartResult) => res.outputs !== undefined)))
     }
 
     getRun(runId: string): Observable<FlexpartRun> {
@@ -77,7 +67,45 @@ export class FlexpartService {
         return this.apiService.flexpartRunsRunIdOutputsOutputIdGet({ runId, outputId })
     }
 
+    getSpatialLayers(outputId: string): Observable<string[]> {
+        return this.apiService.flexpartOutputsOutputIdLayersGet( {outputId, spatial: true} )
+    }
 
+    getZDims(outputId: string, layer: string): Observable<Object> {
+        return this.apiService.flexpartOutputsOutputIdDimensionsGet({outputId, layer, horizontal: false})
+    }
+
+    getSlice(outputId: string, layerName: string, dimensions:Object) {
+        return this.apiService.flexpartOutputsOutputIdSlicePost({
+            outputId,
+            layer: layerName,
+            body: dimensions
+        })
+    }
+
+    getDimsQuestions(outputId: string, layer: string) {
+        const questions: QuestionBase<any>[] = []
+        this.getZDims(outputId, layer).subscribe(dims => {
+            console.log(dims)
+            for (const [key, values] of Object.entries(dims as { [k: string]: string[] | number[]})) {
+                const kvs = values.map( (v) => {
+                    return {key:v as string, value: v as string}
+                })
+                questions.push(new DropdownQuestion({
+                    key: key,
+                    label: key,
+                    options: kvs,
+                    required: true,
+                    value: values[0],
+                    // order: 3
+                }))
+                // this.formGroup.addControl(key, new FormControl(values[0]))
+                // this.dimNames.push(key);
+                // this.dimValues.push(values);
+            }
+        })
+        return of(questions);
+    }
     meteoDataRetrieval(payload: any) {
         const notifTitle = this.notificationService.addNotif('Met data retrieval', 'metDataRequest');
 

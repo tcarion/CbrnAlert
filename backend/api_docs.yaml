@@ -237,7 +237,7 @@ paths:
 
   /flexpart/runs/{runId}/outputs:
     get:
-      description: 'Return the outputs of the Flexpart run `id`'
+      description: 'Return the outputs of the Flexpart run `runId`'
       parameters:
         - $ref: '#/components/parameters/runIdParam'
       responses:
@@ -250,6 +250,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/FlexpartOutput'
 
+  #TODO : runId is not actually needed. Change the paths and backend-frontend accordingly
   /flexpart/runs/{runId}/outputs/{outputId}:
     get:
       parameters:
@@ -262,6 +263,81 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FlexpartOutput'
+
+  /flexpart/outputs/{outputId}/layers:
+    get:
+      description: 'Return the layers of the Flexpart output `outputId`'
+      parameters:
+        - $ref: '#/components/parameters/outputIdParam'
+        - in: query
+          name: spatial
+          schema:
+            type: boolean
+            default: false
+          description: If only spatial layers must be retrieved
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+  /flexpart/outputs/{outputId}/dimensions:
+    get:
+      description: 'Return the dimensions layers of the Flexpart output `outputId` with their values'
+      parameters:
+        - $ref: '#/components/parameters/outputIdParam'
+        - in: query
+          name: layer
+          schema:
+            type: string
+          description: If the name of the layer is given, only returns the dimensions of the layer
+        - in: query
+          name: horizontal
+          schema:
+            type: boolean
+            default: false
+          description: If false, don't return the horizontal dimensions (lons and lats)  
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /flexpart/outputs/{outputId}/slice:
+    post:
+      description: 'Return a slice of the `output` according to some dimensions.'
+      parameters:
+        - in: query
+          name: layer
+          required: true
+          schema:
+            type: string
+          description: Name of the layer to slice
+        - $ref: '#/components/parameters/outputIdParam'
+      requestBody:
+        required: true
+        description: 'dimensions to be sliced along'
+        content:
+          application/json:
+            schema:
+              type: object
+              example: {Time:'2022-02-12T22:00:00.0', height:50, pointpsec:1, nageclass:1}
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
 
   /atp45/types:
     get:

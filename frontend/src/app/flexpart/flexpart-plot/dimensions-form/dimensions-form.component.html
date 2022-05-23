@@ -1,0 +1,17 @@
+<!-- <div *ngFor="let item of dimensions"> {{item}} </div> -->
+<!-- <form *ngFor="let dimName of dimNames; let index = index" [formGroup]="formGroup">
+    <div *ngFor="let question of questions" class="form-row">
+        <app-question [question]="question" [form]="formGroup"></app-question>
+      </div>
+    <mat-label>{{dimName}}</mat-label>
+    <mat-select formControlName="dimName">
+        <mat-option *ngFor="let value of dimValues[index]" [value]="value">{{value}}</mat-option>
+    </mat-select>
+</form> -->
+
+<form [formGroup]="formGroup" (ngSubmit)="onSubmit()">
+    <app-dyn-form *ngIf="!!(questions$ | async) && (questions$ | async)!.length !== 0" [questions]="questions$ | async"
+        [parentForm]="formGroup" formName="dimensions">
+    </app-dyn-form>
+    <button mat-raised-button color="primary" type="submit" [disabled]="!formGroup.valid">Plot!</button>
+</form>

@@ -16,6 +16,8 @@ import * as dayjs from 'dayjs';
 import { MapService } from './map.service';
 import { CbrnMap } from '../models/cbrn-map';
 import { filter, map, tap } from 'rxjs/operators';
+import { QuestionBase } from 'src/app/shared/form/question-base';
+import { FormControl as neatFormControl, FormGroup as neatFormGroup } from '@ngneat/reactive-forms'
 // import { LonlatControl } from 'src/app/shared/form/lonlat-control';
 
 @Injectable({
@@ -28,7 +30,7 @@ export class FormService {
     constructor(
         private formBuilder: FormBuilder,
         private mapService: MapService,
-        ) { }
+    ) { }
 
     // emitCurrentForm() {
     //     this.currentFormSubject.next(this.currentForm);
@@ -79,12 +81,12 @@ export class FormService {
     getLonlat(formGroup: FormGroup) {
         const lon = formGroup.get('lon')?.value;
         const lat = formGroup.get('lat')?.value;
-        return {lon, lat};
+        return { lon, lat };
     }
 
     toControl(item: FormItemBase) {
         let validators = item.required ? [Validators.required] : []
-        item.validators?.forEach(validator => {validators.push(validator)})
+        item.validators?.forEach(validator => { validators.push(validator) })
         return new FormControl(item.value || '', validators);
     }
 
@@ -96,6 +98,20 @@ export class FormService {
         });
 
         return new FormGroup(group);
+    }
+
+    toFormGroup_(questions: QuestionBase<string|number>[]) {
+        const group: any = {};
+
+        questions.forEach(question => {
+            let value = question.value
+            if (!value) {
+                value = typeof question.value == 'number' ? 0 : ''
+            }
+            group[question.key] = question.required ? new neatFormControl(value, Validators.required)
+                : new neatFormControl(value);
+        });
+        return new neatFormGroup(group);
     }
 
     arrayToOptions(array: Array<any>) {
@@ -121,7 +137,7 @@ export class FormService {
         });
     }
 
-    objectToOptions(array: Array<{[k:string]: any}>) {
+    objectToOptions(array: Array<{ [k: string]: any }>) {
         return array.map((obj) => {
             const arrOb = Object.entries(obj);
             const key = arrOb[0][1];
@@ -176,12 +192,12 @@ export class FormService {
                 } else if (obj[k] instanceof Date) {
                     // obj[k] = this.removeTimeZone(obj[k])
                     obj[k] = dayjs(obj[k]).add(4, 'h').toDate()
-                } else if (typeof obj[k] == 'string' ) {
+                } else if (typeof obj[k] == 'string') {
                     const toD = this.strToDate(obj[k]);
                     // obj[k] = toD ? this.removeTimeZone(toD) : obj[k]
                     obj[k] = toD ? dayjs(toD).add(4, 'h').toDate() : obj[k]
                 }
-                
+
             }
         }
     }

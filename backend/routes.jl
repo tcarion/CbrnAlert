@@ -51,7 +51,7 @@ flexpart_routes = Dict(
 api_routes = Dict(
     "/forecast/available" => (f=Atp45Controller.available_steps, keyargs=(method=GET,)),
     "/atp45/run/wind" => (f=Atp45Controller.run_wind, keyargs=(method=POST,)),
-    # "/atp45/types" => (f=Atp45Controller.TODO, keyargs=(method=GET,)),
+    "/atp45/types" => (f=Atp45Controller.get_cbrn_types, keyargs=(method=GET,)),
     "/atp45/run/forecast" => (f=Atp45Controller.run_forecast, keyargs=(method=POST,)),
     "/flexpart/meteo_data_request" => (f=FlexpartController.meteo_data_request, keyargs=(method=POST, named=:meteo_data_request)),
     "/flexpart/inputs" => (f=FlexpartController.get_inputs, keyargs=(method=GET, named=:available_flexpart_input)),
@@ -62,9 +62,12 @@ api_routes = Dict(
     "/flexpart/runs/:runId::String/outputs" => (f=FlexpartController.get_outputs, keyargs=(method = GET,)),
     # "/flexpart/results/:result_id::String/outputs" => (f=FlexpartController.get_outputs, keyargs=(method = GET, named = :get_flexpart_outputs)),
     "/flexpart/runs/:runId::String/outputs/:outputId::String" => (f=FlexpartController.get_output, keyargs=(method = GET, named = :get_flexpart_output)),
+    "/flexpart/outputs/:outputId::String/layers/" => (f=FlexpartController.get_layers, keyargs=(method = GET,)),
+    "/flexpart/outputs/:outputId::String/dimensions/" => (f=FlexpartController.get_dimensions, keyargs=(method = GET,)),
+    "/flexpart/outputs/:outputId::String/slice/" => (f=FlexpartController.get_slice, keyargs=(method = POST,)),
     # "/flexpart/results/:result_id::String/outputs/:output_id::String" => (f=FlexpartController.get_output, keyargs=(method = GET, named = :get_flexpart_output)),
-    "/flexpart/results/:result_id::String/output/:output_id::String" => (f=FlexpartController.get_plot, keyargs=(method = POST,)),
-    "/flexpart/results/:result_id::String/output/:output_id::String/daily_average" => (f=FlexpartController.daily_average, keyargs=(method = POST,))
+    # "/flexpart/results/:result_id::String/output/:output_id::String" => (f=FlexpartController.get_plot, keyargs=(method = POST,)),
+    # "/flexpart/results/:result_id::String/output/:output_id::String/daily_average" => (f=FlexpartController.daily_average, keyargs=(method = POST,))
 )
 
 for (url, args) in api_routes

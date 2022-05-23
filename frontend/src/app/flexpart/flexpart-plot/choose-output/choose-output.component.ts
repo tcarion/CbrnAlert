@@ -1,6 +1,5 @@
 import { ActivatedRoute, ActivatedRouteSnapshot, Router } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
 import { FlexpartService } from 'src/app/flexpart/flexpart.service';
 import { FlexpartOutput } from 'src/app/core/api/models';
 import { SelectionDialogComponent } from 'src/app/flexpart/selection-dialog/selection-dialog.component';
@@ -17,7 +16,6 @@ export class ChooseOutputComponent implements OnInit {
 
     constructor(
         private flexpartService: FlexpartService,
-        public dialog: MatDialog,
         private router: Router,
         private route: ActivatedRoute,
     ) { 
