@@ -3,6 +3,8 @@ import { Component, OnInit } from '@angular/core';
 import { FlexpartService } from 'src/app/flexpart/flexpart.service';
 import { FlexpartOutput } from 'src/app/core/api/models';
 import { SelectionDialogComponent } from 'src/app/flexpart/selection-dialog/selection-dialog.component';
+import { switchMap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 @Component({
     selector: 'app-choose-output',
@@ -11,12 +13,10 @@ import { SelectionDialogComponent } from 'src/app/flexpart/selection-dialog/sele
 })
 export class ChooseOutputComponent implements OnInit {
 
-    fpOutput: FlexpartOutput;
-    fpOutputs: FlexpartOutput[];
+    fpOutputs$: Observable<FlexpartOutput[]>;
 
     constructor(
         private flexpartService: FlexpartService,
-        private router: Router,
         private route: ActivatedRoute,
     ) { 
         // this.fpOutput = this.route.data.
@@ -29,23 +29,12 @@ export class ChooseOutputComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        let runId = this.route.snapshot.paramMap.get('runId') as string;
-        this.flexpartService.getOutputs(runId).subscribe(fpOutputs => {
-            // if (fpOutputs.length == 1) {
-            //     this.goToOutput(fpOutputs[0])
-            // } else {
-            //     this.openDialog(fpOutputs);
-            // }
-            this.fpOutputs = fpOutputs;
-        })
-        // this.route.data.subscribe(data => {
-        //     const outputs = data.fpOutputs;
-        //     if (outputs.length == 1) {
-        //         this.goToOutput(outputs[0])
-        //     } else {
-        //         this.openDialog(outputs);
-        //     }
-        // })
+        this.fpOutputs$ = this.route.paramMap.pipe(
+            switchMap(params => {
+                let runId = params.get('runId') as string;
+                return this.flexpartService.getOutputs(runId);
+            })
+        )
     }
 
     // goToOutput(fpOutput: FlexpartOutput) {

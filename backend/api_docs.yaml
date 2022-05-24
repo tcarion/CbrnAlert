@@ -64,12 +64,51 @@ components:
           description: 'Latitude [°]'
     # TODO MBEOT: MODIFY ACCORDING TO ATP45.JL RESULT
     Atp45Result:
+      allOf: 
+        # - $ref: './api_geojson.yaml#/components/schemas/Feature'
+        - $ref: 'https://api.swaggerhub.com/apis/OlivierMartineau/GeoJSON/1.0.0#/components/schemas/Feature'
+        - type: object
+          properties:
+            'geometry':
+              allOf:
+                # - $ref: 'https://api.swaggerhub.com/apis/OlivierMartineau/GeoJSON/1.0.0#/components/schemas/Polygon'
+                - $ref: 'https://api.swaggerhub.com/apis/OlivierMartineau/GeoJSON/1.0.0#/components/schemas/Polygon'
+
+            'properties':
+              $ref: '#/components/schemas/CbrnTypes'
+
+    CbrnTypes:
       type: object
       properties:
-        coordinates:
-          type: array
-          items: 
-            $ref: '#/components/schemas/GeoPoint'
+        'shortName':
+          type: string
+          example: "SB_RKT"
+        'longName':
+          type: string
+          example: "Surface Burst Rocket"
+        'cbrnType':
+          type: string
+          example: "typeA"
+
+    Atp45Zone:
+      allOf:
+      # $ref: 'https://api.swaggerhub.com/apis/OlivierMartineau/GeoJSON/1.0.0#/components/schemas/Polygon'
+        - $ref: 'https://api.swaggerhub.com/apis/OlivierMartineau/GeoJSON/1.0.0#/components/schemas/Feature'
+        - type: object
+          properties:
+            'properties':
+              type: object
+              properties:
+                'area':
+                  type: string
+                  example: "release area"
+                'shape':
+                  type: string
+                  example: "circle"
+            'geometry':
+              allOf:
+                - $ref: 'https://api.swaggerhub.com/apis/OlivierMartineau/GeoJSON/1.0.0#/components/schemas/Polygon'
+
     ForecastAvailableSteps:
       type: object
       required:
@@ -136,6 +175,59 @@ components:
         metadata:
           type: object
 
+    RawSliceResponse:
+      type: array
+      items:
+        type: number
+
+    GeoJsonSliceResponse:
+      type: object
+      required:
+        - 'collection'
+      properties:
+        'collection':
+          allOf:
+            - $ref: 'https://api.swaggerhub.com/apis/OlivierMartineau/GeoJSON/1.0.0#/components/schemas/FeatureCollection'
+            - type: object
+              properties:
+                'features': 
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/GeoCell'
+        'metadata':
+          # type: object
+          oneOf: 
+            - $ref: '#/components/schemas/ColorbarData'
+            # description: 'Place for other information like legend map'
+      # properties:
+    ColorbarData:
+      type: object
+      properties:
+        colors:
+          type: array
+          items: 
+            type: string
+          description: 'Colors for each interval in hex format'
+          example: ["#00007F", "#0000FF", "#7F0000"]
+        ticks:
+          type: array
+          items:
+            type: number
+          description: 'Values for the bounding intervals'
+
+    GeoCell:
+      type: object
+      allOf:
+        - $ref: 'https://api.swaggerhub.com/apis/OlivierMartineau/GeoJSON/1.0.0#/components/schemas/Feature'
+        - type: object
+          properties:
+            'geometry':
+              $ref: https://api.swaggerhub.com/apis/OlivierMartineau/GeoJSON/1.0.0#/components/schemas/Polygon
+            'properties':
+              type: object
+              properties:
+                'val': 
+                  type: number
     RunStatus:
       type: string
       enum:
@@ -321,6 +413,19 @@ paths:
           schema:
             type: string
           description: Name of the layer to slice
+        - in: query
+          name: geojson
+          schema: 
+            type: boolean
+            default: false
+          description: If true, the output is given in geojson format. The sliced layer must be a surface.
+        - in: query
+          name: legend
+          schema: 
+            type: boolean
+            default: false
+          description: If true, data for legend is provided
+
         - $ref: '#/components/parameters/outputIdParam'
       requestBody:
         required: true
@@ -337,9 +442,12 @@ paths:
           content:
             application/json:
               schema:
-                type: array
+                oneOf:
+                 - $ref: '#/components/schemas/RawSliceResponse'
+                 - $ref: '#/components/schemas/GeoJsonSliceResponse'
 
-  /atp45/types:
+
+  /atp45/cbrntypes:
     get:
       responses:
         '200':
@@ -349,6 +457,4 @@ paths:
               schema:
                 type: array
                 items:
-                  type: string
-
-
+                  $ref: '#/components/schemas/CbrnTypes'

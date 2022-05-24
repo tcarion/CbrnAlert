@@ -2,6 +2,7 @@ import { Feature, FeatureCollection } from 'geojson';
 import * as L from 'leaflet';
 import 'leaflet-draw';
 import 'leaflet.heat';
+import { ColorbarData } from '../api/models';
 import { MapPlot } from './map-plot';
 
 const iconRetinaUrl = 'assets/marker-icon-2x.png';
@@ -42,11 +43,26 @@ const REL_LOC_MARKER_OPTIONS = {
     fillOpacity: 1
 };
 
+function getcolor(value: number, colorbar: ColorbarData) {
+    let ticks = colorbar.ticks as number[];
+    let colors = colorbar!.colors as string[];
+    let n = ticks.length;
+    if (value <= ticks[0]) {
+        return colors[0];
+    }
+    for (let i = 1; i < n; i++) {
+        if (value <= ticks[i]) {
+            return colors[i - 1];
+        }
+    }
+    return colors[n - 2];
+}
+
 abstract class AbstractPlots {
     plots: {
         id: number,
         layers: L.FeatureGroup,
-        legendData?: any 
+        legendData?: any
     }[] = [];
 
     getLayers(id: number) {
@@ -56,7 +72,7 @@ abstract class AbstractPlots {
     getPlot(id: number) {
         return this.plots.find(el => el.id == id);
     }
-    setActive(id: number) {}
+    setActive(id: number) { }
 
     // add() {}
 
@@ -79,7 +95,7 @@ class Atp45Plots extends AbstractPlots {
                 return L.circleMarker(latlng, REL_LOC_MARKER_OPTIONS);
             },
             style: (feature: any) => {
-                let opt = feature.properties.color ? {color: feature.properties.color} : {}
+                let opt = feature.properties.color ? { color: feature.properties.color } : {}
                 return opt;
             },
             onEachFeature: (feature: Feature, layer: L.Layer) => {
@@ -117,14 +133,14 @@ class FlexpartPlots extends AbstractPlots {
     plots: {
         id: number,
         layers: L.FeatureGroup,
-        legendData?: any 
+        legendData?: any
     }[] = [];
-    
+
     constructor(private legendRef: any, private infoRef: any) {
         super()
     }
 
-    getLayerFromCells(cells: FeatureCollection[]): L.FeatureGroup {
+    getLayerFromCells(collection: FeatureCollection): L.FeatureGroup {
         let options: L.GeoJSONOptions = {
             pointToLayer: function (feature: any, latlng: L.LatLng) {
                 if (feature.properties.type === "releasePoint") {
@@ -145,15 +161,15 @@ class FlexpartPlots extends AbstractPlots {
             //         'click': (e) => this.setActive(this.curPlot),
             //     })
             // }
+
+            // Update the info box with the cell value
             onEachFeature: this.cellHoverListener()
         };
-
         let layers = L.geoJSON(undefined, options);
-
-        cells.forEach((feature: any) => {
-            layers.addData(feature);
-        });
-
+        // cells.forEach((feature: any) => {
+        //     layers.addData(feature);
+        // });
+        layers.addData(collection)
         return layers;
     }
 
@@ -167,18 +183,34 @@ class FlexpartPlots extends AbstractPlots {
 
     setActive(id: number) {
         const plot = this.getPlot(id);
-        plot?.layers.setStyle({fillOpacity: 0.8});
-        this.plots.filter(el => el.id !== id).forEach(el => el.layers.setStyle({fillOpacity: 0.4}));
-        plot && this.legendRef.update(plot.legendData);
+        plot?.layers.setStyle({ fillOpacity: 0.8 });
+        this.plots.filter(el => el.id !== id).forEach(el => el.layers.setStyle({ fillOpacity: 0.4 }));
+        plot && this.legendRef.update(plot.legendData as ColorbarData);
     }
 
     add(mapPlot: MapPlot) {
         const newPlot = {
             id: mapPlot.id,
-            layers: this.getLayerFromCells(<FeatureCollection[]>mapPlot.geojson),
-            legendData: mapPlot.metadata
+            layers: this.getLayerFromCells(<FeatureCollection>mapPlot.geojson),
+            legendData: mapPlot.metadata as ColorbarData
         }
+        newPlot.layers.eachLayer((layer: any) => {
+            let val = layer.feature.properties.val
+            if (val !== undefined) {
+                layer.setStyle({
+                    color: getcolor(val, newPlot.legendData)
+                })
+            }
+        })
 
+        // style: (feature: any) => {
+        //     let options: L.PathOptions = {
+        //         stroke: false, 
+        //         fillOpacity: 0.4,
+        //     }
+        //     options = (feature.properties !== undefined) && (legendData !== undefined) ? {...options, color: getcolor(feature.properties.val, legendData) } : options
+        //     return options;
+        // },
         // newPlot.layers.on('click', (e) => {
         //     this.setActive(newPlot.id);
         // })
@@ -189,12 +221,12 @@ class FlexpartPlots extends AbstractPlots {
 
     cellHoverListener() {
         let info = this.infoRef;
-        function cellHover(e:L.LeafletMouseEvent) {
+        function cellHover(e: L.LeafletMouseEvent) {
             let layer = e.target;
             info.update(layer.feature.properties)
         }
 
-        function resetHover(e:L.LeafletMouseEvent) {
+        function resetHover(e: L.LeafletMouseEvent) {
             info.update();
         }
 
@@ -273,14 +305,14 @@ export class CbrnMap {
         }
     }
 
-    private rectLayer(area: number[], options: L.PolylineOptions) : L.Layer {
+    private rectLayer(area: number[], options: L.PolylineOptions): L.Layer {
         const corner1 = L.latLng(area[0], area[1]);
         const corner2 = L.latLng(area[2], area[3]);
         const bounds = L.latLngBounds(corner1, corner2);
         return L.rectangle(bounds, options);
     }
 
-    layerToArea(layer: L.Rectangle) : number[] {
+    layerToArea(layer: L.Rectangle): number[] {
         const nw = layer.getBounds().getNorthWest();
         const se = layer.getBounds().getSouthEast();
         return [nw.lat, nw.lng, se.lat, se.lng];
@@ -312,50 +344,6 @@ export class CbrnMap {
     removeLayer(layer: L.Layer | undefined) {
         layer !== undefined && this.map.removeLayer(layer);
     }
-
-    // addHeatLayer(lons: number[], lats: number[], values: number[]) {
-    //     let toPlot: L.HeatLatLngTuple[] = [];
-    //     const max = Math.max(...values)
-    //     values.map((e, i) => {
-    //         toPlot.push(<any>[
-    //             lats[i],
-    //             lons[i],
-    //             e/max
-    //         ]);
-    //     });
-    //     const options = {
-    //         radius : 1e10,
-    //         // max: max
-    //     };
-    //     this.heatLayer = L.heatLayer(toPlot, options);
-
-    //     // this.heatLayer = L.heatLayer([
-    //     //     [50.5, 30.5, 0.2], // lat, lng, intensity
-    //     //     [50.6, 30.4, 0.5],
-    //     // ], {radius: 25})
-
-    //     this.heatLayer.addTo(this.map);
-    // }
-
-    // drawShapes(shape_data: any) {
-    //     const shapes_color = ['blue', 'red', 'yellow']
-    //     shape_data.shapes.forEach((shape: any, i: number) => {
-    //         L.polygon(shape.coords, { color: shapes_color[i] }).addTo(this.map).bindPopup(shape.text);
-    //     });
-    //     // this.atp45Results.push(shape_data);
-    // }
-
-
-    // setIsActive(cells: FeatureCollection[], isActive: boolean) {
-    //     cells.forEach((cell: any) => {
-    //         cell.features[0].properties.active = isActive;
-    //     })
-    //     // layers.setStyle({fillOpacity: 0.8})
-    // }
-
-    // setActive(layer: any) {
-    //     layer.setStyle({fillOpacity: 0.8})
-    // }
 
     addAtp45Plot(mapPlot: MapPlot) {
         this.atp45Plots.add(mapPlot).layers.addTo(this.map);
@@ -411,13 +399,13 @@ export class CbrnMap {
     }
 
     createInfo() {
-        this.info = new L.Control({position: 'topright'});
+        this.info = new L.Control({ position: 'topright' });
 
-        this.info.update = function (props:any) {
-            while(this._div.firstChild){
+        this.info.update = function (props: any) {
+            while (this._div.firstChild) {
                 this._div.firstChild.remove();
             }
-            let conc = props && parseFloat(props.value);
+            let conc = props && parseFloat(props.val);
             const name = document.createElement('h4'); name.innerText = 'Cell value: ';
             let content;
             if (props) {
@@ -441,28 +429,28 @@ export class CbrnMap {
     }
 
     createLegend() {
-        this.legend = new L.Control({position: 'bottomright'});
+        this.legend = new L.Control({ position: 'bottomright' });
 
-        this.legend.update = function (legendData: any) {
+        this.legend.update = function (legendData: ColorbarData) {
             // if (legendData === undefined) {return;}
-            let colorbar = legendData.colorbar,
-                ticksLabel = legendData.ticksLabel;
-            ticksLabel = ticksLabel.map((e:number) => {return e.toExponential(2)});
-            const specie = legendData.specie ? `(${legendData.specie})` : ''
+            let colorbar = legendData.colors as string[],
+                ticks = legendData.ticks;
+            let ticksLabel = ticks!.map((e: number) => { return e.toExponential(2) });
+            // const specie = legendData.specie ? `(${legendData.specie})` : ''
             this._div.innerHTML = '';
             for (var i = 0; i < colorbar.length; i++) {
-                let span = (i===0) ? `<span class="legend-ticklabel">${ticksLabel[i]}</span>` : '';
+                let span = (i === 0) ? `<span class="legend-ticklabel">${ticksLabel[i]}</span>` : '';
                 this._div.innerHTML +=
                     `<div>
                         <span class="ticks-container">
-                            <span class="legend-ticklabel">${ticksLabel[i+1]}</span>
+                            <span class="legend-ticklabel">${ticksLabel[i + 1]}</span>
                             ${span}
                         </span>
                         <i style="background:${colorbar[i]}"></i>
                     </div>
                     `;
             }
-            this._div.innerHTML += `<span class="title"> ${legendData.name} </br> ${specie} </br> [${legendData.units}]</span>`;
+            // this._div.innerHTML += `<span class="title"> ${legendData.name} </br> ${specie} </br> [${legendData.units}]</span>`;
         };
 
         this.legend.onAdd = function (map: L.Map) {
@@ -479,7 +467,7 @@ export class CbrnMap {
 
 
     // infoUpdateWithConc() {
-        
+
 
     // }
 

@@ -15,7 +15,6 @@ export class DynFormComponent implements OnInit {
     @Input() parentForm?: FormGroup;
     @Input() formName?: string
     form!: FormGroup;
-    payLoad = '';
 
     constructor(private formService: FormService) { }
 
@@ -25,8 +24,4 @@ export class DynFormComponent implements OnInit {
             this.parentForm.addControl(this.formName, this.form)
         }
     }
-
-    //   onSubmit() {
-    //     this.payLoad = JSON.stringify(this.form.getRawValue());
-    //   }
 }

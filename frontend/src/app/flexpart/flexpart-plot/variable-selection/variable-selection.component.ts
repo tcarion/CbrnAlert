@@ -2,7 +2,8 @@ import { FlexpartService } from 'src/app/flexpart/flexpart.service';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { FlexpartOutput } from 'src/app/core/api/models';
-import { tap } from 'rxjs/operators';
+import { map, switchMap, tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 @Component({
     selector: 'app-variable-selection',
@@ -13,13 +14,13 @@ export class VariableSelectionComponent implements OnInit {
 
     // @Select(FlexpartState.fpOutput)
     // fpOutput$: Observable<FlexpartOutput>;
-    
+
     // fpOutputVar2D$: Observable<string[]>;
 
     // selectedVarSub = new Subject<string>();
     // selectedVar$: Observable<string>;
-    fpOutput: FlexpartOutput
-    spatialLayers: string[];
+    // fpOutput$: Observable<FlexpartOutput>
+    spatialLayers$: Observable<string[]>;
 
     constructor(
         private flexpartService: FlexpartService,
@@ -27,23 +28,35 @@ export class VariableSelectionComponent implements OnInit {
     ) {
         // this.selectedVar$ = this.selectedVarSub.asObservable();
     }
-    
-    ngOnInit(): void {
-        const params = this.route.snapshot.paramMap;
-        const runId = params.get('runId');
-        const outputId = params.get('outputId');
 
-        this.flexpartService.getOutput(runId as string, outputId as string)
-        .pipe(
-            tap(res => {
-                this.flexpartService.getSpatialLayers(res.uuid).subscribe(layers => {
-                    this.spatialLayers = layers;
-                });
+    ngOnInit(): void {
+        this.spatialLayers$ = this.route.paramMap.pipe(
+            switchMap(params => {
+                const runId = params.get('runId');
+                const outputId = params.get('outputId');
+                return this.flexpartService.getOutput(runId as string, outputId as string)
+                    .pipe(
+                        switchMap(res => {
+                            return this.flexpartService.getSpatialLayers(res.uuid)
+                        })
+                    )
             })
         )
-        .subscribe(fpOutput => {
-            this.fpOutput = fpOutput
-        })
+        // const params = this.route.snapshot.paramMap;
+        // const runId = params.get('runId');
+        // const outputId = params.get('outputId');
+
+        // this.flexpartService.getOutput(runId as string, outputId as string)
+        //     .pipe(
+        //         tap(res => {
+        //             this.flexpartService.getSpatialLayers(res.uuid).subscribe(layers => {
+        //                 this.spatialLayers = layers;
+        //             });
+        //         })
+        //     )
+        //     .subscribe(fpOutput => {
+        //         this.fpOutput = fpOutput
+        //     })
         // this.route.data.subscribe(data => {
         //     this.store.dispatch(new FlexpartOutputAction.Add(data.fpOutput));
         // })

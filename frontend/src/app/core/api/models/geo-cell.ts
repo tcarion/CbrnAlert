@@ -1,9 +1,10 @@
 /* tslint:disable */
 /* eslint-disable */
-import { CbrnTypes } from './cbrn-types';
 import { Feature } from './feature';
+import { GeoCellProperties } from './geo-cell-properties';
 import { Polygon } from './polygon';
-export type Atp45Result = Feature & {
+export type GeoCell = Feature & {
 'geometry'?: Polygon;
-'properties'?: CbrnTypes;
+'properties'?: GeoCellProperties;
+} & {
 };

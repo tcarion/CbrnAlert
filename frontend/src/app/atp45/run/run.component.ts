@@ -43,9 +43,9 @@ export class RunComponent implements OnInit {
             this.leadtimes = res.leadtimes;
         })
 
-        this.apiService.atp45TypesGet().subscribe(res => {
-            this.cbrn_types = res;
-        })
+        // this.apiService.atp45TypesGet().subscribe(res => {
+        //     this.cbrn_types = res;
+        // })
     }
 
     onSubmit() {

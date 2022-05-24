@@ -51,7 +51,7 @@ flexpart_routes = Dict(
 api_routes = Dict(
     "/forecast/available" => (f=Atp45Controller.available_steps, keyargs=(method=GET,)),
     "/atp45/run/wind" => (f=Atp45Controller.run_wind, keyargs=(method=POST,)),
-    "/atp45/types" => (f=Atp45Controller.get_cbrn_types, keyargs=(method=GET,)),
+    "/atp45/cbrntypes" => (f=Atp45Controller.get_cbrn_types, keyargs=(method=GET,)),
     "/atp45/run/forecast" => (f=Atp45Controller.run_forecast, keyargs=(method=POST,)),
     "/flexpart/meteo_data_request" => (f=FlexpartController.meteo_data_request, keyargs=(method=POST, named=:meteo_data_request)),
     "/flexpart/inputs" => (f=FlexpartController.get_inputs, keyargs=(method=GET, named=:available_flexpart_input)),
@@ -153,95 +153,3 @@ function process_request(routes)
 end
 
 route("/login", AuthenticationController.login, method = POST)
-
-# route("/") do 
-#     Genie.Renderer.redirect(:dashboard) 
-# end
-
-# route("/ngapp") do 
-#     serve_static_file("ngapp/dist/ngapp/index.html")
-# end
-
-# route("/getchannel", method = GET) do
-#     notauth = AuthenticationController.isauth()
-#     !isnothing(notauth) && return notauth
-#     channel = "$(uuid4())"
-#     # Genie.Assets.channels_support(channel)
-#     Genie.Assets.channels_subscribe(channel)
-#     # @show Genie.Requests.wsclient()
-#     Genie.Renderer.Json.json(Dict(:channel => channel))
-# end
-
-
-
-# route("/dashboard", DashboardController.dashboard, named = :dashboard)
-
-# route("/atp45/load", ATPController.preloaded_atp_prediction, named = :preloaded_atp_prediction)
-
-# route("/atp45/load/:file::String", ATPController.preloaded_atp_prediction, named = :preloaded_atp_prediction_picked)
-
-# route("/atp45/realtime_atp_prediction", ATPController.realtime_atp_prediction, named = :realtime_atp_prediction)
-
-# route("/atp45/archive_data", ATPController.archive_data, named = :archive_data)
-
-# route("/atp45/atp_shape_request", ATPController.atp_shape_request, method = POST, named = :atp_shape_request)
-
-# route("/atp45/mars_request", ATPController.mars_request, method = POST, named = :mars_request)
-
-# route("/atp45/available_steps", Atp45Controller.available_steps, method = POST, named = :available_steps)
-
-# route("/atp45/available_gribfiles", Atp45Controller.available_grib_files, method = GET, named = :available_grib_files)
-
-# route("/atp45/prediction_request", Atp45Controller.prediction_request, method = POST, named = :prediction_request)
-
-# route("/atp45/archive_retrieval", Atp45Controller.archive_retrieval, method = POST, named = :archive_retrieval)
-
-# route("/atp45/realtime_available_steps", Atp45Controller.realtime_available_steps, method = GET, named = :realtime_available_steps)
-
-# route("/atp45/realtime_prediction_request", Atp45Controller.realtime_prediction_request, method = POST, named = :realtime_prediction_request)
-
-# route("/flexpart/metdata_retrieval", FlexpartController.flexextract_request, method = POST, named = :metdata_retrieval)
-
-# route("/flexpart/available_flexpart_input", FlexpartController.available_flexpart_input, method = GET, named = :available_flexpart_input)
-
-
-# route("/flexpart/extract_met_data", FlexpartController.extract_met_data, named= :extract_met_data)
-
-# route("/flexpart/flexextract_request", FlexpartController.flexextract_request, method = POST, named= :flexextract_request)
-
-# route("/flexpart/flexpart_preloaded", FlexpartController.flexpart_preloaded, method = GET, named= :flexpart_preloaded)
-
-# route("/flexpart/flexpart_run_request", FlexpartController.flexpart_run_request, method = POST, named= :flexpart_run_request)
-
-# route("/flexpart/flexpart_run_output", FlexpartController.flexpart_run_output, method = POST, named= :flexpart_run_output)
-
-
-
-# route("/initws", method = POST) do
-#     Genie.Assets.channels_support(jsonpayload()["channel"])
-#     Genie.Renderer.Json.json(Dict(:channel => jsonpayload()["channel"]))
-# end
-# channel("/:default_ch/:client_ch") do 
-#     "def_ch = $(payload(:default_ch))       payload : $(@params(:payload))"
-# end
-# channel("realtime_atp_prediction/shape_request", ATPController.atp_shape_request_realtime)
-
-# route("/websocket_test") do 
-
-#     Assets.channels_support() *
-#     """
-#     <script>
-#     window.parse_payload = function(payload) {
-#         console.log('Got this payload: ' + payload);
-#         }
-#     </script>
-#     """
-# end
-
-# channel("/coucou/mess") do 
-#     "RECEIVED : $(@params(:WS_CLIENT))"
-# end
-
-# channel("") do 
-#     println("message received")
-# end

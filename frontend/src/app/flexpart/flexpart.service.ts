@@ -79,6 +79,8 @@ export class FlexpartService {
         return this.apiService.flexpartOutputsOutputIdSlicePost({
             outputId,
             layer: layerName,
+            geojson: true,
+            legend: true,
             body: dimensions
         })
     }

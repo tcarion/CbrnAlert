@@ -1,3 +1,4 @@
+import { GeoJsonSliceResponse } from './../api/models/geo-json-slice-response';
 import { Injectable } from '@angular/core';
 import { Atp45Service } from 'src/app/atp45/atp45.service';
 import { MapPlot, PlotType } from '../models/map-plot';
@@ -6,6 +7,8 @@ import { MapService } from './map.service';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { Atp45ShapeData } from 'src/app/atp45/shape-data';
 import { FlexpartPlotData } from 'src/app/flexpart/flexpart-plot-data';
+import { Feature, FeatureCollection } from 'geojson';
+import { ColorbarData } from '../api/models';
 
 const plots: MapPlot[] = [
     // {
@@ -85,11 +88,12 @@ export class MapPlotsService {
         // this.emitPlots();
     }
 
-    createFlexpartPlot(flexpartPlotData: FlexpartPlotData) {
-        let newPlot = this.createPlot('flexpart', flexpartPlotData.flexpartResult);
+    createFlexpartPlot(flexpartPlotData: GeoJsonSliceResponse) {
+        // let newPlot = this.createPlot('flexpart', flexpartPlotData.flexpartResult);
+        let newPlot = this.createPlot('flexpart');
         // newPlot.isActive = true;
-        newPlot.metadata = flexpartPlotData.legendData;
-        newPlot.geojson = flexpartPlotData.cells;
+        newPlot.metadata = flexpartPlotData.metadata as ColorbarData;
+        newPlot.geojson = flexpartPlotData.collection as FeatureCollection;
         this.mapService.addPlotToMap(newPlot);
         return newPlot;
         // this.emitPlots();

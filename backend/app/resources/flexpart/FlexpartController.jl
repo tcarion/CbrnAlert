@@ -12,6 +12,10 @@ using Flexpart
 using Flexpart.FlexExtract
 using Rasters
 
+using ColorSchemes
+using Colors
+
+
 using Users
 using FlexpartRuns
 using FlexpartInputs
@@ -25,6 +29,7 @@ const DATE_FORMAT = "yyyy-mm-ddTHH:MM:SS"
 const EXTRACTED_WEATHER_DATA_DIR = joinpath(pwd(), "public", "extracted_met_data")
 const FLEXPART_RUNS_DIR = joinpath(pwd(), "public", "flexpart_runs")
 
+const DEFAULT_COLOR_SCHEME = ColorSchemes.jet
 # const PYTHON_PATH = "/opt/anaconda3/bin/python"
 # # const FLEX_EXTRACT_PATH = "/home/tcarion/flexpart/flex_extract_app"
 # const FLEX_EXTRACT_PATH = "/home/tcarion/flexpart/flex_extract_v7.1.2"
@@ -526,41 +531,114 @@ function _to_dim(k, v)
     end
 end
 
+function _slice(path::String, layerName, zdims)
+    # layerName = "spec001_mr"
+    raster = Raster(path, name = layerName)
+    args = [_to_dim(dname, val) for (dname, val) in zdims]
+    view(raster, args...)
+end
 function get_slice()
+    debug()
     pl = jsonpayload()
     fpoutput = _output_by_uuid()
     layerName = Genie.Router.params(:layer)
-    # layerName = "spec001_mr"
-    raster = Raster(fpoutput.path, name = layerName)
-    args = [_to_dim(dname, val) for (dname, val) in pl]
-    viewed = view(raster, args...)
-    viewed |> read |> json
+    to_geojson = Genie.Router.params(:geojson, "false")
+    to_geojson = Base.parse(Bool, to_geojson)
+    viewed = _slice(fpoutput.path, layerName, pl)
+
+    if to_geojson
+        collection = to_geointerface(viewed)
+        result = Dict{Symbol, Any}(:collection => geo2dict(collection))
+        withcolors = Base.parse(Bool, Genie.Router.params(:legend, "false"))
+        if withcolors
+            result[:metadata] = getcolors(collection)
+        end
+        result |> json
+    else
+        viewed |> read |> json
+    end
 end
 
-function output2dict(outpath)
-    fpoutput = FlexpartOutput(outpath)
-    lons, lats = fpoutput.lons, fpoutput.lats
-    dx, dy = deltamesh(lons, lats)
-    v2d = Flexpart.variables2d(fpoutput)
-    d = Dict(
-        :id => splitext(basename(outpath))[1],
-        :times => fpoutput.metadata.times,
-        :startDate => fpoutput.metadata.startd,
-        :endDate => fpoutput.metadata.endd,
-        :dx => dx,
-        :dy => dy,
-        :releaseLons => fpoutput.metadata.rellons,
-        :releaseLats => fpoutput.metadata.rellats,
-        :area => areamesh(lons, lats),
-        :globAttr => attrib(fpoutput),
-        :variables => Flexpart.variables(fpoutput),
-        :variables2d => v2d,
-        :dimensions => Dict(
-            v => Flexpart.alldims(fpoutput, v) for v in v2d
-        )
-    ) 
-    d
+
+function to_geointerface(raster)
+    if !hasdim(raster, X) || !hasdim(raster, Y) || ndims(raster) !== 2
+        error("The remaining dimensions must be spatial")
+    end
+    dx = step(dims(raster, :X))
+    dy = step(dims(raster, :Y))
+
+    features = Feature[]
+    read_raster = read(raster) # we get the raster into memory for faster access to the values
+    for I in eachindex(raster)
+        fval = read_raster[I]
+        if !(fval ≈ 0.)
+            i,j = Tuple(I)
+            poly = coords_to_polygon(raster, i, j, dx, dy)
+            push!(features,
+                Feature(poly,
+                    Dict(
+                        "val" => fval,
+                    )
+                )
+            )
+        end
+    end
+    FeatureCollection(features)
 end
+
+function coords_to_polygon(raster, i, j, dx, dy)
+    x = dims(raster)[1][i]
+    y = dims(raster)[2][j]
+    x, y = convert.(Float64, [x, y])
+    dx2 = dx/2
+    dy2 = dy/2
+
+    left = x - dx2; right = x + dx2; lower = y - dy2; upper = y + dy2
+
+    Polygon([
+        [left, lower],
+        [left, upper],
+        [right, upper],
+        [right, lower],
+    ])
+end
+
+function getcolors(collection)
+    vals = [f.properties["val"] for f in collection.features]
+    minval = minimum(vals)
+    maxval = maximum(vals)
+    ticks = range(minval, maxval, length=10)
+    cbar = get(DEFAULT_COLOR_SCHEME, ticks[2:end], :extrema)
+    Dict(
+        :colors => '#'.*hex.(cbar),
+        :ticks => ticks 
+    )
+end
+
+# function output2dict(outpath)
+#     fpoutput = FlexpartOutput(outpath)
+#     lons, lats = fpoutput.lons, fpoutput.lats
+#     dx, dy = deltamesh(lons, lats)
+#     v2d = Flexpart.variables2d(fpoutput)
+#     d = Dict(
+#         :id => splitext(basename(outpath))[1],
+#         :times => fpoutput.metadata.times,
+#         :startDate => fpoutput.metadata.startd,
+#         :endDate => fpoutput.metadata.endd,
+#         :dx => dx,
+#         :dy => dy,
+#         :releaseLons => fpoutput.metadata.rellons,
+#         :releaseLats => fpoutput.metadata.rellats,
+#         :area => areamesh(lons, lats),
+#         :globAttr => attrib(fpoutput),
+#         :variables => Flexpart.variables(fpoutput),
+#         :variables2d => v2d,
+#         :dimensions => Dict(
+#             v => Flexpart.alldims(fpoutput, v) for v in v2d
+#         )
+#     ) 
+#     d
+# end
 """
     flexpart_conc()
 Return meta data for a flexpart run

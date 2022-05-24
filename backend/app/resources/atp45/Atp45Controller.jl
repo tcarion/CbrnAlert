@@ -411,7 +411,7 @@ function run_wind()
     azimuth = wind.azimuth
     speed = speed isa String ? Base.parse(Float64, speed) : Base.convert(Float64, speed) 
     azimuth = azimuth isa String ? Base.parse(Float64, azimuth) : Base.convert(Float64, azimuth)
-    ATP45.simplified_proc(lon, lat, speed, azimuth) |> json
+    ATP45.simplified_proc(lon, lat, speed, azimuth, 10) |> json
 end
 
 function run_forecast()
@@ -426,6 +426,14 @@ function run_forecast()
             :coordinates => locations
         )
     )
+end
+
+function get_cbrn_types()
+    cbrn_types = ["typeA", "typeB", "typeC"]
+    cont_types = [:BML, :SHL, :MNE, :SB_RKT, :SB_MSL, :BOM, :NKN, :AB_RKT, :AB_MSL]
+
+    cbrn_types |> json
+    cont_types |> json
 end
 
 end

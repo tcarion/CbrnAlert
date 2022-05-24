@@ -14,9 +14,11 @@
     </ng-container>
 </ng-container> -->
 
-<mat-selection-list class="listbox" [multiple]="false">
-    <mat-list-option class="list-item" *ngFor="let layer of spatialLayers;" routerLink="dimensions/{{layer}}">
-        {{ layer }}
-    </mat-list-option>
-</mat-selection-list>
-<router-outlet></router-outlet>
+<ng-container *ngIf="spatialLayers$ | async as spatialLayers">
+    <mat-selection-list class="listbox" [multiple]="false">
+        <mat-list-option class="list-item" *ngFor="let layer of spatialLayers;" routerLink="dimensions/{{layer}}">
+            {{ layer }}
+        </mat-list-option>
+    </mat-selection-list>
+    <router-outlet></router-outlet>
+</ng-container>

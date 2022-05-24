@@ -10,11 +10,13 @@ import { Observable } from 'rxjs';
 import { map, filter } from 'rxjs/operators';
 
 import { Atp45Result } from '../models/atp-45-result';
+import { CbrnTypes } from '../models/cbrn-types';
 import { FlexpartOutput } from '../models/flexpart-output';
 import { FlexpartRun } from '../models/flexpart-run';
 import { ForecastAtp45Input } from '../models/forecast-atp-45-input';
 import { ForecastAvailableSteps } from '../models/forecast-available-steps';
 import { WindAtp45Input } from '../models/wind-atp-45-input';
+import { InlineResponse200 } from '../models/inline-response-200';
 
 @Injectable({
   providedIn: 'root',
@@ -242,7 +244,7 @@ export class ApiService extends BaseService {
 
     const rb = new RequestBuilder(this.rootUrl, ApiService.FlexpartRunsRunIdGetPath, 'get');
     if (params) {
-      rb.path('runId', params.runId, {});
+      rb.path('runId', params.runId, {"style":"simple","explode":false});
     }
 
     return this.http.request(rb.build({
@@ -298,7 +300,7 @@ export class ApiService extends BaseService {
 
     const rb = new RequestBuilder(this.rootUrl, ApiService.FlexpartRunsRunIdOutputsGetPath, 'get');
     if (params) {
-      rb.path('runId', params.runId, {});
+      rb.path('runId', params.runId, {"style":"simple","explode":false});
     }
 
     return this.http.request(rb.build({
@@ -359,8 +361,8 @@ export class ApiService extends BaseService {
 
     const rb = new RequestBuilder(this.rootUrl, ApiService.FlexpartRunsRunIdOutputsOutputIdGetPath, 'get');
     if (params) {
-      rb.path('runId', params.runId, {});
-      rb.path('outputId', params.outputId, {});
+      rb.path('runId', params.runId, {"style":"simple","explode":false});
+      rb.path('outputId', params.outputId, {"style":"simple","explode":false});
     }
 
     return this.http.request(rb.build({
@@ -426,8 +428,8 @@ export class ApiService extends BaseService {
 
     const rb = new RequestBuilder(this.rootUrl, ApiService.FlexpartOutputsOutputIdLayersGetPath, 'get');
     if (params) {
-      rb.path('outputId', params.outputId, {});
-      rb.query('spatial', params.spatial, {});
+      rb.path('outputId', params.outputId, {"style":"simple","explode":false});
+      rb.query('spatial', params.spatial, {"style":"form","explode":true});
     }
 
     return this.http.request(rb.build({
@@ -501,9 +503,9 @@ export class ApiService extends BaseService {
 
     const rb = new RequestBuilder(this.rootUrl, ApiService.FlexpartOutputsOutputIdDimensionsGetPath, 'get');
     if (params) {
-      rb.path('outputId', params.outputId, {});
-      rb.query('layer', params.layer, {});
-      rb.query('horizontal', params.horizontal, {});
+      rb.path('outputId', params.outputId, {"style":"simple","explode":false});
+      rb.query('layer', params.layer, {"style":"form","explode":true});
+      rb.query('horizontal', params.horizontal, {"style":"form","explode":true});
     }
 
     return this.http.request(rb.build({
@@ -573,6 +575,16 @@ export class ApiService extends BaseService {
     layer: string;
 
     /**
+     * If true, the output is given in geojson format. The sliced layer must be a surface.
+     */
+    geojson?: boolean;
+
+    /**
+     * If true, data for legend is provided
+     */
+    legend?: boolean;
+
+    /**
      * The output ID
      */
     outputId: string;
@@ -582,12 +594,14 @@ export class ApiService extends BaseService {
      */
     body: {
 }
-  }): Observable<StrictHttpResponse<Array<any>>> {
+  }): Observable<StrictHttpResponse<InlineResponse200>> {
 
     const rb = new RequestBuilder(this.rootUrl, ApiService.FlexpartOutputsOutputIdSlicePostPath, 'post');
     if (params) {
-      rb.query('layer', params.layer, {});
-      rb.path('outputId', params.outputId, {});
+      rb.query('layer', params.layer, {"style":"form","explode":true});
+      rb.query('geojson', params.geojson, {"style":"form","explode":true});
+      rb.query('legend', params.legend, {"style":"form","explode":true});
+      rb.path('outputId', params.outputId, {"style":"simple","explode":false});
       rb.body(params.body, 'application/json');
     }
 
@@ -597,7 +611,7 @@ export class ApiService extends BaseService {
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<Array<any>>;
+        return r as StrictHttpResponse<InlineResponse200>;
       })
     );
   }
@@ -618,6 +632,16 @@ export class ApiService extends BaseService {
     layer: string;
 
     /**
+     * If true, the output is given in geojson format. The sliced layer must be a surface.
+     */
+    geojson?: boolean;
+
+    /**
+     * If true, data for legend is provided
+     */
+    legend?: boolean;
+
+    /**
      * The output ID
      */
     outputId: string;
@@ -627,28 +651,28 @@ export class ApiService extends BaseService {
      */
     body: {
 }
-  }): Observable<Array<any>> {
+  }): Observable<InlineResponse200> {
 
     return this.flexpartOutputsOutputIdSlicePost$Response(params).pipe(
-      map((r: StrictHttpResponse<Array<any>>) => r.body as Array<any>)
+      map((r: StrictHttpResponse<InlineResponse200>) => r.body as InlineResponse200)
     );
   }
 
   /**
-   * Path part for operation atp45TypesGet
+   * Path part for operation atp45CbrntypesGet
    */
-  static readonly Atp45TypesGetPath = '/atp45/types';
+  static readonly Atp45CbrntypesGetPath = '/atp45/cbrntypes';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `atp45TypesGet()` instead.
+   * To access only the response body, use `atp45CbrntypesGet()` instead.
    *
    * This method doesn't expect any request body.
    */
-  atp45TypesGet$Response(params?: {
-  }): Observable<StrictHttpResponse<Array<string>>> {
+  atp45CbrntypesGet$Response(params?: {
+  }): Observable<StrictHttpResponse<Array<CbrnTypes>>> {
 
-    const rb = new RequestBuilder(this.rootUrl, ApiService.Atp45TypesGetPath, 'get');
+    const rb = new RequestBuilder(this.rootUrl, ApiService.Atp45CbrntypesGetPath, 'get');
     if (params) {
     }
 
@@ -658,22 +682,22 @@ export class ApiService extends BaseService {
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<Array<string>>;
+        return r as StrictHttpResponse<Array<CbrnTypes>>;
       })
     );
   }
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `atp45TypesGet$Response()` instead.
+   * To access the full response (for headers, for example), `atp45CbrntypesGet$Response()` instead.
    *
    * This method doesn't expect any request body.
    */
-  atp45TypesGet(params?: {
-  }): Observable<Array<string>> {
+  atp45CbrntypesGet(params?: {
+  }): Observable<Array<CbrnTypes>> {
 
-    return this.atp45TypesGet$Response(params).pipe(
-      map((r: StrictHttpResponse<Array<string>>) => r.body as Array<string>)
+    return this.atp45CbrntypesGet$Response(params).pipe(
+      map((r: StrictHttpResponse<Array<CbrnTypes>>) => r.body as Array<CbrnTypes>)
     );
   }
 
