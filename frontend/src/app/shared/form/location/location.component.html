@@ -1,39 +1,33 @@
-<form [formGroup]="formGroup">
-    <div formArrayName="locations">
-        <ng-container *ngFor= "let lonlat of locations.controls, let i = index" [formGroupName]= "i">
-            <!-- <app-dynamic-form
-            [formGroup]="$any(lonlat)"
-            [item]="latItem"
-            ></app-dynamic-form>
-            <app-dynamic-form
-            [formGroup]="$any(lonlat)"
-            [item]="lonItem"
-            ></app-dynamic-form> -->
-            <mat-form-field 
-            class="form-control"
-            appearance="outline" 
-            floatLabel="never">
-                <mat-label> Longitude [-180°, 180°] </mat-label>
-                <input 
-                matInput 
-                formControlName="lon"
-                >
-                <!-- <mat-hint>[-180°, 180°]</mat-hint> -->
-                <!-- <mat-error *ngIf="(item.key | formControl).invalid"> error ! </mat-error> -->
-            </mat-form-field>
-
-            <mat-form-field 
-            class="form-control" 
-            appearance="outline" 
-            floatLabel="never">
-                <mat-label> Latitude [-90°, 90°] </mat-label>
-                <input 
-                matInput 
-                formControlName="lat"
-                >
-                <!-- <mat-hint>[-90°, 90°]</mat-hint> -->
-                <!-- <mat-error *ngIf="(item.key | formControl).invalid"> error ! </mat-error> -->
-            </mat-form-field>
-        </ng-container>
+<div class = "flex flex-row items-start max-h-14">
+    <fieldset [formGroup] = "form" (keydown.enter)="onEnter()" class = "flex flex-row justify-around pt-0">
+        <mat-form-field 
+        appearance="outline"
+        class = "w-20"
+        >
+            <mat-label> Long. </mat-label>
+            <input
+            matInput 
+            formControlName="lon"
+            >
+        </mat-form-field>
+        
+        <mat-form-field 
+        class="w-20" 
+        appearance="outline" 
+        floatLabel="never">
+            <mat-label> Latit. </mat-label>
+            <input 
+            matInput 
+            formControlName="lat"
+            >
+        </mat-form-field>
+    </fieldset>
+    <div class="flex flex-col ">
+        <button type="button" matTooltip="Add coords by clicking on the map" (click)="setFromMapClick()">
+            <mat-icon class="text-base">location_searching</mat-icon>
+        </button>
+        <button type="button" class="h-7" matTooltip="Read the coords from the marker position" (click)="setFromMarker()">
+            <mat-icon class="text-base">read_more</mat-icon>
+        </button>
     </div>
-</form>
+</div>

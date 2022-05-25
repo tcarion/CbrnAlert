@@ -1,0 +1,21 @@
+<div class="border-2 p-2 pt-6 pb-0 m-4 relative">
+    <div class="-top-4 bg-gray-200 flex flex-row items-center h-10 absolute w-11/12" style="height: 25px">
+        
+        <span class="text-xs pl-1">Coordinates:</span>
+        <button mat-icon-button color="primary" type="button" (click)="add()"
+            >
+            <mat-icon class="text-xs" matTooltip="Add one location">add</mat-icon>
+        </button>
+        <button mat-icon-button color="primary" type="button" (click)="remove()"
+            >
+        <mat-icon class="text-xs" matTooltip="Remove last location">remove</mat-icon>
+    </button>
+    </div>
+    <fieldset [formGroup] = "formGroup">
+        <ng-container formArrayName="locations">
+            <ng-container *ngFor="let control of locations.controls; let i = index">
+                <app-location [formControlName]="i"></app-location>
+            </ng-container>
+        </ng-container>
+    </fieldset>
+</div>

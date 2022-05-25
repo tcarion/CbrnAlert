@@ -1,15 +1,20 @@
-<form [formGroup]="formGroup" (ngSubmit)="onSubmit()">
-    <app-location [formGroup]="formGroup"></app-location>
+<form [formGroup]="runForm" (ngSubmit)="onSubmit()">
+    <!-- <app-location [formGroup]="formGroup"></app-location> -->
+    <!-- <ng-container *ngFor="let control of locations.controls; let i = index">
+        <app-location [formControlName]="i"></app-location>
+    </ng-container> -->
+    <app-location-array [formGroup]="runForm"></app-location-array>
 
     <mat-slide-toggle [checked]="withWind" (change)="withWind = !withWind">
         Provide wind data
     </mat-slide-toggle>
     <ng-container  *ngIf="!withWind">
-
+        <!-- <ng-container *ngIf="leadtimes$ | async as leadtimes">
+            <app-forecast-time-select [formGroup] = "formGroup" [leadtimes]="leadtimes"></app-forecast-time-select>
+        </ng-container> -->
         <!-- <app-forecast-time-select [formGroup] = "formGroup" [leadtimes]="$any(leadtimes$ | async)"></app-forecast-time-select> -->
-        <app-forecast-time-select [formGroup] = "formGroup" [leadtimes]="leadtimes"></app-forecast-time-select>
     </ng-container>
-    <app-wind-form *ngIf="withWind"  [formGroup]="formGroup"></app-wind-form>
+    <app-wind-form *ngIf="withWind"  [formGroup]="runForm"></app-wind-form>
     <button class="w-17 h-12 self-start"
-    mat-raised-button color="primary" type="submit" [disabled]="formGroup.invalid">Run ATP45 Model</button>
+    mat-raised-button color="primary" type="submit" [disabled]="runForm.invalid">Run ATP45 Model</button>
 </form>

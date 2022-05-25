@@ -9,14 +9,16 @@ import { FormItemBase } from 'src/app/shared/form/form-item-base';
 import { SelectFormItem } from 'src/app/shared/form/form-item-select';
 import { FormItems } from 'src/app/shared/form/form-items';
 import { ForecastStartAction } from 'src/app/core/state/atp45.state';
-import { FormGroup } from '@ngneat/reactive-forms';
-import { ForecastAtp45Input } from 'src/app/core/api/models';
+import { ControlsOf, FormArray, FormControl, FormGroup } from '@ngneat/reactive-forms';
+import { ForecastAtp45Input, GeoPoint } from 'src/app/core/api/models';
+import { tap, map } from 'rxjs/operators';
+import { Validators } from '@angular/forms';
 
-class _WindAtp45Input {
-    public constructor(init?: Partial<WindAtp45Input>) {
-          Object.assign(this, init);
-      }
-  }
+interface Atp45RunForm {
+    locations: GeoPoint[]
+    wind?: object
+    leadtime?: object
+}
 @Component({
     selector: 'app-run',
     templateUrl: './run.component.html',
@@ -24,9 +26,13 @@ class _WindAtp45Input {
 })
 export class RunComponent implements OnInit {
 
-    withWind: boolean = false;
-    formGroup: FormGroup<any>;
-    leadtimes: string[];
+    withWind: boolean = true;
+    // formGroup: FormGroup<any> = new FormGroup({location: new FormControl<GeoPoint>({lon: 0, lat: 0})});
+    runForm = new FormGroup<any>({})
+    // locationsControls: FormArray<GeoPoint, FormControl<GeoPoint>>;
+    // locationsControls: FormArray<GeoPoint, FormControl<GeoPoint>> = new FormArray([new FormControl<GeoPoint>({lon: 0, lat: 0})])
+
+    leadtimes$: Observable<string[]>;
     cbrn_types: string[];
 
     constructor(
@@ -34,22 +40,28 @@ export class RunComponent implements OnInit {
         public apiService: ApiService,
         public store: Store
     ) { 
+        // this.runForm = new FormGroup({})
     } 
-
+    
     ngOnInit(): void {
-        this.formGroup = new FormGroup({});
-        this.apiService.forecastAvailableGet().subscribe(res => {
+        // const initLoc = new FormControl<GeoPoint>({lon: 0, lat: 0})
+        // this.formGroup = new FormGroup({'locations': this.locationsControls})
+        // this.formGroup = new FormGroup<ControlsOf<Atp45RunForm>>({
+        //     locations: new FormArray<GeoPoint>([new FormControl<GeoPoint>({lon:0, lat:0})])
+        // });
+        this.leadtimes$ = this.apiService.forecastAvailableGet().pipe(
+            map(res => {
             this.store.dispatch(new ForecastStartAction.Update(res));
-            this.leadtimes = res.leadtimes;
-        })
-
+            return res.leadtimes;
+        }))
         // this.apiService.atp45TypesGet().subscribe(res => {
         //     this.cbrn_types = res;
         // })
     }
 
+
     onSubmit() {
-        let formVals = this.formGroup.value;
+        let formVals = this.runForm.value as any;
         if (this.withWind) {
             // TODO : Casting the form result to the types of interface. https://stackoverflow.com/questions/44708240/mapping-formgroup-to-interface-object
             let payload = {...formVals}

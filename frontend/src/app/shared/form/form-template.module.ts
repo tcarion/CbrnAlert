@@ -1,3 +1,4 @@
+import { MatIconModule } from '@angular/material/icon';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -21,6 +22,8 @@ import { ForecastTimeSelectComponent } from './forecast-time-select/forecast-tim
 import { MatSelectModule } from '@angular/material/select';
 import { DynFormComponent } from './dyn-form/dyn-form.component';
 import { DynFormQuestionComponent } from './dyn-form-question/dyn-form-question.component';
+import { LocationArrayComponent } from './location-array/location-array.component';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 
 
@@ -35,6 +38,7 @@ import { DynFormQuestionComponent } from './dyn-form-question/dyn-form-question.
     ForecastTimeSelectComponent,
     DynFormComponent,
     DynFormQuestionComponent,
+    LocationArrayComponent,
   ],
   imports: [
     CommonModule,
@@ -48,6 +52,8 @@ import { DynFormQuestionComponent } from './dyn-form-question/dyn-form-question.
     MatSelectModule,
     TextFieldModule,
     MatButtonModule,
+    MatIconModule,
+    MatTooltipModule,
   ],
   exports: [
     AutoformatSelectComponent,
@@ -56,6 +62,8 @@ import { DynFormQuestionComponent } from './dyn-form-question/dyn-form-question.
     ForecastTimeSelectComponent,
     DynFormQuestionComponent,
     DynFormComponent,
+    LocationArrayComponent,
+    LocationComponent,
   ],
   providers: [
     FormService,

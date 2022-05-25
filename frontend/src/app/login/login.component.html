@@ -1,11 +1,11 @@
-<div class="container-login">
-    <div class="header">
+<div class="rounded-md shadow-2xl bg-white flex flex-col justify-center items-center w-80">
+    <div class="rounded-t-md h-11 flex flex-col justify-center items-center font-medium bg-blue-400 w-full">
         Please authenticate
     </div>
 
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex-col py-3">
         <mat-form-field 
-            class="form-control" 
+            class = "w-56" 
             appearance="outline" 
             floatLabel="never">
             <mat-label> Email </mat-label>
@@ -16,7 +16,7 @@
         </mat-form-field>
 
         <mat-form-field 
-            class="form-control" 
+        class = "w-56" 
             appearance="outline" 
             floatLabel="never">
             <mat-label> Password </mat-label>
