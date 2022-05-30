@@ -1,24 +1,33 @@
 import { ActivatedRoute, ActivatedRouteSnapshot, Router } from '@angular/router';
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FlexpartService } from 'src/app/flexpart/flexpart.service';
 import { FlexpartOutput } from 'src/app/core/api/models';
-import { SelectionDialogComponent } from 'src/app/flexpart/selection-dialog/selection-dialog.component';
-import { switchMap } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
 @Component({
     selector: 'app-choose-output',
-    templateUrl: './choose-output.component.html',
-    styleUrls: ['./choose-output.component.scss']
+    templateUrl: './outputs.component.html',
+    styleUrls: ['./outputs.component.scss']
 })
-export class ChooseOutputComponent implements OnInit {
+export class OutputsComponent implements OnInit {
 
     fpOutputs$: Observable<FlexpartOutput[]>;
+    @Output() selectedIdEvent = new EventEmitter<string>();
 
+    @Input()
+    get runId() {return this._runId}
+    set runId(v:string) {
+      this.fpOutputs$ = this.flexpartService.getOutputs(v)
+      this._runId = v
+    }
+
+    _runId = ''
+
+    value: string
     constructor(
         private flexpartService: FlexpartService,
         private route: ActivatedRoute,
-    ) { 
+    ) {
         // this.fpOutput = this.route.data.
         // this.fpResult = this.router.getCurrentNavigation()?.extras.state?.fpResult;
         // if (this.fpResult.outputs.length == 1) {
@@ -29,16 +38,22 @@ export class ChooseOutputComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.fpOutputs$ = this.route.paramMap.pipe(
-            switchMap(params => {
-                let runId = params.get('runId') as string;
-                return this.flexpartService.getOutputs(runId);
-            })
-        )
+        // this.fpOutputs$ = this.route.paramMap.pipe(
+        //     switchMap(params => {
+        //         let runId = params.get('runId') as string;
+        //         return this.flexpartService.getOutputs(runId);
+        //     })
+        // )
+        // this.fpOutputs$ = this.flexpartService.getOutputs(this.runId)
+        // this.fpOutputs$ = this.route.data.pipe(map(data => data.fpOuputs))
     }
 
+    onClick(v: string) {
+      this.selectedIdEvent.emit(v);
+      this.value = v;
+    }
     // goToOutput(fpOutput: FlexpartOutput) {
-    //     this.router.navigate([fpOutput.uuid], { 
+    //     this.router.navigate([fpOutput.uuid], {
     //         relativeTo: this.route,
     //         state: {
     //             fpOutput

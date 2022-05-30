@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SelectInputComponent } from './select-input.component';
+import { OutputsComponent } from './outputs.component';
 
-describe('SelectInputComponent', () => {
-  let component: SelectInputComponent;
-  let fixture: ComponentFixture<SelectInputComponent>;
+describe('FlexpartResultComponent', () => {
+  let component: OutputsComponent;
+  let fixture: ComponentFixture<OutputsComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ SelectInputComponent ]
+      declarations: [ OutputsComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(SelectInputComponent);
+    fixture = TestBed.createComponent(OutputsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

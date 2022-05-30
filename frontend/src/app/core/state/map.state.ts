@@ -4,7 +4,7 @@ import { MapPlotsService } from 'src/app/core/services/map-plots.service';
 import { Injectable } from '@angular/core';
 import { Action, createSelector, Selector, State, StateContext } from '@ngxs/store';
 import produce from "immer"
-import { MapArea } from 'src/app/core/api/models/map-area';
+import { MapArea } from 'src/app/core/models/map-area';
 import { GeoPoint } from 'src/app/core/api/models';
 
 export namespace MapAction {

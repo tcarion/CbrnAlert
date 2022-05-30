@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { FlexpartPlotFormComponent } from './flexpart-plot-form.component';
+import { PlotStepperComponent } from './plot-stepper.component';
 
-describe('FlexpartPlotFormComponent', () => {
-  let component: FlexpartPlotFormComponent;
-  let fixture: ComponentFixture<FlexpartPlotFormComponent>;
+describe('PlotStepperComponent', () => {
+  let component: PlotStepperComponent;
+  let fixture: ComponentFixture<PlotStepperComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ FlexpartPlotFormComponent ]
+      declarations: [ PlotStepperComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(FlexpartPlotFormComponent);
+    fixture = TestBed.createComponent(PlotStepperComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

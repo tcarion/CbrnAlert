@@ -63,8 +63,8 @@ export class FlexpartService {
         return this.apiService.flexpartRunsRunIdOutputsGet({runId})
     }
 
-    getOutput(runId: string, outputId: string): Observable<FlexpartOutput> {
-        return this.apiService.flexpartRunsRunIdOutputsOutputIdGet({ runId, outputId })
+    getOutput(outputId: string): Observable<FlexpartOutput> {
+        return this.apiService.flexpartOutputsOutputIdGet({ outputId })
     }
 
     getSpatialLayers(outputId: string): Observable<string[]> {

@@ -7,6 +7,8 @@ import {
   ViewChild,
   AfterViewInit,
   ElementRef,
+  Output,
+  EventEmitter,
 } from '@angular/core';
 import { SelectionTableComponent } from 'src/app/shared/selection-table/selection-table.component';
 import { FlexpartService } from '../flexpart.service';
@@ -28,7 +30,9 @@ import { FlexpartRun } from 'src/app/core/api/models';
 export class FlexpartPlotComponent implements OnInit {
   // @Select(FlexpartState.fpResults) runs$: Observable<FlexpartRun[]>;
   runs$: Observable<FlexpartRun[]>;
+  value: string
   // runIds$: Observable<string[]>;
+  @Output() selectedIdEvent = new EventEmitter<string>();
 
   constructor(
     private flexpartService: FlexpartService,
@@ -47,6 +51,11 @@ export class FlexpartPlotComponent implements OnInit {
       //   );
 
     // this.runIds$ = this.runs$.pipe(map((res) => res.map((r) => r.uuid)));
+  }
+
+  onClick(id: string) {
+    this.value = id
+    this.selectedIdEvent.emit(id)
   }
 
 //   goToOuput(index: number) {

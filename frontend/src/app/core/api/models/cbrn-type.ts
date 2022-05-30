@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-export interface CbrnTypes {
+export interface CbrnType {
   cbrnType?: string;
   longName?: string;
   shortName?: string;

@@ -8,7 +8,7 @@ import { ControlsOf, FormControl, FormGroup } from '@ngneat/reactive-forms';
 import { Select, Store } from '@ngxs/store';
 import { Observable, Subscription } from 'rxjs';
 import { MapAction, MapState } from 'src/app/core/state/map.state';
-import { MapArea } from 'src/app/core/api/models/map-area'
+import { MapArea } from 'src/app/core/models/map-area'
 import { first, skip } from 'rxjs/operators';
 
 @Component({

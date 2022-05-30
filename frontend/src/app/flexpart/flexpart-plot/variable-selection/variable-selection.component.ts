@@ -1,5 +1,5 @@
 import { FlexpartService } from 'src/app/flexpart/flexpart.service';
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { FlexpartOutput } from 'src/app/core/api/models';
 import { map, switchMap, tap } from 'rxjs/operators';
@@ -20,7 +20,23 @@ export class VariableSelectionComponent implements OnInit {
     // selectedVarSub = new Subject<string>();
     // selectedVar$: Observable<string>;
     // fpOutput$: Observable<FlexpartOutput>
+    value: string
     spatialLayers$: Observable<string[]>;
+    @Output() selectedIdEvent = new EventEmitter<string>();
+
+
+    @Input()
+    get outputId() {return this._outputId}
+    set outputId(v:string) {
+      this.spatialLayers$ = this.flexpartService.getOutput(v).pipe(
+        switchMap(res => {
+            return this.flexpartService.getSpatialLayers(res.uuid)
+        })
+      )
+      this._outputId = v
+    }
+
+    _outputId = ''
 
     constructor(
         private flexpartService: FlexpartService,
@@ -30,18 +46,17 @@ export class VariableSelectionComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.spatialLayers$ = this.route.paramMap.pipe(
-            switchMap(params => {
-                const runId = params.get('runId');
-                const outputId = params.get('outputId');
-                return this.flexpartService.getOutput(runId as string, outputId as string)
-                    .pipe(
-                        switchMap(res => {
-                            return this.flexpartService.getSpatialLayers(res.uuid)
-                        })
-                    )
-            })
-        )
+        // this.spatialLayers$ = this.route.paramMap.pipe(
+        //     switchMap(params => {
+        //         const outputId = params.get('outputId');
+        //         return this.flexpartService.getOutput(outputId as string)
+        //             .pipe(
+        //                 switchMap(res => {
+        //                     return this.flexpartService.getSpatialLayers(res.uuid)
+        //                 })
+        //             )
+        //     })
+        // )
         // const params = this.route.snapshot.paramMap;
         // const runId = params.get('runId');
         // const outputId = params.get('outputId');
@@ -64,7 +79,9 @@ export class VariableSelectionComponent implements OnInit {
         // this.fpOutputVar2D$ = this.fpOutput$.pipe(map(out => out.variables2d))
     }
 
-    goToVariable(i: number) {
+    onClick(e: string) {
+      this.selectedIdEvent.emit(e);
+      this.value = e;
         // this.selectedVarSub.next((this.store.selectSnapshot(state => state.flexpart.fpOutput.variables2d[i])));
     }
 

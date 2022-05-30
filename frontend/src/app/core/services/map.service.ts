@@ -5,7 +5,7 @@ import { BehaviorSubject, Observable, Subject } from 'rxjs';
 // import { ShapeData } from 'src/app/atp45/shape-data';
 import { CbrnMap } from '../models/cbrn-map';
 import { Map, Marker, latLng, Rectangle, LatLng } from 'leaflet';
-import { MapArea } from 'src/app/core/api/models/map-area';
+import { MapArea } from 'src/app/core/models/map-area';
 
 type MapEvent = 'newMarker' | 'areaSelection'
 @Injectable({

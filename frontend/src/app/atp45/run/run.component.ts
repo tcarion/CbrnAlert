@@ -1,5 +1,6 @@
+import { Atp45Result } from './../../core/api/models/atp-45-result';
 import { WindAtp45Input } from './../../core/api/models/wind-atp-45-input';
-import { Observable, Subject, BehaviorSubject } from 'rxjs';
+import { Observable, Subject, BehaviorSubject, of } from 'rxjs';
 import { Store } from '@ngxs/store';
 import { Component, OnInit } from '@angular/core';
 // import { FormGroup } from '@angular/forms';
@@ -10,7 +11,7 @@ import { SelectFormItem } from 'src/app/shared/form/form-item-select';
 import { FormItems } from 'src/app/shared/form/form-items';
 import { ForecastStartAction } from 'src/app/core/state/atp45.state';
 import { ControlsOf, FormArray, FormControl, FormGroup } from '@ngneat/reactive-forms';
-import { ForecastAtp45Input, GeoPoint } from 'src/app/core/api/models';
+import { CbrnType, ForecastAtp45Input, GeoPoint } from 'src/app/core/api/models';
 import { tap, map } from 'rxjs/operators';
 import { Validators } from '@angular/forms';
 
@@ -19,11 +20,20 @@ interface Atp45RunForm {
     wind?: object
     leadtime?: object
 }
+const types = [
+  {
+    longName: 'FOO'
+  },
+  {
+    longName: 'BAR'
+  }
+]
 @Component({
     selector: 'app-run',
     templateUrl: './run.component.html',
     styleUrls: ['./run.component.scss']
 })
+
 export class RunComponent implements OnInit {
 
     withWind: boolean = true;
@@ -33,16 +43,17 @@ export class RunComponent implements OnInit {
     // locationsControls: FormArray<GeoPoint, FormControl<GeoPoint>> = new FormArray([new FormControl<GeoPoint>({lon: 0, lat: 0})])
 
     leadtimes$: Observable<string[]>;
-    cbrn_types: string[];
+    cbrnTypes$: Observable<CbrnType[]>;
+
 
     constructor(
         public formService: FormService,
         public apiService: ApiService,
         public store: Store
-    ) { 
+    ) {
         // this.runForm = new FormGroup({})
-    } 
-    
+    }
+
     ngOnInit(): void {
         // const initLoc = new FormControl<GeoPoint>({lon: 0, lat: 0})
         // this.formGroup = new FormGroup({'locations': this.locationsControls})
@@ -54,9 +65,8 @@ export class RunComponent implements OnInit {
             this.store.dispatch(new ForecastStartAction.Update(res));
             return res.leadtimes;
         }))
-        // this.apiService.atp45TypesGet().subscribe(res => {
-        //     this.cbrn_types = res;
-        // })
+        this.cbrnTypes$ = this.apiService.atp45CbrntypesGet();
+        // this.cbrnTypes$ = of(types);
     }
 
 
@@ -68,7 +78,7 @@ export class RunComponent implements OnInit {
             console.log(payload)
             this.apiService.atp45RunWindPost({body: payload as WindAtp45Input}).subscribe(res => {
                 console.log(res)
-            })    
+            })
         } else {
             formVals = {
                 ...formVals,
@@ -79,10 +89,10 @@ export class RunComponent implements OnInit {
             }
             this.apiService.atp45RunForecastPost({body: formVals as ForecastAtp45Input}).subscribe(res => {
                 console.log(res)
-            })    
+            })
         }
         // let windinput = formVals
         console.log("Form sent from ATP45 run: %o", formVals)
     }
-    
+
 }

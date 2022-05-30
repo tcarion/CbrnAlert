@@ -4,63 +4,81 @@ import { FlexpartPlotComponent } from './flexpart-plot/flexpart-plot.component';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { FlexpartRunPreloadedComponent } from './flexpart-run-preloaded/flexpart-run-preloaded.component';
-import { ChooseOutputComponent } from './flexpart-plot/choose-output/choose-output.component';
 import { DimensionsFormComponent } from './flexpart-plot/dimensions-form/dimensions-form.component';
-
-
+import { OutputsResolverService } from 'src/app/flexpart/resolvers/output-resolver.service';
+import { PlotStepperComponent } from 'src/app/flexpart/plot-stepper/plot-stepper.component';
+import { OutputsComponent } from './flexpart-plot/outputs/outputs.component';
 
 const routes: Routes = [
-    {
-        path: 'metdata',
-        component: MetDataComponent,
-    },
-    {
-        path: 'run',
-        component: FlexpartRunPreloadedComponent,
-        // component: SelectInputComponent,
-    },
-    {
+  {
+    path: 'metdata',
+    component: MetDataComponent,
+  },
+  {
+    path: 'run',
+    component: FlexpartRunPreloadedComponent,
+    // component: SelectInputComponent,
+  },
+  {
+    path: 'plots',
+    component: PlotStepperComponent,
+
+    children: [
+      {
         path: 'runs',
         component: FlexpartPlotComponent,
         children: [
-            {
-                path: ':runId',
-                component: ChooseOutputComponent,
-                // resolve: {
-                //     fpOutputs: OutputsResolverService,
-                // },
-                children: [
-                    {
-                        path: 'outputs/:outputId',
-                        component: VariableSelectionComponent,
-                        // resolve: {
-                        //     fpOutput: OutputResolverService,
-                        // },
-                        children: [
-                            {
-                                path: 'dimensions/:layerName',
-                                component: DimensionsFormComponent,
-                            }
-                        ],
-                    },
-                ]
-            }
-        ]
-    },
-    // {
-    //     path: ':slug',
-    //     component: EditorComponent,
-    //     canActivate: [AuthGuard],
-    //     resolve: {
-    //         article: EditableArticleResolver
-    //     }
-    // }
+          {
+            path: ':runId',
+            component: OutputsComponent,
+            resolve: {
+                fpOutputs: OutputsResolverService,
+            },
+            children: [
+              // {
+              //   path: 'outputs/:outputId',
+              //   component: VariableSelectionComponent,
+              //   // resolve: {
+              //   //     fpOutput: OutputResolverService,
+              //   // },
+              //   children: [
+              //     {
+              //       path: 'dimensions/:layerName',
+              //       component: DimensionsFormComponent,
+              //     },
+              //   ],
+              // },
+            ],
+          },
+        ],
+      },
+      {
+        path: 'outputs/:outputId',
+        component: VariableSelectionComponent,
+        // resolve: {
+        //     fpOutput: OutputResolverService,
+        // },
+        children: [
+          {
+            path: 'dimensions/:layerName',
+            component: DimensionsFormComponent,
+          },
+        ],
+      }
+    ],
+  },
+  // {
+  //     path: ':slug',
+  //     component: EditorComponent,
+  //     canActivate: [AuthGuard],
+  //     resolve: {
+  //         article: EditableArticleResolver
+  //     }
+  // }
 ];
 
 @NgModule({
-    imports: [RouterModule.forChild(routes)],
-    exports: [RouterModule]
+  imports: [RouterModule.forChild(routes)],
+  exports: [RouterModule],
 })
-
-
-export class FlexpartRoutingModule { }
+export class FlexpartRoutingModule {}

@@ -1,7 +1,6 @@
 import { MatListModule } from '@angular/material/list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
-import { FlexpartPlotFormComponent } from './flexpart-plot/flexpart-plot-form/flexpart-plot-form.component';
 import { FlexpartPlotComponent } from './flexpart-plot/flexpart-plot.component';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -11,17 +10,14 @@ import { FlexpartRunPreloadedFormComponent } from './flexpart-run-preloaded/flex
 import { SharedModule } from '../shared/shared.module';
 import { FlexpartService } from './flexpart.service';
 import { FlexpartRoutingModule } from './flexpart-routing.module';
-import { ChooseOutputComponent } from './flexpart-plot/choose-output/choose-output.component';
-import { OutputFormComponent } from './flexpart-plot/output-form/output-form.component';
 import { VariableSelectionComponent } from './flexpart-plot/variable-selection/variable-selection.component';
 import { FlexpartInputComponent } from './flexpart-input/flexpart-input.component';
-import { SelectInputComponent } from './select-input/select-input.component';
-import { SelectionDialogComponent } from 'src/app/flexpart/selection-dialog/selection-dialog.component';
 import { DimensionsFormComponent } from './flexpart-plot/dimensions-form/dimensions-form.component';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
-
-
+import {MatStepperModule} from '@angular/material/stepper';
+import { PlotStepperComponent } from './plot-stepper/plot-stepper.component';
+import { OutputsComponent } from './flexpart-plot/outputs/outputs.component';
 
 @NgModule({
     declarations: [
@@ -29,14 +25,11 @@ import { MatButtonModule } from '@angular/material/button';
         FlexpartRunPreloadedComponent,
         FlexpartRunPreloadedFormComponent,
         FlexpartPlotComponent,
-        FlexpartPlotFormComponent,
-        ChooseOutputComponent,
-        OutputFormComponent,
+        OutputsComponent,
         VariableSelectionComponent,
         FlexpartInputComponent,
-        SelectInputComponent,
-        SelectionDialogComponent,
         DimensionsFormComponent,
+        PlotStepperComponent,
     ],
     providers: [
         FlexpartService,
@@ -51,12 +44,14 @@ import { MatButtonModule } from '@angular/material/button';
         MatListModule,
         MatSelectModule,
         MatButtonModule,
+        MatTabsModule,
+        MatStepperModule
         // MatDialog
     ],
     exports: [
-        MetDataComponent,
-        FlexpartRunPreloadedComponent,
-        FlexpartPlotComponent,
+        // MetDataComponent,
+        // FlexpartRunPreloadedComponent,
+        // FlexpartPlotComponent,
     ]
 })
 export class FlexpartModule { }

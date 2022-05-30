@@ -1,4 +1,4 @@
-<!-- <app-selection-table 
+<!-- <app-selection-table
     #selectionTableRef
     [columnInfo]="columnInfo"
     [displayedColumns]="displayedColumns"
@@ -10,7 +10,9 @@
 <!-- <app-selection-list [elements] = "runIds$ | async" [routerLink]=""></app-selection-list> -->
 
 <mat-selection-list class="listbox" [multiple]="false" *ngIf="runs$ | async as runs">
-    <mat-list-option class="list-item" *ngFor="let run of runs; let index = index" [routerLink]="run.uuid">
+    <mat-list-option class="list-item" *ngFor="let run of runs; let index = index" [value] = "run.uuid"
+    (click)="onClick(run.uuid)"
+    >
         {{ run.uuid }} - {{ run.date_created }}
     </mat-list-option>
 </mat-selection-list>
@@ -23,4 +25,4 @@
     *ngIf="fpOutput"
     [flexpartOutput]="fpOutput"></app-flexpart-plot-form > -->
 
-<router-outlet></router-outlet>
+<!-- <router-outlet></router-outlet> -->

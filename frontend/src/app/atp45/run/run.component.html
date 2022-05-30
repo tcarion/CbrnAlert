@@ -5,6 +5,10 @@
     </ng-container> -->
     <app-location-array [formGroup]="runForm"></app-location-array>
 
+    <select *ngIf="cbrnTypes$ | async as cbrnTypes" name="" id="">
+      <option *ngFor="let cbrnType of cbrnTypes"> {{ cbrnType.longName }} </option>
+    </select>
+
     <mat-slide-toggle [checked]="withWind" (change)="withWind = !withWind">
         Provide wind data
     </mat-slide-toggle>

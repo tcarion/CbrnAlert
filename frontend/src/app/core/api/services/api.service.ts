@@ -10,7 +10,7 @@ import { Observable } from 'rxjs';
 import { map, filter } from 'rxjs/operators';
 
 import { Atp45Result } from '../models/atp-45-result';
-import { CbrnTypes } from '../models/cbrn-types';
+import { CbrnType } from '../models/cbrn-type';
 import { FlexpartOutput } from '../models/flexpart-output';
 import { FlexpartRun } from '../models/flexpart-run';
 import { ForecastAtp45Input } from '../models/forecast-atp-45-input';
@@ -94,7 +94,7 @@ export class ApiService extends BaseService {
    */
   atp45RunWindPost$Response(params: {
     body: WindAtp45Input
-  }): Observable<StrictHttpResponse<void>> {
+  }): Observable<StrictHttpResponse<Atp45Result>> {
 
     const rb = new RequestBuilder(this.rootUrl, ApiService.Atp45RunWindPostPath, 'post');
     if (params) {
@@ -102,12 +102,12 @@ export class ApiService extends BaseService {
     }
 
     return this.http.request(rb.build({
-      responseType: 'text',
-      accept: '*/*'
+      responseType: 'json',
+      accept: 'application/json'
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return (r as HttpResponse<any>).clone({ body: undefined }) as StrictHttpResponse<void>;
+        return r as StrictHttpResponse<Atp45Result>;
       })
     );
   }
@@ -122,10 +122,10 @@ export class ApiService extends BaseService {
    */
   atp45RunWindPost(params: {
     body: WindAtp45Input
-  }): Observable<void> {
+  }): Observable<Atp45Result> {
 
     return this.atp45RunWindPost$Response(params).pipe(
-      map((r: StrictHttpResponse<void>) => r.body as void)
+      map((r: StrictHttpResponse<Atp45Result>) => r.body as Atp45Result)
     );
   }
 
@@ -336,22 +336,17 @@ export class ApiService extends BaseService {
   }
 
   /**
-   * Path part for operation flexpartRunsRunIdOutputsOutputIdGet
+   * Path part for operation flexpartOutputsOutputIdGet
    */
-  static readonly FlexpartRunsRunIdOutputsOutputIdGetPath = '/flexpart/runs/{runId}/outputs/{outputId}';
+  static readonly FlexpartOutputsOutputIdGetPath = '/flexpart/outputs/{outputId}';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `flexpartRunsRunIdOutputsOutputIdGet()` instead.
+   * To access only the response body, use `flexpartOutputsOutputIdGet()` instead.
    *
    * This method doesn't expect any request body.
    */
-  flexpartRunsRunIdOutputsOutputIdGet$Response(params: {
-
-    /**
-     * The flexpart run ID
-     */
-    runId: string;
+  flexpartOutputsOutputIdGet$Response(params: {
 
     /**
      * The output ID
@@ -359,9 +354,8 @@ export class ApiService extends BaseService {
     outputId: string;
   }): Observable<StrictHttpResponse<FlexpartOutput>> {
 
-    const rb = new RequestBuilder(this.rootUrl, ApiService.FlexpartRunsRunIdOutputsOutputIdGetPath, 'get');
+    const rb = new RequestBuilder(this.rootUrl, ApiService.FlexpartOutputsOutputIdGetPath, 'get');
     if (params) {
-      rb.path('runId', params.runId, {"style":"simple","explode":false});
       rb.path('outputId', params.outputId, {"style":"simple","explode":false});
     }
 
@@ -378,16 +372,11 @@ export class ApiService extends BaseService {
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `flexpartRunsRunIdOutputsOutputIdGet$Response()` instead.
+   * To access the full response (for headers, for example), `flexpartOutputsOutputIdGet$Response()` instead.
    *
    * This method doesn't expect any request body.
    */
-  flexpartRunsRunIdOutputsOutputIdGet(params: {
-
-    /**
-     * The flexpart run ID
-     */
-    runId: string;
+  flexpartOutputsOutputIdGet(params: {
 
     /**
      * The output ID
@@ -395,7 +384,7 @@ export class ApiService extends BaseService {
     outputId: string;
   }): Observable<FlexpartOutput> {
 
-    return this.flexpartRunsRunIdOutputsOutputIdGet$Response(params).pipe(
+    return this.flexpartOutputsOutputIdGet$Response(params).pipe(
       map((r: StrictHttpResponse<FlexpartOutput>) => r.body as FlexpartOutput)
     );
   }
@@ -670,7 +659,7 @@ export class ApiService extends BaseService {
    * This method doesn't expect any request body.
    */
   atp45CbrntypesGet$Response(params?: {
-  }): Observable<StrictHttpResponse<Array<CbrnTypes>>> {
+  }): Observable<StrictHttpResponse<Array<CbrnType>>> {
 
     const rb = new RequestBuilder(this.rootUrl, ApiService.Atp45CbrntypesGetPath, 'get');
     if (params) {
@@ -682,7 +671,7 @@ export class ApiService extends BaseService {
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<Array<CbrnTypes>>;
+        return r as StrictHttpResponse<Array<CbrnType>>;
       })
     );
   }
@@ -694,10 +683,10 @@ export class ApiService extends BaseService {
    * This method doesn't expect any request body.
    */
   atp45CbrntypesGet(params?: {
-  }): Observable<Array<CbrnTypes>> {
+  }): Observable<Array<CbrnType>> {
 
     return this.atp45CbrntypesGet$Response(params).pipe(
-      map((r: StrictHttpResponse<Array<CbrnTypes>>) => r.body as Array<CbrnTypes>)
+      map((r: StrictHttpResponse<Array<CbrnType>>) => r.body as Array<CbrnType>)
     );
   }
 
