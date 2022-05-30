@@ -44,7 +44,7 @@ export class LocationComponent implements ControlValueAccessor, OnDestroy {
 
     onChangeSubs: Subscription[] = [];
 
-    @Select(MapState.marker) marker$: Observable<GeoPoint>;
+    @Select(MapState.userPoint) marker$: Observable<GeoPoint>;
 
     constructor(
         public store: Store,

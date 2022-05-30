@@ -24,6 +24,7 @@ import { DynFormComponent } from './dyn-form/dyn-form.component';
 import { DynFormQuestionComponent } from './dyn-form-question/dyn-form-question.component';
 import { LocationArrayComponent } from './location-array/location-array.component';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { AreaInputComponent } from './area-input/area-input.component';
 
 
 
@@ -39,6 +40,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     DynFormComponent,
     DynFormQuestionComponent,
     LocationArrayComponent,
+    AreaInputComponent,
   ],
   imports: [
     CommonModule,
@@ -64,6 +66,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     DynFormComponent,
     LocationArrayComponent,
     LocationComponent,
+    AreaInputComponent,
   ],
   providers: [
     FormService,

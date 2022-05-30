@@ -9,14 +9,14 @@
 <!-- <app-selection-list [(runIds$ | async)] = "runId$ | async" (selected)="goToOuput($event)"></app-selection-list> -->
 <!-- <app-selection-list [elements] = "runIds$ | async" [routerLink]=""></app-selection-list> -->
 
-<div class="spinner-container" *ngIf="!(runIds$ | async) || (runIds$ | async)?.length == 0">
+<mat-selection-list class="listbox" [multiple]="false" *ngIf="runs$ | async as runs">
+    <mat-list-option class="list-item" *ngFor="let run of runs; let index = index" [routerLink]="run.uuid">
+        {{ run.uuid }} - {{ run.date_created }}
+    </mat-list-option>
+</mat-selection-list>
+<div class="spinner-container" *ngIf="!(runs$ | async)">
     <mat-spinner></mat-spinner>
 </div>
-<mat-selection-list class="listbox" [multiple]="false" *ngIf="(runIds$ | async) !== null && (runIds$ | async)?.length !== 0">
-        <mat-list-option class="list-item" *ngFor="let e of (runIds$ | async); let index = index" [routerLink]="e">
-            {{ e }}
-        </mat-list-option>
-</mat-selection-list>
 
 <!-- <button (click)="openDialog()"> Open dialog </button> -->
 <!-- <app-flexpart-plot-form

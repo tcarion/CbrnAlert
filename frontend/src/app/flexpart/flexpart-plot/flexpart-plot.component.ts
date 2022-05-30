@@ -26,8 +26,9 @@ import { FlexpartRun } from 'src/app/core/api/models';
   styleUrls: ['./flexpart-plot.component.scss'],
 })
 export class FlexpartPlotComponent implements OnInit {
-  @Select(FlexpartState.fpResults) runs$: Observable<FlexpartRun[]>;
-  runIds$: Observable<string[]>;
+  // @Select(FlexpartState.fpResults) runs$: Observable<FlexpartRun[]>;
+  runs$: Observable<FlexpartRun[]>;
+  // runIds$: Observable<string[]>;
 
   constructor(
     private flexpartService: FlexpartService,
@@ -35,16 +36,17 @@ export class FlexpartPlotComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.store.selectSnapshot((state) => state.flexpart.runs).length == 0 &&
-      this.flexpartService
-        .getRuns()
-        .subscribe((run) =>
-          run.forEach((result) =>
-            this.store.dispatch(new FlexpartRunAction.Add(result))
-          )
-        );
+    // this.store.selectSnapshot((state) => state.flexpart.runs).length == 0 &&
+    this.runs$ = this.flexpartService.getRuns();
+      // this.flexpartService
+      //   .getRuns()
+      //   .subscribe((run) =>
+      //     run.forEach((result) =>
+      //       this.store.dispatch(new FlexpartRunAction.Add(result))
+      //     )
+      //   );
 
-    this.runIds$ = this.runs$.pipe(map((res) => res.map((r) => r.uuid)));
+    // this.runIds$ = this.runs$.pipe(map((res) => res.map((r) => r.uuid)));
   }
 
 //   goToOuput(index: number) {

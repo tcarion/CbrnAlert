@@ -1,11 +1,11 @@
 <div class="h-screen flex-col absolute inset-0" [class.is-mobile]="mobileQuery.matches">
     <app-topbar [snav]="snav"></app-topbar>
-    
+
     <mat-sidenav-container class="sidenav-container h-screen" [style.marginTop.px]="mobileQuery.matches ? 40 : 0">
-        <mat-sidenav 
-            class="sidenav" 
-            role="navigation" 
-            #snav 
+        <mat-sidenav
+            class="sidenav"
+            role="navigation"
+            #snav
             [mode]="mobileQuery.matches ? 'over' : 'side'"
             [fixedInViewport]="mobileQuery.matches" fixedTopGap="40" opened="true">
             <mat-nav-list>
@@ -22,7 +22,7 @@
                                 </div>
                             </mat-panel-title>
                         </mat-expansion-panel-header>
-                        
+
                         <mat-list-item routerLink="atp45/run">
                             Run
                         </mat-list-item>
@@ -66,7 +66,8 @@
 
         <mat-sidenav-content class="sidenav-content">
             <router-outlet></router-outlet>
-            <app-map></app-map>
+            <!-- <app-map></app-map> -->
+            <app-leaflet-map></app-leaflet-map>
         </mat-sidenav-content>
     </mat-sidenav-container>
 </div>

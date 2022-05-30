@@ -150,7 +150,7 @@ class FlexpartPlots extends AbstractPlots {
             },
             style: (feature: any) => {
                 let options: L.PathOptions = {
-                    stroke: false, 
+                    stroke: false,
                     fillOpacity: 0.4,
                 }
                 options = feature.properties ? {...options, color: feature.properties.color } : options
@@ -205,7 +205,7 @@ class FlexpartPlots extends AbstractPlots {
 
         // style: (feature: any) => {
         //     let options: L.PathOptions = {
-        //         stroke: false, 
+        //         stroke: false,
         //         fillOpacity: 0.4,
         //     }
         //     options = (feature.properties !== undefined) && (legendData !== undefined) ? {...options, color: getcolor(feature.properties.val, legendData) } : options
@@ -249,7 +249,7 @@ export class CbrnMap {
     // private atp45Results: ShapeData[] = [];
     public availableArea: L.Layer;
     public areaSelection: L.Rectangle;
-    private drawRectangleControl?: L.Control;
+    private drawControl?: L.Control;
 
     // private heatLayer: L.Layer;
 
@@ -472,29 +472,28 @@ export class CbrnMap {
     // }
 
     addDrawControl() {
-        L.drawLocal.draw.toolbar.buttons.rectangle = 'Area selection for data retrieval';
-        L.drawLocal.draw.handlers.rectangle.tooltip.start = 'Please select the area for data retrieval';
+        L.drawLocal.draw.toolbar.buttons.rectangle = 'Area selection mode';
+        L.drawLocal.draw.handlers.rectangle.tooltip.start = 'Please select a rectangle area';
         var drawnItems = new L.FeatureGroup();
         this.map.addLayer(drawnItems);
-        this.drawRectangleControl = new L.Control.Draw({
+        this.drawControl = new L.Control.Draw({
             draw: {
                 polyline: false,
                 polygon: false,
                 circle: false,
-                marker: false,
                 circlemarker: false
             },
             edit: {
                 featureGroup: drawnItems
             }
         });
-        this.map.addControl(this.drawRectangleControl);
-        this.map.on('draw:created', (e: any) => {
-            this.newAreaSelection(e.layer)
-        });
+        this.map.addControl(this.drawControl);
+        // this.map.on('draw:created', (e: any) => {
+        //     this.newAreaSelection(e.layer)
+        // });
     }
 
     removeDrawControl() {
-        this.drawRectangleControl !== undefined && this.map.removeControl(this.drawRectangleControl)
+        this.drawControl !== undefined && this.map.removeControl(this.drawControl)
     }
 }

@@ -9,39 +9,43 @@ import { Atp45ShapeData } from 'src/app/atp45/shape-data';
 import { FlexpartPlotData } from 'src/app/flexpart/flexpart-plot-data';
 import { Feature, FeatureCollection } from 'geojson';
 import { ColorbarData } from '../api/models';
+import { circle, circleMarker, geoJSON, LayerGroup } from 'leaflet';
 
-const plots: MapPlot[] = [
-    // {
-    //     type: 'atp45',
-    //     id: 1,
-    //     layer: {},
-    //     info: {
-    //         date: new Date(),
-    //         windSpeed: 3.6
-    //     }
-    // },
-    // {
-    //     type: 'atp45',
-    //     id: 2,
-    //     layer: {},
-    //     info: {
-    //         date: new Date(),
-    //         windSpeed: 8
-    //     }
-    // },
-    // {
-    //     type: 'flexpart',
-    //     id: 1,
-    //     layer: {},
-    //     info: {
-    //         date: new Date(),
-    //         height: 20
-    //     }
-    // }
-]
+const POINT_MARKER_OPTIONS = {
+  radius: 2,
+  fillColor: "black",
+  color: "black",
+  weight: 1,
+  opacity: 1,
+  fillOpacity: 1
+};
+
+const REL_LOC_MARKER_OPTIONS = {
+  radius: 5,
+  fillColor: "red",
+  color: "red",
+  weight: 4,
+  opacity: 1,
+  fillOpacity: 1
+};
 
 type MapPlotCount = {
     [K in PlotType]: number;
+}
+
+function getColor(value: number, colorbar: ColorbarData) {
+  let ticks = colorbar.ticks as number[];
+  let colors = colorbar!.colors as string[];
+  let n = ticks.length;
+  if (value <= ticks[0]) {
+      return colors[0];
+  }
+  for (let i = 1; i < n; i++) {
+      if (value <= ticks[i]) {
+          return colors[i - 1];
+      }
+  }
+  return colors[n - 2];
 }
 
 @Injectable({
@@ -94,12 +98,66 @@ export class MapPlotsService {
         // newPlot.isActive = true;
         newPlot.metadata = flexpartPlotData.metadata as ColorbarData;
         newPlot.geojson = flexpartPlotData.collection as FeatureCollection;
-        this.mapService.addPlotToMap(newPlot);
+        // newPlot.layer = this.flexpartPlotToLayer(flexpartPlotData)
+        // this.mapService.addPlotToMap(newPlot);
         return newPlot;
         // this.emitPlots();
     }
 
-    addPlot({type, plotData}: any) {
+    setColors(layers: LayerGroup, colorbar: ColorbarData) {
+      layers.eachLayer((layer: any) => {
+        let val = layer.feature.properties.val;
+        if (val !== undefined) {
+          layer.setStyle({
+            color: getColor(val, colorbar),
+          });
+        }
+      });
+    }
+
+    flexpartPlotToLayer(collection: FeatureCollection) {
+        let options: L.GeoJSONOptions = {
+            pointToLayer: function (feature: any, latlng: L.LatLng) {
+                if (feature.properties.type === "releasePoint") {
+                    return circleMarker(latlng, REL_LOC_MARKER_OPTIONS);
+                }
+                return circleMarker(latlng, POINT_MARKER_OPTIONS);
+            },
+            style: (feature: any) => {
+                let options: L.PathOptions = {
+                    stroke: false,
+                    fillOpacity: 0.4,
+                }
+                options = feature.properties ? {...options, color: feature.properties.color } : options
+                return options;
+            },
+            // onEachFeature: (feature, layer) => {
+            //     layer.on({
+            //         'click': (e) => this.setActive(this.curPlot),
+            //     })
+            // }
+
+            // Update the info box with the cell value
+            // onEachFeature: this.cellHoverListener()
+        };
+
+        let layers = geoJSON(undefined, {
+          // ...options,
+          pmIgnore: true
+        });
+
+        // cells.forEach((feature: any) => {
+        //     layers.addData(feature);
+        // });
+
+        layers.addData(collection as FeatureCollection);
+        // let layers = circle([ 46.95, 4 ], { radius: 5000 })
+        // return layers;
+        return layers;
+    }
+
+
+    createMapPlot({type, plotData}: any) {
         let mapPlot;
         switch (type) {
             case 'atp45':

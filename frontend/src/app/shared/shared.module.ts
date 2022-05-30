@@ -14,6 +14,8 @@ import { TopbarModule } from './topbar/topbar.module';
 // import { SelectionDialogModule } from 'src/app/flexpart/selection-dialog/selection-dialog.module';
 import { SelectionListComponent } from './selection-list/selection-list.component';
 import { SelectionListModule } from './selection-list/selection-list.module';
+import { LeafletMapComponent } from './leaflet-map/leaflet-map.component';
+import { LeafletMapModule } from './leaflet-map/leaflet-map.module';
 
 
 @NgModule({
@@ -28,6 +30,7 @@ import { SelectionListModule } from './selection-list/selection-list.module';
     MatListModule,
     FormTemplateModule,
     SelectionTableModule,
+    LeafletMapModule,
     // SelectionDialogModule,
   ],
   exports: [
@@ -38,6 +41,7 @@ import { SelectionListModule } from './selection-list/selection-list.module';
     SelectionListModule,
     TopbarModule,
     MapComponent,
+    LeafletMapComponent,
     // InfoButtonComponent,
   ]
 })

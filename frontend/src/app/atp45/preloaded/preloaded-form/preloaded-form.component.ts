@@ -56,12 +56,12 @@ export class PreloadedFormComponent implements OnInit, OnDestroy, OnChanges, Aft
 
     constructor(
         public formService: FormService,
-        private mapService: MapService, 
+        private mapService: MapService,
         private atp45Service: Atp45Service,
         private store: Store,
-        ) { 
+        ) {
         }
-    
+
     ngAfterViewInit() {
 
         this.formService.lonlatValid(this.formGroup).subscribe(() => {
@@ -72,7 +72,7 @@ export class PreloadedFormComponent implements OnInit, OnDestroy, OnChanges, Aft
     ngOnChanges(changes: SimpleChanges) {
         if (changes.gribData && changes.gribData.currentValue) {
             const newGribData = changes.gribData.currentValue;
-    
+
             this.updateStepSelection(newGribData);
             this.mapService.cbrnMap.newAvailableArea(newGribData.area);
         }
@@ -106,7 +106,7 @@ export class PreloadedFormComponent implements OnInit, OnDestroy, OnChanges, Aft
 
     onSubmit() {
         const date = this.gribData.startDate;
-          
+
         const atp45Input = {
             datetime:  this.formService.removeTimeZone(date),
             lat: this.formGroup.get('lat')?.value,
@@ -117,7 +117,7 @@ export class PreloadedFormComponent implements OnInit, OnDestroy, OnChanges, Aft
         };
 
         this.atp45Service.preloadedResultRequest(atp45Input).subscribe(res => {
-            this.store.dispatch(new MapPlotAction.Add(res, 'atp45'))
+            // this.store.dispatch(new MapPlotAction.Add(res, 'atp45'))
         });
     }
 

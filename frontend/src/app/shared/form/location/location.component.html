@@ -1,29 +1,29 @@
 <div class = "flex flex-row items-start max-h-14">
     <fieldset [formGroup] = "form" (keydown.enter)="onEnter()" class = "flex flex-row justify-around pt-0">
-        <mat-form-field 
+        <mat-form-field
         appearance="outline"
         class = "w-20"
         >
             <mat-label> Long. </mat-label>
             <input
-            matInput 
+            matInput
             formControlName="lon"
             >
         </mat-form-field>
-        
-        <mat-form-field 
-        class="w-20" 
-        appearance="outline" 
+
+        <mat-form-field
+        class="w-20"
+        appearance="outline"
         floatLabel="never">
             <mat-label> Latit. </mat-label>
-            <input 
-            matInput 
+            <input
+            matInput
             formControlName="lat"
             >
         </mat-form-field>
     </fieldset>
     <div class="flex flex-col ">
-        <button type="button" matTooltip="Add coords by clicking on the map" (click)="setFromMapClick()">
+        <button type="button" matTooltip="Move the marker to this position" (click)="onEnter()">
             <mat-icon class="text-base">location_searching</mat-icon>
         </button>
         <button type="button" class="h-7" matTooltip="Read the coords from the marker position" (click)="setFromMarker()">

@@ -7,9 +7,9 @@ export interface MapPlot {
     name: string,
     id: number,
     geojson?: FeatureCollection | FeatureCollection[],
-    // layer?: L.Layer,
+    layer?: L.Layer,
     info?: Object,
     visible: boolean,
-    isActive?: boolean,
+    isActive: boolean,
     metadata?: Object
 }

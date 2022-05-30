@@ -31,15 +31,17 @@ export class MapComponent implements AfterViewInit, OnDestroy {
             this.store.dispatch(new MapPlotAction.SetActive(id));
         })
 
-        this.mapService.cbrnMap.map.on('click', (e: L.LeafletMouseEvent) => {
-            let latlng = e.latlng;
-            let lat = latlng.lat;
-            let lon = latlng.lng;
-            // this.cbrnMap.marker = {lon, lat};
-            // this.emitMapSubject();
-            // this.emitEventSubject('newMarker');
-            this.store.dispatch(new MapAction.ChangeMarker({lon, lat}))
-        })
+        this.mapService.cbrnMap.addDrawControl()
+
+        // this.mapService.cbrnMap.map.on('click', (e: L.LeafletMouseEvent) => {
+        //     let latlng = e.latlng;
+        //     let lat = latlng.lat;
+        //     let lon = latlng.lng;
+        //     // this.cbrnMap.marker = {lon, lat};
+        //     // this.emitMapSubject();
+        //     // this.emitEventSubject('newMarker');
+        //     this.store.dispatch(new MapAction.ChangeMarker({lon, lat}))
+        // })
         // this.mapService.onClickInit();
 
         // this.formSubscription = this.formService.currentFormSubject.subscribe(
@@ -53,7 +55,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         //         }
         //     }
         // );
-        
+
         // this.atp45ResultsSubscription = this.mapPlotsService.newAtp45Plot().subscribe((obj) => {
         //     this.mapService.addLayerToMap(obj.layer);
         // });

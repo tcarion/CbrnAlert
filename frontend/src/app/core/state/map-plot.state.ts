@@ -3,53 +3,56 @@ import { Injectable } from '@angular/core';
 import { Action, createSelector, Selector, State, StateContext } from '@ngxs/store';
 import { MapPlot, PlotType } from 'src/app/core/models/map-plot';
 import produce from "immer"
+import { Atp45Result, GeoJsonSliceResponse } from '../api/models';
 
 export namespace MapPlotAction {
     export class Add {
         static readonly type = '[MapPlot] Add'
-    
-        constructor(public plotData: any, public type: PlotType) {}
+
+        constructor(public plotData: GeoJsonSliceResponse | Atp45Result, public type: PlotType) {}
     }
-    
+
     export class Hide {
         static readonly type = '[MapPlot] Hide'
-    
+
         constructor(public mapPlotId: number) {}
     }
-    
+
     export class Show {
         static readonly type = '[MapPlot] Show'
-    
+
         constructor(public mapPlotId: number) {}
     }
-    
+
     export class SetActive {
         static readonly type = '[MapPlot] SetActive'
-    
+
         constructor(public mapPlotId: number) {}
     }
-    
+
     export class SetInactive {
         static readonly type = '[MapPlot] SetInactive'
-    
+
         constructor(public mapPlotId: number) {}
     }
-    
+
     export class Remove {
         static readonly type = '[MapPlot] Remove'
-    
+
         constructor(public mapPlotId: number) {}
     }
 }
 
 export class MapPlotStateModel {
     mapPlots: MapPlot[]
+    activePlot?: MapPlot;
 }
 
 @State<MapPlotStateModel>({
     name: 'mapPlots',
     defaults: {
-        mapPlots: []
+        mapPlots: [],
+        activePlot: undefined
     }
 })
 @Injectable()
@@ -60,12 +63,19 @@ export class MapPlotState {
 
     // @Selector()
     // static getFlexpartPlots(state: MapPlotStateModel) {
-    //     return state.mapPlots.filter(plot => plot.type == 'flexpart')       
+    //     return state.mapPlots.filter(plot => plot.type == 'flexpart')
     // }
-
+    @Selector()
+    static mapPlots(state: MapPlotStateModel) {
+        return state.mapPlots
+    }
+    @Selector()
+    static activePlot(state: MapPlotStateModel) {
+        return state.activePlot;
+    }
     // @Selector()
     // static getAtp45Plots(state: MapPlotStateModel) {
-    //     return state.mapPlots.filter(plot => plot.type == 'atp45')       
+    //     return state.mapPlots.filter(plot => plot.type == 'atp45')
     // }
     static filterType(type: PlotType) {
         return createSelector([MapPlotState], (state: MapPlotStateModel) => {
@@ -76,7 +86,7 @@ export class MapPlotState {
     @Action(MapPlotAction.Add)
     add(ctx: StateContext<MapPlotStateModel>, action : MapPlotAction.Add ) {
         const state = ctx.getState();
-        let mapPlot = this.mapPlotService.addPlot(action);
+        let mapPlot = this.mapPlotService.createMapPlot(action);
 
         ctx.patchState({
             mapPlots: [...state.mapPlots, mapPlot]
@@ -90,7 +100,7 @@ export class MapPlotState {
         ctx.setState(produce(draft => {
             draft.mapPlots.forEach(plt => {
                 if (plt.id == action.mapPlotId) {
-                    this.mapPlotService.showMapPlot(plt);
+                    // this.mapPlotService.showMapPlot(plt);
                     plt.visible = true;
                 }
             })
@@ -102,7 +112,7 @@ export class MapPlotState {
         ctx.setState(produce(draft => {
             draft.mapPlots.forEach(plt => {
                 if (plt.id == action.mapPlotId) {
-                    this.mapPlotService.hideMapPlot(plt);
+                    // this.mapPlotService.hideMapPlot(plt);
                     plt.visible = false;
                 }
             })
@@ -112,25 +122,39 @@ export class MapPlotState {
     @Action(MapPlotAction.SetActive)
     setActive(ctx: StateContext<MapPlotStateModel>, action : MapPlotAction.SetActive ) {
         ctx.setState(produce(draft => {
+            const id = action.mapPlotId
             draft.mapPlots.forEach(plt => {
-                if (plt.id == action.mapPlotId) {
-                    this.mapPlotService.setActive(plt);
+                if (plt.id == id) {
+                    // this.mapPlotService.setActive(plt);
                     plt.isActive = true;
                 } else {
                     plt.isActive = false;
                 }
-            })
+            });
+            draft.activePlot = draft.mapPlots.find(plt => plt.id == id);
         }))
     }
 
 
     @Action(MapPlotAction.Remove)
     remove({getState, patchState}: StateContext<MapPlotStateModel>, { mapPlotId }: MapPlotAction.Remove ) {
-        const state = getState();
-        const toDelete = state.mapPlots.find(e => e.id == mapPlotId);
-        !!toDelete && this.mapPlotService.deleteMapPlot(toDelete);
+        // const state = getState();
+        // const toDelete = state.mapPlots.find(e => e.id == mapPlotId);
+        // !!toDelete && this.mapPlotService.deleteMapPlot(toDelete);
+        const mapPlots = getState().mapPlots;
+        const newMapPlots = mapPlots.filter(a => a.id != mapPlotId);
+        let newActive: MapPlot | undefined;
+        if (newMapPlots.length == 0) {
+          newActive = undefined
+        } else {
+          const toDel = mapPlots.find(a => a.id == mapPlotId)
+          if (toDel?.isActive) {
+            newActive = undefined
+          }
+        }
         patchState({
-            mapPlots: getState().mapPlots.filter(a => a.id != mapPlotId)
+            mapPlots: newMapPlots,
+            activePlot: newActive
         })
     }
 }

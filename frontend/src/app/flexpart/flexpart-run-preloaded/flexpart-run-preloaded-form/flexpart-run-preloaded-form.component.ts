@@ -108,14 +108,14 @@ const formItems: FormItemBase[] = [
             {key: 6},
         ]
     }),
-    new TextFormItem({
-        key: 'area',
-        label: 'Output domain',
-        type: 'mapObject',
-        required: true,
-        disabled: true,
-        mapper: (a: number[]) => a.map(e => Math.round(e * 100)/100).join(', ')
-    }),
+    // new TextFormItem({
+    //     key: 'area',
+    //     label: 'Output domain',
+    //     type: 'mapObject',
+    //     required: true,
+    //     disabled: true,
+    //     mapper: (a: number[]) => a.map(e => Math.round(e * 100)/100).join(', ')
+    // }),
 ]
 @Component({
     selector: 'app-flexpart-run-preloaded-form',

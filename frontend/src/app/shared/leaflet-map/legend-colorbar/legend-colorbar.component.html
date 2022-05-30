@@ -1,0 +1,20 @@
+<!-- <ng-template *ngIf="ticks !== undefined"> -->
+<div
+  class="fixed w-32 bottom-9 right-14 bg-white rounded-lg border-4 p-2 flex flex-col-reverse"
+  style="z-index: 1000"
+>
+  <div
+    *ngFor="let color of colorbar.colors; let i = index"
+    class="flex flex-row"
+  >
+    <i [style.background]="color" class="w-6 h-6 float-left opacity-70"></i>
+    <span class="relative" *ngIf="colorbar.ticks">
+      <span class="absolute text-xs bottom-4 left-1">{{
+        formatTick(colorbar.ticks[i + 1])
+      }}</span>
+      <span *ngIf="i === 0" class="absolute text-xs top-4 left-1">{{ formatTick(colorbar.ticks[i]) }}</span>
+    </span>
+    <!-- <span class="legend-ticklabel"> {{tick}}</span> -->
+  </div>
+</div>
+<!-- </ng-template> -->

@@ -90,7 +90,7 @@ export class RealtimeComponent implements OnInit, OnDestroy, AfterViewInit {
             // step: this.formGroup.get('step')?.value.step,
         };
         this.atp45Service.realtimeResultRequest(atp45Input).subscribe(res => {
-            this.store.dispatch(new MapPlotAction.Add(res, 'atp45'))
+            // this.store.dispatch(new MapPlotAction.Add(res, 'atp45'))
         });
 
     }

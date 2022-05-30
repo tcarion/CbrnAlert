@@ -1,53 +1,56 @@
+import { Marker, Rectangle } from 'leaflet';
 import { MapService } from 'src/app/core/services/map.service';
 import { MapPlotsService } from 'src/app/core/services/map-plots.service';
 import { Injectable } from '@angular/core';
 import { Action, createSelector, Selector, State, StateContext } from '@ngxs/store';
 import produce from "immer"
+import { MapArea } from 'src/app/core/api/models/map-area';
+import { GeoPoint } from 'src/app/core/api/models';
 
 export namespace MapAction {
     export class ChangeArea {
         static readonly type = '[Map] ChangeArea'
-    
+
         constructor(public area: number[]) {}
     }
 
     export class ChangeMarker {
         static readonly type = '[Map] ChangeMarker'
-    
-        constructor(public marker: {lon:number, lat:number}) {}
+
+        constructor(public marker: GeoPoint) {}
     }
 
     export class RemoveArea {
         static readonly type = '[Map] RemoveArea'
-    
+
         constructor() {}
     }
 
     export class ChangeAreaSelection {
         static readonly type = '[Map] ChangeAreaSelection'
-    
-        constructor(public area: number[]) {}
+
+        constructor(public area: MapArea) {}
     }
 
     export class RemoveAreaSelection {
         static readonly type = '[Map] RemoveAreaSelection'
-    
+
         constructor() {}
     }
 }
 
 export class MapStateModel {
     area?:number[]
-    areaSelection?:number[]
-    marker?:{lon:number, lat:number}
+    userArea?:MapArea
+    userPoint?:GeoPoint
 }
 
 @State<MapStateModel>({
     name: 'mapState',
     defaults: {
         area: undefined,
-        areaSelection: undefined,
-        marker:undefined
+        userArea: undefined,
+        userPoint:undefined
     }
 })
 @Injectable()
@@ -57,15 +60,20 @@ export class MapState {
         private mapService: MapService) {}
 
     @Selector()
-    static marker(state: MapStateModel) {
-        return state.marker;
+    static userPoint(state: MapStateModel) {
+        return state.userPoint;
+    }
+
+    @Selector()
+    static userArea(state: MapStateModel) {
+        return state.userArea;
     }
 
     @Action(MapAction.ChangeArea)
     changeArea(ctx: StateContext<MapStateModel>, action : MapAction.ChangeArea ) {
-        this.mapService.changeArea(action.area);
+        // this.mapService.updateRectangle(action.area);
         ctx.patchState({
-            area: action.area
+          area: action.area
         })
 
         // return ctx.dispatch(new MapAction.SetActive(mapPlot.id))
@@ -73,16 +81,26 @@ export class MapState {
 
     @Action(MapAction.ChangeMarker)
     changeMarker(ctx: StateContext<MapStateModel>, action : MapAction.ChangeMarker ) {
-        this.mapService.cbrnMap.marker = action.marker
+        this.mapService.changeMarkerPosition(action.marker)
         return ctx.patchState({
-            marker: action.marker
+            userPoint: action.marker
+        })
+        // return ctx.dispatch(new MapAction.SetActive(mapPlot.id))
+    }
+
+    @Action(MapAction.ChangeAreaSelection)
+    changeAreaSelection(ctx: StateContext<MapStateModel>, action : MapAction.ChangeAreaSelection ) {
+        // this.mapService.cbrnMap.areaSelection = action.area
+        this.mapService.updateRectangle(action.area)
+        return ctx.patchState({
+          userArea: action.area
         })
         // return ctx.dispatch(new MapAction.SetActive(mapPlot.id))
     }
 
     @Action(MapAction.RemoveArea)
     removeArea({getState, patchState}: StateContext<MapStateModel>) {
-        this.mapService.removeArea();        
+        this.mapService.removeArea();
         patchState({
             area: undefined
         })
