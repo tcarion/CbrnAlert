@@ -1,0 +1,27 @@
+<mat-selection-list
+  class="listbox"
+  [multiple]="false"
+  *ngIf="inputs$ | async as inputs"
+>
+  <div class="flex flex-row" *ngFor="let input of inputs; let index = index">
+    <mat-list-option
+      class="list-item"
+      [value]="input.uuid"
+      (click)="onClick(input)"
+    >
+      {{ input.name }} - {{ input.date_created }}
+    </mat-list-option>
+    <button
+      matTooltip="Draw available area"
+      type="button"
+      mat-stroked-button
+      color="primary"
+      (click)="drawArea(input)"
+    >
+      <mat-icon class="text-base">crop</mat-icon>
+    </button>
+  </div>
+</mat-selection-list>
+<div class="spinner-container" *ngIf="!(inputs$ | async)">
+  <mat-spinner></mat-spinner>
+</div>

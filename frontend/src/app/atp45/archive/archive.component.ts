@@ -61,8 +61,8 @@ export class ArchiveComponent extends AbstractWsComponent implements OnInit, OnD
         public websocketService: WebsocketService) {
             super(websocketService, notificationService);
          }
-    
-    
+
+
     ngAfterViewInit() {
         this.mapSubscription = this.mapService.mapEventSubject.subscribe({
             next: (event) => {

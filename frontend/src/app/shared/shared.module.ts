@@ -16,11 +16,13 @@ import { SelectionListComponent } from './selection-list/selection-list.componen
 import { SelectionListModule } from './selection-list/selection-list.module';
 import { LeafletMapComponent } from './leaflet-map/leaflet-map.component';
 import { LeafletMapModule } from './leaflet-map/leaflet-map.module';
+import { SetDateExtremaDirective } from './set-date-extrema.directive';
 
 
 @NgModule({
   declarations: [
     MapComponent,
+    SetDateExtremaDirective,
     // InfoButtonComponent
   ],
   imports: [
@@ -42,6 +44,7 @@ import { LeafletMapModule } from './leaflet-map/leaflet-map.module';
     TopbarModule,
     MapComponent,
     LeafletMapComponent,
+    SetDateExtremaDirective,
     // InfoButtonComponent,
   ]
 })

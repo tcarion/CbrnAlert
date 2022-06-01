@@ -106,7 +106,7 @@ export class MetDataComponent extends AbstractWsComponent implements OnInit, OnD
         public formService: FormService,
         public websocketService: WebsocketService,
         public notificationService: NotificationService
-    ) { 
+    ) {
         super(websocketService, notificationService);
     }
 
@@ -131,11 +131,11 @@ export class MetDataComponent extends AbstractWsComponent implements OnInit, OnD
 
     onSubmit() {
         let formFields = this.formGroup.value;
-        
+
         formFields.startDate = this.formService.removeTimeZone(this.formService.toDate(formFields.startDay, formFields.startTime));
         formFields.endDate = this.formService.removeTimeZone(this.formService.toDate(formFields.endDay, formFields.endTime));
 
-        this.flexpartService.meteoDataRetrieval(formFields).subscribe();
+        // this.flexpartService.meteoDataRetrieval(formFields).subscribe();
     }
 
     ngOnDestroy() {

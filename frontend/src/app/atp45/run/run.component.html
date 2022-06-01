@@ -5,9 +5,14 @@
     </ng-container> -->
     <app-location-array [formGroup]="runForm"></app-location-array>
 
-    <select *ngIf="cbrnTypes$ | async as cbrnTypes" name="" id="">
-      <option *ngFor="let cbrnType of cbrnTypes"> {{ cbrnType.longName }} </option>
+    <select formControlName="procedureType" *ngIf="procedureTypes$ | async as procedureTypes" name="" id="">
+      <option *ngFor="let procedureType of procedureTypes"> {{ procedureType.id }} </option>
     </select>
+
+    <select formControlName="container" *ngIf="containerTypes$ | async as containerTypes" name="" id="">
+        <option *ngFor="let container of containerTypes"> {{ container.id }} </option>
+    </select>   
+
 
     <mat-slide-toggle [checked]="withWind" (change)="withWind = !withWind">
         Provide wind data

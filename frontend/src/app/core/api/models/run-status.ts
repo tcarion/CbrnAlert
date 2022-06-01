@@ -2,7 +2,7 @@
 /* eslint-disable */
 export enum RunStatus {
   Created = 'created',
-  Started = 'started',
+  Finished = 'finished',
   Ongoing = 'ongoing',
   Errored = 'errored'
 }

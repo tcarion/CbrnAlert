@@ -1,3 +1,7 @@
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatListModule } from '@angular/material/list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -18,6 +22,12 @@ import { MatButtonModule } from '@angular/material/button';
 import {MatStepperModule} from '@angular/material/stepper';
 import { PlotStepperComponent } from './plot-stepper/plot-stepper.component';
 import { OutputsComponent } from './flexpart-plot/outputs/outputs.component';
+import { RunStepperComponent } from './run-stepper/run-stepper.component';
+import { InputsComponent } from './inputs/inputs.component';
+import { RunSimpleComponent } from './run-simple/run-simple.component';
+import { ReleaseFormComponent } from './run-simple/release-form/release-form.component';
+import { CommandFormComponent } from './run-simple/command-form/command-form.component';
+import { OutgridFormComponent } from './run-simple/outgrid-form/outgrid-form.component';
 
 @NgModule({
     declarations: [
@@ -30,6 +40,12 @@ import { OutputsComponent } from './flexpart-plot/outputs/outputs.component';
         FlexpartInputComponent,
         DimensionsFormComponent,
         PlotStepperComponent,
+        RunStepperComponent,
+        InputsComponent,
+        RunSimpleComponent,
+        ReleaseFormComponent,
+        CommandFormComponent,
+        OutgridFormComponent,
     ],
     providers: [
         FlexpartService,
@@ -45,7 +61,11 @@ import { OutputsComponent } from './flexpart-plot/outputs/outputs.component';
         MatSelectModule,
         MatButtonModule,
         MatTabsModule,
-        MatStepperModule
+        MatStepperModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatIconModule,
+        MatTooltipModule
         // MatDialog
     ],
     exports: [

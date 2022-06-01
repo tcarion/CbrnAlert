@@ -1,7 +1,7 @@
-import { Store } from '@ngxs/store';
+import { Select, Store } from '@ngxs/store';
 import { FormItems } from 'src/app/shared/form/form-items';
 import { FormItemBase } from 'src/app/shared/form/form-item-base';
-import { Subscription, Subject } from 'rxjs';
+import { Subscription, Subject, Observable } from 'rxjs';
 import { FormItem } from '../../../core/models/form-item';
 import { AroundPipe } from '../../../core/pipes/around.pipe';
 import { DatePipe } from '@angular/common';
@@ -19,6 +19,9 @@ import { FlexpartService } from '../../flexpart.service';
 import { TextFormItem } from 'src/app/shared/form/form-item-text';
 import { SelectFormItem } from 'src/app/shared/form/form-item-select';
 import { MapAction } from 'src/app/core/state/map.state';
+import { NotifAction, NotifState } from 'src/app/core/state/notification.state';
+import { withLatestFrom } from 'rxjs/operators';
+import { Notif } from 'src/app/core/models/notif';
 
 const formItems: FormItemBase[] = [
     new TextFormItem({
@@ -127,6 +130,7 @@ export class FlexpartRunPreloadedFormComponent extends AbstractWsComponent imple
     formItems = new FormItems(formItems);
 
     @Input() flexpartInput: FlexpartInput;
+    @Select(NotifState.notifs) notifs$: Observable<Notif[]>;
 
     formGroup: FormGroup;
 
@@ -211,8 +215,32 @@ export class FlexpartRunPreloadedFormComponent extends AbstractWsComponent imple
         this.formService.adjustDates(formFields)
         console.log(formFields);
 
-        this.flexpartService.runFlexpart(formFields);
-        
+        let notif: Notif;
+        this.store
+          .dispatch(new NotifAction.Add('Flexpart Run', 'flexpartRun'))
+          .pipe(withLatestFrom(this.notifs$))
+          .subscribe(([_, notifs]) => {
+            notif = notifs[notifs.length - 1];
+          })
+
+        const notifId = notif!.id
+        const payload = {
+            ...formFields,
+            ws_info: { channel: this.websocketService.channel, backid: notifId },
+            request: 'flexpart_run'
+        }
+
+        // this.apiService_old.post('/flexpart/run',payload).subscribe({
+        //     next: () => {
+        //         alert("Flexpart run done");
+        //         this.notificationService.changeStatus(notifTitle, 'succeeded');
+        //     },
+        //     error: (error) => {
+        //         alert(error.info);
+        //         this.notificationService.changeStatus(notifTitle, 'failed');
+        //     }
+        // })
+
     }
 
     ngOnDestroy(): void {

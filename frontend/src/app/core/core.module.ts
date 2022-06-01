@@ -19,6 +19,7 @@ import { NgxsLoggerPluginModule } from '@ngxs/logger-plugin';
 import { MapPlotState } from './state/map-plot.state';
 import { ApiService } from './api/services/api.service';
 import { Atp45State } from 'src/app/core/state/atp45.state';
+import { NotifState } from './state/notification.state';
 
 @NgModule({
   declarations: [],
@@ -29,6 +30,7 @@ import { Atp45State } from 'src/app/core/state/atp45.state';
         Atp45State,
         FlexpartState,
         MapState,
+        NotifState
     ],
     { developmentMode: !environment.production }),
     NgxsReduxDevtoolsPluginModule.forRoot(),

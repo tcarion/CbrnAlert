@@ -24,17 +24,17 @@ export class ApiService_old {
     // }
 
     atp45Request(payload: Payload) {
-        return this.http.post(environment.apiUrl + '/atp45', payload);
+        return this.http.post(environment.rootUrl + '/atp45', payload);
     }
 
     get(path: string, params: HttpParams = new HttpParams()): Observable<any> {
-        return this.http.get(`${environment.apiUrl}/api${path}`, { params })
+        return this.http.get(`${environment.rootUrl}/api${path}`, { params })
           .pipe(catchError(this.formatErrors));
     }
 
     post(path: string, body: Object = {}): Observable<any> {
         return this.http.post(
-          `${environment.apiUrl}/api${path}`,
+          `${environment.rootUrl}/api${path}`,
         //   JSON.stringify(body)
         body
         ).pipe(catchError(this.formatErrors));

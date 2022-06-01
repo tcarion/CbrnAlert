@@ -1,0 +1,36 @@
+<form [formGroup]="runForm" *ngIf="input$ | async as input else loading" (onSubmit)="submit(runForm)">
+  <mat-horizontal-stepper [linear]="true">
+
+    <mat-step label="Release 1">
+
+      <ng-container formArrayName="releases">
+        <ng-container *ngFor="let control of releases.controls; let i = index">
+          <app-release-form [appSetDateExtrema]="minMaxDate" [formGroup]="runForm" [formControlName]="i"></app-release-form>
+        </ng-container>
+      </ng-container>
+
+      <div>
+        <button mat-raised-button matStepperNext [disabled]="releases.invalid" >Next</button>
+      </div>
+    </mat-step>
+
+    <mat-step label="Command">
+      <app-command-form [appSetDateExtrema]="minMaxDate" [formGroup]="runForm" formControlName="command"></app-command-form>
+      <div>
+        <button mat-raised-button matStepperNext [disabled]="runForm.get('command')!.invalid" >Next</button>
+      </div>
+    </mat-step>
+
+    <mat-step label="Outgrid">
+      <app-outgrid-form [formGroup]="runForm" formControlName="outgrid"></app-outgrid-form>
+      <div>
+        <button type="submit" mat-raised-button color="primary" [disabled]="runForm.invalid" (click)="submit(runForm)">Run Flexpart!</button>
+      </div>
+      <!-- <button type="submit" mat-raised-button color="primary" [disabled]="runForm.invalid"></button> -->
+    </mat-step>
+  </mat-horizontal-stepper>
+</form>
+
+<ng-template #loading>
+  <div>Loading ...</div>
+</ng-template>

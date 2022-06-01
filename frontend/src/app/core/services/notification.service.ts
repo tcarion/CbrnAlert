@@ -36,12 +36,12 @@ export class NotificationService {
 
     // }
 ];
-    nRealtimeNotif = 0;
-    nArchiveNotif = 0;
+    // nRealtimeNotif = 0;
+    // nArchiveNotif = 0;
 
-    newNotifSubject = new Subject<boolean>();
+    // newNotifSubject = new Subject<boolean>();
 
-    notifTypes: NotifCount = {
+     notifTypes: NotifCount = {
         'atp45Request': 0,
         'archiveRequest': 0,
         'metDataRequest': 0,
@@ -50,23 +50,23 @@ export class NotificationService {
 
     constructor() { }
 
-    addNotif(title: string, type: NotifType): string {
-        this.notifTypes[type]++;
-        const tit = `${title} ${this.notifTypes[type]}`
-        this.notifs.push({
-            title: tit,
-            content: [],
-            status: 'none',
-            type: type,
-            showed: false
-        })
-        this.newNotifSubject.next(true);
-        return tit;
-    }
+    // addNotif(title: string, type: NotifType): string {
+    //     this.notifTypes[type]++;
+    //     const tit = `${title} ${this.notifTypes[type]}`
+    //     this.notifs.push({
+    //         title: tit,
+    //         content: [],
+    //         status: 'none',
+    //         type: type,
+    //         showed: false
+    //     })
+    //     // this.newNotifSubject.next(true);
+    //     return tit;
+    // }
 
     addContent(title: string, line: string) {
         this.getNotif(title)?.content.push(line);
-        this.newNotifSubject.next(true);
+        // this.newNotifSubject.next(true);
     }
 
     getNotif(title: string): Notif | undefined {
@@ -82,12 +82,12 @@ export class NotificationService {
     changeStatus(title: string, st: NotifStatus) {
         let notif = this.getNotif(title);
         if(notif !== undefined) {notif.status = st};
-        this.newNotifSubject.next(true);
+        // this.newNotifSubject.next(true);
     }
 
-    runNotif(title: string, st: NotifType): string {
-        const notifTitle = this.addNotif(title, st);
-        this.changeStatus(notifTitle, 'pending');
-        return notifTitle;
-    }
+    // runNotif(title: string, st: NotifType): string {
+    //     const notifTitle = this.addNotif(title, st);
+    //     this.changeStatus(notifTitle, 'pending');
+    //     return notifTitle;
+    // }
 }

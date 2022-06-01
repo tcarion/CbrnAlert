@@ -100,11 +100,11 @@ export class Atp45Service {
     }
 
     realtimeResultRequest(payload: any) {
-        const notifTitle = this.notificationService.addNotif('ATP45 Prediction', 'atp45Request');
-        const plWs = {...payload,
-            ws_info: { channel: this.websocketService.channel, backid: notifTitle },
-        }
-        return this.getResult(plWs, 'realtime_prediction_request');
+        // const notifTitle = this.notificationService.addNotif('ATP45 Prediction', 'atp45Request');
+        // const plWs = {...payload,
+        //     ws_info: { channel: this.websocketService.channel, backid: notifTitle },
+        // }
+        // return this.getResult(plWs, 'realtime_prediction_request');
     }
 
     availablesSteps(gribData: GribData) {
@@ -121,22 +121,22 @@ export class Atp45Service {
     }
 
     archiveRequest(payload: any) {
-        const notifTitle = this.notificationService.addNotif('Archive Request', 'archiveRequest');
-        const plWs = {...payload,
-            ws_info: { channel: this.websocketService.channel, backid: notifTitle },
-        }
+        // const notifTitle = this.notificationService.addNotif('Archive Request', 'archiveRequest');
+        // const plWs = {...payload,
+        //     ws_info: { channel: this.websocketService.channel, backid: notifTitle },
+        // }
 
-        this.apiService.atp45Request({...plWs, request: "archive_retrieval"}).subscribe({
-            next: () => {
-                alert("Archive data have been received");
-                this.notificationService.changeStatus(notifTitle, 'succeeded');
+        // this.apiService.atp45Request({...plWs, request: "archive_retrieval"}).subscribe({
+        //     next: () => {
+        //         alert("Archive data have been received");
+        //         this.notificationService.changeStatus(notifTitle, 'succeeded');
 
-            },
-            error: (error) => {
-                console.log(error);
-                this.notificationService.changeStatus(notifTitle, 'failed');
-            }
-        })
+        //     },
+        //     error: (error) => {
+        //         console.log(error);
+        //         this.notificationService.changeStatus(notifTitle, 'failed');
+        //     }
+        // })
     }
 
     // addResult(shapeData: Atp45ShapeData): void {

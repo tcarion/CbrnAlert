@@ -7,7 +7,7 @@ import { DynamicPipe } from 'src/app/core/pipes/dynamic.pipe';
 
 @NgModule({
   declarations: [
-    JoinPipe, 
+    JoinPipe,
     AroundPipe,
     DynamicPipe,
   ],
@@ -15,7 +15,7 @@ import { DynamicPipe } from 'src/app/core/pipes/dynamic.pipe';
     // CommonModule
   ],
   exports: [
-    JoinPipe, 
+    JoinPipe,
     AroundPipe,
     DynamicPipe,
   ]

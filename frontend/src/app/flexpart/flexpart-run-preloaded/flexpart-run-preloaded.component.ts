@@ -51,7 +51,7 @@ export class FlexpartRunPreloadedComponent implements OnInit, OnDestroy, AfterVi
     ngAfterViewInit() {
         this.inputsSubscription = this.flexpartService.inputsSubject.subscribe(
             (inputs) => {
-                this.selectionTableRef.populateTable(inputs);
+                // this.selectionTableRef.populateTable(inputs);
             }
         )
     }

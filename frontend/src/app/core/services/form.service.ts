@@ -71,7 +71,7 @@ export class FormService {
 
     // lonlatValid2(formGroup: FormGroup): Observable<any> {
     //     return formGroup.statusChanges.pipe(
-    //         filter(status => status === 'VALID'), 
+    //         filter(status => status === 'VALID'),
     //         tap(() => {
     //             // this.mapService.cbrnMap.marker = this.getLonlat(formGroup);
     //         })
@@ -98,6 +98,15 @@ export class FormService {
         });
 
         return new FormGroup(group);
+    }
+
+    toControl_(question: QuestionBase<any>) {
+      let value = question.value
+      if (!value) {
+          value = typeof question.value == 'number' ? 0 : ''
+      }
+      let control = question.required ? new neatFormControl(value, Validators.required) : new neatFormControl(value)
+      return {name: question.key, control}
     }
 
     toFormGroup_(questions: QuestionBase<string|number>[]) {

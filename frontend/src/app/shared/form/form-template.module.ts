@@ -25,6 +25,7 @@ import { DynFormQuestionComponent } from './dyn-form-question/dyn-form-question.
 import { LocationArrayComponent } from './location-array/location-array.component';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AreaInputComponent } from './area-input/area-input.component';
+import { DatetimePickerModule } from './datetime-picker/datetime-picker.module';
 
 
 
@@ -56,6 +57,7 @@ import { AreaInputComponent } from './area-input/area-input.component';
     MatButtonModule,
     MatIconModule,
     MatTooltipModule,
+    DatetimePickerModule,
   ],
   exports: [
     AutoformatSelectComponent,
@@ -67,6 +69,7 @@ import { AreaInputComponent } from './area-input/area-input.component';
     LocationArrayComponent,
     LocationComponent,
     AreaInputComponent,
+    DatetimePickerModule
   ],
   providers: [
     FormService,

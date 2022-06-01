@@ -1,7 +1,8 @@
 /* tslint:disable */
 /* eslint-disable */
+import { CbrnContainer } from './cbrn-container';
+import { ProcedureType } from './procedure-type';
 export interface CbrnType {
-  cbrnType?: string;
-  longName?: string;
-  shortName?: string;
+  container?: CbrnContainer;
+  procedureType: ProcedureType;
 }

@@ -10,11 +10,14 @@ import { Observable } from 'rxjs';
 import { map, filter } from 'rxjs/operators';
 
 import { Atp45Result } from '../models/atp-45-result';
-import { CbrnType } from '../models/cbrn-type';
+import { CbrnContainer } from '../models/cbrn-container';
+import { FlexpartInput } from '../models/flexpart-input';
 import { FlexpartOutput } from '../models/flexpart-output';
 import { FlexpartRun } from '../models/flexpart-run';
 import { ForecastAtp45Input } from '../models/forecast-atp-45-input';
 import { ForecastAvailableSteps } from '../models/forecast-available-steps';
+import { ProcedureType } from '../models/procedure-type';
+import { RunStatus } from '../models/run-status';
 import { WindAtp45Input } from '../models/wind-atp-45-input';
 import { InlineResponse200 } from '../models/inline-response-200';
 
@@ -177,12 +180,62 @@ export class ApiService extends BaseService {
   }
 
   /**
+   * Path part for operation flexpartInputsGet
+   */
+  static readonly FlexpartInputsGetPath = '/flexpart/inputs';
+
+  /**
+   * Return all the Flexpart inputs available (default finished)
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `flexpartInputsGet()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  flexpartInputsGet$Response(params?: {
+    status?: RunStatus;
+  }): Observable<StrictHttpResponse<Array<FlexpartInput>>> {
+
+    const rb = new RequestBuilder(this.rootUrl, ApiService.FlexpartInputsGetPath, 'get');
+    if (params) {
+      rb.query('status', params.status, {"style":"form","explode":true});
+    }
+
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<Array<FlexpartInput>>;
+      })
+    );
+  }
+
+  /**
+   * Return all the Flexpart inputs available (default finished)
+   *
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `flexpartInputsGet$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  flexpartInputsGet(params?: {
+    status?: RunStatus;
+  }): Observable<Array<FlexpartInput>> {
+
+    return this.flexpartInputsGet$Response(params).pipe(
+      map((r: StrictHttpResponse<Array<FlexpartInput>>) => r.body as Array<FlexpartInput>)
+    );
+  }
+
+  /**
    * Path part for operation flexpartRunsGet
    */
   static readonly FlexpartRunsGetPath = '/flexpart/runs';
 
   /**
-   * Return all the finished Flexpart runs
+   * Return all the Flexpart runs (default finished)
    *
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
    * To access only the response body, use `flexpartRunsGet()` instead.
@@ -190,10 +243,12 @@ export class ApiService extends BaseService {
    * This method doesn't expect any request body.
    */
   flexpartRunsGet$Response(params?: {
+    status?: RunStatus;
   }): Observable<StrictHttpResponse<Array<FlexpartRun>>> {
 
     const rb = new RequestBuilder(this.rootUrl, ApiService.FlexpartRunsGetPath, 'get');
     if (params) {
+      rb.query('status', params.status, {"style":"form","explode":true});
     }
 
     return this.http.request(rb.build({
@@ -208,7 +263,7 @@ export class ApiService extends BaseService {
   }
 
   /**
-   * Return all the finished Flexpart runs
+   * Return all the Flexpart runs (default finished)
    *
    * This method provides access to only to the response body.
    * To access the full response (for headers, for example), `flexpartRunsGet$Response()` instead.
@@ -216,6 +271,7 @@ export class ApiService extends BaseService {
    * This method doesn't expect any request body.
    */
   flexpartRunsGet(params?: {
+    status?: RunStatus;
   }): Observable<Array<FlexpartRun>> {
 
     return this.flexpartRunsGet$Response(params).pipe(
@@ -648,20 +704,20 @@ export class ApiService extends BaseService {
   }
 
   /**
-   * Path part for operation atp45CbrntypesGet
+   * Path part for operation atp45ContainersGet
    */
-  static readonly Atp45CbrntypesGetPath = '/atp45/cbrntypes';
+  static readonly Atp45ContainersGetPath = '/atp45/containers';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `atp45CbrntypesGet()` instead.
+   * To access only the response body, use `atp45ContainersGet()` instead.
    *
    * This method doesn't expect any request body.
    */
-  atp45CbrntypesGet$Response(params?: {
-  }): Observable<StrictHttpResponse<Array<CbrnType>>> {
+  atp45ContainersGet$Response(params?: {
+  }): Observable<StrictHttpResponse<Array<CbrnContainer>>> {
 
-    const rb = new RequestBuilder(this.rootUrl, ApiService.Atp45CbrntypesGetPath, 'get');
+    const rb = new RequestBuilder(this.rootUrl, ApiService.Atp45ContainersGetPath, 'get');
     if (params) {
     }
 
@@ -671,22 +727,65 @@ export class ApiService extends BaseService {
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<Array<CbrnType>>;
+        return r as StrictHttpResponse<Array<CbrnContainer>>;
       })
     );
   }
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `atp45CbrntypesGet$Response()` instead.
+   * To access the full response (for headers, for example), `atp45ContainersGet$Response()` instead.
    *
    * This method doesn't expect any request body.
    */
-  atp45CbrntypesGet(params?: {
-  }): Observable<Array<CbrnType>> {
+  atp45ContainersGet(params?: {
+  }): Observable<Array<CbrnContainer>> {
 
-    return this.atp45CbrntypesGet$Response(params).pipe(
-      map((r: StrictHttpResponse<Array<CbrnType>>) => r.body as Array<CbrnType>)
+    return this.atp45ContainersGet$Response(params).pipe(
+      map((r: StrictHttpResponse<Array<CbrnContainer>>) => r.body as Array<CbrnContainer>)
+    );
+  }
+
+  /**
+   * Path part for operation atp45ProceduresGet
+   */
+  static readonly Atp45ProceduresGetPath = '/atp45/procedures';
+
+  /**
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `atp45ProceduresGet()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  atp45ProceduresGet$Response(params?: {
+  }): Observable<StrictHttpResponse<Array<ProcedureType>>> {
+
+    const rb = new RequestBuilder(this.rootUrl, ApiService.Atp45ProceduresGetPath, 'get');
+    if (params) {
+    }
+
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<Array<ProcedureType>>;
+      })
+    );
+  }
+
+  /**
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `atp45ProceduresGet$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  atp45ProceduresGet(params?: {
+  }): Observable<Array<ProcedureType>> {
+
+    return this.atp45ProceduresGet$Response(params).pipe(
+      map((r: StrictHttpResponse<Array<ProcedureType>>) => r.body as Array<ProcedureType>)
     );
   }
 

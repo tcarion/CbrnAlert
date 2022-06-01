@@ -1,0 +1,24 @@
+<fieldset [formGroup]="form">
+  <app-location formControlName="location"></app-location>
+  <!-- <div *ngFor="let question of questions">
+    <app-question [form]="form" [question]="question"></app-question>
+  </div> -->
+  <app-datetime-picker
+    formControlName="start"
+    label="Release start"
+    [formGroup]="form"
+  ></app-datetime-picker>
+  <app-datetime-picker
+    formControlName="end"
+    label="Release end"
+    [formGroup]="form"
+  ></app-datetime-picker>
+  <mat-form-field [formGroup]="form" class="form-control" appearance="outline" floatLabel="never">
+    <mat-label> Height [m] </mat-label>
+    <input type="number" matInput formControlName="height" />
+  </mat-form-field>
+  <mat-form-field [formGroup]="form" class="form-control" appearance="outline" floatLabel="never">
+    <mat-label> Mass [m] </mat-label>
+    <input type="number" matInput formControlName="mass"/>
+  </mat-form-field>
+</fieldset>

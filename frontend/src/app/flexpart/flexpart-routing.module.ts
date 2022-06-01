@@ -8,6 +8,7 @@ import { DimensionsFormComponent } from './flexpart-plot/dimensions-form/dimensi
 import { OutputsResolverService } from 'src/app/flexpart/resolvers/output-resolver.service';
 import { PlotStepperComponent } from 'src/app/flexpart/plot-stepper/plot-stepper.component';
 import { OutputsComponent } from './flexpart-plot/outputs/outputs.component';
+import { RunStepperComponent } from './run-stepper/run-stepper.component';
 
 const routes: Routes = [
   {
@@ -16,7 +17,7 @@ const routes: Routes = [
   },
   {
     path: 'run',
-    component: FlexpartRunPreloadedComponent,
+    component: RunStepperComponent,
     // component: SelectInputComponent,
   },
   {

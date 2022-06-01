@@ -1,5 +1,5 @@
 <mat-action-list>
-  <span *ngFor="let notif of notifs">
+  <span *ngFor="let notif of notifs$ | async">
     <mat-list-item class="notif-item">
       <button mat-list-item (click)="onShowNotif(notif)" [ngClass]="notif.status">
         {{ notif.title }}
@@ -14,7 +14,7 @@
   </span>
 </mat-action-list>
 
-<div 
-  *ngIf="showedNotif()" 
+<div
+  *ngIf="showedNotif()"
   class="backdrop"
   (click)="hideNotifs()"></div>

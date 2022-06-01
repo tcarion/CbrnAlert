@@ -1,5 +1,4 @@
 import { Router } from '@angular/router';
-import { environment } from './../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
@@ -7,6 +6,7 @@ import { map, tap, mapTo, shareReplay } from 'rxjs/operators';
 import { User } from '../models/user';
 
 import * as dayjs from 'dayjs';
+import { environment } from 'src/environments/environment';
 
 interface LoginRespone {
     idToken: string,
@@ -25,7 +25,7 @@ export class AuthenticationService {
     constructor(
         private http: HttpClient,
         private router: Router
-    ) { 
+    ) {
         const user = localStorage.getItem('currentUser') || '{}';
         this.currentUserSubject = new BehaviorSubject<User>(JSON.parse(user));
         this.currentUser$ = this.currentUserSubject.asObservable();
@@ -37,7 +37,7 @@ export class AuthenticationService {
 
     login(email: string, password: string) {
         return this.http
-            .post<LoginRespone>('http://127.0.0.1:8000/login', {
+            .post<LoginRespone>(`${environment.rootUrl}/login`, {
                 email,
                 password,
             })

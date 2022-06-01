@@ -11,7 +11,7 @@ export namespace MapAction {
     export class ChangeArea {
         static readonly type = '[Map] ChangeArea'
 
-        constructor(public area: number[]) {}
+        constructor(public area: MapArea) {}
     }
 
     export class ChangeMarker {
@@ -40,7 +40,7 @@ export namespace MapAction {
 }
 
 export class MapStateModel {
-    area?:number[]
+    area?:MapArea
     userArea?:MapArea
     userPoint?:GeoPoint
 }
@@ -71,7 +71,7 @@ export class MapState {
 
     @Action(MapAction.ChangeArea)
     changeArea(ctx: StateContext<MapStateModel>, action : MapAction.ChangeArea ) {
-        // this.mapService.updateRectangle(action.area);
+        this.mapService.updateShowRectangle(action.area);
         ctx.patchState({
           area: action.area
         })
@@ -91,7 +91,7 @@ export class MapState {
     @Action(MapAction.ChangeAreaSelection)
     changeAreaSelection(ctx: StateContext<MapStateModel>, action : MapAction.ChangeAreaSelection ) {
         // this.mapService.cbrnMap.areaSelection = action.area
-        this.mapService.updateRectangle(action.area)
+        this.mapService.updateDrawnRectangle(action.area)
         return ctx.patchState({
           userArea: action.area
         })
@@ -100,7 +100,7 @@ export class MapState {
 
     @Action(MapAction.RemoveArea)
     removeArea({getState, patchState}: StateContext<MapStateModel>) {
-        this.mapService.removeArea();
+        this.mapService.removeShowRectangle();
         patchState({
             area: undefined
         })

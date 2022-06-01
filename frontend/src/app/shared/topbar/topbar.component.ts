@@ -26,9 +26,9 @@ export class TopbarComponent implements OnInit, OnDestroy {
     ) { }
 
     ngOnInit(): void {
-        this.notifSubscription = this.notificationService.newNotifSubject.subscribe((val: boolean) => {
-            this.hasNewNotif = val;
-        })
+        // this.notifSubscription = this.notificationService.newNotifSubject.subscribe((val: boolean) => {
+        //     this.hasNewNotif = val;
+        // })
     }
 
     toggleNav() {

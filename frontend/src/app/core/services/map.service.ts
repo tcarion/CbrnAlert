@@ -4,7 +4,7 @@ import { EventEmitter, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 // import { ShapeData } from 'src/app/atp45/shape-data';
 import { CbrnMap } from '../models/cbrn-map';
-import { Map, Marker, latLng, Rectangle, LatLng } from 'leaflet';
+import { Map, Marker, latLng, Rectangle, LatLng, latLngBounds, rectangle, LayerOptions } from 'leaflet';
 import { MapArea } from 'src/app/core/models/map-area';
 
 type MapEvent = 'newMarker' | 'areaSelection'
@@ -16,6 +16,7 @@ export class MapService {
 
     drawnRectangle?: Rectangle
     drawnMarker?: Marker
+    showRectangle: Rectangle
 
     mapSubject: BehaviorSubject<CbrnMap>;
     map$: Observable<CbrnMap>;
@@ -48,10 +49,47 @@ export class MapService {
       }
     }
 
-    updateRectangle(area: MapArea) {
+    updateRectangle(area: MapArea, layer: Rectangle) {
+      layer.setBounds([[area.bottom, area.left], [area.top, area.right]])
+    }
+
+    updateDrawnRectangle(area: MapArea) {
       if (this.drawnRectangle) {
-        this.drawnRectangle.setBounds([[area.bottom, area.left], [area.top, area.right]])
+        this.updateRectangle(area, this.drawnRectangle);
       }
+    }
+
+    updateShowRectangle(area: MapArea) {
+      if (this.showRectangle) {
+        this.updateRectangle(area, this.showRectangle);
+      } else {
+        this.showRectangle = this.areaToRectangle(area, {interactive: false, fillOpacity: 0, color: 'green'})
+        this.showRectangle.addTo(this.leafletMap)
+      }
+    }
+
+    rectangleToArea(rect: Rectangle): MapArea {
+      const bounds = rect.getBounds()
+      const nw = bounds.getNorthWest();
+      const se = bounds.getSouthEast();
+      return {
+        top: nw.lat,
+        bottom: se.lat,
+        left: nw.lng,
+        right: se.lng,
+      }
+    }
+
+    areaToRectangle(area: MapArea, options: {}): Rectangle {
+      const corner1 = latLng(area.bottom, area.left);
+      const corner2 = latLng(area.top, area.right);
+      const bounds = latLngBounds(corner1, corner2);
+      return rectangle(bounds, options);
+    }
+
+
+    removeShowRectangle() {
+      this.leafletMap.removeLayer(this.showRectangle);
     }
 
     get cbrnMap() {
@@ -85,18 +123,6 @@ export class MapService {
       return {
         lon: latlng.lng,
         lat: latlng.lat
-      }
-    }
-
-    rectangleToArea(rect: Rectangle): MapArea {
-      const bounds = rect.getBounds()
-      const nw = bounds.getNorthWest();
-      const se = bounds.getSouthEast();
-      return {
-        top: nw.lat,
-        bottom: se.lat,
-        left: nw.lng,
-        right: se.lng,
       }
     }
 
