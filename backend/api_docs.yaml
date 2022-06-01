@@ -12,12 +12,20 @@ components:
       type: object
       required:
         - "locations"
+        - "procedureTypeId"
+        - "containerId"
+
       properties:
         locations:
           type: array
           items:
             $ref: '#/components/schemas/GeoPoint'
           description: 'Array of release points'
+        procedureTypeId:
+          type: string
+        containerId:
+          type: string
+
     WindAtp45Input:
       allOf:
         - $ref: '#/components/schemas/BasicAtp45Input'
@@ -27,6 +35,7 @@ components:
           properties:
             wind:
               $ref: '#/components/schemas/WindVelocity'
+
     ForecastAtp45Input:
       allOf:
         - $ref: '#/components/schemas/BasicAtp45Input'
@@ -62,33 +71,72 @@ components:
         lat:
           type: number
           description: 'Latitude [°]'
-    # TODO MBEOT: MODIFY ACCORDING TO ATP45.JL RESULT
     Atp45Result:
-      allOf: 
-        # - $ref: './api_geojson.yaml#/components/schemas/Feature'
-        - $ref: 'https://api.swaggerhub.com/apis/OlivierMartineau/GeoJSON/1.0.0#/components/schemas/Feature'
-        - type: object
+      type: object
+      required:
+        - 'collection'
+      properties:
+        'collection':
+          allOf:
+            - $ref: 'https://api.swaggerhub.com/apis/OlivierMartineau/GeoJSON/1.0.0#/components/schemas/FeatureCollection'
+            - type: object
+              properties:
+                'features':
+                  type: array
+                  items:
+                    allOf:
+                      # - $ref: './api_geojson.yaml#/components/schemas/Feature'
+                      - $ref: 'https://api.swaggerhub.com/apis/OlivierMartineau/GeoJSON/1.0.0#/components/schemas/Feature'
+                      - type: object
+                        properties:
+                          'geometry':
+                            allOf:
+                              # - $ref: 'https://api.swaggerhub.com/apis/OlivierMartineau/GeoJSON/1.0.0#/components/schemas/Polygon'
+                              - $ref: 'https://api.swaggerhub.com/apis/OlivierMartineau/GeoJSON/1.0.0#/components/schemas/Polygon'
+                          'properties':
+                            type: object
+                            properties:
+                              'type':
+                                type: string
+                              'shape':
+                                type: string
+        'metadata':
+          type: object
           properties:
-            'geometry':
-              allOf:
-                # - $ref: 'https://api.swaggerhub.com/apis/OlivierMartineau/GeoJSON/1.0.0#/components/schemas/Polygon'
-                - $ref: 'https://api.swaggerhub.com/apis/OlivierMartineau/GeoJSON/1.0.0#/components/schemas/Polygon'
+            'cbrnType':
+              $ref: '#/components/schemas/CbrnType'
+            'wind':
+              $ref: '#/components/schemas/WindVelocity'
 
-            'properties':
-              $ref: '#/components/schemas/CbrnTypes'
+    CbrnType:
+      type: object
+      required:
+        - 'procedureType'
+      properties:
+        'procedureType':
+          $ref: '#/components/schemas/ProcedureType'
+        'container':
+          $ref: '#/components/schemas/CbrnContainer'
 
-    CbrnTypes:
+    CbrnContainer:
       type: object
       properties:
-        'shortName':
+        'id':
           type: string
-          example: "SB_RKT"
-        'longName':
+          example: SB_RKT
+        'description':
           type: string
           example: "Surface Burst Rocket"
-        'cbrnType':
+
+    ProcedureType:
+      type: object
+      properties:
+        'id':
           type: string
-          example: "typeA"
+          example: typeA
+        'description':
+          type: string
+          example: "Non Persistent Agents"
 
     Atp45Zone:
       allOf:
@@ -135,6 +183,29 @@ components:
         leadtime:
           type: string
           format: date-time
+
+    FlexpartInput:
+      type: object
+      required:
+        - "uuid"
+        - "name"
+        - "date_created"
+        - "control"
+      properties:
+        uuid:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+          $ref: '#/components/schemas/RunStatus'
+        date_created:
+          type: string
+          format: date-time
+        control:
+          type: object
+          additionalProperties: 
+            type: string
 
     FlexpartRun:
       type: object
@@ -232,7 +303,7 @@ components:
       type: string
       enum:
         - "created"
-        - "started"
+        - "finished"
         - "ongoing"
         - "errored"
 
@@ -290,6 +361,10 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Atp45Result'
           
   /forecast/available:
     get:
@@ -302,9 +377,36 @@ paths:
               schema:
                 $ref: '#/components/schemas/ForecastAvailableSteps'
 
+  /flexpart/inputs:
+    get:
+      description: 'Return all the Flexpart inputs available (default finished)'
+      parameters:
+        - in: query
+          name: status
+          schema:
+            $ref: '#/components/schemas/RunStatus'
+            default: "finished"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FlexpartInput'
+
   /flexpart/runs:
     get:
-      description: 'Return all the finished Flexpart runs'
+      description: 'Return all the Flexpart runs (default finished)'
+      parameters:
+        - in: query
+          name: status
+          schema:
+            # type: string
+            # enum:
+            $ref: '#/components/schemas/RunStatus'
+            default: "finished"
       responses:
         '200':
           description: OK
@@ -342,11 +444,9 @@ paths:
                 items:
                   $ref: '#/components/schemas/FlexpartOutput'
 
-  #TODO : runId is not actually needed. Change the paths and backend-frontend accordingly
-  /flexpart/runs/{runId}/outputs/{outputId}:
+  /flexpart/outputs/{outputId}:
     get:
       parameters:
-        - $ref: '#/components/parameters/runIdParam'
         - $ref: '#/components/parameters/outputIdParam'
       responses:
         '200':
@@ -447,7 +547,7 @@ paths:
                  - $ref: '#/components/schemas/GeoJsonSliceResponse'
 
 
-  /atp45/cbrntypes:
+  /atp45/containers:
     get:
       responses:
         '200':
@@ -457,4 +557,16 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/CbrnTypes'
+                  $ref: '#/components/schemas/CbrnContainer'
+
+  /atp45/procedures:
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProcedureType'

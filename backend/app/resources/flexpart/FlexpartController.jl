@@ -156,14 +156,15 @@ end
 function get_inputs()
     fpinputs = _user_related(FlexpartInput)
     filter!(FlexpartInputs.isfinished, fpinputs)
-    metdata_dirs = [input.path for input in fpinputs]
-    names = [input.name for input in fpinputs]
-    fedirs = _find_control_path.(metdata_dirs)
-    fcontrols = FeControl.(fedirs)
-    clarified_controls = _clarify_control.(fcontrols)
-    response = map(zip(clarified_controls, names)) do (c, n)
-        push!(c, :name => n)
-    end
+    # metdata_dirs = [input.path for input in fpinputs]
+    # names = [input.name for input in fpinputs]
+    # fedirs = _find_control_path.(metdata_dirs)
+    # fcontrols = FeControl.(fedirs)
+    # clarified_controls = _clarify_control.(fcontrols)
+    # response = map(zip(clarified_controls, names)) do (c, n)
+    #     push!(c, :name => n)
+    # end
+    response = Dict.(fpinputs)
     return response |> json
 end
 
@@ -180,9 +181,10 @@ function flexpart_run()
     releaseenddate = Dates.DateTime(request_data["releaseEndDate"][1:22])
     releaseheight = request_data["releaseHeight"]
     timestep = request_data["timeStep"]
-    gridres = Base.parse(Float64, request_data["gridRes"])
-    area = request_data["area"]
-    area = area isa Dict ? area : Base.copy(area)
+    # gridres = Base.parse(Float64, request_data["gridRes"])
+    gridres = 0.005
+    # area = request_data["area"]
+    # area = area isa Dict ? area : Base.copy(area)
     area = [51., -3, 44., 9.]
     rel_lon = request_data["lon"]
     rel_lat = request_data["lat"]
@@ -304,7 +306,6 @@ end
 
 function get_output()
     output_id = Genie.Router.params(:outputId)
-    run_id = Genie.Router.params(:runId)
     outfile = findone(FlexpartOutput, uuid = output_id)
     Dict(outfile) |> json
 end
@@ -391,7 +392,11 @@ function to_geointerface(raster)
         error("The remaining dimensions must be spatial")
     end
     dx = step(dims(raster, :X))
-    dy = step(dims(raster, :Y))
+    dy = try
+        step(dims(raster, :Y))
+    catch
+        dims(raster, :Y)[2] - dims(raster, :Y)[1]
+    end
 
     features = Feature[]
     read_raster = read(raster) # we get the raster into memory for faster access to the values

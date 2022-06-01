@@ -65,10 +65,14 @@ function getsubject()
 end
 
 function _decode()
-    head = Genie.Requests.payload()[:REQUEST].headers |> pairs_array_to_dict
-    bearer = head["Authorization"]
-    token = split(bearer, "Bearer")[2] |> strip
-    JSONWebTokens.decode(JSONWebTokens.RS256(PUK_PATH), token)
+    try
+        head = Genie.Requests.payload()[:REQUEST].headers |> pairs_array_to_dict
+        bearer = head["Authorization"]
+        token = split(bearer, "Bearer")[2] |> strip
+        JSONWebTokens.decode(JSONWebTokens.RS256(PUK_PATH), token)
+    catch
+        throw(Genie.Exceptions.RuntimeException("Not authorized", "No authorization has been provided", 401))
+    end
 end
 
 function authenticated()

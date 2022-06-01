@@ -25,9 +25,13 @@ const EXTRACTED_WEATHER_DATA_DIR = joinpath(pwd(), "public", "extracted_met_data
 
 @kwdef mutable struct FlexpartInput <: AbstractModel
     id::DbId = DbId()
+    # id as uuid4
     uuid::String = ""
+    # user customizable name
     name::String = ""
+    # path to the FlexExtract directory
     path::String = ""
+    # Control file options in JSON format
     control::String = ""
     date_created::DateTime = Dates.now()
     status::String = CREATED
@@ -87,5 +91,18 @@ function change_control(uuid::String, fcontrol::FeControl)
     # entry.options = ""
     entry |> save!
 end
+
+function get_control(input::FlexpartInput)
+    JSON3.read(input.control)
+end
+
+Base.Dict(x::FlexpartInput) = Dict(
+    # :type => "flexpartResultId",
+    :uuid => x.uuid,
+    :name => x.name,
+    :status => x.status,
+    :date_created => x.date_created,
+    :control => get_control(x)
+)
 
 end
