@@ -5,22 +5,22 @@
     </ng-container> -->
     <app-location-array [formGroup]="runForm"></app-location-array>
 
-    <select formControlName="procedureType" *ngIf="procedureTypes$ | async as procedureTypes" name="" id="">
+    <select formControlName="procedureTypeId" *ngIf="procedureTypes$ | async as procedureTypes" name="" id="">
       <option *ngFor="let procedureType of procedureTypes"> {{ procedureType.id }} </option>
     </select>
 
-    <select formControlName="container" *ngIf="containerTypes$ | async as containerTypes" name="" id="">
-        <option *ngFor="let container of containerTypes"> {{ container.id }} </option>
-    </select>   
+    <select formControlName="containerId" *ngIf="containers$ | async as containers" name="" id="">
+        <option *ngFor="let container of containers"> {{ container.id }} </option>
+    </select>
 
 
     <mat-slide-toggle [checked]="withWind" (change)="withWind = !withWind">
         Provide wind data
     </mat-slide-toggle>
     <ng-container  *ngIf="!withWind">
-        <!-- <ng-container *ngIf="leadtimes$ | async as leadtimes">
-            <app-forecast-time-select [formGroup] = "formGroup" [leadtimes]="leadtimes"></app-forecast-time-select>
-        </ng-container> -->
+        <ng-container *ngIf="leadtimes$ | async as leadtimes">
+            <app-forecast-time-select [formGroup] = "runForm" [leadtimes]="leadtimes"></app-forecast-time-select>
+        </ng-container>
         <!-- <app-forecast-time-select [formGroup] = "formGroup" [leadtimes]="$any(leadtimes$ | async)"></app-forecast-time-select> -->
     </ng-container>
     <app-wind-form *ngIf="withWind"  [formGroup]="runForm"></app-wind-form>

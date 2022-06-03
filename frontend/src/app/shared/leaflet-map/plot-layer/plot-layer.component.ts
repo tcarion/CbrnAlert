@@ -6,7 +6,7 @@ import {
   Input,
   OnDestroy,
 } from '@angular/core';
-import { FeatureCollection } from 'geojson';
+import { Feature, FeatureCollection } from 'geojson';
 import { FeatureGroup, Layer, LayerGroup } from 'leaflet';
 import { ColorbarData } from 'src/app/core/api/models';
 import { MapPlot } from 'src/app/core/models/map-plot';
@@ -38,7 +38,7 @@ export class PlotLayerComponent implements OnInit, OnDestroy {
 
   @Select(MapPlotState.activePlot) activePlot$: Observable<MapPlot>;;
 
-  layer: Layer;
+  layer: FeatureGroup;
   sub: Subscription;
 
   constructor(
@@ -63,8 +63,14 @@ export class PlotLayerComponent implements OnInit, OnDestroy {
         }
       });
     } else if (this.mapPlot.type == 'atp45') {
-      this.layer = this.mapPlotsService.atp45PlotToLayer(this.mapPlot.geojson as FeatureCollection);
-
+      let featureGroup = this.mapPlotsService.atp45PlotToLayer(this.mapPlot.geojson as FeatureCollection);
+      featureGroup.eachLayer((layers: any) => {
+        layers.eachLayer((layer: any) => {
+          layer.bindPopup(layer.feature.properties.type)
+          console.log(layer)
+        })
+      })
+      this.layer = featureGroup;
     }
   }
 

@@ -12,12 +12,13 @@ import { FormItems } from 'src/app/shared/form/form-items';
 import { ForecastStartAction } from 'src/app/core/state/atp45.state';
 import { ControlsOf, FormArray, FormControl, FormGroup } from '@ngneat/reactive-forms';
 import { ForecastAtp45Input, GeoPoint } from 'src/app/core/api/models';
-import { tap, map } from 'rxjs/operators';
+import { tap, map, take } from 'rxjs/operators';
 import { Validators } from '@angular/forms';
 import { AppForms } from '../formtypes/atp45-input';
 import { NgFormsManager } from '@ngneat/forms-manager';
 import { ProcedureType } from 'src/app/core/api/models/procedure-type';
 import { CbrnContainer } from 'src/app/core/api/models/cbrn-container';
+import { MapPlotAction } from 'src/app/core/state/map-plot.state';
 
 interface Atp45RunForm {
     locations: GeoPoint[]
@@ -51,7 +52,7 @@ export class RunComponent implements OnInit {
 
     leadtimes$: Observable<string[]>;
     procedureTypes$: Observable<ProcedureType[]>;
-    containerTypes$: Observable<CbrnContainer[]>;
+    containers$: Observable<CbrnContainer[]>;
 
 
     constructor(
@@ -75,7 +76,15 @@ export class RunComponent implements OnInit {
             return res.leadtimes;
         }))
         this.procedureTypes$ = this.apiService.atp45ProceduresGet();
-        this.containerTypes$ = this.apiService.atp45ContainersGet();
+        this.containers$ = this.apiService.atp45ContainersGet();
+
+        // Set the first value for the select controls:
+        this.procedureTypes$.pipe(
+          take(1)
+        ).subscribe(val => this.runForm.patchValue({procedureTypeId: val[0].id}))
+        this.containers$.pipe(
+          take(1)
+        ).subscribe(val => this.runForm.patchValue({containerId: val[0].id}))
 
         this.formsManager.upsert('atp45Input', this.runForm)
         // this.cbrnTypes$ = of(types);
@@ -84,13 +93,12 @@ export class RunComponent implements OnInit {
 
     onSubmit() {
         let formVals = this.runForm.value as any;
+        let request;
         if (this.withWind) {
             // TODO : Casting the form result to the types of interface. https://stackoverflow.com/questions/44708240/mapping-formgroup-to-interface-object
             // let payload = {...formVals}
             // console.log(payload)
-            this.apiService.atp45RunWindPost({body: formVals as WindAtp45Input}).subscribe(res => {
-                console.log(res)
-            })
+            request = this.apiService.atp45RunWindPost({body: formVals as WindAtp45Input})
         } else {
             formVals = {
                 ...formVals,
@@ -99,12 +107,14 @@ export class RunComponent implements OnInit {
                     start: <string> this.store.selectSnapshot(state => state.atp45.forecastStart)
                 }
             }
-            this.apiService.atp45RunForecastPost({body: formVals as ForecastAtp45Input}).subscribe(res => {
-                console.log(res)
-            })
+            request = this.apiService.atp45RunForecastPost({body: formVals as ForecastAtp45Input})
         }
         // let windinput = formVals
         console.log("Form sent from ATP45 run: %o", formVals)
+
+        request.subscribe(res => {
+          this.store.dispatch(new MapPlotAction.Add(res, 'atp45'))
+        })
     }
 
 }

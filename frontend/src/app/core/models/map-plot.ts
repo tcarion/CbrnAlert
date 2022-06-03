@@ -27,8 +27,8 @@ export class MapPlot implements MapPlot {
   static _id = 0;
 
   name: string;
-  visible = false;
-  isActive = false;
+  visible = true;
+  isActive = true;
 
   constructor(public type: PlotType, ) {
     this.name = "Plot " + MapPlot.plotsCount[type]

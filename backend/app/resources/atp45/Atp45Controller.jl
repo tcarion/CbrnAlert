@@ -10,14 +10,15 @@ using ATP45
 
 using GeoInterface
 using GeoJSON
+using DataStructures: OrderedDict
 
 global dict
 
 const ec = 0
 const WIND_THRESHOLD = 10 # km/h
 
-global DEBUG_PAYLOAD = 0
-debug() = global DEBUG_PAYLOAD = Genie.Requests.jsonpayload()
+global DEBUG_PAYLOAD_ATP = 0
+debug() = global DEBUG_PAYLOAD_ATP = Genie.Requests.jsonpayload()
 
 struct Wind
     u::Float64
@@ -341,6 +342,12 @@ function archive_retrieval(payload)
 end
 
 
+default_request() = OrderedDict(
+    :type => "fc",
+    :levtype => "sfc",
+    :param => "10u/10v",
+)
+
 const AVAILABLE_STEPS = collect(0:6:240)
 """
     steps_to_datetimes(toParse, steps::Union{Array{Int}, Tuple{Vararg}, Array{String}}, df)
@@ -395,14 +402,9 @@ function run_wind()
     @show payload
     locations = payload["locations"]
     wind = payload["wind"]
-    Genie.Renderer.Json.json(
-        Dict(
-            :coordinates => locations,
-            :wind_speed => wind["speed"],
-            :azimuth => wind["azimuth"]
-            )
-        )
-    # methods(Base.parse)
+    procedure = payload["procedureTypeId"]
+    container = payload["containerId"]
+
     lon = locations[1]["lon"]
     lat = locations[1]["lat"]
     lon = lon isa String ? Base.parse(Float64, lon) : Base.convert(Float64, lon) 
@@ -411,29 +413,70 @@ function run_wind()
     azimuth = wind.azimuth
     speed = speed isa String ? Base.parse(Float64, speed) : Base.convert(Float64, speed) 
     azimuth = azimuth isa String ? Base.parse(Float64, azimuth) : Base.convert(Float64, azimuth)
-    ATP45.simplified_proc(lon, lat, speed, azimuth, 10) |> json
+    cont_type = Symbol(container)
+    proc_type = Symbol(procedure)
+
+    input = Atp45Input([[lon, lat]], WindAzimuth(speed, azimuth), cont_type, proc_type)
+    atp45_result = ATP45.run(input)
+    response = Dict(
+        :collection => atp45_result.collection |> geo2dict,
+        :metadata => Dict(
+            :cbrnTypes =>  Dict(
+                :procedureType => Dict(
+                    :id => proc_type,
+                    :description => ATP45.PROCEDURES[proc_type][:name]
+                ),
+                :container => Dict(
+                    :id => cont_type,
+                    :description => ATP45.CONTAINERS[cont_type]["name"]
+                )
+            ),
+            :wind => Dict(
+                :speed => atp45_result.input.wind.speed,
+                :azimuth => atp45_result.input.wind.azimuth
+            )
+        )
+    )
+    response |> json
 end
 
 function run_forecast()
+    debug()
     payload = Genie.Requests.jsonpayload()
-    @show payload
     locations = payload["locations"]
-    @show locations[1]["lon"]
-    @show locations[1]["lat"]
-    # wind = payload["datetime"]
-    Genie.Renderer.Json.json(
-        Dict(
-            :coordinates => locations
-        )
-    )
+    step = payload["step"]
+    forecasttime = DateTime(step["start"])
+    leadtime = DateTime(step["leadtime"])
+    procedure = payload["procedureTypeId"]
+    container = payload["containerId"]
+
+    lon = locations[1]["lon"]
+    lat = locations[1]["lat"]
+
+    
 end
 
-function get_cbrn_types()
-    cbrn_types = ["typeA", "typeB", "typeC"]
-    cont_types = [:BML, :SHL, :MNE, :SB_RKT, :SB_MSL, :BOM, :NKN, :AB_RKT, :AB_MSL]
+function get_container()
+    containernames = keys(ATP45.CONTAINERS) |> collect
+    descr = [x[2]["name"] for x in ATP45.CONTAINERS]
+ 
+    containers = [Dict(
+        :id => x,
+        :description => y
+    ) for (x, y) in zip(containernames, descr)]
 
-    cbrn_types |> json
-    cont_types |> json
+    return containers |> json
+end
+
+function get_procedure()
+    type = keys(ATP45.PROCEDURES) |> collect
+    descr = [x[2][:name] for x in ATP45.PROCEDURES]
+    procedures = [Dict(
+        :id => x,
+        :description => y
+    ) for (x, y) in zip(type, descr)]
+
+    return procedures |> json
 end
 
 end

@@ -119,11 +119,12 @@ export class LocationComponent implements ControlValueAccessor, OnDestroy {
 let lonLatFormat = /^-?\d{1,3}[,|.]?\d*$/gm;
 
 export function wrongLatValidator(control: AbstractControl): ValidationErrors | null {
-    const val = control.value.toString();
+    // const val = control.value.toString();
+    const val = control.value;
 
-    if (!val.match(lonLatFormat)) {
-        return { wrongFormat: { value: val } };
-    }
+    // if (!val.match(lonLatFormat)) {
+    //     return { wrongFormat: { value: val } };
+    // }
     if (parseFloat(val) < -90. || parseFloat(val) > 90.) {
         return { valOutOfBound: { value: val } };
     }
@@ -131,11 +132,11 @@ export function wrongLatValidator(control: AbstractControl): ValidationErrors | 
 }
 
 export function wrongLonValidator(control: AbstractControl): ValidationErrors | null {
-    const val = control.value.toString();
-
-    if (!val.match(lonLatFormat)) {
-        return { wrongFormat: { value: val } };
-    }
+    // const val = control.value.toString();
+    const val = control.value;
+    // if (!val.match(lonLatFormat)) {
+    //     return { wrongFormat: { value: val } };
+    // }
     if (parseFloat(val) < -180. || parseFloat(val) > 180.) {
         return { valOutOfBound: { value: val } };
     }

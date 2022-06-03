@@ -9,8 +9,8 @@ import { AbstractControl, FormControl, FormGroup, ValidationErrors } from '@angu
 export class WindFormComponent implements OnInit, OnDestroy {
 
     windForm = new FormGroup({
-        speed: new FormControl('8', isNumber),
-        azimuth: new FormControl('45', isNumber),
+        speed: new FormControl(8, isNumber),
+        azimuth: new FormControl(45, isNumber),
     });
 
     @Input() formGroup: FormGroup;

@@ -23,7 +23,7 @@ components:
           description: 'Array of release points'
         procedureTypeId:
           type: string
-          example: "typeA"
+          example: "A"
         containerId:
           type: string
           example: "BML"
