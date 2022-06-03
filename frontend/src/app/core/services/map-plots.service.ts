@@ -1,7 +1,8 @@
+import { Atp45Result } from './../api/models/atp-45-result';
 import { GeoJsonSliceResponse } from './../api/models/geo-json-slice-response';
 import { Injectable } from '@angular/core';
 import { Atp45Service } from 'src/app/atp45/atp45.service';
-import { MapPlot, PlotType } from '../models/map-plot';
+import { MapPlot } from '../models/map-plot';
 import { tap } from 'rxjs/operators';
 import { MapService } from './map.service';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
@@ -29,10 +30,6 @@ const REL_LOC_MARKER_OPTIONS = {
   fillOpacity: 1
 };
 
-type MapPlotCount = {
-    [K in PlotType]: number;
-}
-
 function getColor(value: number, colorbar: ColorbarData) {
   let ticks = colorbar.ticks as number[];
   let colors = colorbar!.colors as string[];
@@ -52,49 +49,26 @@ function getColor(value: number, colorbar: ColorbarData) {
     providedIn: 'root'
 })
 export class MapPlotsService {
-    // mapPlots: MapPlot[] = plots;
-
-    // mapPlotsSubject = new BehaviorSubject<MapPlot[]>([]);
-    // mapPlots$ = this.mapPlotsSubject.asObservable();
-
-    plotsCount: MapPlotCount = {
-        'atp45': 0,
-        'flexpart': 0,
-    }
-    count = 0;
 
     constructor(
         private mapService: MapService,
     ) { }
 
-    createPlot(type: PlotType, info?: Object): MapPlot {
-        this.plotsCount[type]++;
-        this.count++;
-        const newPlot = {
-            type,
-            name: "Plot " + this.plotsCount[type],
-            id: this.count,
-            info: info,
-            visible: true,
-            isActive: true,
-        }
-        // this.mapPlots.push(newPlot);
-        return newPlot;
-    }
+    createAtp45Plot(atpResult:Atp45Result) {
+        let newPlot = new MapPlot('atp45');
 
-    createAtp45Plot(atp45ShapeData:Atp45ShapeData) {
-        let newPlot = this.createPlot('atp45', {startDate: atp45ShapeData.date});
-        newPlot.geojson = atp45ShapeData.shapes;
+        newPlot.metadata = atpResult.metadata
+        newPlot.geojson = atpResult.collection as FeatureCollection;
         // let layer = this.mapService.geoJson2Layer(atp45ShapeData.shapes);
         // newPlot.layer = layer;
-        this.mapService.addPlotToMap(newPlot);
+        // this.mapService.addPlotToMap(newPlot);
         return newPlot;
         // this.emitPlots();
     }
 
     createFlexpartPlot(flexpartPlotData: GeoJsonSliceResponse) {
         // let newPlot = this.createPlot('flexpart', flexpartPlotData.flexpartResult);
-        let newPlot = this.createPlot('flexpart');
+        let newPlot = new MapPlot('flexpart');
         // newPlot.isActive = true;
         newPlot.metadata = flexpartPlotData.metadata as ColorbarData;
         newPlot.geojson = flexpartPlotData.collection as FeatureCollection;
@@ -131,29 +105,22 @@ export class MapPlotsService {
                 options = feature.properties ? {...options, color: feature.properties.color } : options
                 return options;
             },
-            // onEachFeature: (feature, layer) => {
-            //     layer.on({
-            //         'click': (e) => this.setActive(this.curPlot),
-            //     })
-            // }
-
-            // Update the info box with the cell value
-            // onEachFeature: this.cellHoverListener()
         };
 
         let layers = geoJSON(undefined, {
-          // ...options,
           pmIgnore: true
         });
 
-        // cells.forEach((feature: any) => {
-        //     layers.addData(feature);
-        // });
-
         layers.addData(collection as FeatureCollection);
-        // let layers = circle([ 46.95, 4 ], { radius: 5000 })
-        // return layers;
         return layers;
+    }
+
+    atp45PlotToLayer(collection:FeatureCollection) {
+      let layers = geoJSON(undefined, {
+        pmIgnore: true
+      });
+      layers.addData(collection as FeatureCollection);
+      return layers
     }
 
 

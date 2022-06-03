@@ -1,5 +1,5 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { FormControl, FormGroup, NG_VALUE_ACCESSOR, Validators } from '@angular/forms';
+import { Component, OnInit, ChangeDetectionStrategy, forwardRef, OnDestroy } from '@angular/core';
+import { FormControl, FormGroup, NG_VALIDATORS, NG_VALUE_ACCESSOR, Validators, ControlValueAccessor, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { FormService } from 'src/app/core/services/form.service';
 import { DropdownQuestion } from 'src/app/shared/form/dropdown-question';
@@ -17,6 +17,28 @@ const timeSteps = [{
   key: 1*60*60,
   value: '1 hours'
 }]
+const outputTypes = [
+  {
+  key: 1,
+  value: 'mass'
+  },
+  {
+    key: 2,
+    value: 'pptv'
+  },
+  {
+    key: 3,
+    value: 'mass & pptv'
+  },
+  {
+    key: 4,
+    value: 'plume'
+  },
+  {
+    key: 5,
+    value: 'mass & plume'
+  },
+]
 
 @Component({
   selector: 'app-command-form',
@@ -28,19 +50,26 @@ const timeSteps = [{
         provide: NG_VALUE_ACCESSOR,
         multi: true,
         useExisting: CommandFormComponent
+    },
+    {
+      provide: NG_VALIDATORS,
+      useExisting: forwardRef(() => CommandFormComponent),
+      multi: true
     }
   ]
 })
-export class CommandFormComponent {
+export class CommandFormComponent implements ControlValueAccessor, OnDestroy {
 
   form = new FormGroup({
     start: new FormControl(new Date(), Validators.required),
     end: new FormControl(new Date(), Validators.required),
     timeStep: new FormControl(timeSteps[0].key, Validators.required),
-    nstep: new FormControl(5, Validators.required),
+    outputType: new FormControl(outputTypes[0].key, Validators.required),
+    // nstep: new FormControl(0, Validators.required),
   })
 
   timeSteps = timeSteps;
+  outputTypes = outputTypes;
 
   touched = false;
 
@@ -57,6 +86,12 @@ export class CommandFormComponent {
   ) {
   }
 
+  validate(control: AbstractControl): ValidationErrors | null {
+    if (this.form.valid) {
+      return null;
+    }
+    return { invalidForm: { valid: false, message: 'all fields are required' } };
+  }
   // ngOnInit(): void {
   // }
 

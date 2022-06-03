@@ -1,7 +1,9 @@
-import { Release } from '../models/release';
+import { FlexpartCommandSimple, FlexpartOutgridSimple, FlexpartReleaseSimple } from "src/app/core/api/models"
 
 export interface AppForms {
   flexpartRunSimple: {
-    releases: Release[]
+    releases: FlexpartReleaseSimple[]
+    command: FlexpartCommandSimple
+    outgrid: FlexpartOutgridSimple
   }
 }

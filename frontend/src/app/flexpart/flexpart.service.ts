@@ -10,7 +10,7 @@ import { WebsocketService } from '../core/services/websocket.service';
 import { MapService } from '../core/services/map.service';
 import { MapPlotsService } from 'src/app/core/services/map-plots.service';
 import { AuthenticationService } from '../core/services/authentication.service';
-import { FlexpartOutput, FlexpartRun } from 'src/app/core/api/models';
+import { FlexpartOptionsSimple, FlexpartOutput, FlexpartRun } from 'src/app/core/api/models';
 import { QuestionBase } from '../shared/form/question-base';
 import { DropdownQuestion } from '../shared/form/dropdown-question';
 import { Store } from '@ngxs/store';
@@ -70,7 +70,7 @@ export class FlexpartService {
     const start = this.getInputStart(input)
     const steps = control['TIME'].split(" ")
     const timeStep = this.getInputTimeStep(input)
-    const hours = timeStep * steps.length
+    const hours = timeStep * (steps.length - 1)
     return dayjs(start).add(hours, 'hour').toDate();
   }
 
@@ -100,6 +100,14 @@ export class FlexpartService {
 
   getInputs() {
     return this.apiService.flexpartInputsGet();
+  }
+
+  postRunSimple(body: FlexpartOptionsSimple, inputId: string) {
+    return this.apiService.flexpartRunPost({
+      runType: 'simple',
+      inputId,
+      body,
+    })
   }
 
   getRuns(): Observable<FlexpartRun[]> {

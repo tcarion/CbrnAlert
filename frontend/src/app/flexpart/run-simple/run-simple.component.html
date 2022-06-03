@@ -16,12 +16,14 @@
 
     <mat-step label="Command">
       <app-command-form [appSetDateExtrema]="minMaxDate" [formGroup]="runForm" formControlName="command"></app-command-form>
+      <!-- <app-command-form [appSetDateExtrema]="minMaxDate" formGroupName="command" formControlName="command"></app-command-form> -->
       <div>
         <button mat-raised-button matStepperNext [disabled]="runForm.get('command')!.invalid" >Next</button>
       </div>
     </mat-step>
 
     <mat-step label="Outgrid">
+      <!-- <app-outgrid-form [formGroup]="runForm" formControlName="outgrid"></app-outgrid-form> -->
       <app-outgrid-form [formGroup]="runForm" formControlName="outgrid"></app-outgrid-form>
       <div>
         <button type="submit" mat-raised-button color="primary" [disabled]="runForm.invalid" (click)="submit(runForm)">Run Flexpart!</button>
@@ -30,7 +32,11 @@
     </mat-step>
   </mat-horizontal-stepper>
 </form>
-
+{{ runForm.value | json }}
+<strong> runForm: {{runForm.valid}} </strong>
+<strong> releases: {{runForm.get('releases')!.valid }} </strong>
+<strong> command: {{runForm.get('command')!.valid }} </strong>
+<strong> command: {{runForm.get('outgrid')!.valid }} </strong>
 <ng-template #loading>
   <div>Loading ...</div>
 </ng-template>

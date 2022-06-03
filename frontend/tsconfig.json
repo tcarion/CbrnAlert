@@ -20,7 +20,9 @@
     "lib": [
       "es2019",
       "dom"
-    ]
+    ],
+    // see https://www.typescriptlang.org/tsconfig#allowSyntheticDefaultImports
+    "allowSyntheticDefaultImports" : true
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

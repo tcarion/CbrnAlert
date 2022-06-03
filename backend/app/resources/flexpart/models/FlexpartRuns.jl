@@ -105,7 +105,7 @@ end
 
 function delete(entry)
     isdir(entry.path) && rm(entry.path, recursive=true)
-    delete(entry)
+    SearchLight.delete(entry)
 end
 
 end

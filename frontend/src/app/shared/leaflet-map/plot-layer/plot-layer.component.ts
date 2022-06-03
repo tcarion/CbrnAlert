@@ -47,22 +47,25 @@ export class PlotLayerComponent implements OnInit, OnDestroy {
     ) {}
 
   ngOnInit(): void {
-    this.layer = this.mapPlotsService.flexpartPlotToLayer(
-      this.mapPlot.geojson as FeatureCollection
-    );
-    this.mapPlotsService.setColors(this.layer as LayerGroup, this.mapPlot.metadata as ColorbarData);
-    this.layer.on('click', layer => {
-      this.store.dispatch(new MapPlotAction.SetActive(this.mapPlot.id))
-    })
-    this.sub = this.activePlot$.subscribe(plot => {
-      if (plot !== undefined) {
-        if (this.mapPlot.id == plot.id) {
-          (this.layer as FeatureGroup).setStyle({ opacity: 0.6, fillOpacity: 0.8 })
-        } else {
-          (this.layer as FeatureGroup).setStyle({ opacity: 0.2, fillOpacity: 0.2 })
+    if (this.mapPlot.type == 'flexpart') {
+      this.layer = this.mapPlotsService.flexpartPlotToLayer(this.mapPlot.geojson as FeatureCollection);
+      this.mapPlotsService.setColors(this.layer as LayerGroup, this.mapPlot.metadata as ColorbarData);
+      this.layer.on('click', layer => {
+        this.store.dispatch(new MapPlotAction.SetActive(this.mapPlot.id))
+      })
+      this.sub = this.activePlot$.subscribe(plot => {
+        if (plot !== undefined) {
+          if (this.mapPlot.id == plot.id) {
+            (this.layer as FeatureGroup).setStyle({ opacity: 0.6, fillOpacity: 0.8 })
+          } else {
+            (this.layer as FeatureGroup).setStyle({ opacity: 0.2, fillOpacity: 0.2 })
+          }
         }
-      }
-    });
+      });
+    } else if (this.mapPlot.type == 'atp45') {
+      this.layer = this.mapPlotsService.atp45PlotToLayer(this.mapPlot.geojson as FeatureCollection);
+
+    }
   }
 
   ngOnDestroy(): void {

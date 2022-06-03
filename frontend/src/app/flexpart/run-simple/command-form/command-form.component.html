@@ -19,7 +19,16 @@
     </mat-select>
   </mat-form-field>
 
-  <mat-form-field
+  <mat-form-field class="form-control" appearance="outline" floatLabel="never">
+    <mat-label> Output types </mat-label>
+    <mat-select formControlName="outputType">
+      <mat-option *ngFor="let option of outputTypes" [value]="option.key">
+        {{ option.value }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <!-- <mat-form-field
     [formGroup]="form"
     class="form-control"
     appearance="outline"
@@ -27,5 +36,5 @@
   >
     <mat-label> Number of steps </mat-label>
     <input type="number" matInput formControlName="nstep" />
-  </mat-form-field>
+  </mat-form-field> -->
 </fieldset>

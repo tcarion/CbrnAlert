@@ -26,7 +26,7 @@ import { LoginComponent } from './login/login.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { LoginModule } from './login/login.module';
 import { HandleDateInterceptor } from './core/helpers/handle-date.interceptor';
-
+import './core/config/custom-methods'
 @NgModule({
     declarations: [
         AppComponent,

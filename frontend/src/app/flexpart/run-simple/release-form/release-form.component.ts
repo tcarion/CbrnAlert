@@ -1,5 +1,5 @@
-import { Component, OnInit, ChangeDetectionStrategy, OnDestroy } from '@angular/core';
-import { ControlValueAccessor, FormControl, FormGroup, NG_VALUE_ACCESSOR, Validators } from '@angular/forms';
+import { Component, OnInit, ChangeDetectionStrategy, OnDestroy, forwardRef } from '@angular/core';
+import { AbstractControl, ControlValueAccessor, FormControl, FormGroup, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { FormService } from 'src/app/core/services/form.service';
 import { DropdownQuestion } from 'src/app/shared/form/dropdown-question';
@@ -14,6 +14,11 @@ import { QuestionBase } from 'src/app/shared/form/question-base';
         provide: NG_VALUE_ACCESSOR,
         multi: true,
         useExisting: ReleaseFormComponent
+    },
+    {
+      provide: NG_VALIDATORS,
+      useExisting: forwardRef(() => ReleaseFormComponent),
+      multi: true
     }
 ]
 })
@@ -43,6 +48,12 @@ export class ReleaseFormComponent implements ControlValueAccessor, OnDestroy {
 
   // ngOnInit(): void {
   // }
+  validate(control: AbstractControl): ValidationErrors | null {
+    if (this.form.valid) {
+      return null;
+    }
+    return { invalidForm: { valid: false, message: 'all fields are required' } };
+  }
 
   writeValue(value: any) {
       if (value) {

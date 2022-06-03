@@ -23,8 +23,10 @@ components:
           description: 'Array of release points'
         procedureTypeId:
           type: string
+          example: "typeA"
         containerId:
           type: string
+          example: "BML"
 
     WindAtp45Input:
       allOf:
@@ -71,6 +73,27 @@ components:
         lat:
           type: number
           description: 'Latitude [°]'
+    GeoRectangle:
+      type: object
+      required:
+        - "top"
+        - "bottom"
+        - "left"
+        - "right"
+      properties:
+        top:
+          type: number
+          description: 'north lat [°]'
+        bottom:
+          type: number
+          description: 'south lat [°]'
+        left:
+          type: number
+          description: 'west lon [°]'
+        right:
+          type: number
+          description: 'east lon [°]'
+
     Atp45Result:
       type: object
       required:
@@ -206,6 +229,93 @@ components:
           type: object
           additionalProperties: 
             type: string
+    FlexpartReleaseSimple:
+      type: object
+      required:
+        - location
+        - start
+        - end
+        - height
+        - mass
+      properties:
+        location:
+          $ref: '#/components/schemas/GeoPoint'
+        start:
+          type: string
+          format: date-time
+        end: 
+          type: string
+          format: date-time
+        height:
+          type: number
+          default: 50.0
+        mass:
+          type: number
+          default: 1000
+        particles:
+          type: number
+          
+    FlexpartCommandSimple:
+      type: object
+      required:
+        - start
+        - end
+        - timeStep
+        - outputType
+      properties:
+        start:
+          type: string
+          format: date-time
+        end: 
+          type: string
+          format: date-time
+        timeStep:
+          type: number
+          description: 'units: [s]'
+          default: 3600
+        specie:
+          type: string
+          default: "AIRTRACER"
+        outputType:
+          type: number
+          default: 1
+          description: 'Units for the output (see Flexpart docs)'
+
+    FlexpartOutgridSimple:
+      type: object
+      required:
+        - area
+        - gridres
+        - heights
+      properties:
+        area:
+          $ref: '#/components/schemas/GeoRectangle'
+        gridres: 
+          type: number
+          default: 1.0
+          description: 'units: [°]'
+        heights:
+          type: array
+          items: 
+            type: number
+            default: 100.0
+
+    FlexpartOptionsSimple:
+      type: object
+      required:
+        - releases
+        - command
+        - outgrid
+      properties:
+        releases:
+          type: array
+          items:
+            $ref: '#/components/schemas/FlexpartReleaseSimple'
+        command:
+          $ref: '#/components/schemas/FlexpartCommandSimple'
+        outgrid:
+          $ref: '#/components/schemas/FlexpartOutgridSimple'
+        
 
     FlexpartRun:
       type: object
@@ -308,6 +418,13 @@ components:
         - "errored"
 
   parameters:
+    inputIdParam:
+      in: path
+      name: inputId
+      required: true
+      schema:
+        type: string
+      description: The input ID
     runIdParam:
       in: path
       name: runId
@@ -395,6 +512,43 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/FlexpartInput'
+  /flexpart/run:
+    post:
+      description: 'Run flexpart'
+      parameters:
+        - name: runType
+          in: query
+          description: 'If `simple`, use the simplified options structure defined by `FlexpartOptionsSimple`. If `detailed`, a full Flexpart options object is expected (see Flexpart docs)'
+          schema:
+            type: string
+            enum:
+              - "simple"
+              - "detailed"
+            default: "simple"
+
+        - name: inputId
+          in: query
+          required: true
+          description: 'Input id'
+          schema:
+            type: string
+
+      requestBody:
+        required: true
+        description: 'Options for Flexpart.'
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/FlexpartOptionsSimple'
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlexpartRun'
 
   /flexpart/runs:
     get:

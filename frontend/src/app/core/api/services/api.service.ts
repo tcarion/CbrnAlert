@@ -19,6 +19,7 @@ import { ForecastAvailableSteps } from '../models/forecast-available-steps';
 import { ProcedureType } from '../models/procedure-type';
 import { RunStatus } from '../models/run-status';
 import { WindAtp45Input } from '../models/wind-atp-45-input';
+import { FlexpartRunBody } from '../models/flexpart-run-body';
 import { InlineResponse200 } from '../models/inline-response-200';
 
 @Injectable({
@@ -226,6 +227,86 @@ export class ApiService extends BaseService {
 
     return this.flexpartInputsGet$Response(params).pipe(
       map((r: StrictHttpResponse<Array<FlexpartInput>>) => r.body as Array<FlexpartInput>)
+    );
+  }
+
+  /**
+   * Path part for operation flexpartRunPost
+   */
+  static readonly FlexpartRunPostPath = '/flexpart/run';
+
+  /**
+   * Run flexpart
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `flexpartRunPost()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  flexpartRunPost$Response(params: {
+
+    /**
+     * If &#x60;simple&#x60;, use the simplified options structure defined by &#x60;FlexpartOptionsSimple&#x60;. If &#x60;detailed&#x60;, a full Flexpart options object is expected (see Flexpart docs)
+     */
+    runType?: 'simple' | 'detailed';
+
+    /**
+     * Input id
+     */
+    inputId: string;
+
+    /**
+     * Options for Flexpart.
+     */
+    body: FlexpartRunBody
+  }): Observable<StrictHttpResponse<FlexpartRun>> {
+
+    const rb = new RequestBuilder(this.rootUrl, ApiService.FlexpartRunPostPath, 'post');
+    if (params) {
+      rb.query('runType', params.runType, {"style":"form","explode":true});
+      rb.query('inputId', params.inputId, {"style":"form","explode":true});
+      rb.body(params.body, 'application/json');
+    }
+
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<FlexpartRun>;
+      })
+    );
+  }
+
+  /**
+   * Run flexpart
+   *
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `flexpartRunPost$Response()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  flexpartRunPost(params: {
+
+    /**
+     * If &#x60;simple&#x60;, use the simplified options structure defined by &#x60;FlexpartOptionsSimple&#x60;. If &#x60;detailed&#x60;, a full Flexpart options object is expected (see Flexpart docs)
+     */
+    runType?: 'simple' | 'detailed';
+
+    /**
+     * Input id
+     */
+    inputId: string;
+
+    /**
+     * Options for Flexpart.
+     */
+    body: FlexpartRunBody
+  }): Observable<FlexpartRun> {
+
+    return this.flexpartRunPost$Response(params).pipe(
+      map((r: StrictHttpResponse<FlexpartRun>) => r.body as FlexpartRun)
     );
   }
 
