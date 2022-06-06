@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, ValidationErrors } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 
 @Component({
     selector: 'app-wind-form',
@@ -8,9 +8,11 @@ import { AbstractControl, FormControl, FormGroup, ValidationErrors } from '@angu
 })
 export class WindFormComponent implements OnInit, OnDestroy {
 
+    @Input() disabled = false;
+
     windForm = new FormGroup({
-        speed: new FormControl(8, isNumber),
-        azimuth: new FormControl(45, isNumber),
+        speed: new FormControl(8, Validators.required),
+        azimuth: new FormControl(45, Validators.required),
     });
 
     @Input() formGroup: FormGroup;
@@ -21,16 +23,11 @@ export class WindFormComponent implements OnInit, OnDestroy {
         this.formGroup.addControl('wind', this.windForm);
     }
 
+    isValid(): boolean {
+      return this.windForm.valid;
+    }
+
     ngOnDestroy(): void {
         this.formGroup.removeControl('wind');
     }
-}
-
-function isNumber(control: AbstractControl): ValidationErrors | null {
-    const val = control.value;
-
-    if (isNaN(parseFloat(val))) {
-        return { notANumber: { value: val } };
-    }
-    return null;
 }

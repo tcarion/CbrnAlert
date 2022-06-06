@@ -1,3 +1,4 @@
+import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatInputModule } from '@angular/material/input';
 import { NgModule } from '@angular/core';
@@ -14,7 +15,8 @@ import { WindFormComponent } from './wind-form/wind-form.component';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { RunComponent } from './run/run.component';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
-
+import { MatDividerModule } from '@angular/material/divider';
+import {MatButtonToggleModule} from '@angular/material/button-toggle';
 
 @NgModule({
     declarations: [
@@ -34,6 +36,9 @@ import {MatSlideToggleModule} from '@angular/material/slide-toggle';
         MatInputModule,
         MatSlideToggleModule,
         MatTooltipModule,
+        MatSelectModule,
+        MatDividerModule,
+        MatButtonToggleModule,
     ],
     providers: [
         Atp45Service

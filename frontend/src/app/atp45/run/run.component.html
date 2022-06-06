@@ -1,29 +1,57 @@
 <form [formGroup]="runForm" (ngSubmit)="onSubmit()">
-    <!-- <app-location [formGroup]="formGroup"></app-location> -->
-    <!-- <ng-container *ngFor="let control of locations.controls; let i = index">
+  <!-- <app-location [formGroup]="formGroup"></app-location> -->
+  <!-- <ng-container *ngFor="let control of locations.controls; let i = index">
         <app-location [formControlName]="i"></app-location>
     </ng-container> -->
+
+  <div class="common-form">
+    <div class="text-lg font-medium"> Common ATP45 inputs: </div>
+    <mat-divider class="pb-3"></mat-divider>
     <app-location-array [formGroup]="runForm"></app-location-array>
 
-    <select formControlName="procedureTypeId" *ngIf="procedureTypes$ | async as procedureTypes" name="" id="">
-      <option *ngFor="let procedureType of procedureTypes"> {{ procedureType.id }} </option>
-    </select>
+    <mat-form-field class="form-control" appearance="outline" floatLabel="never"
+      *ngIf="procedureTypes$ | async as procedureTypes">
+      <mat-label> Procedure: </mat-label>
+      <mat-select formControlName="procedureTypeId">
+        <mat-option *ngFor="let procedureType of procedureTypes" [value]="procedureType.id"> {{ procedureType.id }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
 
-    <select formControlName="containerId" *ngIf="containers$ | async as containers" name="" id="">
-        <option *ngFor="let container of containers"> {{ container.id }} </option>
-    </select>
+    <mat-form-field class="form-control" appearance="outline" floatLabel="never"
+      *ngIf="containers$ | async as containers">
+      <mat-label> Container: </mat-label>
+      <mat-select formControlName="containerId">
+        <mat-option *ngFor="let container of containers" [value]="container.id"> {{ container.description }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
 
+  <div class="option-form">
+    <div class="text-lg font-medium"> Which meteorological data from: </div>
+    <mat-divider class="pb-3"></mat-divider>
 
-    <mat-slide-toggle [checked]="withWind" (change)="withWind = !withWind">
-        Provide wind data
-    </mat-slide-toggle>
-    <ng-container  *ngIf="!withWind">
-        <ng-container *ngIf="leadtimes$ | async as leadtimes">
-            <app-forecast-time-select [formGroup] = "runForm" [leadtimes]="leadtimes"></app-forecast-time-select>
-        </ng-container>
+    <mat-button-toggle-group #buttons="matButtonToggleGroup" name="which" (change)="onChange($event)">
+      <mat-button-toggle value="realtime">Last forecast</mat-button-toggle>
+      <mat-button-toggle value="archive">Archive forecast</mat-button-toggle>
+      <mat-button-toggle value="wind" [checked]="true">User provided</mat-button-toggle>
+    </mat-button-toggle-group>
+    <!-- <mat-slide-toggle [checked]="withWind" (change)="withWind = !withWind">
+      Provide wind data
+    </mat-slide-toggle> -->
+    <form class="pt-2">
+      <app-wind-form *ngIf="buttons.value == 'wind' as withWind" [formGroup]="runForm" [disabled]="!withWind"></app-wind-form>
+
+      <ng-container *ngIf="leadtimes$ | async as leadtimes">
+          <app-forecast-time-select *ngIf="buttons.value == 'realtime' as realtime" [formGroup]="runForm" [leadtimes]="leadtimes"></app-forecast-time-select>
         <!-- <app-forecast-time-select [formGroup] = "formGroup" [leadtimes]="$any(leadtimes$ | async)"></app-forecast-time-select> -->
-    </ng-container>
-    <app-wind-form *ngIf="withWind"  [formGroup]="runForm"></app-wind-form>
-    <button class="w-17 h-12 self-start"
-    mat-raised-button color="primary" type="submit" [disabled]="runForm.invalid">Run ATP45 Model</button>
+      </ng-container>
+      <app-datetime-picker *ngIf="!runForm.get('archive').disabled" [formGroup]="runForm" formControlName="archive" [max]="maxDate"></app-datetime-picker>
+
+    </form>
+
+  </div>
+  <button class="w-17 h-12 self-start" mat-raised-button color="primary" type="submit" [disabled]="runForm.invalid">Run
+    ATP45 Model</button>
 </form>
