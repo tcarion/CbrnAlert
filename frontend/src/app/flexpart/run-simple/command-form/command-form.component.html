@@ -1,10 +1,14 @@
 <fieldset [formGroup]="form">
   <app-datetime-picker
+    [min] = "dateRange.min"
+    [max] = "dateRange.max"
     formControlName="start"
     label="Simulation start"
     [formGroup]="form"
   ></app-datetime-picker>
   <app-datetime-picker
+    [min] = "dateRange.min"
+    [max] = "dateRange.max"
     formControlName="end"
     label="Simulation end"
     [formGroup]="form"

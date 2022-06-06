@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, forwardRef, OnDestroy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, forwardRef, OnDestroy, Input } from '@angular/core';
 import { FormControl, FormGroup, NG_VALIDATORS, NG_VALUE_ACCESSOR, Validators, ControlValueAccessor, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { FormService } from 'src/app/core/services/form.service';
@@ -59,6 +59,7 @@ const outputTypes = [
   ]
 })
 export class CommandFormComponent implements ControlValueAccessor, OnDestroy {
+  @Input() dateRange: {min: Date, max: Date} = {min: new Date(1950), max: new Date(2200)};
 
   form = new FormGroup({
     start: new FormControl(new Date(), Validators.required),

@@ -5,7 +5,7 @@
 
       <ng-container formArrayName="releases">
         <ng-container *ngFor="let control of releases.controls; let i = index">
-          <app-release-form [appSetDateExtrema]="minMaxDate" [formGroup]="runForm" [formControlName]="i"></app-release-form>
+          <app-release-form [dateRange]="minMaxDate" [formGroup]="runForm" [formControlName]="i"></app-release-form>
         </ng-container>
       </ng-container>
 
@@ -15,7 +15,7 @@
     </mat-step>
 
     <mat-step label="Command">
-      <app-command-form [appSetDateExtrema]="minMaxDate" [formGroup]="runForm" formControlName="command"></app-command-form>
+      <app-command-form [dateRange]="minMaxDate" [formGroup]="runForm" formControlName="command"></app-command-form>
       <!-- <app-command-form [appSetDateExtrema]="minMaxDate" formGroupName="command" formControlName="command"></app-command-form> -->
       <div>
         <button mat-raised-button matStepperNext [disabled]="runForm.get('command')!.invalid" >Next</button>
@@ -32,11 +32,11 @@
     </mat-step>
   </mat-horizontal-stepper>
 </form>
-{{ runForm.value | json }}
+<!-- {{ runForm.value | json }}
 <strong> runForm: {{runForm.valid}} </strong>
 <strong> releases: {{runForm.get('releases')!.valid }} </strong>
 <strong> command: {{runForm.get('command')!.valid }} </strong>
-<strong> command: {{runForm.get('outgrid')!.valid }} </strong>
+<strong> command: {{runForm.get('outgrid')!.valid }} </strong> -->
 <ng-template #loading>
   <div>Loading ...</div>
 </ng-template>

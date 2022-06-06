@@ -4,11 +4,15 @@
     <app-question [form]="form" [question]="question"></app-question>
   </div> -->
   <app-datetime-picker
+    [min] = "dateRange.min"
+    [max] = "dateRange.max"
     formControlName="start"
     label="Release start"
     [formGroup]="form"
   ></app-datetime-picker>
   <app-datetime-picker
+    [min] = "dateRange.min"
+    [max] = "dateRange.max"
     formControlName="end"
     label="Release end"
     [formGroup]="form"

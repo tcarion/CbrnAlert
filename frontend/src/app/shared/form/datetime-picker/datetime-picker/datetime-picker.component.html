@@ -1,4 +1,4 @@
-<mat-form-field
+<!-- <mat-form-field
 class="form-control"
 appearance="outline"
 floatLabel="never">
@@ -11,4 +11,18 @@ floatLabel="never">
     step=".1000"
     [formControl]="control"
 >
+</mat-form-field> -->
+<mat-form-field
+class="form-control"
+appearance="outline"
+floatLabel="never">
+<mat-label> {{ label }} </mat-label>
+  <input class="datetime-picker" matInput [ngxMatDatetimePicker]="picker" placeholder="Choose a date" [formControl]="control"
+     [min]="min ? min: ''" [max]="max ? max : ''">
+  <mat-datepicker-toggle matSuffix [for]="$any(picker)"></mat-datepicker-toggle>
+  <ngx-mat-datetime-picker #picker [showSpinners]="true" [showSeconds]="true"
+     [stepHour]="1" [stepMinute]="1" [stepSecond]="1"
+     [touchUi]="true" [color]="'primary'" [enableMeridian]="false"
+     [disableMinute]="false" [hideTime]="false">
+  </ngx-mat-datetime-picker>
 </mat-form-field>

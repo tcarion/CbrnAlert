@@ -16,8 +16,12 @@ import { Observable, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-plot-layer',
-  templateUrl: './plot-layer.component.html',
-  styleUrls: ['./plot-layer.component.scss'],
+  template: `
+			<div *ngIf="layer && visible" [leafletLayer]="layer"></div>
+		`,
+  styles: [`
+
+		`],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PlotLayerComponent implements OnInit, OnDestroy {
