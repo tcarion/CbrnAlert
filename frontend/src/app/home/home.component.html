@@ -1,73 +1,73 @@
 <div class="h-screen flex-col absolute inset-0" [class.is-mobile]="mobileQuery.matches">
-    <app-topbar [snav]="snav"></app-topbar>
+  <app-topbar [snav]="snav"></app-topbar>
 
-    <mat-sidenav-container class="sidenav-container h-screen" [style.marginTop.px]="mobileQuery.matches ? 40 : 0">
-        <mat-sidenav
-            class="sidenav"
-            role="navigation"
-            #snav
-            [mode]="mobileQuery.matches ? 'over' : 'side'"
-            [fixedInViewport]="mobileQuery.matches" fixedTopGap="40" opened="true">
-            <mat-nav-list>
-                <mat-list-item>
-                    Dashboard
-                </mat-list-item>
-                <mat-divider></mat-divider>
-                    <mat-expansion-panel>
-                        <mat-expansion-panel-header>
-                            <mat-panel-title>
-                                <div fxLayout="row" fxLayoutAlign="space-between center">
-                                    <!-- <mat-icon>menu</mat-icon> -->
-                                    ATP45 model
-                                </div>
-                            </mat-panel-title>
-                        </mat-expansion-panel-header>
+  <mat-sidenav-container class="sidenav-container h-screen" [style.marginTop.px]="mobileQuery.matches ? 40 : 0">
+    <mat-sidenav class="sidenav" role="navigation" #snav [mode]="mobileQuery.matches ? 'over' : 'side'"
+      [fixedInViewport]="mobileQuery.matches" fixedTopGap="40" opened="true">
+      <mat-nav-list>
+        <mat-list-item>
+          Dashboard
+        </mat-list-item>
+        <mat-divider></mat-divider>
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <div fxLayout="row" fxLayoutAlign="space-between center">
+                <!-- <mat-icon>menu</mat-icon> -->
+                ATP45 model
+              </div>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
 
-                        <mat-list-item routerLink="atp45/run">
-                            Run
-                        </mat-list-item>
+          <mat-list-item routerLink="atp45/run">
+            Run
+          </mat-list-item>
 
-                        <mat-list-item routerLink="atp45/preloaded">
-                            Preloaded data
-                        </mat-list-item>
+          <mat-list-item routerLink="atp45/preloaded">
+            Preloaded data
+          </mat-list-item>
 
-                        <mat-list-item routerLink="atp45/realtime">
-                            Real-time data
-                        </mat-list-item>
+          <mat-list-item routerLink="atp45/realtime">
+            Real-time data
+          </mat-list-item>
 
-                        <mat-list-item routerLink="atp45/archive">
-                            Archive data retrieval
-                        </mat-list-item>
-                    </mat-expansion-panel>
+          <mat-list-item routerLink="atp45/archive">
+            Archive data retrieval
+          </mat-list-item>
+        </mat-expansion-panel>
 
-                    <mat-expansion-panel>
-                        <mat-expansion-panel-header>
-                            <mat-panel-title>
-                                <div fxLayout="row" fxLayoutAlign="space-between center">
-                                    Flexpart model
-                                </div>
-                            </mat-panel-title>
-                        </mat-expansion-panel-header>
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <div fxLayout="row" fxLayoutAlign="space-between center">
+                Flexpart model
+              </div>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
 
-                        <mat-list-item routerLink="flexpart/metdata">
-                            Extract met data
-                        </mat-list-item>
+          <mat-list-item routerLink="flexpart/metdata">
+            Extract met data
+          </mat-list-item>
 
-                        <mat-list-item routerLink="flexpart/run">
-                            Run flexpart with preloaded data
-                        </mat-list-item>
+          <mat-list-item routerLink="flexpart/retrieve">
+            Retrieve meteo data
+          </mat-list-item>
 
-                        <mat-list-item routerLink="flexpart/plots">
-                            Plot flexpart
-                        </mat-list-item>
-                    </mat-expansion-panel>
-            </mat-nav-list>
-        </mat-sidenav>
+          <mat-list-item routerLink="flexpart/run">
+            Run flexpart with preloaded data
+          </mat-list-item>
 
-        <mat-sidenav-content class="sidenav-content">
-            <router-outlet></router-outlet>
-            <!-- <app-map></app-map> -->
-            <app-leaflet-map></app-leaflet-map>
-        </mat-sidenav-content>
-    </mat-sidenav-container>
+          <mat-list-item routerLink="flexpart/plots">
+            Plot flexpart
+          </mat-list-item>
+        </mat-expansion-panel>
+      </mat-nav-list>
+    </mat-sidenav>
+
+    <mat-sidenav-content class="sidenav-content">
+      <router-outlet></router-outlet>
+      <!-- <app-map></app-map> -->
+      <app-leaflet-map></app-leaflet-map>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
 </div>

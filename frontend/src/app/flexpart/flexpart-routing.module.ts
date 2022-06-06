@@ -1,3 +1,4 @@
+import { RetrieveMeteoSimpleComponent } from './retrieve-meteo-simple/retrieve-meteo-simple.component';
 import { VariableSelectionComponent } from './flexpart-plot/variable-selection/variable-selection.component';
 import { MetDataComponent } from './met-data/met-data.component';
 import { FlexpartPlotComponent } from './flexpart-plot/flexpart-plot.component';
@@ -14,6 +15,10 @@ const routes: Routes = [
   {
     path: 'metdata',
     component: MetDataComponent,
+  },
+  {
+    path: 'retrieve',
+    component: RetrieveMeteoSimpleComponent,
   },
   {
     path: 'run',

@@ -28,6 +28,7 @@ export class DatetimePickerComponent implements ControlValueAccessor {
   @Input() label: string;
   @Input() min?: Date;
   @Input() max?: Date;
+  @Input() steps = {hour:1, minute:1, second:1}
   control = new FormControl(new Date());
 
   date: Date;

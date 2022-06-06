@@ -28,6 +28,7 @@ import { RunSimpleComponent } from './run-simple/run-simple.component';
 import { ReleaseFormComponent } from './run-simple/release-form/release-form.component';
 import { CommandFormComponent } from './run-simple/command-form/command-form.component';
 import { OutgridFormComponent } from './run-simple/outgrid-form/outgrid-form.component';
+import { RetrieveMeteoSimpleComponent } from './retrieve-meteo-simple/retrieve-meteo-simple.component';
 
 @NgModule({
     declarations: [
@@ -46,6 +47,7 @@ import { OutgridFormComponent } from './run-simple/outgrid-form/outgrid-form.com
         ReleaseFormComponent,
         CommandFormComponent,
         OutgridFormComponent,
+        RetrieveMeteoSimpleComponent,
     ],
     providers: [
         FlexpartService,

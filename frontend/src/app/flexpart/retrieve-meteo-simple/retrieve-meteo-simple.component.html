@@ -1,0 +1,29 @@
+<form [formGroup]="form">
+  <app-datetime-picker formControlName="start" label="Start" [formGroup]="form" [steps] = steps></app-datetime-picker>
+  <app-datetime-picker formControlName="end" label="End" [formGroup]="form" [steps] = steps></app-datetime-picker>
+
+  <app-area-input formControlName="area"></app-area-input>
+
+  <mat-form-field class="form-control" appearance="outline" floatLabel="never">
+    <mat-label> Horizontal resolution [°]</mat-label>
+    <mat-select formControlName="gridres">
+      <mat-option *ngFor="let option of gridResolutions" [value]="option">
+        {{ option }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field class="form-control" appearance="outline" floatLabel="never">
+    <mat-label> Time step </mat-label>
+    <mat-select formControlName="timeStep">
+      <mat-option *ngFor="let option of timeSteps" [value]="option.key">
+        {{ option.value }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <div>
+    <button type="submit" mat-raised-button color="primary" [disabled]="form.invalid" (click)="submit(form)">Run Flexpart!</button>
+  </div>
+
+</form>

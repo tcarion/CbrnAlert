@@ -21,8 +21,9 @@ floatLabel="never">
      [min]="min ? min: ''" [max]="max ? max : ''">
   <mat-datepicker-toggle matSuffix [for]="$any(picker)"></mat-datepicker-toggle>
   <ngx-mat-datetime-picker #picker [showSpinners]="true" [showSeconds]="true"
-     [stepHour]="1" [stepMinute]="1" [stepSecond]="1"
+     [stepHour]="steps.hour" [stepMinute]="steps.minute" [stepSecond]="steps.second"
      [touchUi]="true" [color]="'primary'" [enableMeridian]="false"
-     [disableMinute]="false" [hideTime]="false">
+     [disableMinute]="steps.minute == 0 ? true : false"
+     [hideTime]="false">
   </ngx-mat-datetime-picker>
 </mat-form-field>
