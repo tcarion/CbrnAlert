@@ -53,11 +53,20 @@ export class DimensionsFormComponent implements OnChanges {
   }
 
   onSubmit() {
-    const params = this.route.snapshot.paramMap;
+    // const params = this.route.snapshot.paramMap;
     // const outputId = params.get('outputId');
     // const layerName = params.get('layerName');
     const outputId = this.outputId;
     const layerName = this.layerName;
+
+    // TODO: not very clean, should fine a way to automatically cast values from to select to float or int according to the provided type
+    Object.entries(this.formGroup.value.dimensions).forEach(entry => {
+      const [key, value] = entry;
+      if (key == 'height') {
+        this.formGroup.value.dimensions[key] = parseFloat(value as string);
+      }
+    });
+
     console.log(this.formGroup.value.dimensions)
     this.flexpartService.getSlice(outputId as string, layerName as string, this.formGroup.value.dimensions).subscribe(res => {
       const geores = res as GeoJsonSliceResponse;

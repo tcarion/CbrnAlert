@@ -19,6 +19,7 @@ import { ForecastAvailableSteps } from '../models/forecast-available-steps';
 import { ProcedureType } from '../models/procedure-type';
 import { RunStatus } from '../models/run-status';
 import { WindAtp45Input } from '../models/wind-atp-45-input';
+import { FlexpartInputBody } from '../models/flexpart-input-body';
 import { FlexpartRunBody } from '../models/flexpart-run-body';
 import { InlineResponse200 } from '../models/inline-response-200';
 
@@ -177,6 +178,67 @@ export class ApiService extends BaseService {
 
     return this.forecastAvailableGet$Response(params).pipe(
       map((r: StrictHttpResponse<ForecastAvailableSteps>) => r.body as ForecastAvailableSteps)
+    );
+  }
+
+  /**
+   * Path part for operation flexpartInputPost
+   */
+  static readonly FlexpartInputPostPath = '/flexpart/input';
+
+  /**
+   * Retrieve the meteorological data needed for flexpart
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `flexpartInputPost()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  flexpartInputPost$Response(params: {
+
+    /**
+     * If &#x60;simple&#x60;, use the simplified options structure defined by &#x60;FlexpartRetrieveSimple&#x60;. If &#x60;detailed&#x60;, a full Flexpart options object is expected (see Flexpart docs)
+     */
+    retrievalType?: 'simple' | 'detailed';
+    body: FlexpartInputBody
+  }): Observable<StrictHttpResponse<FlexpartInput>> {
+
+    const rb = new RequestBuilder(this.rootUrl, ApiService.FlexpartInputPostPath, 'post');
+    if (params) {
+      rb.query('retrievalType', params.retrievalType, {"style":"form","explode":true});
+      rb.body(params.body, 'application/json');
+    }
+
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<FlexpartInput>;
+      })
+    );
+  }
+
+  /**
+   * Retrieve the meteorological data needed for flexpart
+   *
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `flexpartInputPost$Response()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  flexpartInputPost(params: {
+
+    /**
+     * If &#x60;simple&#x60;, use the simplified options structure defined by &#x60;FlexpartRetrieveSimple&#x60;. If &#x60;detailed&#x60;, a full Flexpart options object is expected (see Flexpart docs)
+     */
+    retrievalType?: 'simple' | 'detailed';
+    body: FlexpartInputBody
+  }): Observable<FlexpartInput> {
+
+    return this.flexpartInputPost$Response(params).pipe(
+      map((r: StrictHttpResponse<FlexpartInput>) => r.body as FlexpartInput)
     );
   }
 

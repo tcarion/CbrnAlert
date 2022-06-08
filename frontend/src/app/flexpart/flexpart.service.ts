@@ -1,3 +1,4 @@
+import { FlexpartRetrieveSimple } from './../core/api/models/flexpart-retrieve-simple';
 import { ApiService } from 'src/app/core/api/services';
 import { BehaviorSubject, Observable, of, Subject, throwError } from 'rxjs';
 import { Injectable } from '@angular/core';
@@ -56,6 +57,13 @@ export class FlexpartService {
 
   newSelectedInput(input:FlexpartInput) {
     this.selectedInputSubject.next(input);
+  }
+
+  retrieveSimple(retrieval:FlexpartRetrieveSimple) {
+    return this.apiService.flexpartInputPost({
+      retrievalType: 'simple',
+      body: retrieval
+    })
   }
 
   getInputStart(input:FlexpartInput) {

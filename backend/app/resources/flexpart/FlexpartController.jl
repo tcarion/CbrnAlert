@@ -66,61 +66,117 @@ end
 
 function _check_mars_errors(filepath)
     lines = readlines(filepath)
+    haserror = false
     map(lines) do line
         if occursin("DATA_NOT_YET_AVAILABLE", line)
             throw(MarsDataNotAvailableError())
-        elseif occursin("ERROR", line)
-            throw(UnknownMarsError())
+        end
+        if occursin("ERROR", line)
+            haserror = true
         end
     end
-    return 0
+    haserror && throw(UnknownMarsError())
+    return haserror
 end
 
-function meteo_data_request()
+# function meteo_data_request()
+#     payload = Genie.Requests.jsonpayload()
+#     startdate = Dates.DateTime(payload["startDate"][1:22])
+#     enddate = Dates.DateTime(payload["endDate"][1:22])
+#     timestep = payload["timeStep"]
+#     gridres = payload["gridRes"]
+#     area = payload["area"]
+#     area = round_area(area)
+#     area_str = join(convert.(Int, area .|> round), "_")
+#     ws_info = payload["ws_info"]
+
+#     dir_name = Dates.format(startdate, "yyyymmdd_HHMM") * "_" * area_str
+#     dir_path = joinpath(EXTRACTED_WEATHER_DATA_DIR, dir_name)
+
+#     newinput = FlexpartInputs.create(dir_path)
+#     FlexpartInputs.assign_to_user!(current_user(), newinput)
+#     fcontrol = FeControl(fedir)
+#     fcontrol[:GRID] = gridres
+#     fcontrol[:REQUEST] = 0
+#     set_area!(fcontrol, area)
+#     set_steps!(fcontrol, startdate, enddate, timestep)
+
+#     FlexExtract.write(fcontrol)
+
+#     log_file_path = joinpath(fedir.path, "output_log.log")
+#     FlexpartInputs.change_status(newinput.name, ONGOING)
+#     open(log_file_path, "w") do log_file
+#         FlexExtract.submit(fedir) do stream
+#             log_and_broadcast(stream, ws_info, log_file)
+#         end
+#     end
+
+#     try
+#         _check_mars_errors(log_file_path)
+#         FlexpartInputs.change_status(newinput.name, FINISHED)
+#     catch e
+#         FlexpartInputs.change_status(newinput.name, ERRORED)
+#         if e isa MarsDataNotAvailableError
+#             return DATA_NOT_YET_AVAILABLE
+#         elseif e isa UnknownMarsError
+#             return UNKNOWN_MARS_ERROR
+#         end
+#     end
+# end
+
+function data_retrieval()
     payload = Genie.Requests.jsonpayload()
-    startdate = Dates.DateTime(payload["startDate"][1:22])
-    enddate = Dates.DateTime(payload["endDate"][1:22])
-    timestep = payload["timeStep"]
-    gridres = payload["gridRes"]
-    area = payload["area"]
-    area = round_area(area)
-    area_str = join(convert.(Int, area .|> round), "_")
-    ws_info = payload["ws_info"]
+    start_date = payload["start"] |> DateTime
+    end_date = payload["end"] |> DateTime
+    area = round_area(_area(payload["area"]))
+    gridres = payload["gridres"]
+    time_step = convert(Int64, payload["timeStep"] / 3600)
 
-    dir_name = Dates.format(startdate, "yyyymmdd_HHMM") * "_" * area_str
-    dir_path = joinpath(EXTRACTED_WEATHER_DATA_DIR, dir_name)
-
-    newinput = FlexpartInputs.create(dir_path)
+    newinput, fedir = FlexpartInputs.create()
     FlexpartInputs.assign_to_user!(current_user(), newinput)
     fcontrol = FeControl(fedir)
     fcontrol[:GRID] = gridres
     fcontrol[:REQUEST] = 0
     set_area!(fcontrol, area)
-    set_steps!(fcontrol, startdate, enddate, timestep)
+    set_steps!(fcontrol, start_date, end_date, time_step)
 
     FlexExtract.write(fcontrol)
 
+    FlexpartInputs.change_control(newinput.uuid, fcontrol)
+    FlexpartInputs.change_status(newinput.uuid, ONGOING)
     log_file_path = joinpath(fedir.path, "output_log.log")
-    FlexpartInputs.change_status(newinput.name, ONGOING)
-    open(log_file_path, "w") do log_file
-        FlexExtract.submit(fedir) do stream
-            log_and_broadcast(stream, ws_info, log_file)
+    open(log_file_path, "w") do logf
+        try 
+            FlexExtract.submit(fedir) do stream
+                # log_and_broadcast(stream, ws_info, log_file)
+                line = readline(stream, keep=true)
+                Base.write(logf, line)
+                flush(logf)
+            end
+        catch
+            FlexpartInputs.change_status(newinput.uuid, ERRORED)
+            rethrow()
         end
     end
 
     try
         _check_mars_errors(log_file_path)
-        FlexpartInputs.change_status(newinput.name, FINISHED)
+        FlexpartInputs.change_status(newinput.uuid, FINISHED)
     catch e
-        FlexpartInputs.change_status(newinput.name, ERRORED)
+        FlexpartInputs.change_status(newinput.uuid, ERRORED)
         if e isa MarsDataNotAvailableError
+            # throw(Genie.Exceptions.RuntimeException("Mars Retrieval error: DATA_NOT_YET_AVAILABLE", "The data you're requesting is not yet available", 500, e))
             return DATA_NOT_YET_AVAILABLE
         elseif e isa UnknownMarsError
+            # throw(Genie.Exceptions.RuntimeException("Mars Retrieval error: Unknown", "Unknown error during data retrieval", 500, e))
             return UNKNOWN_MARS_ERROR
+        else
+            throw(e)
         end
     end
-end
 
+    return Dict(newinput) |> json
+end
 
 function _find_control_path(fedirpath)::FlexExtractDir
     fefiles = readdir(fedirpath, join=true)
@@ -241,12 +297,7 @@ function run_simple()
     Flexpart.merge!(fpoptions["RELEASES"][:RELEASE], releases_options)
 
     # Set outgrid options
-    area_f = [
-        area["top"],
-        area["left"],
-        area["bottom"],
-        area["right"],
-        ]
+    area_f = _area(area)
     outgrid = Flexpart.area2outgrid(area_f, gridres)
     Flexpart.merge!(fpoptions["OUTGRID"][:OUTGRID], outgrid)
     fpoptions["OUTGRID"][:OUTGRID][:OUTHEIGHTS] = join(heights, ", ")
@@ -256,9 +307,7 @@ function run_simple()
 
     # Get the input and adapt the Available file
     fpinput = findone(FlexpartInput, uuid = input_id)
-    # @show fpinput
     fpdir[:input] = abspath(joinpath(fpinput.path, "output"))
-    @show fpdir
     avs = Available(fpdir)
 
     # Save the available file and the flexpart paths
@@ -290,7 +339,7 @@ function run(fpdir::FlexpartDir, fprun::FlexpartRun)
     if _iscompleted(fpdir)
         FlexpartRuns.change_status(fprun.name, FINISHED)
     else
-        # @warn "Flexpart run failed"
+        @warn "Flexpart run failed"
         FlexpartRuns.change_status(fprun.name, ERRORED)
         if ENV["GENIE_ENV"] == "prod"
             rm(fpdir.path, recursive = true)
@@ -324,10 +373,8 @@ function get_runs()
     Dict.(fpruns) |> json
 end
 
-function _get_run(id)
-    fprun = findone(FlexpartRun, uuid = id)
-    fprun
-end
+_get_run(id) = findone(FlexpartRun, uuid = id)
+
 function get_run()
     id = Genie.Router.params(:runId)
     fprun = _get_run(id)
@@ -489,4 +536,10 @@ function getcolors(collection)
     )
 end
 
+_area(area) = [
+    area["top"],
+    area["left"],
+    area["bottom"],
+    area["right"],
+    ]
 end

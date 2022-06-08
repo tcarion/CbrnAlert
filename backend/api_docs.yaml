@@ -107,22 +107,23 @@ components:
                 'features':
                   type: array
                   items:
-                    allOf:
-                      # - $ref: './api_geojson.yaml#/components/schemas/Feature'
-                      - $ref: 'https://api.swaggerhub.com/apis/OlivierMartineau/GeoJSON/1.0.0#/components/schemas/Feature'
-                      - type: object
-                        properties:
-                          'geometry':
-                            allOf:
-                              # - $ref: 'https://api.swaggerhub.com/apis/OlivierMartineau/GeoJSON/1.0.0#/components/schemas/Polygon'
-                              - $ref: 'https://api.swaggerhub.com/apis/OlivierMartineau/GeoJSON/1.0.0#/components/schemas/Polygon'
-                          'properties':
-                            type: object
-                            properties:
-                              'type':
-                                type: string
-                              'shape':
-                                type: string
+                    $ref: '#/components/schemas/Atp45Zone'
+                    # allOf:
+                    #   # - $ref: './api_geojson.yaml#/components/schemas/Feature'
+                    #   - $ref: 'https://api.swaggerhub.com/apis/OlivierMartineau/GeoJSON/1.0.0#/components/schemas/Feature'
+                    #   - type: object
+                    #     properties:
+                    #       'geometry':
+                    #         allOf:
+                    #           # - $ref: 'https://api.swaggerhub.com/apis/OlivierMartineau/GeoJSON/1.0.0#/components/schemas/Polygon'
+                    #           - $ref: 'https://api.swaggerhub.com/apis/OlivierMartineau/GeoJSON/1.0.0#/components/schemas/Polygon'
+                    #       'properties':
+                    #         type: object
+                    #         properties:
+                    #           'type':
+                    #             type: string
+                    #           'shape':
+                    #             type: string
         'metadata':
           type: object
           properties:
@@ -170,9 +171,9 @@ components:
             'properties':
               type: object
               properties:
-                'area':
+                'type':
                   type: string
-                  example: "release area"
+                  example: "release"
                 'shape':
                   type: string
                   example: "circle"
@@ -207,6 +208,32 @@ components:
           type: string
           format: date-time
 
+    FlexpartRetrieveSimple:
+      description: 'Simplified data structure needed for a retrieval of meteorological data for Flexpart'
+      type: object
+      required:
+        - "area"
+        - "start"
+        - "end"
+        - "gridres"
+        - "timeStep"
+      properties:
+        area:
+          $ref: '#/components/schemas/GeoRectangle'
+        start:
+          type: string
+          format: date-time
+        end:
+          type: string
+          format: date-time
+        gridres: 
+          type: number
+          default: 1.0
+          description: 'units: [°]'
+        timeStep:
+          type: number
+          description: 'units: [s]'
+          default: 3600
     FlexpartInput:
       type: object
       required:
@@ -493,6 +520,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ForecastAvailableSteps'
+
+  /flexpart/input:
+    post:
+      description: 'Retrieve the meteorological data needed for flexpart'
+      parameters:
+        - name: retrievalType
+          in: query
+          description: 'If `simple`, use the simplified options structure defined by `FlexpartRetrieveSimple`. If `detailed`, a full Flexpart options object is expected (see Flexpart docs)'
+          schema:
+            type: string
+            enum:
+              - "simple"
+              - "detailed"
+            default: "simple"
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/FlexpartRetrieveSimple'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+                schema:
+                  $ref: '#/components/schemas/FlexpartInput'
 
   /flexpart/inputs:
     get:

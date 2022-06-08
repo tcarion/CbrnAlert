@@ -84,6 +84,7 @@ export class RunSimpleComponent implements OnInit, OnDestroy {
     let formVals = JSON.parse(JSON.stringify(this.runForm.value))
     formVals.outgrid.heights = (formVals.outgrid.heights as string).split(',').map( h  => { return parseFloat(h.trim()) } )
     this.flexpartService.postRunSimple(formVals, this.input!.uuid).subscribe( res => {
+      alert('Flexpart Run has completed!')
       console.log(res)
     })
   }

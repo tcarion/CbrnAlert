@@ -1,6 +1,7 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import dayjs from 'dayjs';
+import { FlexpartService } from '../flexpart.service';
 
 const gridResolutions = [
   1.,
@@ -42,12 +43,18 @@ export class RetrieveMeteoSimpleComponent implements OnInit {
   gridResolutions = gridResolutions;
   timeSteps = timeSteps;
 
-  constructor() { }
+  constructor(
+    private flexpartService: FlexpartService,
+  ) { }
 
   ngOnInit(): void {
   }
 
   submit(form: FormGroup) {
-    console.log(form.value)
+    console.log(form)
+    this.flexpartService.retrieveSimple(form.value).subscribe(res => {
+      // TODO: add the result input to the app state (flexpartService.fpInputs$ ?)
+      console.log(res)
+    })
   }
 }

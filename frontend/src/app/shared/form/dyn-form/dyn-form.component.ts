@@ -19,7 +19,7 @@ export class DynFormComponent implements OnInit {
     constructor(private formService: FormService) { }
 
     ngOnInit() {
-        this.form = this.formService.toFormGroup_(this.questions as QuestionBase<string>[]);
+        this.form = this.formService.toFormGroup_(this.questions as QuestionBase<string|number>[]);
         if (this.parentForm && this.formName) {
             this.parentForm.addControl(this.formName, this.form)
         }
