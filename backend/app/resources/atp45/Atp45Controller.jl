@@ -7,6 +7,7 @@ using Dates
 using ReadGrib
 using EcmwfRequests
 using ATP45
+using GRIB
 
 using GeoInterface
 using GeoJSON
@@ -405,10 +406,16 @@ function run_wind()
     procedure = payload["procedureTypeId"]
     container = payload["containerId"]
 
-    lon = locations[1]["lon"]
-    lat = locations[1]["lat"]
-    lon = lon isa String ? Base.parse(Float64, lon) : Base.convert(Float64, lon) 
-    lat = lat isa String ? Base.parse(Float64, lat) : Base.convert(Float64, lat) 
+    lon1 = locations[1]["lon"]
+    lat1 = locations[1]["lat"]
+    lon2 = locations[2]["lon"]
+    lat2 = locations[2]["lat"]
+
+    lon1 = lon1 isa String ? Base.parse(Float64, lon1) : Base.convert(Float64, lon1) 
+    lat1 = lat1 isa String ? Base.parse(Float64, lat1) : Base.convert(Float64, lat1) 
+    lon2 = lon2 isa String ? Base.parse(Float64, lon2) : Base.convert(Float64, lon2) 
+    lat2 = lat2 isa String ? Base.parse(Float64, lat2) : Base.convert(Float64, lat2)
+
     speed = wind.speed
     azimuth = wind.azimuth
     speed = speed isa String ? Base.parse(Float64, speed) : Base.convert(Float64, speed) 
@@ -416,7 +423,7 @@ function run_wind()
     cont_type = Symbol(container)
     proc_type = Symbol(procedure)
 
-    input = Atp45Input([[lon, lat]], WindAzimuth(speed, azimuth), cont_type, proc_type)
+    input = Atp45Input([[lon1, lat1], [lon2, lat2]], WindAzimuth(speed, azimuth), cont_type, proc_type)
     atp45_result = ATP45.run(input)
     response = Dict(
         :collection => atp45_result.collection |> geo2dict,
@@ -428,7 +435,7 @@ function run_wind()
                 ),
                 :container => Dict(
                     :id => cont_type,
-                    :description => ATP45.CONTAINERS[cont_type]["name"]
+                    :description => ATP45.CONTAINERS[cont_type][:name]
                 )
             ),
             :wind => Dict(
@@ -453,12 +460,115 @@ function run_forecast()
     lon = locations[1]["lon"]
     lat = locations[1]["lat"]
 
-    
+    step = Dates.Hour(leadtime - forecasttime).value
+    fc_req = default_request()
+
+    target = "tmp.grib"
+    fc_req[:date] = Dates.format(forecasttime, "yyyymmdd")
+    fc_req[:time] = Dates.format(forecasttime, "HH")
+    fc_req[:step] = string(step)
+    # fc_req[:area] = join([lat, lon, lat, lon], "/")
+    # fc_req[:area] = join([lat+.01, lon-.01, lat-.01, lon+.01], "/")
+
+    # We retrieve a bounding box because I experienced MARS errors when taking too small areas
+    fc_req[:area] = join([ceil(Int, lat) + 1, floor(Int, lon) - 1, floor(Int, lat) - 1, ceil(Int, lon) + 1], "/")
+    fc_req[:target] = target
+
+    fc_req_s = Dict(string(k)=>v for (k,v) in fc_req)
+
+    # Retrieval of the meteorological data with MARS
+    EcmwfRequests.runmars(fc_req_s)
+
+    # Retrieve the 4 nearest points from the input location by reading the grib file `target`
+    nearests = Dict()
+    GribFile(target, mode="r") do grib
+        for message in grib
+            Nearest(message) do near
+                nearests[message["shortName"]] = find(near, message, lon, lat)
+            end
+        end
+    end
+
+    # From the 4 nearest points, we take the first (nearest neigbour interpolation)
+    nearest = Dict(
+        # Coordinates of the nearest point to `lon`, `lat`
+        :lon => nearests["10u"][1][1],
+        :lat => nearests["10u"][2][1],
+        # West to east horizontal wind component
+        :u => nearests["10u"][3][1],
+        # south to north horizontal wind component
+        :v => nearests["10v"][3][1],
+        # distance between the the nearest point and `lon`, `lat`
+        :distance => nearests["10u"][4][1],
+    )
+
+    lon = locations[1]["lon"]
+    lat = locations[1]["lat"]
+    u = nearest[:u]
+    v = nearest[:v]
+    cont_type = Symbol(container)
+    proc_type = Symbol(procedure)
+
+    input = Atp45Input([[lon, lat]], WindCoords(u, v), cont_type, proc_type)
+    atp45_result = ATP45.run(input)
+    response = Dict(
+        :collection => atp45_result.collection |> geo2dict,
+        :metadata => Dict(
+            :cbrnTypes =>  Dict(
+                :procedureType => Dict(
+                    :id => proc_type,
+                    :description => ATP45.PROCEDURES[proc_type][:name]
+                ),
+                :container => Dict(
+                    :id => cont_type,
+                    :description => ATP45.CONTAINERS[cont_type][:name]
+                )
+            ),
+            :wind => Dict(
+                :speed => atp45_result.input.wind.speed,
+                :azimuth => atp45_result.input.wind.azimuth
+            )
+        )
+    )
+    response |> json
+    # Lancer l'ATP45.run à partir de la variable suivante dans laquelle tu as :u et :v comme données de vent. En gros
+    # cette fonction doit retourner exactement pareil que run_wind. N'hésite pas à créer des fonctions supplémentaires
+    # pour mettre en commun une partie du code et éviter le boilerplate (répétition de code "copier coller").
+    # Pour faire tes tests, tu peux copier la ligne ci dessous dans le REPL et travailler à partir de la (évite de relancer
+    # cette fonction à partir de l'interface graphique car elle doit faire appel à un serveur externe pour retrouver les données
+    # météo)
+    # nearest = Dict(:v => 0.0714569091796875, :lat => 50.931457353761914, :distance => 5.423612776114363, :u => -3.4767913818359375, :lon => 4.017857142857142)
 end
+
+
+function result(input)
+    atp45_result = ATP45.run(input)
+    response = Dict(
+        :collection => atp45_result.collection |> geo2dict,
+        :metadata => Dict(
+            :cbrnTypes =>  Dict(
+                :procedureType => Dict(
+                    :id => proc_type,
+                    :description => ATP45.PROCEDURES[proc_type][:name]
+                ),
+                :container => Dict(
+                    :id => cont_type,
+                    :description => ATP45.CONTAINERS[cont_type][:name]
+                )
+            ),
+            :wind => Dict(
+                :speed => atp45_result.input.wind.speed,
+                :azimuth => atp45_result.input.wind.azimuth
+            )
+        )
+    )
+    response |> json
+end
+
 
 function get_container()
     containernames = keys(ATP45.CONTAINERS) |> collect
-    descr = [x[2]["name"] for x in ATP45.CONTAINERS]
+    descr = [x[2][:name] for x in ATP45.CONTAINERS]
  
     containers = [Dict(
         :id => x,
