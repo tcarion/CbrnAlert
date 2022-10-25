@@ -8,6 +8,7 @@ export { Atp45Result } from './models/atp-45-result';
 export { CbrnType } from './models/cbrn-type';
 export { CbrnContainer } from './models/cbrn-container';
 export { ProcedureType } from './models/procedure-type';
+export { IncidentType } from './models/incident-type';
 export { Atp45Zone } from './models/atp-45-zone';
 export { ForecastAvailableSteps } from './models/forecast-available-steps';
 export { ForecastStep } from './models/forecast-step';

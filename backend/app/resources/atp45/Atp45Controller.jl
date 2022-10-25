@@ -5,7 +5,7 @@ using Genie.Requests
 using Genie.Renderer.Json: json
 using Dates
 using ReadGrib
-using EcmwfRequests
+using EcRequests
 using ATP45
 using GRIB
 
@@ -402,29 +402,50 @@ function run_wind()
     global DEBUG_PAYLOAD = debug()
     @show payload
     locations = payload["locations"]
-    wind = payload["wind"]
+    weather = payload["wind"]
     procedure = payload["procedureTypeId"]
     container = payload["containerId"]
-
-    lon1 = locations[1]["lon"]
-    lat1 = locations[1]["lat"]
-    lon2 = locations[2]["lon"]
-    lat2 = locations[2]["lat"]
-
-    lon1 = lon1 isa String ? Base.parse(Float64, lon1) : Base.convert(Float64, lon1) 
-    lat1 = lat1 isa String ? Base.parse(Float64, lat1) : Base.convert(Float64, lat1) 
-    lon2 = lon2 isa String ? Base.parse(Float64, lon2) : Base.convert(Float64, lon2) 
-    lat2 = lat2 isa String ? Base.parse(Float64, lat2) : Base.convert(Float64, lat2)
-
-    speed = wind.speed
-    azimuth = wind.azimuth
+    incident = payload["incidentTypeId"]
+    
+    speed = weather.speed
+    azimuth = weather.azimuth
+    stability = Symbol(weather.stabilityClass)
     speed = speed isa String ? Base.parse(Float64, speed) : Base.convert(Float64, speed) 
     azimuth = azimuth isa String ? Base.parse(Float64, azimuth) : Base.convert(Float64, azimuth)
     cont_type = Symbol(container)
     proc_type = Symbol(procedure)
+    inc_type = Symbol(incident)
 
-    input = Atp45Input([[lon1, lat1], [lon2, lat2]], WindAzimuth(speed, azimuth), cont_type, proc_type)
-    atp45_result = ATP45.run(input)
+    lon1 = locations[1]["lon"]
+    lat1 = locations[1]["lat"]
+
+    lon1 = lon1 isa String ? Base.parse(Float64, lon1) : Base.convert(Float64, lon1) 
+    lat1 = lat1 isa String ? Base.parse(Float64, lat1) : Base.convert(Float64, lat1) 
+
+
+    if length(locations) == 1
+        input = Atp45Input([[lon1, lat1]], WindAzimuth(speed, azimuth), cont_type, proc_type, stability)
+    elseif length(locations) > 1
+        lon2 = locations[2]["lon"]
+        lat2 = locations[2]["lat"]
+
+        lon2 = lon2 isa String ? Base.parse(Float64, lon2) : Base.convert(Float64, lon2) 
+        lat2 = lat2 isa String ? Base.parse(Float64, lat2) : Base.convert(Float64, lat2)
+
+        input = Atp45Input([[lon1, lat1], [lon2, lat2]], WindAzimuth(speed, azimuth), cont_type, proc_type, stability)
+    end
+
+
+    if incident == "chem"
+        atp45_result = ATP45.run_chem(input)
+    elseif incident == "bio"
+        atp45_result = ATP45.run_bio(input)
+    #elseif incident == "radio"
+     #   atp45_result = ATP45.run_radio(input)
+    #elseif incident == "nucl"
+     #   atp45_result = ATP45.run_nucl(input)
+    end
+    @show payload
     response = Dict(
         :collection => atp45_result.collection |> geo2dict,
         :metadata => Dict(
@@ -436,13 +457,17 @@ function run_wind()
                 :container => Dict(
                     :id => cont_type,
                     :description => ATP45.CONTAINERS[cont_type][:name]
+                ),
+                :incident => Dict(
+                    :id => incident,
+                    :description => ATP45.INCIDENTS[inc_type][:name]
                 )
             ),
             :wind => Dict(
                 :speed => atp45_result.input.wind.speed,
                 :azimuth => atp45_result.input.wind.azimuth
             )
-        )
+        )   
     )
     response |> json
 end
@@ -477,7 +502,7 @@ function run_forecast()
     fc_req_s = Dict(string(k)=>v for (k,v) in fc_req)
 
     # Retrieval of the meteorological data with MARS
-    EcmwfRequests.runmars(fc_req_s)
+    EcRequests.runmars(fc_req_s)
 
     # Retrieve the 4 nearest points from the input location by reading the grib file `target`
     nearests = Dict()
@@ -588,5 +613,17 @@ function get_procedure()
 
     return procedures |> json
 end
+
+function get_incident()
+    type = keys(ATP45.INCIDENTS) |> collect
+    descr = [x[2][:name] for x in ATP45.INCIDENTS]
+    incidents = [Dict(
+        :id => x,
+        :description => y
+    ) for (x, y) in zip(type, descr)]
+
+    return incidents |> json
+end
+
 
 end

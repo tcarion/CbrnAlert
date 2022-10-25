@@ -14,6 +14,8 @@ components:
         - "locations"
         - "procedureTypeId"
         - "containerId"
+        - "stabilityClass"
+        - "incidentTypeId"
 
       properties:
         locations:
@@ -27,6 +29,12 @@ components:
         containerId:
           type: string
           example: "BML"
+        stabilityClass:
+          type: string
+          example: "U"
+        incidentTypeId:
+          type: string
+          example: "chem"
 
     WindAtp45Input:
       allOf:
@@ -141,6 +149,8 @@ components:
           $ref: '#/components/schemas/ProcedureType'
         'container':
           $ref: '#/components/schemas/CbrnContainer'
+        'incident':
+          $ref: '#/components/schemas/IncidentType'
 
     CbrnContainer:
       type: object
@@ -161,6 +171,17 @@ components:
         'description':
           type: string
           example: "Non Persistent Agents"
+
+    IncidentType:
+      type: object
+      properties:
+        'id':
+          type: string
+          example: chem
+        'description':
+          type: string
+          example: "Chemical"
+
 
     Atp45Zone:
       allOf:
@@ -780,3 +801,15 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ProcedureType'
+
+  /atp45/incidents:
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/IncidentType'

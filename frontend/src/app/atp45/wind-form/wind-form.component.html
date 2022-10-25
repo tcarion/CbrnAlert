@@ -1,5 +1,6 @@
 <form [formGroup]="windForm">
     <mat-form-field
+      [style.width.px]=100
         class="form-control"
         appearance="outline"
         floatLabel="never">
@@ -10,12 +11,13 @@
             formControlName="speed"
             >
             <mat-hint>[km/h]</mat-hint>
-        </mat-form-field>
+    </mat-form-field>
     <mat-form-field
+        [style.width.px]=100
         class="form-control"
         appearance="outline"
         floatLabel="never">
-            <mat-label> Azimuth </mat-label>
+            <mat-label> Direction </mat-label>
             <input
             type="number"
             matInput
@@ -23,4 +25,15 @@
             >
             <mat-hint>[° from North]</mat-hint>
         </mat-form-field>
+    <mat-form-field
+    [style.width.px]=100
+    class="form-control"
+    appearance="outline"
+    floatLabel="never">
+        <mat-label> Stability: </mat-label>
+        <mat-select formControlName="stabilityClass">
+          <mat-option *ngFor="let stab of stabilityClasses" [value]="stab.id"> {{ stab.key }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
 </form>

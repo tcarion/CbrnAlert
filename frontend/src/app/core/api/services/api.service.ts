@@ -16,6 +16,7 @@ import { FlexpartOutput } from '../models/flexpart-output';
 import { FlexpartRun } from '../models/flexpart-run';
 import { ForecastAtp45Input } from '../models/forecast-atp-45-input';
 import { ForecastAvailableSteps } from '../models/forecast-available-steps';
+import { IncidentType } from '../models/incident-type';
 import { ProcedureType } from '../models/procedure-type';
 import { RunStatus } from '../models/run-status';
 import { WindAtp45Input } from '../models/wind-atp-45-input';
@@ -929,6 +930,49 @@ export class ApiService extends BaseService {
 
     return this.atp45ProceduresGet$Response(params).pipe(
       map((r: StrictHttpResponse<Array<ProcedureType>>) => r.body as Array<ProcedureType>)
+    );
+  }
+
+  /**
+   * Path part for operation atp45IncidentsGet
+   */
+  static readonly Atp45IncidentsGetPath = '/atp45/incidents';
+
+  /**
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `atp45IncidentsGet()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  atp45IncidentsGet$Response(params?: {
+  }): Observable<StrictHttpResponse<Array<IncidentType>>> {
+
+    const rb = new RequestBuilder(this.rootUrl, ApiService.Atp45IncidentsGetPath, 'get');
+    if (params) {
+    }
+
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<Array<IncidentType>>;
+      })
+    );
+  }
+
+  /**
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `atp45IncidentsGet$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  atp45IncidentsGet(params?: {
+  }): Observable<Array<IncidentType>> {
+
+    return this.atp45IncidentsGet$Response(params).pipe(
+      map((r: StrictHttpResponse<Array<IncidentType>>) => r.body as Array<IncidentType>)
     );
   }
 

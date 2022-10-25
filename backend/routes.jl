@@ -29,6 +29,7 @@ api_routes = Dict(
     "/forecast/available" => (f=Atp45Controller.available_steps, keyargs=(method=GET,)),
     "/atp45/containers" => (f=Atp45Controller.get_container, keyargs=(method=GET,)),
     "/atp45/procedures" => (f=Atp45Controller.get_procedure, keyargs=(method=GET,)),
+    "/atp45/incidents" => (f=Atp45Controller.get_incident, keyargs=(method=GET,)),
     "/atp45/run/wind" => (f=Atp45Controller.run_wind, keyargs=(method=POST,)),
     "/atp45/run/forecast" => (f=Atp45Controller.run_forecast, keyargs=(method=POST,)),
     # "/flexpart/meteo_data_request" => (f=FlexpartController.meteo_data_request, keyargs=(method=POST, named=:meteo_data_request)),

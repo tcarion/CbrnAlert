@@ -9,7 +9,16 @@
     <mat-divider class="pb-3"></mat-divider>
     <app-location-array [formGroup]="runForm"></app-location-array>
 
-    <mat-form-field class="form-control" appearance="outline" floatLabel="never"
+    <mat-form-field class="form-control" appearance="outline" floatLabel="never" [style.width.px]=100
+      *ngIf="incidentTypes$ | async as incidentTypes">
+      <mat-label> Incident: </mat-label>
+      <mat-select formControlName="incidentTypeId">
+        <mat-option *ngFor="let incidentType of incidentTypes" [value]="incidentType.id"> {{ incidentType.description }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field class="form-control" appearance="outline" floatLabel="never" [style.width.px]=100
       *ngIf="procedureTypes$ | async as procedureTypes">
       <mat-label> Procedure: </mat-label>
       <mat-select formControlName="procedureTypeId">
@@ -18,7 +27,7 @@
       </mat-select>
     </mat-form-field>
 
-    <mat-form-field class="form-control" appearance="outline" floatLabel="never"
+    <mat-form-field class="form-control" appearance="outline" floatLabel="never" [style.width.px]=100
       *ngIf="containers$ | async as containers">
       <mat-label> Container: </mat-label>
       <mat-select formControlName="containerId">

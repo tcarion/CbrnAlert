@@ -269,6 +269,7 @@ function run_simple()
     Flexpart.remove_unused_species!(fpoptions)
 
     # Set simulation start and end
+    # TODO: update to set_cmd_dates! when new version available
     Flexpart.set_cmd_with_dates!(fpoptions, sim_start, sim_end)
 
     cmd = Dict(

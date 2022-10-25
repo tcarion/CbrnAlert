@@ -11,7 +11,7 @@ import { SelectFormItem } from 'src/app/shared/form/form-item-select';
 import { FormItems } from 'src/app/shared/form/form-items';
 import { ForecastStartAction } from 'src/app/core/state/atp45.state';
 import { ControlsOf, FormArray, FormControl, FormGroup } from '@ngneat/reactive-forms';
-import { ForecastAtp45Input, GeoPoint } from 'src/app/core/api/models';
+import { ForecastAtp45Input, GeoPoint, IncidentType } from 'src/app/core/api/models';
 import { tap, map, take } from 'rxjs/operators';
 import { Validators } from '@angular/forms';
 import { AppForms } from '../formtypes/atp45-input';
@@ -46,6 +46,7 @@ export class RunComponent implements OnInit {
   runForm = new FormGroup<any>({
     'procedureTypeId': new FormControl('', Validators.required),
     'containerId': new FormControl('', Validators.required),
+    'incidentTypeId': new FormControl('', Validators.required),
     // 'wind': new FormControl('', Validators.required),
     // 'leadtimes': new FormControl('', Validators.required),
     'archive': new FormControl({ value: '', disabled: true }, Validators.required)
@@ -57,6 +58,7 @@ export class RunComponent implements OnInit {
 
   leadtimes$: Observable<string[]>;
   procedureTypes$: Observable<ProcedureType[]>;
+  incidentTypes$: Observable<IncidentType[]>;
   containers$: Observable<CbrnContainer[]>;
 
 
@@ -80,6 +82,7 @@ export class RunComponent implements OnInit {
         this.store.dispatch(new ForecastStartAction.Update(res));
         return res.leadtimes;
       }))
+    this.incidentTypes$ = this.apiService.atp45IncidentsGet();
     this.procedureTypes$ = this.apiService.atp45ProceduresGet();
     this.containers$ = this.apiService.atp45ContainersGet();
 
@@ -90,6 +93,9 @@ export class RunComponent implements OnInit {
     this.containers$.pipe(
       take(1)
     ).subscribe(val => this.runForm.patchValue({ containerId: val[0].id }))
+    this.incidentTypes$.pipe(
+      take(1)
+    ).subscribe(val => this.runForm.patchValue({ incidentTypeId: val[0].id }))
 
     this.formsManager.upsert('atp45Input', this.runForm)
     // this.cbrnTypes$ = of(types);
