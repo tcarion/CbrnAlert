@@ -5,8 +5,8 @@ using Genie.Renderer.Json: json
 using Dates
 using GeoJSON
 using GeoInterface
-using AuthenticationController: current_user
-using AuthenticationController
+# using ..Main.UserApp.AuthenticationController: current_user
+using CbrnAlertApp.AuthenticationController
 using Flexpart
 using Flexpart.FlexExtract
 using Rasters
@@ -15,14 +15,16 @@ using ColorSchemes
 using Colors
 
 
-using Users
-using FlexpartRuns
-using FlexpartInputs
-using FlexpartOutputs
-using SharedModels
+using ..Main.UserApp.Users
+using ..Main.UserApp.FlexpartRuns
+using ..Main.UserApp.FlexpartInputs
+using ..Main.UserApp.FlexpartOutputs
+using ..Main.UserApp.SharedModels
 
 using SearchLight
 using SearchLight.Relationships
+
+const AC = AuthenticationController
 
 const DATE_FORMAT = "yyyy-mm-ddTHH:MM:SS"
 
@@ -184,7 +186,7 @@ function _find_control_path(fedirpath)::FlexExtractDir
     FlexExtractDir(fedirpath, fefiles[1])
 end
 function _clarify_control(fcontrol)
-    startday = Dates.DateTime(fcontrol[:START_DATE], dateformat"yyyymmdd")
+    startday = Dates.DateTime(fcontrol[:START_DATE], "yyyymmdd")
     times = Base.parse.(Int, split(fcontrol[:TIME], " "))
     steps = Base.parse.(Int, split(fcontrol[:STEP], " "))
     gridres = Base.parse(Float32, fcontrol[:GRID])
@@ -379,7 +381,7 @@ _get_run(id) = findone(FlexpartRun, uuid = id)
 function get_run()
     id = Genie.Router.params(:runId)
     fprun = _get_run(id)
-    AuthenticationController.@hasaccess!(fprun)
+    AC.@hasaccess!(fprun)
     Dict(fprun) |> json
 end
 

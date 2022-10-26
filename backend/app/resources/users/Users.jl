@@ -1,7 +1,7 @@
 module Users
 
 using Genie
-using SearchLight, SearchLight.Validation, UsersValidator
+using SearchLight, SearchLight.Validation, CbrnAlertApp.UsersValidator
 using SHA
 using StructTypes
 

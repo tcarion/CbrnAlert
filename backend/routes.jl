@@ -2,9 +2,9 @@ using Genie.Router, Genie.Requests, Genie.Assets
 using SearchLight
 # using ATPController
 # using FlexpartController
-using AuthenticationController
-using Atp45Controller
-using FlexpartController
+using CbrnAlertApp.AuthenticationController
+using CbrnAlertApp.Atp45Controller
+using CbrnAlertApp.FlexpartController
 using JSONWebTokens
 using StructTypes
 using UUIDs
@@ -12,12 +12,8 @@ using YAML
 
 using SwagUI
 
-using Genie.Cache
-Genie.config.cache_duration = 3600
-Genie.Cache.init()
-
 using SearchLight
-using Users
+using CbrnAlertApp.Users
 
 
 Genie.config.websockets_server = true

@@ -1,7 +1,7 @@
 module FlexpartOutputs
 
 import SearchLight: AbstractModel, DbId
-using SearchLight.Validation, FlexpartValidator
+using SearchLight.Validation, CbrnAlertApp.FlexpartValidator
 using SearchLight, SearchLight.Relationships
 import Base: @kwdef
 
@@ -10,8 +10,9 @@ using Dates
 using Rasters
 using JSON3
 
-using FlexpartRuns
 using Flexpart: AbstractOutputFile
+
+using ..Main.UserApp.FlexpartRuns
 
 export FlexpartOutput
 

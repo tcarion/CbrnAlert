@@ -1,1 +1,1 @@
-"/usr/bin/julia" --color=yes --depwarn=no -q -- ../bootstrap.jl -r %*
+"/home/tcarion/julia-1.7.0/bin/julia" --color=yes --depwarn=no --project=@. -q -- "%~dp0..\bootstrap.jl" -r %*

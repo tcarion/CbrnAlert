@@ -2,7 +2,7 @@ module AuthenticationController
 
 using Genie, Genie.Renderer, Genie.Renderer.Html, Genie.Router
 using SearchLight
-using Users
+using CbrnAlertApp.Users
 using Logging
 using JSONWebTokens
 

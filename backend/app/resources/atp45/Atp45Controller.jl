@@ -4,10 +4,11 @@ using Genie
 using Genie.Requests
 using Genie.Renderer.Json: json
 using Dates
-using ReadGrib
+using CbrnAlertApp.ReadGrib
 using EcRequests
 using ATP45
 using GRIB
+using JSON3
 
 using GeoInterface
 using GeoJSON
@@ -28,19 +29,19 @@ struct Wind
     Wind(u, v) = new(u, v, sqrt(u^2 + v^2))
 end
 
-"""
-Structure to represent one ATP model instance. `shapes` contains all to shapes related to the ATP instance (release area, hazard area etc.). 
-The other fields are data related to the instance
-"""
-mutable struct ShapeData
-    lon::Float64
-    lat::Float64
-    # shapes::Vector{ComputeShapes.Shape}
-    shapes::Vector{Feature}
-    wind::Wind
-    datetime::DateTime
-    step::Int
-end
+# """
+# Structure to represent one ATP model instance. `shapes` contains all to shapes related to the ATP instance (release area, hazard area etc.). 
+# The other fields are data related to the instance
+# """
+# mutable struct ShapeData
+#     lon::Float64
+#     lat::Float64
+#     # shapes::Vector{ComputeShapes.Shape}
+#     shapes::Vector{Feature}
+#     wind::Wind
+#     datetime::DateTime
+#     step::Int
+# end
 
 struct MarsRequest
     date::String
@@ -51,7 +52,7 @@ struct MarsRequest
     datetime::DateTime
 end
 MarsRequest(date, time, step, area::Array) = MarsRequest(date, time, step, join(area, "/"))
-MarsRequest(date, time, step, area::String) = MarsRequest(date, time, step, area,  "public/grib_files/$(date)_$(time)_$(replace(area, "/" => "-")).grib", DateTime(date * time, dateformat"yyyymmddHHMM"))
+MarsRequest(date, time, step, area::String) = MarsRequest(date, time, step, area,  "public/grib_files/$(date)_$(time)_$(replace(area, "/" => "-")).grib", DateTime(date * time, "yyyymmddHHMM"))
 
 request_to_string(date, time, step, area, target_file="public/grib_files/$(date)_$(time)_$(replace(area, "/" => "-")).grib") = """retrieve,
                                       type    = fc,
@@ -66,18 +67,18 @@ request_to_string(date, time, step, area, target_file="public/grib_files/$(date)
                                       
 request_to_string(req::MarsRequest) = request_to_string(req.date, req.time, req.step, req.area, req.target_file)
 
-"""
-    to_dict(arg::Union{Wind, ShapeData})
+# """
+#     to_dict(arg::Union{Wind, ShapeData})
 
-Convert the structures in dict to be passed to Genie.Renderer.Json.json
-"""
-to_dict(field::Feature) = geo2dict(field)
-to_dict(field::Vector{Feature}) = geo2dict(FeatureCollection(field))
-to_dict(field) = field
-function type2dict(obj)
-    fns = fieldnames(obj |> typeof)
-    (!isempty(fns) && !isa(obj, DateTime)) ? Dict(fn => type2dict(getfield(obj, fn)) for fn in fieldnames(obj |> typeof)) : to_dict(obj)
-end
+# Convert the structures in dict to be passed to Genie.Renderer.Json.json
+# """
+# to_dict(field::Feature) = geo2dict(field)
+# to_dict(field::Vector{Feature}) = geo2dict(FeatureCollection(field))
+# to_dict(field) = field
+# function type2dict(obj)
+#     fns = fieldnames(obj |> typeof)
+#     (!isempty(fns) && !isa(obj, DateTime)) ? Dict(fn => type2dict(getfield(obj, fn)) for fn in fieldnames(obj |> typeof)) : to_dict(obj)
+# end
 
 searchdir(path,key) = filter(x -> occursin(key, x), readdir(path))
 
@@ -158,154 +159,154 @@ function available_grib_files(payload)
     end
 end
 
-"""
-    prediction_request()
-Handle a request for an ATP hazard prediction. Interpolate the wind speed at the requested lon/lat with the four nearest points.
-Then calculate the ATP shapes according to the wind speed and return a Dict with the prediction data.
+# """
+#     prediction_request()
+# Handle a request for an ATP hazard prediction. Interpolate the wind speed at the requested lon/lat with the four nearest points.
+# Then calculate the ATP shapes according to the wind speed and return a Dict with the prediction data.
 
-Needed from json request :
-  @`lat`, @`lon`, @`date`, @`time`, @`step`
-  @`loaded_file` file to get the data from
-Data return as json :
-  @`shape_data` 
-"""
-function prediction_request(payload)
-    request_data = payload
-    lat = typeof(request_data["lat"]) == String ? Base.parse(Float64, request_data["lat"]) : request_data["lat"]
-    lon = typeof(request_data["lon"]) == String ? Base.parse(Float64, request_data["lon"]) : request_data["lon"]
+# Needed from json request :
+#   @`lat`, @`lon`, @`date`, @`time`, @`step`
+#   @`loaded_file` file to get the data from
+# Data return as json :
+#   @`shape_data` 
+# """
+# function prediction_request(payload)
+#     request_data = payload
+#     lat = typeof(request_data["lat"]) == String ? Base.parse(Float64, request_data["lat"]) : request_data["lat"]
+#     lon = typeof(request_data["lon"]) == String ? Base.parse(Float64, request_data["lon"]) : request_data["lon"]
 
-    step = request_data["step"] isa String ? Base.parse(Int64, request_data["step"]) : request_data["step"]
+#     step = request_data["step"] isa String ? Base.parse(Int64, request_data["step"]) : request_data["step"]
 
-    datetime_start = Dates.DateTime(request_data["datetime"][1:19])
-    time = Dates.format(datetime_start, "HHMM")
-    date = Dates.format(datetime_start, "yyyymmdd")
+#     datetime_start = Dates.DateTime(request_data["datetime"][1:19])
+#     time = Dates.format(datetime_start, "HHMM")
+#     date = Dates.format(datetime_start, "yyyymmdd")
 
-    grib_to_read = request_data["loaded_file"]
-    filename = joinpath(pwd(), "public", "grib_files", grib_to_read * ".grib")
+#     grib_to_read = request_data["loaded_file"]
+#     filename = joinpath(pwd(), "public", "grib_files", grib_to_read * ".grib")
 
-    time_grib = time == "0000" ? "0" : time
+#     time_grib = time == "0000" ? "0" : time
 
-    keys_to_select = Dict(
-        "date" => date,
-        "step" => step,
-        "time" => time_grib,
-        "level" => "0",
-    )
+#     keys_to_select = Dict(
+#         "date" => date,
+#         "step" => step,
+#         "time" => time_grib,
+#         "level" => "0",
+#     )
 
-    run_dt = steps_to_datetimes(datetime_start, [step])[1]
-    shape_data = ShapeData(lon, lat, Vector{Feature}(), Wind(0, 0), run_dt, step)
+#     run_dt = steps_to_datetimes(datetime_start, [step])[1]
+#     shape_data = ShapeData(lon, lat, Vector{Feature}(), Wind(0, 0), run_dt, step)
 
-    shape_data = calc_prediction(filename, keys_to_select, shape_data)
-    dict_sd = shape_data |> type2dict
+#     shape_data = calc_prediction(filename, keys_to_select, shape_data)
+#     dict_sd = shape_data |> type2dict
 
-    return dict_sd
-end
+#     return dict_sd
+# end
 
-function realtime_prediction_request(payload)
-    request_data = payload
-    lat = typeof(request_data["lat"]) == String ? Base.parse(Float64, request_data["lat"]) : request_data["lat"]
-    lon = typeof(request_data["lon"]) == String ? Base.parse(Float64, request_data["lon"]) : request_data["lon"]
-    step = request_data["step"]
-    datetime_start = Dates.DateTime(request_data["datetime"][1:22])
-    time = Dates.format(datetime_start, "HHMM")
-    date = Dates.format(datetime_start, "yyyymmdd")
+# function realtime_prediction_request(payload)
+#     request_data = payload
+#     lat = typeof(request_data["lat"]) == String ? Base.parse(Float64, request_data["lat"]) : request_data["lat"]
+#     lon = typeof(request_data["lon"]) == String ? Base.parse(Float64, request_data["lon"]) : request_data["lon"]
+#     step = request_data["step"]
+#     datetime_start = Dates.DateTime(request_data["datetime"][1:22])
+#     time = Dates.format(datetime_start, "HHMM")
+#     date = Dates.format(datetime_start, "yyyymmdd")
 
-    req = MarsRequest(date, time, [step], wrap_coord(lon, lat))
-    ws_info = request_data["ws_info"]
-    for n_attempts in 1:2
-        broadcast_mars_output(req, ws_info)
-        if isfile(req.target_file)
-            filename = req.target_file
-            break
-        else
-            prev_date = DateTime(req.date * req.time, dateformat"yyyymmddHHMM")
-            new_date = prev_date - Dates.Hour(12)
-            new_step = Base.parse(Int, req.step) + 12
-            req = MarsRequest(Dates.format(new_date, "yyyymmdd"), Dates.format(new_date, "HHMM"), string(new_step), req.area)
-        end
-    end
+#     req = MarsRequest(date, time, [step], wrap_coord(lon, lat))
+#     ws_info = request_data["ws_info"]
+#     for n_attempts in 1:2
+#         broadcast_mars_output(req, ws_info)
+#         if isfile(req.target_file)
+#             filename = req.target_file
+#             break
+#         else
+#             prev_date = DateTime(req.date * req.time, "yyyymmddHHMM")
+#             new_date = prev_date - Dates.Hour(12)
+#             new_step = Base.parse(Int, req.step) + 12
+#             req = MarsRequest(Dates.format(new_date, "yyyymmdd"), Dates.format(new_date, "HHMM"), string(new_step), req.area)
+#         end
+#     end
 
-    if !isfile(req.target_file)
-        throw(Genie.Exceptions.RuntimeException("Mars request not completed", "The grib file hasn't been found", 1))
-    end
+#     if !isfile(req.target_file)
+#         throw(Genie.Exceptions.RuntimeException("Mars request not completed", "The grib file hasn't been found", 1))
+#     end
     
-    date = req.date
-    time = req.time
-    step = req.step[1]
+#     date = req.date
+#     time = req.time
+#     step = req.step[1]
 
-    filename = joinpath(pwd(), req.target_file)
+#     filename = joinpath(pwd(), req.target_file)
 
-    time_grib = time == "0000" ? "0" : time
-    keys_to_select = Dict(
-        "date" => date,
-        "step" => step,
-        "time" => time_grib,
-        "level" => "0",
-    )
+#     time_grib = time == "0000" ? "0" : time
+#     keys_to_select = Dict(
+#         "date" => date,
+#         "step" => step,
+#         "time" => time_grib,
+#         "level" => "0",
+#     )
 
-    run_dt = steps_to_datetimes(datetime_start, [step])[1]
-    shape_data = ShapeData(lon, lat, Vector{Feature}(), Wind(0, 0), run_dt, step)
+#     run_dt = steps_to_datetimes(datetime_start, [step])[1]
+#     shape_data = ShapeData(lon, lat, Vector{Feature}(), Wind(0, 0), run_dt, step)
 
-    shape_data = calc_prediction(filename, keys_to_select, shape_data)
+#     shape_data = calc_prediction(filename, keys_to_select, shape_data)
 
-    rm(filename)
+#     rm(filename)
 
-    dict_sd = shape_data |> type2dict
-    return dict_sd
-end
+#     dict_sd = shape_data |> type2dict
+#     return dict_sd
+# end
 
-function calc_prediction(filename, keys_to_select, shape_data::ShapeData)
-    lon = shape_data.lon
-    lat = shape_data.lat
+# function calc_prediction(filename, keys_to_select, shape_data::ShapeData)
+#     lon = shape_data.lon
+#     lat = shape_data.lat
 
-    surroundings = Dict()
-    try 
-        surroundings = ReadGrib.find_nearest_wind(filename, keys_to_select, lon, lat)
-    catch e
-        if isa(e, ReadGrib.OutOfBoundAreaError)
-            throw(Genie.Exceptions.RuntimeException("$(e)", sprint(showerror, e), 500))
-        elseif isa(e, ReadGrib.KeysNotFoundError)
-            throw(Genie.Exceptions.RuntimeException("$(e)", sprint(showerror, e), 500))
-        else
-            throw(e)
-        end
-    end
+#     surroundings = Dict()
+#     try 
+#         surroundings = ReadGrib.find_nearest_wind(filename, keys_to_select, lon, lat)
+#     catch e
+#         if isa(e, ReadGrib.OutOfBoundAreaError)
+#             throw(Genie.Exceptions.RuntimeException("$(e)", sprint(showerror, e), 500))
+#         elseif isa(e, ReadGrib.KeysNotFoundError)
+#             throw(Genie.Exceptions.RuntimeException("$(e)", sprint(showerror, e), 500))
+#         else
+#             throw(e)
+#         end
+#     end
 
-    nearest_phi = surroundings["10u"][:lon] .* pi / 180
-    nearest_theta =  surroundings["10u"][:lat] .* pi / 180
-    nearest_coord = ec.SphereC(nearest_phi, nearest_theta)
+#     nearest_phi = surroundings["10u"][:lon] .* pi / 180
+#     nearest_theta =  surroundings["10u"][:lat] .* pi / 180
+#     nearest_coord = ec.SphereC(nearest_phi, nearest_theta)
 
-    nearest_u = surroundings["10u"][:values]
-    nearest_v = surroundings["10v"][:values]
+#     nearest_u = surroundings["10u"][:values]
+#     nearest_v = surroundings["10v"][:values]
 
-    u_wind = ec.evaluate_interp(lon * pi / 180, lat * pi / 180, ec.poly_bilinear_interp(nearest_coord, nearest_u))
-    v_wind = ec.evaluate_interp(lon * pi / 180, lat * pi / 180, ec.poly_bilinear_interp(nearest_coord, nearest_v))
+#     u_wind = ec.evaluate_interp(lon * pi / 180, lat * pi / 180, ec.poly_bilinear_interp(nearest_coord, nearest_u))
+#     v_wind = ec.evaluate_interp(lon * pi / 180, lat * pi / 180, ec.poly_bilinear_interp(nearest_coord, nearest_v))
 
-    wind = Wind(u_wind, v_wind)
+#     wind = Wind(u_wind, v_wind)
 
-    shape_data.wind = wind
+#     shape_data.wind = wind
 
-    resolution = 25
-    thres_wind = WIND_THRESHOLD / 3.6
-    if wind.speed < thres_wind
-        haz_area = ComputeShapes.ATP_circle(lat, lon, 10., resolution)
-        rel_area = ComputeShapes.ATP_circle(lat, lon, 2., resolution)
-    else
-        haz_area = ComputeShapes.ATP_triangle(lat, lon, 10., 2., wind.u, wind.v)
-        rel_area = ComputeShapes.ATP_circle(lat, lon, 2., resolution)
+#     resolution = 25
+#     thres_wind = WIND_THRESHOLD / 3.6
+#     if wind.speed < thres_wind
+#         haz_area = ComputeShapes.ATP_circle(lat, lon, 10., resolution)
+#         rel_area = ComputeShapes.ATP_circle(lat, lon, 2., resolution)
+#     else
+#         haz_area = ComputeShapes.ATP_triangle(lat, lon, 10., 2., wind.u, wind.v)
+#         rel_area = ComputeShapes.ATP_circle(lat, lon, 2., resolution)
         
-    end
-    push!(haz_area.properties, "label" => "Hazard Area")
-    push!(haz_area.properties, "color" => "	#0000FF")
-    push!(rel_area.properties, "label" => "Release Area")
-    push!(rel_area.properties, "color" => "	#FF0000")
-    push!(shape_data.shapes, haz_area)
-    push!(shape_data.shapes, rel_area)
+#     end
+#     push!(haz_area.properties, "label" => "Hazard Area")
+#     push!(haz_area.properties, "color" => "	#0000FF")
+#     push!(rel_area.properties, "label" => "Release Area")
+#     push!(rel_area.properties, "color" => "	#FF0000")
+#     push!(shape_data.shapes, haz_area)
+#     push!(shape_data.shapes, rel_area)
 
-    push!(shape_data.shapes, Feature(Point([lon, lat]), Dict("type" => "releaseLocation")))
+#     push!(shape_data.shapes, Feature(Point([lon, lat]), Dict("type" => "releaseLocation")))
     
-    shape_data
-end
+#     shape_data
+# end
 """
     mars_request()
 Send a mars request for archive data with the requested date, time and area
@@ -424,7 +425,7 @@ function run_wind()
 
 
     if length(locations) == 1
-        input = Atp45Input([[lon1, lat1]], WindAzimuth(speed, azimuth), cont_type, proc_type, stability)
+        input = Atp45Input([[lon1, lat1]], WindDirection(speed, azimuth), cont_type, proc_type, stability)
     elseif length(locations) > 1
         lon2 = locations[2]["lon"]
         lat2 = locations[2]["lat"]
@@ -432,7 +433,7 @@ function run_wind()
         lon2 = lon2 isa String ? Base.parse(Float64, lon2) : Base.convert(Float64, lon2) 
         lat2 = lat2 isa String ? Base.parse(Float64, lat2) : Base.convert(Float64, lat2)
 
-        input = Atp45Input([[lon1, lat1], [lon2, lat2]], WindAzimuth(speed, azimuth), cont_type, proc_type, stability)
+        input = Atp45Input([[lon1, lat1], [lon2, lat2]], WindDirection(speed, azimuth), cont_type, proc_type, stability)
     end
 
 
@@ -447,7 +448,8 @@ function run_wind()
     end
     @show payload
     response = Dict(
-        :collection => atp45_result.collection |> geo2dict,
+        # Not ideal, should find a better way to parse the FeatureCollection
+        :collection => JSON3.read(GeoJSON.write(atp45_result.collection)),
         :metadata => Dict(
             :cbrnTypes =>  Dict(
                 :procedureType => Dict(
@@ -465,10 +467,11 @@ function run_wind()
             ),
             :wind => Dict(
                 :speed => atp45_result.input.wind.speed,
-                :azimuth => atp45_result.input.wind.azimuth
+                :azimuth => atp45_result.input.wind.direction
             )
         )   
     )
+    global DEBUG_PAYLOAD_ATP = response
     response |> json
 end
 

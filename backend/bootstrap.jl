@@ -1,7 +1,5 @@
-  cd(@__DIR__)
-  import Pkg
-  Pkg.activate(".")
+(pwd() != @__DIR__) && cd(@__DIR__) # allow starting app from bin/ dir
 
-  function main()
-    include(joinpath("src", "WebApp.jl"))
-  end; main()
+using CbrnAlertApp
+push!(Base.modules_warned_for, Base.PkgId(CbrnAlertApp))
+CbrnAlertApp.main()
