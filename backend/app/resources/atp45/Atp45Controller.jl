@@ -628,5 +628,6 @@ function get_incident()
     return incidents |> json
 end
 
+geo2dict(collection) = JSON3.read(GeoJSON.write(collection))
 
 end

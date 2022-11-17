@@ -2,11 +2,15 @@ module FlexpartController
 using Genie
 using Genie.Requests
 using Genie.Renderer.Json: json
+using JSON3
 using Dates
-using GeoJSON
+# using GeoJSON
+using GeoJSON: Feature, FeatureCollection, Polygon, write
 using GeoInterface
 # using ..Main.UserApp.AuthenticationController: current_user
 using CbrnAlertApp.AuthenticationController
+using CbrnAlertApp.AuthenticationController: current_user
+# using CbrnAlertApp.AuthenticationController: @hasaccess!
 using Flexpart
 using Flexpart.FlexExtract
 using Rasters
@@ -15,11 +19,11 @@ using ColorSchemes
 using Colors
 
 
-using ..Main.UserApp.Users
-using ..Main.UserApp.FlexpartRuns
-using ..Main.UserApp.FlexpartInputs
-using ..Main.UserApp.FlexpartOutputs
-using ..Main.UserApp.SharedModels
+using CbrnAlertApp.Users
+using CbrnAlertApp.FlexpartRuns
+using CbrnAlertApp.FlexpartInputs
+using CbrnAlertApp.FlexpartOutputs
+using CbrnAlertApp.SharedModels
 
 using SearchLight
 using SearchLight.Relationships
@@ -381,7 +385,7 @@ _get_run(id) = findone(FlexpartRun, uuid = id)
 function get_run()
     id = Genie.Router.params(:runId)
     fprun = _get_run(id)
-    AC.@hasaccess!(fprun)
+    # @hasaccess!(fprun)
     Dict(fprun) |> json
 end
 
@@ -490,27 +494,28 @@ function to_geointerface(raster)
     catch
         dims(raster, :Y)[2] - dims(raster, :Y)[1]
     end
-
-    features = Feature[]
+    coords = []
+    vals = []
     read_raster = read(raster) # we get the raster into memory for faster access to the values
-    for I in eachindex(raster)
+    for I in CartesianIndices(read_raster)
         fval = read_raster[I]
         if !(fval ≈ 0.)
             i,j = Tuple(I)
-            poly = coords_to_polygon(raster, i, j, dx, dy)
-            push!(features,
-                Feature(poly,
-                    Dict(
-                        "val" => fval,
-                    )
-                )
-            )
+            coord = cell_coords(read_raster, i, j, dx, dy)
+            # feat = Feature(poly; properties = (val = fval,))
+            push!(coords, coord)
+            push!(vals, fval)
         end
     end
+
+    features = map(zip(coords, vals)) do (coord, val)
+        Feature(Polygon(coordinates = [coord]); properties = (val = val,))
+    end
+
     FeatureCollection(features)
 end
 
-function coords_to_polygon(raster, i, j, dx, dy)
+function cell_coords(raster, i, j, dx, dy)
     x = dims(raster)[1][i]
     y = dims(raster)[2][j]
     x, y = convert.(Float64, [x, y])
@@ -519,16 +524,16 @@ function coords_to_polygon(raster, i, j, dx, dy)
 
     left = x - dx2; right = x + dx2; lower = y - dy2; upper = y + dy2
 
-    Polygon([
+    [
         [left, lower],
         [left, upper],
         [right, upper],
         [right, lower],
-    ])
+    ]
 end
 
 function getcolors(collection)
-    vals = [f.properties["val"] for f in collection.features]
+    vals = [f.val for f in collect(collection)]
     minval = minimum(vals)
     maxval = maximum(vals)
     ticks = range(minval, maxval, length=10)
@@ -545,4 +550,7 @@ _area(area) = [
     area["bottom"],
     area["right"],
     ]
+
+geo2dict(collection) = JSON3.read(write(collection))
+
 end

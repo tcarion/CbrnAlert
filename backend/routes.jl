@@ -21,6 +21,8 @@ for user in SearchLight.all(User)
     Genie.Assets.channels_subscribe(user.email)
 end
 
+route("/login", AuthenticationController.login, method = POST)
+
 api_routes = Dict(
     "/forecast/available" => (f=Atp45Controller.available_steps, keyargs=(method=GET,)),
     "/atp45/containers" => (f=Atp45Controller.get_container, keyargs=(method=GET,)),
@@ -52,5 +54,3 @@ route("/docs") do
     swagger_document = YAML.load_file("api_docs.yaml"; dicttype=Dict{String, Any})
     render_swagger(swagger_document)
 end
-
-route("/login", AuthenticationController.login, method = POST)
