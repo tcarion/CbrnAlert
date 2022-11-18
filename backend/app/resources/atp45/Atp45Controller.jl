@@ -400,8 +400,6 @@ end
 
 function run_wind()
     payload = Genie.Requests.jsonpayload()
-    global DEBUG_PAYLOAD = debug()
-    @show payload
     locations = payload["locations"]
     weather = payload["wind"]
     procedure = payload["procedureTypeId"]
@@ -476,7 +474,6 @@ function run_wind()
 end
 
 function run_forecast()
-    debug()
     payload = Genie.Requests.jsonpayload()
     locations = payload["locations"]
     step = payload["step"]

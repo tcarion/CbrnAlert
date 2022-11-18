@@ -5,6 +5,9 @@ using SearchLight
 using CbrnAlertApp.AuthenticationController
 using CbrnAlertApp.Atp45Controller
 using CbrnAlertApp.FlexpartController
+using CbrnAlertApp.FlexpartInputsController
+using CbrnAlertApp.FlexpartRunsController
+using CbrnAlertApp.FlexpartOutputsController
 using JSONWebTokens
 using StructTypes
 using UUIDs
@@ -15,11 +18,13 @@ using SwagUI
 using SearchLight
 using CbrnAlertApp.Users
 
+global DEBUG_PAYLOAD = 0
+global DEBUG_PARAMS = 0
 
-Genie.config.websockets_server = true
-for user in SearchLight.all(User)
-    Genie.Assets.channels_subscribe(user.email)
-end
+# Genie.config.websockets_server = true
+# for user in SearchLight.all(User)
+#     Genie.Assets.channels_subscribe(user.email)
+# end
 
 route("/login", AuthenticationController.login, method = POST)
 
@@ -31,20 +36,22 @@ api_routes = Dict(
     "/atp45/run/wind" => (f=Atp45Controller.run_wind, keyargs=(method=POST,)),
     "/atp45/run/forecast" => (f=Atp45Controller.run_forecast, keyargs=(method=POST,)),
     # "/flexpart/meteo_data_request" => (f=FlexpartController.meteo_data_request, keyargs=(method=POST, named=:meteo_data_request)),
-    "/flexpart/input" => (f=FlexpartController.data_retrieval, keyargs=(method=POST,)),
-    "/flexpart/inputs" => (f=FlexpartController.get_inputs, keyargs=(method=GET,)),
-    "/flexpart/run" => (f=FlexpartController.run, keyargs=(method=POST,)),
-    "/flexpart/runs" => (f=FlexpartController.get_runs, keyargs=(method = GET,)),
-    "/flexpart/runs/:runId::String" => (f=FlexpartController.get_run, keyargs=(method = GET,)),
-    "/flexpart/runs/:runId::String/outputs" => (f=FlexpartController.get_outputs, keyargs=(method = GET,)),
-    "/flexpart/outputs/:outputId::String" => (f=FlexpartController.get_output, keyargs=(method = GET,)),
-    "/flexpart/outputs/:outputId::String/layers/" => (f=FlexpartController.get_layers, keyargs=(method = GET,)),
-    "/flexpart/outputs/:outputId::String/dimensions/" => (f=FlexpartController.get_dimensions, keyargs=(method = GET,)),
-    "/flexpart/outputs/:outputId::String/slice/" => (f=FlexpartController.get_slice, keyargs=(method = POST,)),
+    "/flexpart/input" => (f=FlexpartInputsController.data_retrieval, keyargs=(method=POST,)),
+    "/flexpart/inputs" => (f=FlexpartInputsController.get_inputs, keyargs=(method=GET,)),
+    "/flexpart/run" => (f=FlexpartRunsController.run, keyargs=(method=POST,)),
+    "/flexpart/runs" => (f=FlexpartRunsController.get_runs, keyargs=(method = GET,)),
+    "/flexpart/runs/:runId::String" => (f=FlexpartRunsController.get_run, keyargs=(method = GET,)),
+    "/flexpart/runs/:runId::String/outputs" => (f=FlexpartOutputsController.get_outputs, keyargs=(method = GET,)),
+    "/flexpart/outputs/:outputId::String" => (f=FlexpartOutputsController.get_output, keyargs=(method = GET,)),
+    "/flexpart/outputs/:outputId::String/layers/" => (f=FlexpartOutputsController.get_layers, keyargs=(method = GET,)),
+    "/flexpart/outputs/:outputId::String/dimensions/" => (f=FlexpartOutputsController.get_dimensions, keyargs=(method = GET,)),
+    "/flexpart/outputs/:outputId::String/slice/" => (f=FlexpartOutputsController.get_slice, keyargs=(method = POST,)),
 )
 
 for (url, args) in api_routes
     route("/api"*url; args[:keyargs]...) do
+        global DEBUG_PAYLOAD = Genie.Requests.jsonpayload()
+        global DEBUG_PARAMS = Genie.Router.params()
         # AuthenticationController.@authenticated!
         args[:f]()
     end
