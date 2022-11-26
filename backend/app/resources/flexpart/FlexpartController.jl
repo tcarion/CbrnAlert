@@ -23,23 +23,9 @@ using SearchLight.Relationships
 
 const AC = AuthenticationController
 
-const DATE_FORMAT = "yyyy-mm-ddTHH:MM:SS"
-
-const FLEXPART_RUNS_DIR = joinpath(pwd(), "public", "flexpart_runs")
-
-const CONTROL_FILE_NAME = "CONTROL_OD.OPER.FC.eta.highres.app"
-
-const FLEXPART_RUN_FAILED = Genie.Router.error(500, "Flexpart run failed", "application/json", error_info="Flexpart run failed")
-
-
 
 global DEBUG_PAYLOAD_FP = 0
 debug() = global DEBUG_PAYLOAD_FP = Genie.Requests.jsonpayload()
-
-function round_area(area)
-    return [ceil(area[1]), floor(area[2]), floor(area[3]), ceil(area[4])]
-end
-
 """
     log_and_broadcast(stream, ws_info, log_file::IO)
 Write the `stream` to a `log_file` stream and broadcast it the WebChannel given by `ws_info`

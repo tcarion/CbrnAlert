@@ -17,13 +17,18 @@ using CbrnAlertApp.FlexpartInputs
 using CbrnAlertApp.FlexpartRuns
 using CbrnAlertApp.FlexpartOutputs
 
-_area(area) = [
-    area["top"],
-    area["left"],
-    area["bottom"],
-    area["right"],
-    ]
+const FLEXPART_RUN_FAILED = Genie.Router.error(500, "Flexpart run failed", "application/json", error_info="Flexpart run failed")
 
+_area(area) = [
+  area["top"],
+  area["left"],
+  area["bottom"],
+  area["right"],
+]
+
+function round_area(area)
+  return [ceil(area[1]), floor(area[2]), floor(area[3]), ceil(area[4])]
+end
 
 function _iscompleted(fpdir)
   lines = readlines(joinpath(fpdir.path, "output.log"))
@@ -34,9 +39,9 @@ function run()
   runtype = Genie.Router.params(:runType, "simple")
 
   if runtype == "simple"
-      run_simple() 
+    run_simple()
   else
-      run_detailed()
+    run_detailed()
   end
 end
 
@@ -73,27 +78,27 @@ function run_simple()
   Flexpart.set_cmd_dates!(fpoptions, sim_start, sim_end)
 
   cmd = Dict(
-      # Set simulation step
-      :LOUTSTEP => time_step,
-      :LOUTAVER => time_step,
-      :LOUTSAMPLE => convert(Int64, time_step / 4),
-      :LSYNCTIME => convert(Int64, time_step / 4),
-      # Set netcdf output
-      :IOUT =>  output_type + 8
+    # Set simulation step
+    :LOUTSTEP => time_step,
+    :LOUTAVER => time_step,
+    :LOUTSAMPLE => convert(Int64, time_step / 4),
+    :LSYNCTIME => convert(Int64, time_step / 4),
+    # Set netcdf output
+    :IOUT => output_type + 8
   )
   merge!(fpoptions["COMMAND"][:COMMAND], cmd)
 
   # Set release options
   Flexpart.set_point_release!(fpoptions, lon, lat)
   releases_options = Dict(
-      :IDATE1 => Dates.format(release_start, "yyyymmdd"),
-      :ITIME1 => Dates.format(release_start, "HHMMSS"),
-      :IDATE2 => Dates.format(release_end, "yyyymmdd"),
-      :ITIME2 => Dates.format(release_end, "HHMMSS"),
-      :Z1 => release_height,
-      :Z2 => release_height,
-      :PARTS => Flexpart.MAX_PARTICLES,
-      :MASS => release_mass
+    :IDATE1 => Dates.format(release_start, "yyyymmdd"),
+    :ITIME1 => Dates.format(release_start, "HHMMSS"),
+    :IDATE2 => Dates.format(release_end, "yyyymmdd"),
+    :ITIME2 => Dates.format(release_end, "HHMMSS"),
+    :Z1 => release_height,
+    :Z2 => release_height,
+    :PARTS => Flexpart.MAX_PARTICLES,
+    :MASS => release_mass
   )
   Flexpart.merge!(fpoptions["RELEASES"][:RELEASE], releases_options)
 
@@ -102,12 +107,12 @@ function run_simple()
   outgrid = Flexpart.area2outgrid(area_f, gridres)
   Flexpart.merge!(fpoptions["OUTGRID"][:OUTGRID], outgrid)
   fpoptions["OUTGRID"][:OUTGRID][:OUTHEIGHTS] = join(heights, ", ")
-  
+
   # Save the options
   Flexpart.save(fpoptions)
 
   # Get the input and adapt the Available file
-  fpinput = findone(FlexpartInput, uuid = input_id)
+  fpinput = findone(FlexpartInput, uuid=input_id)
   fpdir[:input] = abspath(joinpath(fpinput.path, "output"))
   avs = Available(fpdir)
 
@@ -127,32 +132,32 @@ function run(fpdir::FlexpartDir, fprun::FlexpartRun)
   Flexpart.remove_unused_species!(fpoptions)
   FlexpartRuns.change_options(fprun.name, fpoptions)
   open(joinpath(fpdir.path, "output.log"), "w") do logf
-      FlexpartRuns.change_status(fprun.name, ONGOING)
-      Flexpart.run(fpdir) do stream
-          # log_and_broadcast(stream, request_data["ws_info"], logf)
-          line = readline(stream, keep=true)
-          Base.write(logf, line)
-          flush(logf)
-      end
+    FlexpartRuns.change_status(fprun.name, ONGOING)
+    Flexpart.run(fpdir) do stream
+      # log_and_broadcast(stream, request_data["ws_info"], logf)
+      line = readline(stream, keep=true)
+      Base.write(logf, line)
+      flush(logf)
+    end
   end
 
   if _iscompleted(fpdir)
-      FlexpartRuns.change_status(fprun.name, FINISHED)
+    FlexpartRuns.change_status(fprun.name, FINISHED)
   else
-      @warn "Flexpart run failed"
-      FlexpartRuns.change_status(fprun.name, ERRORED)
-      if ENV["GENIE_ENV"] == "prod"
-          rm(fpdir.path, recursive = true)
-      end
-      return FLEXPART_RUN_FAILED
+    @warn "Flexpart run failed"
+    FlexpartRuns.change_status(fprun.name, ERRORED)
+    if ENV["GENIE_ENV"] == "prod"
+      rm(fpdir.path, recursive=true)
+    end
+    return FLEXPART_RUN_FAILED
   end
 
   FlexpartRuns.assign_to_user!(current_user(), fprun)
 
   outfiles = Flexpart.OutputFiles(fpdir)
   for outfile in outfiles
-      fpoutput = FlexpartOutputs.add(outfile)
-      FlexpartOutputs.assign_to_run!(fprun.uuid, fpoutput)
+    fpoutput = FlexpartOutputs.add(outfile)
+    FlexpartOutputs.assign_to_run!(fprun.uuid, fpoutput)
   end
 
   return fprun
