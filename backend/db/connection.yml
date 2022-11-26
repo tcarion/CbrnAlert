@@ -20,7 +20,7 @@ prod:
 
 test:
   adapter: SQLite
-  database: db/db.sqlite
+  database: db/db_test.sqlite
   host:
   username:
   password:

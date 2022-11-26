@@ -8,7 +8,7 @@ using SHA
 using StructTypes
 using JSONWebTokens
 
-using CbrnAlertApp: PUK_PATH, PRK_PATH
+using CbrnAlertApp: PUK_PATH, PRK_PATH, UNAUTHORIZED
 
 export User, user_related
 
@@ -60,12 +60,12 @@ end
 
 function _decode()
     try
-        head = Genie.Requests.payload()[:REQUEST].headers |> pairs_array_to_dict
+        head = Dict(Genie.Requests.payload()[:REQUEST].headers)
         bearer = head["Authorization"]
         token = split(bearer, "Bearer")[2] |> strip
         JSONWebTokens.decode(JSONWebTokens.RS256(PUK_PATH), token)
     catch
-        throw(Genie.Exceptions.RuntimeException("Not authorized", "No authorization has been provided", 401))
+        throw(UNAUTHORIZED)
     end
 end
 
@@ -96,7 +96,5 @@ end
 function user_related(model::Type{<:AbstractModel})
     related(current_user(), model)
 end
-
-pairs_array_to_dict(array) = Dict(pair[1] => pair[2] for pair in array)
 
 end

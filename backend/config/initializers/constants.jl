@@ -10,3 +10,6 @@ const CREATED="created"
 const FINISHED="finished"
 const ONGOING="ongoing"
 const ERRORED="errored"
+
+## Exceptions
+const UNAUTHORIZED = Genie.Exceptions.RuntimeException("Not authorized", "No authorization has been provided", 401)

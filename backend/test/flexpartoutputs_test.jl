@@ -1,4 +1,4 @@
-using Test, SearchLight, FlexpartOutputs
+using Test, SearchLight, Main.UserApp, Main.UserApp.FlexpartOutputs
 
 @testset "FlexpartOutput unit tests" begin
 
