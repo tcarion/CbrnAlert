@@ -5,29 +5,34 @@
 # If you want to selectively run tests, use `$ julia --project runtests.jl test_file_1 test_file_2`
 
 ENV["GENIE_ENV"] = "test"
+ENV["GENIE_ENV"] = "test_interactive"
 push!(LOAD_PATH, abspath(normpath(joinpath("..", "src"))))
 
 cd("..")
 using Pkg
 Pkg.activate(".")
 
+include("../bootstrap.jl")
+
 using Genie
-using SearchLight
 
-
-Genie.loadapp()
-# has to run twice because of big with loading order of resources.
+# has to run twice because of bug with loading order of resources.
 Genie.loadapp()
 
 cd(@__DIR__)
 Pkg.activate(".")
 
 using Main.UserApp, Test, TestSetExtensions, Logging
+# Main.UserApp.main()
+# Logging.global_logger(NullLogger())
 
-
-Logging.global_logger(NullLogger())
+include(joinpath("utils", "server_setup.jl"))
+include(joinpath("utils", "db_setup.jl"))
+include(joinpath("utils", "requests.jl"))
+include(joinpath("utils", "docs_utils.jl"))
+server_setup()
+db_setup()
 
 @testset ExtendedTestSet "CbrnAlert app tests" begin
-    include("db_setup_test.jl")
     @includetests ARGS
 end

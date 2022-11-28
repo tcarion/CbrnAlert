@@ -1,5 +1,7 @@
-const PRK_PATH = "config/private.pem"
-const PUK_PATH = "config/public.pem"
+const PRK_PATH = joinpath("config", "private.pem")
+const PUK_PATH = joinpath("config", "public.pem")
+
+const API_DOC_FILE = "api_docs.yaml"
 
 const DATE_FORMAT = "yyyy-mm-ddTHH:MM:SS"
 

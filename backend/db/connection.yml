@@ -26,3 +26,12 @@ test:
   password:
   port:
   config:
+
+test_interactive:
+  adapter: SQLite
+  database: db/db_test.sqlite
+  host:
+  username:
+  password:
+  port:
+  config:

@@ -372,7 +372,6 @@ components:
       - incidentTypeId
       - locations
       - procedureTypeId
-      - stabilityClass
       type: object
       properties:
         locations:
@@ -386,9 +385,6 @@ components:
         containerId:
           type: string
           example: BML
-        stabilityClass:
-          type: string
-          example: U
         incidentTypeId:
           type: string
           example: chem
@@ -396,11 +392,19 @@ components:
       allOf:
       - $ref: '#/components/schemas/BasicAtp45Input'
       - required:
+        - stabilityClass
         - wind
         type: object
         properties:
           wind:
             $ref: '#/components/schemas/WindVelocity'
+          stabilityClass:
+            type: string
+            example: Unstable
+            enum:
+            - Unstable
+            - Neutral
+            - Stable
     ForecastAtp45Input:
       allOf:
       - $ref: '#/components/schemas/BasicAtp45Input'
@@ -419,9 +423,11 @@ components:
         speed:
           type: number
           description: Wind speed - units [m/s]
+          example: 5
         azimuth:
           type: number
           description: angle from North - units [m/s]
+          example: 30
     GeoPoint:
       required:
       - lat
@@ -431,9 +437,11 @@ components:
         lon:
           type: number
           description: Longitude [°]
+          example: 4
         lat:
           type: number
           description: Latitude [°]
+          example: 50
     GeoRectangle:
       required:
       - bottom
@@ -445,15 +453,19 @@ components:
         top:
           type: number
           description: north lat [°]
+          example: 51
         bottom:
           type: number
           description: south lat [°]
+          example: 49
         left:
           type: number
           description: west lon [°]
+          example: 3
         right:
           type: number
           description: east lon [°]
+          example: 5
     Atp45Result:
       required:
       - collection
@@ -482,6 +494,9 @@ components:
         incident:
           $ref: '#/components/schemas/IncidentType'
     CbrnContainer:
+      required:
+      - description
+      - id
       type: object
       properties:
         id:
@@ -491,6 +506,9 @@ components:
           type: string
           example: Surface Burst Rocket
     ProcedureType:
+      required:
+      - description
+      - id
       type: object
       properties:
         id:
@@ -500,6 +518,9 @@ components:
           type: string
           example: Non Persistent Agents
     IncidentType:
+      required:
+      - description
+      - id
       type: object
       properties:
         id:

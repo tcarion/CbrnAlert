@@ -17,6 +17,12 @@ end
     @test length(all(User)) == 1
     @test first(find(User)).username == "foo"
 
+    @test_throws SearchLight.Exceptions.InvalidModelException Users.add(email, "pw2"; username = "username2", name = "name2")
+
+    Users.add("email", "pw2"; username = "username2", name = "name2")
+
+    @test all(User)[2].email == "email"
+
     @test_throws Genie.Exceptions.RuntimeException Users.current_user()
     @test_throws Genie.Exceptions.RuntimeException Users.user_related(User)
 end;

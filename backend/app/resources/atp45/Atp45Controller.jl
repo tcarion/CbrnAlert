@@ -405,12 +405,13 @@ function run_wind()
     procedure = payload["procedureTypeId"]
     container = payload["containerId"]
     incident = payload["incidentTypeId"]
+
+    stability = Symbol(payload["stabilityClass"])
     
-    speed = weather.speed
-    azimuth = weather.azimuth
-    stability = Symbol(weather.stabilityClass)
-    speed = speed isa String ? Base.parse(Float64, speed) : Base.convert(Float64, speed) 
-    azimuth = azimuth isa String ? Base.parse(Float64, azimuth) : Base.convert(Float64, azimuth)
+    speed = weather["speed"]
+    azimuth = weather["azimuth"]
+    # speed = speed isa String ? Base.parse(Float64, speed) : Base.convert(Float64, speed) 
+    # azimuth = azimuth isa String ? Base.parse(Float64, azimuth) : Base.convert(Float64, azimuth)
     cont_type = Symbol(container)
     proc_type = Symbol(procedure)
     inc_type = Symbol(incident)
@@ -418,8 +419,8 @@ function run_wind()
     lon1 = locations[1]["lon"]
     lat1 = locations[1]["lat"]
 
-    lon1 = lon1 isa String ? Base.parse(Float64, lon1) : Base.convert(Float64, lon1) 
-    lat1 = lat1 isa String ? Base.parse(Float64, lat1) : Base.convert(Float64, lat1) 
+    # lon1 = lon1 isa String ? Base.parse(Float64, lon1) : Base.convert(Float64, lon1) 
+    # lat1 = lat1 isa String ? Base.parse(Float64, lat1) : Base.convert(Float64, lat1) 
 
 
     if length(locations) == 1

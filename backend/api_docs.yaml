@@ -14,7 +14,6 @@ components:
         - "locations"
         - "procedureTypeId"
         - "containerId"
-        - "stabilityClass"
         - "incidentTypeId"
 
       properties:
@@ -29,9 +28,6 @@ components:
         containerId:
           type: string
           example: "BML"
-        stabilityClass:
-          type: string
-          example: "U"
         incidentTypeId:
           type: string
           example: "chem"
@@ -42,9 +38,17 @@ components:
         - type: object
           required:
             - wind
+            - stabilityClass
           properties:
             wind:
               $ref: '#/components/schemas/WindVelocity'
+            stabilityClass:
+              type: string
+              enum:
+                - Unstable
+                - Neutral
+                - Stable
+              example: "Unstable"
 
     ForecastAtp45Input:
       allOf:
@@ -66,9 +70,11 @@ components:
         speed:
           type: number
           description: 'Wind speed - units [m/s]'
+          example: 5.0
         azimuth:
           type: number
           description: 'angle from North - units [m/s]'
+          example: 30.0
     GeoPoint:
       type: object
       required:
@@ -78,9 +84,11 @@ components:
         lon:
           type: number
           description: 'Longitude [°]'
+          example: 4.0
         lat:
           type: number
           description: 'Latitude [°]'
+          example: 50.0
     GeoRectangle:
       type: object
       required:
@@ -92,15 +100,19 @@ components:
         top:
           type: number
           description: 'north lat [°]'
+          example: 51.0
         bottom:
           type: number
           description: 'south lat [°]'
+          example: 49.0
         left:
           type: number
           description: 'west lon [°]'
+          example: 3.0
         right:
           type: number
           description: 'east lon [°]'
+          example: 5.0
 
     Atp45Result:
       type: object
@@ -111,6 +123,8 @@ components:
           allOf:
             - $ref: 'https://api.swaggerhub.com/apis/OlivierMartineau/GeoJSON/1.0.0#/components/schemas/FeatureCollection'
             - type: object
+              required:
+                - features
               properties:
                 'features':
                   type: array
@@ -154,6 +168,9 @@ components:
 
     CbrnContainer:
       type: object
+      required:
+        - 'id'
+        - 'description'
       properties:
         'id':
           type: string
@@ -164,6 +181,9 @@ components:
 
     ProcedureType:
       type: object
+      required:
+        - 'id'
+        - 'description'
       properties:
         'id':
           type: string
@@ -174,6 +194,9 @@ components:
 
     IncidentType:
       type: object
+      required:
+        - 'id'
+        - 'description'
       properties:
         'id':
           type: string

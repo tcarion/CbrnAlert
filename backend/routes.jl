@@ -18,6 +18,8 @@ using SwagUI
 using SearchLight
 using CbrnAlertApp.Users
 
+using CbrnAlertApp: API_DOC_FILE
+
 global DEBUG_PAYLOAD = 0
 global DEBUG_PARAMS = 0
 
@@ -58,6 +60,6 @@ for (url, args) in api_routes
 end
 
 route("/docs") do 
-    swagger_document = YAML.load_file("api_docs.yaml"; dicttype=Dict{String, Any})
+    swagger_document = YAML.load_file(API_DOC_FILE; dicttype=Dict{String, Any})
     render_swagger(swagger_document)
 end
