@@ -1,13 +1,48 @@
 ---
 openapi: 3.0.2
 info:
-  title: API Title
+  title: CbrnAlert API
   version: "1.0"
+externalDocs:
+  description: Find more info here
+  url: /docs
 servers:
-- url: http://localhost:8000/api
+- url: '{protocol}://localhost:8000/api'
+  variables:
+    protocol:
+      default: https
+      enum:
+      - http
+      - https
 paths:
+  /login:
+    post:
+      tags:
+      - auth
+      description: Authentication request
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/login_body'
+        required: true
+      responses:
+        "200":
+          description: Authentication succeeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+        "401":
+          description: Access token is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonErrorBody'
   /atp45/run/forecast:
     post:
+      tags:
+      - atp45
       description: Run ATP45 with forecast wind data
       requestBody:
         content:
@@ -24,6 +59,8 @@ paths:
                 $ref: '#/components/schemas/Atp45Result'
   /atp45/run/wind:
     post:
+      tags:
+      - atp45
       description: Run ATP45 with request wind data
       requestBody:
         content:
@@ -40,6 +77,8 @@ paths:
                 $ref: '#/components/schemas/Atp45Result'
   /forecast/available:
     get:
+      tags:
+      - atp45
       description: Return the last forecast datetimes available at ECMWF
       responses:
         "200":
@@ -50,6 +89,8 @@ paths:
                 $ref: '#/components/schemas/ForecastAvailableSteps'
   /flexpart/input:
     post:
+      tags:
+      - flexpart
       description: Retrieve the meteorological data needed for flexpart
       parameters:
       - name: retrievalType
@@ -79,6 +120,8 @@ paths:
                 $ref: '#/components/schemas/FlexpartInput'
   /flexpart/inputs:
     get:
+      tags:
+      - flexpart
       description: Return all the Flexpart inputs available (default finished)
       parameters:
       - name: status
@@ -99,6 +142,8 @@ paths:
                   $ref: '#/components/schemas/FlexpartInput'
   /flexpart/run:
     post:
+      tags:
+      - flexpart
       description: Run flexpart
       parameters:
       - name: runType
@@ -137,6 +182,8 @@ paths:
                 $ref: '#/components/schemas/FlexpartRun'
   /flexpart/runs:
     get:
+      tags:
+      - flexpart
       description: Return all the Flexpart runs (default finished)
       parameters:
       - name: status
@@ -157,6 +204,8 @@ paths:
                   $ref: '#/components/schemas/FlexpartRun'
   /flexpart/runs/{runId}:
     get:
+      tags:
+      - flexpart
       parameters:
       - name: runId
         in: path
@@ -175,6 +224,8 @@ paths:
                 $ref: '#/components/schemas/FlexpartRun'
   /flexpart/runs/{runId}/outputs:
     get:
+      tags:
+      - flexpart
       description: Return the outputs of the Flexpart run `runId`
       parameters:
       - name: runId
@@ -196,6 +247,8 @@ paths:
                   $ref: '#/components/schemas/FlexpartOutput'
   /flexpart/outputs/{outputId}:
     get:
+      tags:
+      - flexpart
       parameters:
       - name: outputId
         in: path
@@ -214,6 +267,8 @@ paths:
                 $ref: '#/components/schemas/FlexpartOutput'
   /flexpart/outputs/{outputId}/layers:
     get:
+      tags:
+      - flexpart
       description: Return the layers of the Flexpart output `outputId`
       parameters:
       - name: outputId
@@ -244,6 +299,8 @@ paths:
                   type: string
   /flexpart/outputs/{outputId}/dimensions:
     get:
+      tags:
+      - flexpart
       description: Return the dimensions layers of the Flexpart output `outputId` with their values
       parameters:
       - name: outputId
@@ -280,6 +337,8 @@ paths:
                 type: object
   /flexpart/outputs/{outputId}/slice:
     post:
+      tags:
+      - flexpart
       description: Return a slice of the `output` according to some dimensions.
       parameters:
       - name: layer
@@ -330,9 +389,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_200'
+                $ref: '#/components/schemas/inline_response_200_1'
   /atp45/containers:
     get:
+      tags:
+      - atp45
       responses:
         "200":
           description: OK
@@ -344,6 +405,8 @@ paths:
                   $ref: '#/components/schemas/CbrnContainer'
   /atp45/procedures:
     get:
+      tags:
+      - atp45
       responses:
         "200":
           description: OK
@@ -355,6 +418,8 @@ paths:
                   $ref: '#/components/schemas/ProcedureType'
   /atp45/incidents:
     get:
+      tags:
+      - atp45
       responses:
         "200":
           description: OK
@@ -366,6 +431,18 @@ paths:
                   $ref: '#/components/schemas/IncidentType'
 components:
   schemas:
+    User:
+      required:
+      - email
+      - username
+      type: object
+      properties:
+        email:
+          type: string
+        username:
+          type: string
+        name:
+          type: string
     BasicAtp45Input:
       required:
       - containerId
@@ -474,7 +551,9 @@ components:
         collection:
           allOf:
           - $ref: '#/components/schemas/FeatureCollection'
-          - type: object
+          - required:
+            - features
+            type: object
             properties:
               features:
                 type: array
@@ -753,6 +832,8 @@ components:
           oneOf:
           - $ref: '#/components/schemas/ColorbarData'
     ColorbarData:
+      required:
+      - ticks
       type: object
       properties:
         colors:
@@ -786,6 +867,15 @@ components:
       - finished
       - ongoing
       - errored
+    JsonErrorBody:
+      required:
+      - error
+      type: object
+      properties:
+        error:
+          type: string
+        info:
+          type: string
     FeatureCollection:
       description: GeoJSon 'FeatureCollection' object
       externalDocs:
@@ -933,13 +1023,35 @@ components:
         url: https://tools.ietf.org/html/rfc7946#section-3.1.1
       items:
         type: number
+    login_body:
+      required:
+      - email
+      - password
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    inline_response_200:
+      required:
+      - idToken
+      - user
+      type: object
+      properties:
+        idToken:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+        expiresIn:
+          type: number
     flexpart_input_body:
       oneOf:
       - $ref: '#/components/schemas/FlexpartRetrieveSimple'
     flexpart_run_body:
       oneOf:
       - $ref: '#/components/schemas/FlexpartOptionsSimple'
-    inline_response_200:
+    inline_response_200_1:
       oneOf:
       - $ref: '#/components/schemas/RawSliceResponse'
       - $ref: '#/components/schemas/GeoJsonSliceResponse'
@@ -964,6 +1076,13 @@ components:
       properties:
         val:
           type: number
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/JsonErrorBody'
   parameters:
     inputIdParam:
       name: inputId
@@ -993,7 +1112,7 @@ components:
       schema:
         type: string
   securitySchemes:
-    name:
+    bearerAuth:
       type: http
       scheme: bearer
-      bearerFormat: JWTpaths
+      bearerFormat: JWT

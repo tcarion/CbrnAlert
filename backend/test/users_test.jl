@@ -23,7 +23,8 @@ end
 
     @test all(User)[2].email == "email"
 
-    @test_throws Genie.Exceptions.RuntimeException Users.current_user()
-    @test_throws Genie.Exceptions.RuntimeException Users.user_related(User)
+    @test_throws Genie.Exceptions.ExceptionalResponse Users.current_user()
+    @test_throws Genie.Exceptions.ExceptionalResponse Users.user_related(User)
+    deleteall(User)
 end;
   

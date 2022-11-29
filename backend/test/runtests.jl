@@ -8,6 +8,8 @@ ENV["GENIE_ENV"] = "test"
 ENV["GENIE_ENV"] = "test_interactive"
 push!(LOAD_PATH, abspath(normpath(joinpath("..", "src"))))
 
+const TEST_USER = (email = "test@user.com", username = "testuser", password = "testpw")
+
 cd("..")
 using Pkg
 Pkg.activate(".")
@@ -34,5 +36,13 @@ server_setup()
 db_setup()
 
 @testset ExtendedTestSet "CbrnAlert app tests" begin
-    @includetests ARGS
+    @testset "Users test" begin include("users_test.jl") end
+    @testset "Authorization tests" begin include("auth_test.jl") end
+    # @testset "Docs compliance" begin include("docs_compliance_test.jl") end
+    @testset "Flexpart inputs" begin include("flexpartinputs_test.jl") end
+    @testset "Flexpart outputs" begin include("flexpartoutputs_test.jl") end
+    @testset "Flexpart runs" begin include("flexpartruns_test.jl") end
+    # @includetests ARGS
 end
+
+db_remove()

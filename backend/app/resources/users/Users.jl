@@ -8,9 +8,17 @@ using SHA
 using StructTypes
 using JSONWebTokens
 
-using CbrnAlertApp: PUK_PATH, PRK_PATH, UNAUTHORIZED
+using CbrnAlertApp: PUK_PATH, PRK_PATH, UNAUTHORIZED, FORBIDDEN
 
 export User, user_related
+
+const TOKEN_KEY = :token
+
+function __init__() :: Nothing
+    Users.add_auth_header in Genie.Router.pre_match_hooks || pushfirst!(Genie.Router.pre_match_hooks, Users.add_auth_header)
+  
+    nothing
+end
 
 Base.@kwdef mutable struct User <: AbstractModel
     ### FIELDS
@@ -39,7 +47,7 @@ function hash_password(password::String)
 end
 
 function add(email, password; username = "", name= "")
-    Genie.Assets.channels_subscribe(username)
+    # Genie.Assets.channels_subscribe(username)
     User(
         username=username,
         password=password |> hash_password,
@@ -59,15 +67,33 @@ function getsubject()
 end
 
 function _decode()
+    request = Genie.Router.request()
+    _decode(request)
+end
+
+function _decode(http_request)
     try
-        head = Dict(Genie.Requests.payload()[:REQUEST].headers)
-        bearer = head["Authorization"]
+        headers = Dict(http_request.headers)
+        bearer = headers["Authorization"]
         token = split(bearer, "Bearer")[2] |> strip
-        JSONWebTokens.decode(JSONWebTokens.RS256(PUK_PATH), token)
+        decode(token)
     catch
         throw(UNAUTHORIZED)
     end
 end
+
+decode(token) = JSONWebTokens.decode(JSONWebTokens.RS256(PUK_PATH), token)
+
+# function _decode()
+#     try
+#         head = Dict(Genie.Requests.payload()[:REQUEST].headers)
+#         bearer = head["Authorization"]
+#         token = split(bearer, "Bearer")[2] |> strip
+#         JSONWebTokens.decode(JSONWebTokens.RS256(PUK_PATH), token)
+#     catch
+#         throw(UNAUTHORIZED)
+#     end
+# end
 
 function authenticated()
     try
@@ -85,16 +111,33 @@ function hasaccess(model::AbstractModel)
     true
 end
 
-macro authenticated!(exception=Genie.Exceptions.ExceptionalResponse(Genie.Router.error(401, "Access to this API is not authorized", "application/json")))
-    :(AuthenticationController.authenticated() || throw($exception))
+macro authenticated!(exception=UNAUTHORIZED)
+    :(authenticated() || throw($exception))
 end
 
-macro hasaccess!(model, exception=Genie.Exceptions.ExceptionalResponse(Genie.Router.error(401, "Unauthorized", "application/json", error_info = "You don't have access to these data")))
-    :(AuthenticationController.hasaccess($model) || throw($exception))
+macro hasaccess!(model, exception=FORBIDDEN)
+    :(hasaccess($model) || throw($exception))
 end
 
 function user_related(model::Type{<:AbstractModel})
     related(current_user(), model)
+end
+
+function add_auth_header(req, res, params)
+    @warn "IN ADD AUTH"
+    headers = Dict(req.headers)
+    if haskey(headers, "Authorization")
+        auth = headers["Authorization"]
+        if startswith(auth, "Bearer ")
+            try
+                token = split(auth, "Bearer")[2] |> strip
+                params[TOKEN_KEY] = token
+            catch _
+            end
+        end
+    end
+
+    req, res, params
 end
 
 end

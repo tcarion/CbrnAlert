@@ -22,13 +22,14 @@ using CbrnAlertApp: API_DOC_FILE
 
 global DEBUG_PAYLOAD = 0
 global DEBUG_PARAMS = 0
+global DEBUG_REQUEST = 0
 
 # Genie.config.websockets_server = true
 # for user in SearchLight.all(User)
 #     Genie.Assets.channels_subscribe(user.email)
 # end
 
-route("/login", AuthenticationController.login, method = POST)
+route("/api/login", AuthenticationController.login, method = POST)
 
 api_routes = Dict(
     "/forecast/available" => (f=Atp45Controller.available_steps, keyargs=(method=GET,)),
@@ -52,9 +53,13 @@ api_routes = Dict(
 
 for (url, args) in api_routes
     route("/api"*url; args[:keyargs]...) do
-        global DEBUG_PAYLOAD = Genie.Requests.jsonpayload()
-        global DEBUG_PARAMS = Genie.Router.params()
-        # AuthenticationController.@authenticated!
+        if ENV["GENIE_ENV"] !== "prod"
+            global DEBUG_PAYLOAD = Genie.Requests.jsonpayload()
+            global DEBUG_PARAMS = Genie.Router.params()
+            global DEBUG_REQUEST = Genie.Router.request()
+        end
+        # would be better to do that in Genie.Router.pre_match_hooks. See GenieAuthentication which provides an example (basicauthparams)
+        Users.@authenticated!
         args[:f]()
     end
 end

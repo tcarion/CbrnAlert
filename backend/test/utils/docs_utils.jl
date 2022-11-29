@@ -6,19 +6,20 @@ using Test
 const API_DOCS = YAML.load_file(joinpath("..", "resolved.yaml"); dicttype=Dict{String, Any})
 
 
-function get_response_schema(testroute)
-    schema = API_DOCS["paths"][testroute]["get"]["responses"]["200"]["content"]["application/json"]["schema"]
-    schema_to_dict(schema)
+function response_schema(testroute; method = "get", response = "200", only_required = true)
+    method = lowercase(method)
+    method in ["get", "post"] || error("method $method not knon")
+    schema = API_DOCS["paths"][testroute][method]["responses"][response]["content"]["application/json"]["schema"]
+    schema_to_dict(schema; only_required)
 end
 
-function post_request_schema(testroute)
+function body_schema(testroute)
     schema = API_DOCS["paths"][testroute]["post"]["requestBody"]["content"]["application/json"]["schema"]
     schema_to_dict(schema)
 end
 
-function post_response_schema(testroute)
-    schema = API_DOCS["paths"][testroute]["post"]["responses"]["200"]["content"]["application/json"]["schema"]
-    schema_to_dict(schema; only_required = false)
+function post_response_schema(testroute; response = "200")
+    response_schema(testroute; method = "post", response)
 end
 
 get_schema(name) = API_DOCS["components"]["schemas"][name]
@@ -29,7 +30,7 @@ get_schema(name) = API_DOCS["components"]["schemas"][name]
 function follows_spec(testroute, result; method = :GET)
     method = string(method)
     schema = if method == "GET"
-        get_response_schema(testroute)
+        response_schema(testroute)
     elseif method == "POST"
         post_response_schema(testroute)
     else
@@ -45,6 +46,37 @@ function follows_spec(testroute, result; method = :GET)
     @test keys(result) == Set(Symbol.(keys(schema)))
 end
 
+function keys_in(schema, result)
+    try
+        throws_keys_in(schema, result)
+    catch _
+        false
+    end
+end
+
+function throws_keys_in(schema, result)
+    if schema isa AbstractVector
+        if !(result isa AbstractVector)
+            error("Both structs are different")
+        end
+        return keys_in(schema[1], result[1])
+    end
+    schkeys = Set(Symbol.(keys(schema)))
+    reskeys = Set(Symbol.(keys(result)))
+    # check if all the properties required by the scheme are in the result
+    isin = all(in.(schkeys, Ref(reskeys)))
+    if isin
+        for (k, v) in schema
+            if v isa AbstractDict
+                return keys_in(schema[k], result[k])
+            else
+                return true
+            end
+        end
+    else
+        error("Both structs are different")
+    end
+end
 """
     Fails if `only_required == true` and some nested schema has no required properties.
 """
@@ -60,7 +92,12 @@ function schema_to_dict(schema, dict = Dict{String, Any}(); only_required = true
     if !isnothing(allofs)
         for allof in allofs
             if !get(allof, "nullable", false)
-                push!(dict, schema_to_dict(allof; only_required)...)
+                inner_schema = schema_to_dict(allof; only_required)
+                if isempty(inner_schema)
+                    continue
+                else
+                    push!(dict, schema_to_dict(allof; only_required)...)
+                end
             end
         end
     end
@@ -78,7 +115,7 @@ function schema_to_dict(schema, dict = Dict{String, Any}(); only_required = true
                         if e isa KeyError
                             error("Key $reqkey is required but is not in the properties (only $(collect(keys(schema["properties"]))))")
                         end
-                        throw(e)
+                        rethrow(e)
                     end
                 end
             end

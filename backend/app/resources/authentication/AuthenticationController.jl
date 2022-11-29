@@ -7,7 +7,7 @@ using Logging
 using JSONWebTokens
 
 using CbrnAlertApp.Users
-using CbrnAlertApp: PUK_PATH, PRK_PATH
+using CbrnAlertApp: PUK_PATH, PRK_PATH, UNAUTHORIZED
 
 function login()
     exp = 60 * 60
@@ -34,7 +34,8 @@ function login()
         ))
 
     else
-        Genie.Router.error(401, "User not found", "application/json", error_info="Email or password must be incorrect")
+        # Genie.Router.error(401, "User not found", "application/json", error_info="Email or password must be incorrect")
+        throw(UNAUTHORIZED)
     end
 end
 

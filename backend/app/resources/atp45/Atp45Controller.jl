@@ -14,6 +14,8 @@ using GeoInterface
 using GeoJSON
 using DataStructures: OrderedDict
 
+using CbrnAlertApp.Users
+
 global dict
 
 const ec = 0
