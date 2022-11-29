@@ -1,13 +1,37 @@
 openapi: '3.0.2'
 info:
-  title: API Title
+  title: CbrnAlert API
   version: '1.0'
 servers:
   # TODO: CHANGE TO HTTPS FOR PROD
-  - url: http://localhost:8000/api
+  - url: '{protocol}://localhost:8000/api'
+    variables:
+      protocol:
+        enum:
+          - http
+          - https
+        default: https
+externalDocs:
+  url: /docs
+  description: Find more info here
 
 components:
   schemas:
+    User:
+      type: object
+      required: 
+        - email
+        - password
+        - username
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        username:
+          type: string
+        name:
+          type: string
     BasicAtp45Input:
       type: object
       required:
@@ -454,6 +478,8 @@ components:
       # properties:
     ColorbarData:
       type: object
+      required:
+        - ticks
       properties:
         colors:
           type: array
@@ -488,6 +514,15 @@ components:
         - "ongoing"
         - "errored"
 
+    JsonErrorBody:
+      type: object
+      required:
+        - error
+      properties:
+        'error':
+          type: string
+        'info':
+          type: string
   parameters:
     inputIdParam:
       in: path
@@ -511,17 +546,66 @@ components:
         type: string
       description: The output ID
   
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/JsonErrorBody'
+
 
   securitySchemes:
-    name:
+    bearerAuth: # arbitrary name for the security scheme
       type: http
       scheme: bearer
-      bearerFormat: JWTpaths
+      bearerFormat: JWT
 
   
 paths:
+  /login:
+    post:
+      tags:
+        - auth
+      description: 'Authentication request'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: 'Authentication succeeded'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - idToken
+                  - user
+                properties:
+                  idToken:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+                  expiresIn:
+                    type: number
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+                  
   /atp45/run/forecast:
     post:
+      tags:
+        - atp45
       description: 'Run ATP45 with forecast wind data'
       requestBody:
         required: true
@@ -539,6 +623,8 @@ paths:
 
   /atp45/run/wind:
     post:
+      tags:
+        - atp45
       description: 'Run ATP45 with request wind data'
       requestBody:
         required: true
@@ -556,6 +642,8 @@ paths:
           
   /forecast/available:
     get:
+      tags:
+        - atp45
       description: 'Return the last forecast datetimes available at ECMWF'
       responses:
         '200':
@@ -567,6 +655,8 @@ paths:
 
   /flexpart/input:
     post:
+      tags:
+        - flexpart
       description: 'Retrieve the meteorological data needed for flexpart'
       parameters:
         - name: retrievalType
@@ -596,6 +686,8 @@ paths:
 
   /flexpart/inputs:
     get:
+      tags:
+        - flexpart
       description: 'Return all the Flexpart inputs available (default finished)'
       parameters:
         - in: query
@@ -614,6 +706,8 @@ paths:
                   $ref: '#/components/schemas/FlexpartInput'
   /flexpart/run:
     post:
+      tags:
+        - flexpart
       description: 'Run flexpart'
       parameters:
         - name: runType
@@ -652,6 +746,8 @@ paths:
 
   /flexpart/runs:
     get:
+      tags:
+        - flexpart
       description: 'Return all the Flexpart runs (default finished)'
       parameters:
         - in: query
@@ -673,6 +769,8 @@ paths:
 
   /flexpart/runs/{runId}:
     get:
+      tags:
+        - flexpart
       parameters:
         - $ref: '#/components/parameters/runIdParam'
       responses:
@@ -685,6 +783,8 @@ paths:
 
   /flexpart/runs/{runId}/outputs:
     get:
+      tags:
+        - flexpart
       description: 'Return the outputs of the Flexpart run `runId`'
       parameters:
         - $ref: '#/components/parameters/runIdParam'
@@ -700,6 +800,8 @@ paths:
 
   /flexpart/outputs/{outputId}:
     get:
+      tags:
+        - flexpart
       parameters:
         - $ref: '#/components/parameters/outputIdParam'
       responses:
@@ -712,6 +814,8 @@ paths:
 
   /flexpart/outputs/{outputId}/layers:
     get:
+      tags:
+        - flexpart
       description: 'Return the layers of the Flexpart output `outputId`'
       parameters:
         - $ref: '#/components/parameters/outputIdParam'
@@ -734,6 +838,8 @@ paths:
 
   /flexpart/outputs/{outputId}/dimensions:
     get:
+      tags:
+        - flexpart
       description: 'Return the dimensions layers of the Flexpart output `outputId` with their values'
       parameters:
         - $ref: '#/components/parameters/outputIdParam'
@@ -759,6 +865,8 @@ paths:
 
   /flexpart/outputs/{outputId}/slice:
     post:
+      tags:
+        - flexpart
       description: 'Return a slice of the `output` according to some dimensions.'
       parameters:
         - in: query
@@ -803,6 +911,8 @@ paths:
 
   /atp45/containers:
     get:
+      tags:
+        - atp45
       responses:
         '200':
           description: OK
@@ -815,6 +925,8 @@ paths:
 
   /atp45/procedures:
     get:
+      tags:
+        - atp45
       responses:
         '200':
           description: OK
@@ -827,6 +939,8 @@ paths:
 
   /atp45/incidents:
     get:
+      tags:
+        - atp45
       responses:
         '200':
           description: OK
