@@ -10,7 +10,7 @@ servers:
 - url: '{protocol}://localhost:8000/api'
   variables:
     protocol:
-      default: https
+      default: http
       enum:
       - http
       - https
