@@ -137,8 +137,8 @@ export class FlexpartService {
 
   getSlice(outputId: string, layerName: string, dimensions: Object) {
     return this.apiService.flexpartOutputsOutputIdSlicePost(
-      outputId,
       layerName,
+      outputId,
       dimensions,
       true,
       true,
