@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Action, createSelector, Selector, State, StateContext } from '@ngxs/store';
 import { MapPlot, PlotType } from 'src/app/core/models/map-plot';
 import produce from "immer"
-import { Atp45Result, GeoJsonSliceResponse } from '../api/models';
+import { Atp45Result, GeoJsonSliceResponse } from 'src/app/core/api/v1';
 import { DRAFTABLE } from 'immer/dist/internal';
 
 export namespace MapPlotAction {

@@ -1,4 +1,4 @@
-import { GeoPoint } from 'src/app/core/api/models';
+import { GeoPoint } from 'src/app/core/api/v1';
 import { MapPlot } from 'src/app/core/models/map-plot';
 import { EventEmitter, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';

@@ -1,7 +1,7 @@
 import { FlexpartService } from 'src/app/flexpart/flexpart.service';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { FlexpartOutput } from 'src/app/core/api/models';
+import { FlexpartOutput } from 'src/app/core/api/v1';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 

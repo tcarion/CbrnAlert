@@ -1,0 +1,19 @@
+{
+  "$schema": "./node_modules/@openapitools/openapi-generator-cli/config.schema.json",
+  "spaces": 2,
+  "generator-cli": {
+    "version": "6.2.1",
+    "generators": {
+      "v1": {
+        "generatorName": "typescript-angular",
+        "output": "src/app/core/api/v1",
+        "glob": "../backend/api_docs.yaml",
+        "additionalProperties": {
+          "npmName": "cbrn-spa",
+          "serviceSuffix": "ApiService",
+          "serviceFileSuffix": "-api.service"
+        }
+      }
+    }
+  }
+}

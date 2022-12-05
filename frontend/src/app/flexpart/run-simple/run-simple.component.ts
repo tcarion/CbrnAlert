@@ -3,7 +3,7 @@ import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@ang
 import { NgFormsManager } from '@ngneat/forms-manager';
 import * as dayjs from 'dayjs';
 import { Observable, Subscription } from 'rxjs';
-import { FlexpartInput } from 'src/app/core/api/models';
+import { FlexpartInput } from 'src/app/core/api/v1';
 import { NiceInput } from 'src/app/flexpart/models/nice-input';
 import { FlexpartService } from '../flexpart.service';
 @Component({

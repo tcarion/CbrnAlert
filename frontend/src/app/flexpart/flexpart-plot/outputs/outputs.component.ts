@@ -1,7 +1,7 @@
 import { ActivatedRoute, ActivatedRouteSnapshot, Router } from '@angular/router';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FlexpartService } from 'src/app/flexpart/flexpart.service';
-import { FlexpartOutput } from 'src/app/core/api/models';
+import { FlexpartOutput } from 'src/app/core/api/v1';
 import { Observable, of } from 'rxjs';
 
 @Component({

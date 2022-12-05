@@ -1,4 +1,4 @@
-import { ColorbarData } from './../../../core/api/models/colorbar-data';
+import { ColorbarData } from 'src/app/core/api/v1'
 import { Component, OnInit, ChangeDetectionStrategy, Input } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';

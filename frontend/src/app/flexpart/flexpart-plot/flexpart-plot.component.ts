@@ -20,7 +20,7 @@ import {
   FlexpartRunAction,
   FlexpartState,
 } from 'src/app/core/state/flexpart.state';
-import { FlexpartRun } from 'src/app/core/api/models';
+import { FlexpartRun } from 'src/app/core/api/v1';
 
 @Component({
   selector: 'app-flexpart-plot',

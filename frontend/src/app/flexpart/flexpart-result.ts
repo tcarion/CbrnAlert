@@ -11,12 +11,12 @@
 //     dataDirname: string,
 //     options?: any,
 //     description?: {[key:string]: string },
-//     variables: string[], 
+//     variables: string[],
 //     variables2d : any,
 //     globAttr: string[],
 // }
 
-import { FlexpartOutput } from "src/app/core/api/models";
+import { FlexpartOutput } from "src/app/core/api/v1";
 
 
 export interface FlexpartResult {
@@ -24,4 +24,3 @@ export interface FlexpartResult {
     options: string,
     outputs?: FlexpartOutput[],
 }
-    

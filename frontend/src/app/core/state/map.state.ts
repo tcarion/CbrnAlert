@@ -5,7 +5,7 @@ import { Injectable } from '@angular/core';
 import { Action, createSelector, Selector, State, StateContext } from '@ngxs/store';
 import produce from "immer"
 import { MapArea } from 'src/app/core/models/map-area';
-import { GeoPoint } from 'src/app/core/api/models';
+import { GeoPoint } from 'src/app/core/api/v1';
 
 export namespace MapAction {
     export class ChangeArea {

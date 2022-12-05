@@ -3,10 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { map, tap, mapTo, shareReplay } from 'rxjs/operators';
-import { User } from '../models/user';
 
 import * as dayjs from 'dayjs';
-import { environment } from 'src/environments/environment';
+import { AuthApiService, User } from '../api/v1';
 
 interface LoginRespone {
     idToken: string,
@@ -24,7 +23,8 @@ export class AuthenticationService {
 
     constructor(
         private http: HttpClient,
-        private router: Router
+        private router: Router,
+        private AuthApiService: AuthApiService,
     ) {
         const user = localStorage.getItem('currentUser') || '{}';
         this.currentUserSubject = new BehaviorSubject<User>(JSON.parse(user));
@@ -36,26 +36,25 @@ export class AuthenticationService {
     }
 
     login(email: string, password: string) {
-        return this.http
-            .post<LoginRespone>(`${environment.rootUrl}/login`, {
-                email,
-                password,
-            })
-            .pipe(
-                tap((res) => {
-                    this.currentUserSubject.next(res.user)
-                    this.setSession(res);
-                }),
-                shareReplay()
-            );
-        // this is just the HTTP call,
-        // we still need to handle the reception of the token;
+        let loginBody = {
+          email,
+          password
+        }
+        return this.AuthApiService.loginPost(loginBody)
+          .pipe(
+              tap((res) => {
+                this.currentUserSubject.next(res.user)
+                this.setSession(res.idToken, res.user, res.expiresIn);
+            }),
+          shareReplay()
+          )
+
     }
 
-    private setSession(authResult: LoginRespone) {
-        const expiresAt = dayjs().add(authResult.expiresIn, 'second');
-        localStorage.setItem('id_token', authResult.idToken);
-        localStorage.setItem('currentUser', JSON.stringify(authResult.user));
+    private setSession(idToken: string, user: User, expiresIn: number | undefined = undefined) {
+        const expiresAt = expiresIn !== undefined && dayjs().add(expiresIn, 'second');
+        localStorage.setItem('id_token', idToken);
+        localStorage.setItem('currentUser', JSON.stringify(user));
         localStorage.setItem('expires_at', JSON.stringify(expiresAt.valueOf()));
     }
 

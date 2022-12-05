@@ -1,10 +1,10 @@
-import { Atp45Result } from './../api/models/atp-45-result';
-import { GeoJsonSliceResponse } from './../api/models/geo-json-slice-response';
+import { Atp45Result } from 'src/app/core/api/v1';
+import { GeoJsonSliceResponse } from 'src/app/core/api/v1';
 import { Injectable } from '@angular/core';
 import { MapPlot, PlotType } from '../models/map-plot';
 import { MapService } from './map.service';
 import { Feature, FeatureCollection } from 'geojson';
-import { ColorbarData } from '../api/models';
+import { ColorbarData } from 'src/app/core/api/v1';
 import { circle, circleMarker, FeatureGroup, geoJSON, LayerGroup } from 'leaflet';
 
 const POINT_MARKER_OPTIONS = {

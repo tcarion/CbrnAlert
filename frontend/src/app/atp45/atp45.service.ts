@@ -10,7 +10,7 @@ import { FeatureCollection } from 'geojson';
 import { MapPlotsService } from 'src/app/core/services/map-plots.service';
 import { NotificationService } from '../core/services/notification.service';
 import { WebsocketService } from '../core/services/websocket.service';
-import { WindAtp45Input } from '../core/api/models';
+import { WindAtp45Input } from 'src/app/core/api/v1';
 
 @Injectable({
     providedIn: 'root',

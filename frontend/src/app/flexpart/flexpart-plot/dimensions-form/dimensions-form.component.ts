@@ -1,5 +1,5 @@
 import { MapPlotAction } from 'src/app/core/state/map-plot.state';
-import { GeoJsonSliceResponse } from './../../../core/api/models/geo-json-slice-response';
+import { GeoJsonSliceResponse } from 'src/app/core/api/v1'
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';

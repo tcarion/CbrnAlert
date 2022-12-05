@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { Feature, FeatureCollection } from 'geojson';
 import { FeatureGroup, Layer, LayerGroup } from 'leaflet';
-import { ColorbarData } from 'src/app/core/api/models';
+import { ColorbarData } from 'src/app/core/api/v1';
 import { MapPlot } from 'src/app/core/models/map-plot';
 import { MapPlotsService } from 'src/app/core/services/map-plots.service';
 import { MapPlotState, MapPlotAction } from 'src/app/core/state/map-plot.state';

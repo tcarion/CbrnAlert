@@ -1,5 +1,5 @@
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { ForecastAvailableSteps } from './../../../core/api/models/forecast-available-steps';
+import { ForecastAvailableSteps } from 'src/app/core/api/v1'
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 
 @Component({

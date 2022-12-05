@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, Router, RouterStateSnapshot } from '@angular/router';
 import { catchError } from 'rxjs/operators';
 import { FlexpartService } from 'src/app/flexpart/flexpart.service';
-import { FlexpartOutput } from 'src/app/core/api/models';
+import { FlexpartOutput } from 'src/app/core/api/v1';
 
 @Injectable({
     providedIn: 'root'

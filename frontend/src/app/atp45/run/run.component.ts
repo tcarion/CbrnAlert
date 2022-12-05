@@ -1,25 +1,17 @@
-import { Atp45Result } from './../../core/api/models/atp-45-result';
-import { WindAtp45Input } from './../../core/api/models/wind-atp-45-input';
 import { Observable, Subject, BehaviorSubject, of } from 'rxjs';
 import { Store } from '@ngxs/store';
 import { Component, OnInit } from '@angular/core';
 // import { FormGroup } from '@angular/forms';
-import { ApiService } from 'src/app/core/api/services';
 import { FormService } from 'src/app/core/services/form.service';
-import { FormItemBase } from 'src/app/shared/form/form-item-base';
-import { SelectFormItem } from 'src/app/shared/form/form-item-select';
-import { FormItems } from 'src/app/shared/form/form-items';
 import { ForecastStartAction } from 'src/app/core/state/atp45.state';
-import { ControlsOf, FormArray, FormControl, FormGroup } from '@ngneat/reactive-forms';
-import { ForecastAtp45Input, GeoPoint, IncidentType } from 'src/app/core/api/models';
+import { FormControl, FormGroup } from '@ngneat/reactive-forms';
 import { tap, map, take } from 'rxjs/operators';
 import { Validators } from '@angular/forms';
 import { AppForms } from '../formtypes/atp45-input';
 import { NgFormsManager } from '@ngneat/forms-manager';
-import { ProcedureType } from 'src/app/core/api/models/procedure-type';
-import { CbrnContainer } from 'src/app/core/api/models/cbrn-container';
 import { MapPlotAction } from 'src/app/core/state/map-plot.state';
 import { MatButtonToggleChange } from '@angular/material/button-toggle';
+import { Atp45ApiService, CbrnContainer, GeoPoint, IncidentType, ProcedureType, WindAtp45Input } from 'src/app/core/api/v1';
 
 interface Atp45RunForm {
   locations: GeoPoint[]
@@ -65,7 +57,7 @@ export class RunComponent implements OnInit {
   constructor(
     public formService: FormService,
     private formsManager: NgFormsManager<AppForms>,
-    public apiService: ApiService,
+    public apiService: Atp45ApiService,
     public store: Store
   ) {
     // this.runForm = new FormGroup({})
@@ -129,7 +121,7 @@ export class RunComponent implements OnInit {
     // }
     // let windinput = formVals
     console.log("Form sent from ATP45 run: %o", formVals)
-    request = this.apiService.atp45RunWindPost({ body: formVals as WindAtp45Input })
+    request = this.apiService.atp45RunWindPost(formVals as WindAtp45Input)
     request.subscribe(res => {
       this.store.dispatch(new MapPlotAction.Add(res, 'atp45'))
     })

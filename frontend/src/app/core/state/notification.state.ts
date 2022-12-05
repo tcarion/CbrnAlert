@@ -1,10 +1,6 @@
-import { FlexpartRun } from './../api/models/flexpart-run';
-import { MapPlotsService } from '../services/map-plots.service';
 import { Injectable } from "@angular/core";
 import { Action, Selector, State, StateContext } from "@ngxs/store";
-import { FlexpartInput } from 'src/app/flexpart/flexpart-input';
 import { MapService } from 'src/app/core/services/map.service';
-import { FlexpartOutput } from 'src/app/core/api/models';
 import { Notif, NotifStatus, NotifType } from '../models/notif';
 import produce from 'immer';
 

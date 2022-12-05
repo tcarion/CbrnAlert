@@ -2,7 +2,7 @@ import { Feature, FeatureCollection } from 'geojson';
 import * as L from 'leaflet';
 import 'leaflet-draw';
 import 'leaflet.heat';
-import { ColorbarData } from '../api/models';
+import { ColorbarData } from 'src/app/core/api/v1';
 import { MapPlot } from './map-plot';
 
 const iconRetinaUrl = 'assets/marker-icon-2x.png';

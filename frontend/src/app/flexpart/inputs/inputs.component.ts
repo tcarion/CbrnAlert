@@ -2,7 +2,7 @@ import { MapAction } from 'src/app/core/state/map.state';
 import { Component, OnInit, ChangeDetectionStrategy, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { Store } from '@ngxs/store';
 import { Observable } from 'rxjs';
-import { FlexpartInput } from 'src/app/core/api/models/flexpart-input';
+import { FlexpartInput } from 'src/app/core/api/v1'
 import { FlexpartService } from '../flexpart.service';
 
 @Component({

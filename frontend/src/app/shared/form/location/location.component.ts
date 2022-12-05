@@ -4,7 +4,7 @@ import { Select, Store } from '@ngxs/store';
 import { Component, OnDestroy } from '@angular/core';
 import { first, skip } from 'rxjs/operators';
 import { MapState, MapAction } from 'src/app/core/state/map.state';
-import { GeoPoint } from 'src/app/core/api/models';
+import { GeoPoint } from 'src/app/core/api/v1';
 import { ControlsOf, ControlValueAccessor, FormControl, FormGroup } from '@ngneat/reactive-forms';
 
 // interface Locations {

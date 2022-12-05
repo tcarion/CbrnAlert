@@ -10,7 +10,7 @@ servers:
         enum:
           - http
           - https
-        default: https
+        default: http
 externalDocs:
   url: /docs
   description: Find more info here
@@ -232,6 +232,9 @@ components:
       # $ref: 'https://api.swaggerhub.com/apis/OlivierMartineau/GeoJSON/1.0.0#/components/schemas/Polygon'
         - $ref: 'https://api.swaggerhub.com/apis/OlivierMartineau/GeoJSON/1.0.0#/components/schemas/Feature'
         - type: object
+          required:
+            - properties
+            - geometry
           properties:
             'properties':
               type: object
@@ -462,6 +465,8 @@ components:
           allOf:
             - $ref: 'https://api.swaggerhub.com/apis/OlivierMartineau/GeoJSON/1.0.0#/components/schemas/FeatureCollection'
             - type: object
+              required:
+                - features
               properties:
                 'features': 
                   type: array
@@ -492,6 +497,9 @@ components:
 
     GeoCell:
       type: object
+      required:
+        - properties
+        - geometry
       allOf:
         - $ref: 'https://api.swaggerhub.com/apis/OlivierMartineau/GeoJSON/1.0.0#/components/schemas/Feature'
         - type: object
@@ -500,6 +508,8 @@ components:
               $ref: https://api.swaggerhub.com/apis/OlivierMartineau/GeoJSON/1.0.0#/components/schemas/Polygon
             'properties':
               type: object
+              required: 
+                - val
               properties:
                 'val': 
                   type: number
@@ -563,7 +573,7 @@ paths:
   /login:
     post:
       tags:
-        - auth
+        - Auth
       description: 'Authentication request'
       requestBody:
         required: true
@@ -602,7 +612,7 @@ paths:
   /atp45/run/forecast:
     post:
       tags:
-        - atp45
+        - Atp45
       description: 'Run ATP45 with forecast wind data'
       requestBody:
         required: true
@@ -621,7 +631,7 @@ paths:
   /atp45/run/wind:
     post:
       tags:
-        - atp45
+        - Atp45
       description: 'Run ATP45 with request wind data'
       requestBody:
         required: true
@@ -640,7 +650,7 @@ paths:
   /forecast/available:
     get:
       tags:
-        - atp45
+        - Atp45
       description: 'Return the last forecast datetimes available at ECMWF'
       responses:
         '200':
@@ -653,7 +663,7 @@ paths:
   /flexpart/input:
     post:
       tags:
-        - flexpart
+        - Flexpart
       description: 'Retrieve the meteorological data needed for flexpart'
       parameters:
         - name: retrievalType
@@ -684,7 +694,7 @@ paths:
   /flexpart/inputs:
     get:
       tags:
-        - flexpart
+        - Flexpart
       description: 'Return all the Flexpart inputs available (default finished)'
       parameters:
         - in: query
@@ -704,7 +714,7 @@ paths:
   /flexpart/run:
     post:
       tags:
-        - flexpart
+        - Flexpart
       description: 'Run flexpart'
       parameters:
         - name: runType
@@ -744,7 +754,7 @@ paths:
   /flexpart/runs:
     get:
       tags:
-        - flexpart
+        - Flexpart
       description: 'Return all the Flexpart runs (default finished)'
       parameters:
         - in: query
@@ -767,7 +777,7 @@ paths:
   /flexpart/runs/{runId}:
     get:
       tags:
-        - flexpart
+        - Flexpart
       parameters:
         - $ref: '#/components/parameters/runIdParam'
       responses:
@@ -781,7 +791,7 @@ paths:
   /flexpart/runs/{runId}/outputs:
     get:
       tags:
-        - flexpart
+        - Flexpart
       description: 'Return the outputs of the Flexpart run `runId`'
       parameters:
         - $ref: '#/components/parameters/runIdParam'
@@ -798,7 +808,7 @@ paths:
   /flexpart/outputs/{outputId}:
     get:
       tags:
-        - flexpart
+        - Flexpart
       parameters:
         - $ref: '#/components/parameters/outputIdParam'
       responses:
@@ -812,7 +822,7 @@ paths:
   /flexpart/outputs/{outputId}/layers:
     get:
       tags:
-        - flexpart
+        - Flexpart
       description: 'Return the layers of the Flexpart output `outputId`'
       parameters:
         - $ref: '#/components/parameters/outputIdParam'
@@ -836,7 +846,7 @@ paths:
   /flexpart/outputs/{outputId}/dimensions:
     get:
       tags:
-        - flexpart
+        - Flexpart
       description: 'Return the dimensions layers of the Flexpart output `outputId` with their values'
       parameters:
         - $ref: '#/components/parameters/outputIdParam'
@@ -863,7 +873,7 @@ paths:
   /flexpart/outputs/{outputId}/slice:
     post:
       tags:
-        - flexpart
+        - Flexpart
       description: 'Return a slice of the `output` according to some dimensions.'
       parameters:
         - in: query
@@ -909,7 +919,7 @@ paths:
   /atp45/containers:
     get:
       tags:
-        - atp45
+        - Atp45
       responses:
         '200':
           description: OK
@@ -923,7 +933,7 @@ paths:
   /atp45/procedures:
     get:
       tags:
-        - atp45
+        - Atp45
       responses:
         '200':
           description: OK
@@ -937,7 +947,7 @@ paths:
   /atp45/incidents:
     get:
       tags:
-        - atp45
+        - Atp45
       responses:
         '200':
           description: OK

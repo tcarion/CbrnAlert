@@ -1,5 +1,5 @@
-import { FlexpartRetrieveSimple } from './../core/api/models/flexpart-retrieve-simple';
-import { ApiService } from 'src/app/core/api/services';
+import { FlexpartRetrieveSimple } from 'src/app/core/api/v1';
+import { FlexpartApiService } from 'src/app/core/api/v1';
 import { BehaviorSubject, Observable, of, Subject, throwError } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { FlexpartResult } from 'src/app/flexpart/flexpart-result';
@@ -11,12 +11,12 @@ import { WebsocketService } from '../core/services/websocket.service';
 import { MapService } from '../core/services/map.service';
 import { MapPlotsService } from 'src/app/core/services/map-plots.service';
 import { AuthenticationService } from '../core/services/authentication.service';
-import { FlexpartOptionsSimple, FlexpartOutput, FlexpartRun } from 'src/app/core/api/models';
+import { FlexpartOptionsSimple, FlexpartOutput, FlexpartRun } from 'src/app/core/api/v1';
 import { QuestionBase } from '../shared/form/question-base';
 import { DropdownQuestion } from '../shared/form/dropdown-question';
 import { Store } from '@ngxs/store';
 import { NotifAction } from '../core/state/notification.state';
-import { FlexpartInput } from '../core/api/models/flexpart-input';
+import { FlexpartInput } from 'src/app/core/api/v1';
 import * as dayjs from 'dayjs';
 import { MapArea } from 'src/app/core/models/map-area';
 import { NiceInput } from 'src/app/flexpart/models/nice-input';
@@ -38,7 +38,7 @@ export class FlexpartService {
   // plotsSubject = new Subject<FlexpartPlot>();
 
   constructor(
-    private apiService: ApiService,
+    private apiService: FlexpartApiService,
   ) { }
 
   // getInputs(): Observable<FlexpartInput[]> {
@@ -60,10 +60,7 @@ export class FlexpartService {
   }
 
   retrieveSimple(retrieval:FlexpartRetrieveSimple) {
-    return this.apiService.flexpartInputPost({
-      retrievalType: 'simple',
-      body: retrieval
-    })
+    return this.apiService.flexpartInputPost(retrieval, "simple")
   }
 
   getInputStart(input:FlexpartInput) {
@@ -111,11 +108,7 @@ export class FlexpartService {
   }
 
   postRunSimple(body: FlexpartOptionsSimple, inputId: string) {
-    return this.apiService.flexpartRunPost({
-      runType: 'simple',
-      inputId,
-      body,
-    })
+    return this.apiService.flexpartRunPost(inputId, body, 'simple')
   }
 
   getRuns(): Observable<FlexpartRun[]> {
@@ -123,33 +116,33 @@ export class FlexpartService {
   }
 
   getRun(runId: string): Observable<FlexpartRun> {
-    return this.apiService.flexpartRunsRunIdGet({ runId })
+    return this.apiService.flexpartRunsRunIdGet(runId)
   }
 
   getOutputs(runId: string): Observable<FlexpartOutput[]> {
-    return this.apiService.flexpartRunsRunIdOutputsGet({ runId })
+    return this.apiService.flexpartRunsRunIdOutputsGet(runId)
   }
 
   getOutput(outputId: string): Observable<FlexpartOutput> {
-    return this.apiService.flexpartOutputsOutputIdGet({ outputId })
+    return this.apiService.flexpartOutputsOutputIdGet(outputId)
   }
 
   getSpatialLayers(outputId: string): Observable<string[]> {
-    return this.apiService.flexpartOutputsOutputIdLayersGet({ outputId, spatial: true })
+    return this.apiService.flexpartOutputsOutputIdLayersGet(outputId, true)
   }
 
   getZDims(outputId: string, layer: string): Observable<Object> {
-    return this.apiService.flexpartOutputsOutputIdDimensionsGet({ outputId, layer, horizontal: false })
+    return this.apiService.flexpartOutputsOutputIdDimensionsGet(outputId, layer, false )
   }
 
   getSlice(outputId: string, layerName: string, dimensions: Object) {
-    return this.apiService.flexpartOutputsOutputIdSlicePost({
+    return this.apiService.flexpartOutputsOutputIdSlicePost(
       outputId,
-      layer: layerName,
-      geojson: true,
-      legend: true,
-      body: dimensions
-    })
+      layerName,
+      dimensions,
+      true,
+      true,
+    )
   }
 
   getDimsQuestions(outputId: string, layer: string) {
