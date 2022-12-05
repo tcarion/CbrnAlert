@@ -1,5 +1,8 @@
 /* tslint:disable */
 /* eslint-disable */
-import { GeoJsonSliceResponse } from './geo-json-slice-response';
-import { RawSliceResponse } from './raw-slice-response';
-export type InlineResponse200 = (RawSliceResponse | GeoJsonSliceResponse);
+import { User } from './user';
+export interface InlineResponse200 {
+  expiresIn?: number;
+  idToken: string;
+  user: User;
+}

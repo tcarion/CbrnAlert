@@ -17,9 +17,9 @@ import { NgxsReduxDevtoolsPluginModule } from '@ngxs/devtools-plugin';
 import { environment } from 'src/environments/environment';
 import { NgxsLoggerPluginModule } from '@ngxs/logger-plugin';
 import { MapPlotState } from './state/map-plot.state';
-import { ApiService } from './api/services/api.service';
 import { Atp45State } from 'src/app/core/state/atp45.state';
 import { NotifState } from './state/notification.state';
+import { ApiModule } from './api/api.module';
 
 @NgModule({
   declarations: [],
@@ -41,7 +41,7 @@ import { NotifState } from './state/notification.state';
     FormService,
     WebsocketService,
     ApiService_old,
-    ApiService,
+    ApiModule,
     NotificationService,
     MapPlotsService,
     AuthenticationService,

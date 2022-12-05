@@ -10,5 +10,4 @@ export interface BasicAtp45Input {
    */
   locations: Array<GeoPoint>;
   procedureTypeId: string;
-  stabilityClass: string;
 }

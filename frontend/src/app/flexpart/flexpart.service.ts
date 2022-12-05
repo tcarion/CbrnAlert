@@ -1,25 +1,15 @@
 import { FlexpartRetrieveSimple } from './../core/api/models/flexpart-retrieve-simple';
-import { ApiService } from 'src/app/core/api/services';
 import { BehaviorSubject, Observable, of, Subject, throwError } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { FlexpartResult } from 'src/app/flexpart/flexpart-result';
-import { ApiService_old } from '../core/services/api.service';
-import { FlexpartPlotData } from './flexpart-plot-data';
-import { catchError, filter, map, tap, withLatestFrom } from 'rxjs/operators';
-import { NotificationService } from '../core/services/notification.service';
-import { WebsocketService } from '../core/services/websocket.service';
-import { MapService } from '../core/services/map.service';
-import { MapPlotsService } from 'src/app/core/services/map-plots.service';
-import { AuthenticationService } from '../core/services/authentication.service';
 import { FlexpartOptionsSimple, FlexpartOutput, FlexpartRun } from 'src/app/core/api/models';
 import { QuestionBase } from '../shared/form/question-base';
 import { DropdownQuestion } from '../shared/form/dropdown-question';
-import { Store } from '@ngxs/store';
-import { NotifAction } from '../core/state/notification.state';
 import { FlexpartInput } from '../core/api/models/flexpart-input';
 import * as dayjs from 'dayjs';
 import { MapArea } from 'src/app/core/models/map-area';
 import { NiceInput } from 'src/app/flexpart/models/nice-input';
+import { FlexpartApiService } from 'src/app/core/api/services';
 
 @Injectable({
   providedIn: 'root'
@@ -38,7 +28,7 @@ export class FlexpartService {
   // plotsSubject = new Subject<FlexpartPlot>();
 
   constructor(
-    private apiService: ApiService,
+    private apiService: FlexpartApiService,
   ) { }
 
   // getInputs(): Observable<FlexpartInput[]> {

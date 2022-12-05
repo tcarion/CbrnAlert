@@ -10,5 +10,5 @@ export interface ColorbarData {
   /**
    * Values for the bounding intervals
    */
-  ticks?: Array<number>;
+  ticks: Array<number>;
 }

@@ -4,7 +4,9 @@ import { NgModule, ModuleWithProviders, SkipSelf, Optional } from '@angular/core
 import { HttpClient } from '@angular/common/http';
 import { ApiConfiguration, ApiConfigurationParams } from './api-configuration';
 
-import { ApiService } from './services/api.service';
+import { AuthApiService } from './services/auth-api.service';
+import { Atp45ApiService } from './services/atp-45-api.service';
+import { FlexpartApiService } from './services/flexpart-api.service';
 
 /**
  * Module that provides all services and configuration.
@@ -14,7 +16,9 @@ import { ApiService } from './services/api.service';
   exports: [],
   declarations: [],
   providers: [
-    ApiService,
+    AuthApiService,
+    Atp45ApiService,
+    FlexpartApiService,
     ApiConfiguration
   ],
 })
