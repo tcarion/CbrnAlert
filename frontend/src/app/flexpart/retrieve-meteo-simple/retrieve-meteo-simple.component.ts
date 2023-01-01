@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import dayjs from 'dayjs';
 import { FlexpartService } from '../flexpart.service';
 
@@ -30,12 +30,12 @@ const timeSteps = [{
 })
 export class RetrieveMeteoSimpleComponent implements OnInit {
 
-  form = new FormGroup({
-    start: new FormControl(dayjs().startOf('hour').toDate(), Validators.required),
-    end: new FormControl(dayjs().startOf('hour').toDate(), Validators.required),
-    area: new FormControl('', Validators.required),
-    timeStep: new FormControl(timeSteps[0].key, Validators.required),
-    gridres: new FormControl(gridResolutions[0], Validators.required),
+  form = new UntypedFormGroup({
+    start: new UntypedFormControl(dayjs().startOf('hour').toDate(), Validators.required),
+    end: new UntypedFormControl(dayjs().startOf('hour').toDate(), Validators.required),
+    area: new UntypedFormControl('', Validators.required),
+    timeStep: new UntypedFormControl(timeSteps[0].key, Validators.required),
+    gridres: new UntypedFormControl(gridResolutions[0], Validators.required),
   })
 
   steps = {hour: 1, minute: 0, second: 0};
@@ -50,7 +50,7 @@ export class RetrieveMeteoSimpleComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  submit(form: FormGroup) {
+  submit(form: UntypedFormGroup) {
     console.log(form)
     this.flexpartService.retrieveSimple(form.value).subscribe(res => {
       // TODO: add the result input to the app state (flexpartService.fpInputs$ ?)

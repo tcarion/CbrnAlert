@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectionStrategy, Input } from '@angular/core';
 import {
   ControlValueAccessor,
-  FormControl,
+  UntypedFormControl,
   FormGroup,
   NG_VALUE_ACCESSOR,
 } from '@angular/forms';
@@ -29,7 +29,7 @@ export class DatetimePickerComponent implements ControlValueAccessor {
   @Input() min?: Date;
   @Input() max?: Date;
   @Input() steps = {hour:1, minute:1, second:1}
-  control = new FormControl(new Date());
+  control = new UntypedFormControl(new Date());
 
   date: Date;
 

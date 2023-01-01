@@ -1,7 +1,7 @@
 import { MapPlotAction } from 'src/app/core/state/map-plot.state';
 import { GeoJsonSliceResponse } from './../../../core/api/models/geo-json-slice-response';
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
-import { FormGroup, FormControl } from '@angular/forms';
+import { UntypedFormGroup, FormControl } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { DropdownQuestion } from 'src/app/shared/form/dropdown-question';
@@ -21,18 +21,18 @@ export class DimensionsFormComponent implements OnChanges {
   @Input() outputId: string
   @Input() layerName: string
 
-  formGroup: FormGroup;
+  formGroup: UntypedFormGroup;
 
   questions$: Observable<QuestionBase<any>[]>;
 
-  dimForm: FormGroup;
+  dimForm: UntypedFormGroup;
 
   constructor(
     private route: ActivatedRoute,
     private flexpartService: FlexpartService,
     private store: Store
   ) {
-    this.formGroup = new FormGroup({});
+    this.formGroup = new UntypedFormGroup({});
     // this.questions$ = this.route.paramMap.pipe(
     //     switchMap(params => {
     //         const outputId = params.get('outputId');
@@ -47,7 +47,7 @@ export class DimensionsFormComponent implements OnChanges {
     const newOutId = changes["outputId"] ? changes["outputId"].currentValue : this.outputId;
     const newLayer = changes["layerName"] ? changes["layerName"].currentValue : this.layerName;
     if (newOutId && newLayer) {
-      this.formGroup = new FormGroup({});
+      this.formGroup = new UntypedFormGroup({});
       this.questions$ = this.flexpartService.getDimsQuestions(newOutId, newLayer);
     }
   }

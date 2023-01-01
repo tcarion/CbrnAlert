@@ -4,7 +4,7 @@ import { NotificationService } from 'src/app/core/services/notification.service'
 import { FormService } from '../../core/services/form.service';
 import { Subscription } from 'rxjs';
 import { MapService } from 'src/app/core/services/map.service';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
 import { AbstractWsComponent } from 'src/app/abstract-classes/abstract-ws-component';
 import { FormItemBase } from 'src/app/shared/form/form-item-base';
@@ -49,7 +49,7 @@ const formItems: FormItemBase[] = [
 export class ArchiveComponent extends AbstractWsComponent implements OnInit, OnDestroy, AfterViewInit {
     formItems = new FormItems(formItems);
 
-    formGroup: FormGroup;
+    formGroup: UntypedFormGroup;
 
     mapSubscription: Subscription;
 

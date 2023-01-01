@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy, OnDestroy, forwardRef, Input } from '@angular/core';
-import { AbstractControl, ControlValueAccessor, FormControl, FormGroup, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validators } from '@angular/forms';
+import { AbstractControl, ControlValueAccessor, UntypedFormControl, UntypedFormGroup, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { FormService } from 'src/app/core/services/form.service';
 import { DropdownQuestion } from 'src/app/shared/form/dropdown-question';
@@ -25,12 +25,12 @@ import { QuestionBase } from 'src/app/shared/form/question-base';
 export class ReleaseFormComponent implements ControlValueAccessor, OnDestroy {
   @Input() dateRange: {min: Date, max: Date} = {min: new Date(1950), max: new Date(2200)};
 
-  form = new FormGroup({
-    location: new FormControl({lon: 0, lat: 0}, Validators.required),
-    height: new FormControl(1.5, Validators.required),
-    mass: new FormControl(1., Validators.required),
-    start: new FormControl(new Date(), Validators.required),
-    end: new FormControl(new Date(), Validators.required)
+  form = new UntypedFormGroup({
+    location: new UntypedFormControl({lon: 0, lat: 0}, Validators.required),
+    height: new UntypedFormControl(1.5, Validators.required),
+    mass: new UntypedFormControl(1., Validators.required),
+    start: new UntypedFormControl(new Date(), Validators.required),
+    end: new UntypedFormControl(new Date(), Validators.required)
   })
 
   touched = false;

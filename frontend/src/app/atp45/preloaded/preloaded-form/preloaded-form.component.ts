@@ -5,7 +5,7 @@ import { FormService } from 'src/app/core/services/form.service';
 import { Component, Input, OnDestroy, OnInit, ViewChild, AfterViewInit, SimpleChanges } from '@angular/core';
 import { Subscription, Subject } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { wrongLatValidator, wrongLonValidator } from 'src/app/shared/validators';
 import { Atp45Service } from 'src/app/atp45/atp45.service';
 import { FormItemBase } from 'src/app/shared/form/form-item-base';
@@ -48,7 +48,7 @@ const formItems: FormItemBase[] = [
 })
 export class PreloadedFormComponent implements OnInit, OnDestroy, OnChanges, AfterViewInit {
     formItems = new FormItems(formItems);
-    formGroup: FormGroup;
+    formGroup: UntypedFormGroup;
 
     @Input() gribData: GribData;
 

@@ -3,7 +3,7 @@ import { AroundPipe } from 'src/app/core/pipes/around.pipe';
 import { CbrnMap } from '../../core/models/cbrn-map';
 import { Subscription } from 'rxjs';
 import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
-import { FormGroup, Validators } from '@angular/forms';
+import { UntypedFormGroup, Validators } from '@angular/forms';
 import { AbstractWsComponent } from 'src/app/abstract-classes/abstract-ws-component';
 import { ApiService_old } from 'src/app/core/services/api.service';
 import { MapService } from 'src/app/core/services/map.service';
@@ -96,7 +96,7 @@ export class MetDataComponent extends AbstractWsComponent implements OnInit, OnD
 
     formItems = new FormItems(formItems);
 
-    formGroup: FormGroup;
+    formGroup: UntypedFormGroup;
 
     mapSubscription: Subscription;
 

@@ -3,7 +3,7 @@ import { NotificationService } from 'src/app/core/services/notification.service'
 import { FormService } from '../../core/services/form.service';
 import { MapService } from 'src/app/core/services/map.service';
 import { Component, OnDestroy, OnInit, AfterViewInit } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { Atp45Service } from 'src/app/atp45/atp45.service';
 import { FormItemBase } from 'src/app/shared/form/form-item-base';
 import { SelectFormItem } from 'src/app/shared/form/form-item-select';
@@ -47,7 +47,7 @@ export class RealtimeComponent implements OnInit, OnDestroy, AfterViewInit {
     // })
 
     formItems = new FormItems(formItems);
-    formGroup: FormGroup;
+    formGroup: UntypedFormGroup;
 
     // lonlatFormArray: FormArray;
     // @ViewChild('appForm') appForm: FormComponent;

@@ -1,6 +1,6 @@
 import { FormService } from 'src/app/core/services/form.service';
 import { Component, Input, OnInit } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 
 import { QuestionBase } from '../question-base';
 
@@ -12,9 +12,9 @@ import { QuestionBase } from '../question-base';
 export class DynFormComponent implements OnInit {
 
     @Input() questions: QuestionBase<string>[] | null;
-    @Input() parentForm?: FormGroup;
+    @Input() parentForm?: UntypedFormGroup;
     @Input() formName?: string
-    form!: FormGroup;
+    form!: UntypedFormGroup;
 
     constructor(private formService: FormService) { }
 

@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy, forwardRef, OnDestroy, Input } from '@angular/core';
-import { FormControl, FormGroup, NG_VALIDATORS, NG_VALUE_ACCESSOR, Validators, ControlValueAccessor, AbstractControl, ValidationErrors } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, NG_VALIDATORS, NG_VALUE_ACCESSOR, Validators, ControlValueAccessor, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { FormService } from 'src/app/core/services/form.service';
 import { DropdownQuestion } from 'src/app/shared/form/dropdown-question';
@@ -61,11 +61,11 @@ const outputTypes = [
 export class CommandFormComponent implements ControlValueAccessor, OnDestroy {
   @Input() dateRange: {min: Date, max: Date} = {min: new Date(1950), max: new Date(2200)};
 
-  form = new FormGroup({
-    start: new FormControl(new Date(), Validators.required),
-    end: new FormControl(new Date(), Validators.required),
-    timeStep: new FormControl(timeSteps[0].key, Validators.required),
-    outputType: new FormControl(outputTypes[0].key, Validators.required),
+  form = new UntypedFormGroup({
+    start: new UntypedFormControl(new Date(), Validators.required),
+    end: new UntypedFormControl(new Date(), Validators.required),
+    timeStep: new UntypedFormControl(timeSteps[0].key, Validators.required),
+    outputType: new UntypedFormControl(outputTypes[0].key, Validators.required),
     // nstep: new FormControl(0, Validators.required),
   })
 

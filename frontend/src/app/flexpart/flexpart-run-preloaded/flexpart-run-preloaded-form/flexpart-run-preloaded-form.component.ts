@@ -6,7 +6,7 @@ import { FormItem } from '../../../core/models/form-item';
 import { AroundPipe } from '../../../core/pipes/around.pipe';
 import { DatePipe } from '@angular/common';
 import { wrongLatValidator, wrongLonValidator } from 'src/app/shared/validators';
-import { Validators, FormGroup } from '@angular/forms';
+import { Validators, UntypedFormGroup } from '@angular/forms';
 import { NotificationService } from 'src/app/core/services/notification.service';
 import { WebsocketService } from 'src/app/core/services/websocket.service';
 import { FormService } from 'src/app/core/services/form.service';
@@ -132,7 +132,7 @@ export class FlexpartRunPreloadedFormComponent extends AbstractWsComponent imple
     @Input() flexpartInput: FlexpartInput;
     @Select(NotifState.notifs) notifs$: Observable<Notif[]>;
 
-    formGroup: FormGroup;
+    formGroup: UntypedFormGroup;
 
     mapSubscription: Subscription;
 

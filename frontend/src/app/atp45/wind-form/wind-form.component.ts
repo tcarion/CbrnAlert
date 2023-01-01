@@ -1,8 +1,8 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import {
   AbstractControl,
-  FormControl,
-  FormGroup,
+  UntypedFormControl,
+  UntypedFormGroup,
   ValidationErrors,
   Validators,
 } from '@angular/forms';
@@ -21,16 +21,16 @@ export class WindFormComponent implements OnInit, OnDestroy {
 
   @Input() disabled = false;
 
-  windForm = new FormGroup({
-    speed: new FormControl(8, Validators.required),
-    azimuth: new FormControl(45, Validators.required),
-    stabilityClass: new FormControl(
+  windForm = new UntypedFormGroup({
+    speed: new UntypedFormControl(8, Validators.required),
+    azimuth: new UntypedFormControl(45, Validators.required),
+    stabilityClass: new UntypedFormControl(
       this.stabilityClasses[2].id,
       Validators.required
     ),
   });
 
-  @Input() formGroup: FormGroup;
+  @Input() formGroup: UntypedFormGroup;
 
   constructor() {}
 

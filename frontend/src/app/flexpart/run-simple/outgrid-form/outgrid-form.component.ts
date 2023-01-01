@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy, OnDestroy, forwardRef } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validators, ControlValueAccessor } from '@angular/forms';
+import { AbstractControl, UntypedFormControl, UntypedFormGroup, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validators, ControlValueAccessor } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
 const gridResolutions = [
@@ -28,10 +28,10 @@ const gridResolutions = [
 })
 export class OutgridFormComponent implements ControlValueAccessor, OnDestroy {
 
-  form = new FormGroup({
-    area: new FormControl('', Validators.required),
-    gridres: new FormControl(gridResolutions[0], Validators.required),
-    heights: new FormControl('100.0', Validators.required)
+  form = new UntypedFormGroup({
+    area: new UntypedFormControl('', Validators.required),
+    gridres: new UntypedFormControl(gridResolutions[0], Validators.required),
+    heights: new UntypedFormControl('100.0', Validators.required)
   })
 
   gridResolutions = gridResolutions;

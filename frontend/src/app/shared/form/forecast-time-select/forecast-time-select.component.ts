@@ -1,4 +1,4 @@
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ForecastAvailableSteps } from './../../../core/api/models/forecast-available-steps';
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 
@@ -10,8 +10,8 @@ import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 export class ForecastTimeSelectComponent implements OnInit, OnDestroy {
 
   @Input() leadtimes: string[];
-  @Input() formGroup: FormGroup;
-  leadtime = new FormControl('', Validators.required);
+  @Input() formGroup: UntypedFormGroup;
+  leadtime = new UntypedFormControl('', Validators.required);
   constructor() { }
 
   ngOnInit(): void {

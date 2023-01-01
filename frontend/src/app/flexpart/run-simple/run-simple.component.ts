@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy, AfterViewInit, OnDestroy } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormArray, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { NgFormsManager } from '@ngneat/forms-manager';
 import * as dayjs from 'dayjs';
 import { Observable, Subscription } from 'rxjs';
@@ -27,13 +27,13 @@ export class RunSimpleComponent implements OnInit, OnDestroy {
   // https://www.dotnetsurfers.com/blog/2020/10/11/3-approaches-for-implementing-nested-forms-in-angular/
   // https://indepth.dev/posts/1055/never-again-be-confused-when-implementing-controlvalueaccessor-in-angular-forms
   // https://indepth.dev/posts/1245/angular-nested-reactive-forms-using-controlvalueaccessors-cvas
-  runForm = new FormGroup({
-    releases: new FormArray([new FormControl({lon: 4, lat: 50}, Validators.required)]),
+  runForm = new UntypedFormGroup({
+    releases: new UntypedFormArray([new UntypedFormControl({lon: 4, lat: 50}, Validators.required)]),
     // command: new FormControl('', Validators.required),
-    command: new FormControl('', Validators.required),
+    command: new UntypedFormControl('', Validators.required),
     // command: new FormGroup({}),
     // outgrid: new FormControl('', Validators.required),
-    outgrid: new FormControl('', Validators.required),
+    outgrid: new UntypedFormControl('', Validators.required),
   });
 
   readableInput: any
@@ -42,7 +42,7 @@ export class RunSimpleComponent implements OnInit, OnDestroy {
   constructor(
     public flexpartService: FlexpartService,
     public formsManager: NgFormsManager,
-    public fb: FormBuilder
+    public fb: UntypedFormBuilder
   ) { }
 
   ngOnInit(): void {
@@ -72,15 +72,15 @@ export class RunSimpleComponent implements OnInit, OnDestroy {
 
 
     this.formsManager.upsert('flexpartRunSimple', this.runForm, {
-      arrControlFactory: { releases: val => new FormControl(val) }
+      arrControlFactory: { releases: val => new UntypedFormControl(val) }
     })
   }
 
   get releases() {
-    return this.runForm.get('releases') as FormArray;
+    return this.runForm.get('releases') as UntypedFormArray;
   }
 
-  submit(form: FormGroup) {
+  submit(form: UntypedFormGroup) {
     let formVals = JSON.parse(JSON.stringify(this.runForm.value))
     formVals.outgrid.heights = (formVals.outgrid.heights as string).split(',').map( h  => { return parseFloat(h.trim()) } )
     this.flexpartService.postRunSimple(formVals, this.input!.uuid).subscribe( res => {

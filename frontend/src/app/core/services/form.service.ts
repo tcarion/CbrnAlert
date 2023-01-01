@@ -2,9 +2,9 @@ import { formatDate } from '@angular/common';
 import { FormItem } from '../models/form-item';
 import { Form } from '../models/form';
 import {
-    FormGroup,
-    FormBuilder,
-    FormControl,
+    UntypedFormGroup,
+    UntypedFormBuilder,
+    UntypedFormControl,
     Validators,
     ValidationErrors,
     AbstractControl,
@@ -28,7 +28,7 @@ export class FormService {
 
     // currentForm = { formGroup: new FormGroup({}), form: new Form([]) };
     constructor(
-        private formBuilder: FormBuilder,
+        private formBuilder: UntypedFormBuilder,
         private mapService: MapService,
     ) { }
 
@@ -54,16 +54,16 @@ export class FormService {
     //     return this.formBuilder.group(formControls);
     // }
 
-    patchMarker(formGroup: FormGroup, marker: any) {
+    patchMarker(formGroup: UntypedFormGroup, marker: any) {
         marker !== undefined && formGroup.patchValue({
             lon: `${marker.lon}`,
             lat: `${marker.lat}`,
         });
     }
 
-    lonlatValid(formGroup: FormGroup): Observable<any> {
+    lonlatValid(formGroup: UntypedFormGroup): Observable<any> {
         const lonlatControls = Object.entries(formGroup.controls).filter(e => (e[0] == 'lat' || e[0] == 'lon'))
-        const lonlatGroup = new FormGroup(Object.fromEntries(lonlatControls));
+        const lonlatGroup = new UntypedFormGroup(Object.fromEntries(lonlatControls));
         return lonlatGroup.statusChanges.pipe(
             filter(status => status === 'VALID')
         );
@@ -78,7 +78,7 @@ export class FormService {
     //     );
     // }
 
-    getLonlat(formGroup: FormGroup) {
+    getLonlat(formGroup: UntypedFormGroup) {
         const lon = formGroup.get('lon')?.value;
         const lat = formGroup.get('lat')?.value;
         return { lon, lat };
@@ -87,7 +87,7 @@ export class FormService {
     toControl(item: FormItemBase) {
         let validators = item.required ? [Validators.required] : []
         item.validators?.forEach(validator => { validators.push(validator) })
-        return new FormControl(item.value || '', validators);
+        return new UntypedFormControl(item.value || '', validators);
     }
 
     toFormGroup(items: FormItemBase[]) {
@@ -97,7 +97,7 @@ export class FormService {
             group[item.key] = this.toControl(item);
         });
 
-        return new FormGroup(group);
+        return new UntypedFormGroup(group);
     }
 
     toControl_(question: QuestionBase<any>) {
@@ -105,7 +105,7 @@ export class FormService {
       if (!value) {
           value = typeof question.value == 'number' ? 0 : ''
       }
-      let control = question.required ? new neatFormControl(value, Validators.required) : new neatFormControl(value)
+      let control = question.required ? new UntypedFormControl(value, Validators.required) : new UntypedFormControl(value)
       return {name: question.key, control}
     }
 
@@ -117,10 +117,10 @@ export class FormService {
             if (!value) {
                 value = typeof question.value == 'number' ? 0 : ''
             }
-            group[question.key] = question.required ? new neatFormControl(value, Validators.required)
-                : new neatFormControl(value);
+            group[question.key] = question.required ? new UntypedFormControl(value, Validators.required)
+                : new UntypedFormControl(value);
         });
-        return new neatFormGroup(group);
+        return new UntypedFormGroup(group);
     }
 
     arrayToOptions(array: Array<any>) {

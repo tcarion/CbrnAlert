@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { QuestionBase } from '../question-base';
 
 
@@ -9,6 +9,6 @@ import { QuestionBase } from '../question-base';
 })
 export class DynFormQuestionComponent {
   @Input() question!: QuestionBase<string>;
-  @Input() form!: FormGroup;
+  @Input() form!: UntypedFormGroup;
   get isValid() { return this.form.controls[this.question.key].valid; }
 }
