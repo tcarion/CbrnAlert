@@ -34,6 +34,7 @@
     "@ngxs/store": "^3.7.2",
     "@ungap/structured-clone": "^1.0.1",
     "dayjs": "^1.10.6",
+    "geojson": "^0.5.0",
     "immer": "^9.0.6",
     "leaflet": "^1.8.0",
     "leaflet-draw": "^1.0.4",
