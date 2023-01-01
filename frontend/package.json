@@ -28,7 +28,7 @@
     "@asymmetrik/ngx-leaflet": "^13.0.2",
     "@geoman-io/leaflet-geoman-free": "^2.13.0",
     "@ngneat/forms-manager": "^2.5.0",
-    "@ngneat/reactive-forms": "^4.1.0",
+    "@ngneat/reactive-forms": "^5.0.2",
     "@ngxs/devtools-plugin": "^3.7.2",
     "@ngxs/logger-plugin": "^3.7.2",
     "@ngxs/store": "^3.7.2",
