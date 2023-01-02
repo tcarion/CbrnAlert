@@ -33,6 +33,7 @@ route("/api/login", AuthenticationController.login, method = POST)
 
 api_routes = Dict(
     "/forecast/available" => (f=Atp45Controller.available_steps, keyargs=(method=GET,)),
+    "/atp45/tree" => (f=Atp45Controller.get_tree, keyargs=(method=GET,)),
     "/atp45/containers" => (f=Atp45Controller.get_container, keyargs=(method=GET,)),
     "/atp45/procedures" => (f=Atp45Controller.get_procedure, keyargs=(method=GET,)),
     "/atp45/incidents" => (f=Atp45Controller.get_incident, keyargs=(method=GET,)),
@@ -59,7 +60,9 @@ for (url, args) in api_routes
             global DEBUG_REQUEST = Genie.Router.request()
         end
         # would be better to do that in Genie.Router.pre_match_hooks. See GenieAuthentication which provides an example (basicauthparams)
-        Users.@authenticated!
+        # if ENV["GENIE_ENV"] !== "dev"
+            Users.@authenticated!
+        # end
         args[:f]()
     end
 end

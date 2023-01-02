@@ -309,6 +309,12 @@ end
     
 #     shape_data
 # end
+
+function get_tree()
+    json(
+        ATP45.ATP45_DICT_TREE
+    )
+end
 """
     mars_request()
 Send a mars request for archive data with the requested date, time and area
