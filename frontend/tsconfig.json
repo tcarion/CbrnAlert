@@ -15,14 +15,14 @@
     "moduleResolution": "node",
     "importHelpers": true,
     "strictPropertyInitialization": false,
-    "target": "es2020",
+    "target": "ES2022",
     "module": "es2020",
     "lib": [
       "es2019",
       "dom"
     ],
-    // see https://www.typescriptlang.org/tsconfig#allowSyntheticDefaultImports
-    "allowSyntheticDefaultImports" : true
+    "allowSyntheticDefaultImports": true,
+    "useDefineForClassFields": false
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

@@ -53,9 +53,8 @@ export const routingConfiguration: ExtraOptions = {
     // preload all modules; optionally we could
     // implement a custom preloading strategy for just some
     // of the modules (PRs welcome 😉)
-    preloadingStrategy: PreloadAllModules,
-    relativeLinkResolution: 'legacy'
-  };
+    preloadingStrategy: PreloadAllModules
+};
   
 @NgModule({
   imports: [RouterModule.forRoot(routes,routingConfiguration)],

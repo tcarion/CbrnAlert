@@ -3,7 +3,7 @@ import { MapAction } from 'src/app/core/state/map.state';
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { circle, Control, Icon, icon, latLng, Layer, Map, marker, Marker, polygon, Rectangle, tileLayer } from 'leaflet';
 import '@geoman-io/leaflet-geoman-free';
-import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
+// import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
 import { MapService } from 'src/app/core/services/map.service';
 import { Select, Store } from '@ngxs/store';
 import { Observable, of } from 'rxjs';
