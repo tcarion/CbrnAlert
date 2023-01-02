@@ -1,12 +1,12 @@
 <!-- <form fxLayout="row wrap" [formGroup]="formGroup" (ngSubmit)="onGetAtp45Prediction()">
     <span *ngFor="let formItem of formItems">
-        <mat-form-field *ngIf="formItem.type == 'input'" class="form-control" appearance="outline" floatLabel="never">
+        <mat-form-field *ngIf="formItem.type == 'input'" class="form-control" appearance="outline" >
             <mat-label> {{ formItem.label }} </mat-label>
             <input matInput [formControlName]="formItem.controlName">
             <mat-hint *ngIf="formItem.hint !== undefined">{{ formItem.hint }}</mat-hint>
             <mat-error *ngIf="formItem.controlName.invalid"> error ! </mat-error>
         </mat-form-field>
-        <mat-form-field *ngIf="formItem.type == 'select'" class="form-control" appearance="outline" floatLabel="never">
+        <mat-form-field *ngIf="formItem.type == 'select'" class="form-control" appearance="outline" >
             <mat-label> {{ formItem.label }} </mat-label>
             <select matNativeControl [formControlName]="formItem.controlName">
                 <option *ngFor="let val of formItem.value.display.steps" [ngValue]="val">{{ val.datetime | date:'YYYY-MM-dd @ HH:mm'}}</option>

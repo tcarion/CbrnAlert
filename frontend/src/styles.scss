@@ -35,14 +35,16 @@ html {
         color: rgb(133, 135, 150);
         min-height: 100%;
         margin: 0;
-
+        /* TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version.*/
         .mat-form-field-flex > .mat-form-field-infix { padding: 0.4em 0px !important;}
+        /* TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version.*/
         .mat-form-field-label-wrapper { top: -1.5em; }
-
+        /* TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version.*/
         .mat-form-field-appearance-outline.mat-form-field-can-float.mat-form-field-should-float .mat-form-field-label {
             transform: translateY(-1.1em) scale(.75);
             width: 133.33333%;
         }
+        /* TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version.*/
         .mat-form-field-outline { background-color: white; }
     }
 }
@@ -54,21 +56,21 @@ html {
     box-shadow: 0px 5px 5px -3px rgb(0 0 0 / 20%), 0px 8px 10px 1px rgb(0 0 0 / 14%), 0px 3px 14px 2px rgb(0 0 0 / 12%);
     margin-bottom: 1em;
 
-    .mat-row, .mat-header-row {
+    .mat-mdc-row, .mat-mdc-header-row {
         height: auto;
     }
 
-    .mat-row:hover {
+    .mat-mdc-row:hover {
         cursor: pointer;
         background: rgba(0, 0, 0, 0.1);
     }
-    .mat-cell {
+    .mat-mdc-cell {
         font-size: var(--formFontSize);
         padding-top: 0.5em;
         padding-bottom: 0.5em;
     }
 
-    .mat-header-cell {
+    .mat-mdc-header-cell {
         padding-top: 0.8em;
         padding-bottom: 0.8em;
     }
@@ -167,6 +169,7 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 }
 
 .map-plot-list {
+    /* TODO(mdc-migration): The following rule targets internal classes of list that may no longer apply for the MDC version.*/
     mat-list-item {
         height: 36px;
     }

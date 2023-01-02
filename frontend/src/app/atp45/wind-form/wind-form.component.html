@@ -3,7 +3,7 @@
       [style.width.px]=100
         class="form-control"
         appearance="outline"
-        floatLabel="never">
+        >
             <mat-label> Wind speed </mat-label>
             <input
             type="number"
@@ -16,7 +16,7 @@
         [style.width.px]=100
         class="form-control"
         appearance="outline"
-        floatLabel="never">
+        >
             <mat-label> Direction </mat-label>
             <input
             type="number"
@@ -29,7 +29,7 @@
     [style.width.px]=100
     class="form-control"
     appearance="outline"
-    floatLabel="never">
+    >
         <mat-label> Stability: </mat-label>
         <mat-select formControlName="stabilityClass">
           <mat-option *ngFor="let stab of stabilityClasses" [value]="stab.id"> {{ stab.key }}

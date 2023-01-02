@@ -4,36 +4,36 @@
     </div>
 
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex-col py-3">
-        <mat-form-field 
-            class = "w-56" 
-            appearance="outline" 
-            floatLabel="never">
+        <mat-form-field
+            class = "w-56"
+            appearance="outline"
+            >
             <mat-label> Email </mat-label>
-            <input 
+            <input
                 matInput
                 formControlName="email">
             <!-- <mat-error *ngIf="(formItem.controlName | formControl).invalid"> error ! </mat-error> -->
         </mat-form-field>
 
-        <mat-form-field 
-        class = "w-56" 
-            appearance="outline" 
-            floatLabel="never">
+        <mat-form-field
+        class = "w-56"
+            appearance="outline"
+            >
             <mat-label> Password </mat-label>
-            <input 
+            <input
                 matInput
                 formControlName="password">
             <!-- <mat-error *ngIf="(formItem.controlName | formControl).invalid"> error ! </mat-error> -->
         </mat-form-field>
 
-        <button 
-            mat-raised-button 
-            color="primary" 
-            type="submit" 
+        <button
+            mat-raised-button
+            color="primary"
+            type="submit"
             [disabled]="loginForm.invalid">Login</button>
         <!-- <div class="form-group">
             <label for="username">Username</label>
-            <input matInput type="text" formControlName="username" class="form-control" 
+            <input matInput type="text" formControlName="username" class="form-control"
             />
             <div *ngIf="submitted && f.username.errors" class="invalid-feedback">
                 <div *ngIf="f.username.errors.required">Username is required</div>

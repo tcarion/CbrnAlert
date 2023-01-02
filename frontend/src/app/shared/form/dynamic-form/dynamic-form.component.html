@@ -12,14 +12,14 @@
         <ng-container
         *ngSwitchCase="'textbox'"
         >
-            <mat-form-field 
+            <mat-form-field
             *ngIf="item.type !== 'mapObject'"
-            class="form-control" 
-            appearance="outline" 
-            floatLabel="never">
+            class="form-control"
+            appearance="outline"
+            >
                 <mat-label> {{ item.label }} </mat-label>
-                <input 
-                matInput 
+                <input
+                matInput
                 [formControlName]="item.key"
                 [value]="item.value || '' ">
                 <mat-hint>{{ item.hint }}</mat-hint>
@@ -27,7 +27,7 @@
             </mat-form-field>
             <map-object-input
             *ngIf="item.type === 'mapObject'"
-            [item]="item" 
+            [item]="item"
             [formControlName]="item.key"
             ></map-object-input>
         </ng-container>
@@ -35,28 +35,28 @@
         <ng-container *ngSwitchCase="'select'">
             <app-autoformat-select
             *ngIf="item.type !== 'mapObject'"
-            [item]="item" 
+            [item]="item"
             [formControlName]="item.key">
             </app-autoformat-select>
             <app-map-object-select
             *ngIf="item.type === 'mapObject'"
-            [item]="item" 
+            [item]="item"
             [formControlName]="item.key">
             </app-map-object-select>
         </ng-container>
 
         <ng-container *ngSwitchCase="'datepicker'">
-            <mat-form-field 
-            class="form-control" 
-            appearance="outline" 
-            floatLabel="never">
+            <mat-form-field
+            class="form-control"
+            appearance="outline"
+            >
             <mat-label> {{ item.label }} </mat-label>
             <input
                 *ngIf="item.minmax !== undefined"
-                matInput 
-                [matDatepicker]="picker" 
-                [min]="item.minmax.min" 
-                [max]="item.minmax.max" 
+                matInput
+                [matDatepicker]="picker"
+                [min]="item.minmax.min"
+                [max]="item.minmax.max"
                 [formControlName]="item.key">
             <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
             <mat-datepicker #picker></mat-datepicker>
