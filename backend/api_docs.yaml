@@ -29,6 +29,20 @@ components:
           type: string
         name:
           type: string
+    Atp45DecisionTree:
+      type: object
+      required: 
+        - "id"
+        - "children"
+      properties:
+        id:
+          type: string
+        description:
+          type: string
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/Atp45DecisionTree'
     BasicAtp45Input:
       type: object
       required:
@@ -929,6 +943,18 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CbrnContainer'
+  /atp45/tree:
+    get:
+      description: "Get the decision tree discriminating between the ATP-45 cases."
+      tags:
+        - Atp45
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Atp45DecisionTree'
 
   /atp45/procedures:
     get:
