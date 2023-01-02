@@ -39,6 +39,18 @@ components:
           type: string
         description:
           type: string
+        note:
+          type: string
+        longname:
+          type: string
+        paramtype:
+          type: string
+        internalname:
+          type: string
+        content:
+          type: array
+          items:
+            type: string
         children:
           type: array
           items:

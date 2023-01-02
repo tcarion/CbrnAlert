@@ -14,6 +14,11 @@
 export interface Atp45DecisionTree { 
     id: string;
     description?: string;
+    note?: string;
+    longname?: string;
+    paramtype?: string;
+    internalname?: string;
+    content?: Array<string>;
     children: Array<Atp45DecisionTree>;
 }
 
