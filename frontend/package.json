@@ -8,7 +8,8 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "generate:api": "openapi-generator-cli generate -i ../backend/api_docs.yaml -g typescript-angular -o src/app/core/api",
+    "generate:api": "openapi-generator-cli generate -i ../backend/api_docs.yaml -g typescript-angular -o src/app/core/api/oa-gen",
+    "resolve:api": "openapi-generator-cli generate -i ../backend/api_docs.yaml -g openapi-yaml -o ../backend/resolved_.yaml",
     "ng-generate:api": "ng-openapi-gen --config ng-open-api-gen.config.json"
   },
   "private": true,

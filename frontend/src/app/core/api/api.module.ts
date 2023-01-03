@@ -1,33 +1,50 @@
+/* tslint:disable */
+/* eslint-disable */
 import { NgModule, ModuleWithProviders, SkipSelf, Optional } from '@angular/core';
-import { Configuration } from './configuration';
 import { HttpClient } from '@angular/common/http';
+import { ApiConfiguration, ApiConfigurationParams } from './api-configuration';
 
-import { Atp45Service } from './api/atp45.service';
-import { AuthService } from './api/auth.service';
-import { FlexpartService } from './api/flexpart.service';
+import { AuthApiService } from './services/auth-api.service';
+import { Atp45ApiService } from './services/atp-45-api.service';
+import { FlexpartApiService } from './services/flexpart-api.service';
 
+/**
+ * Module that provides all services and configuration.
+ */
 @NgModule({
-  imports:      [],
+  imports: [],
+  exports: [],
   declarations: [],
-  exports:      [],
-  providers: []
+  providers: [
+    AuthApiService,
+    Atp45ApiService,
+    FlexpartApiService,
+    ApiConfiguration
+  ],
 })
 export class ApiModule {
-    public static forRoot(configurationFactory: () => Configuration): ModuleWithProviders<ApiModule> {
-        return {
-            ngModule: ApiModule,
-            providers: [ { provide: Configuration, useFactory: configurationFactory } ]
-        };
+  static forRoot(params: ApiConfigurationParams): ModuleWithProviders<ApiModule> {
+    return {
+      ngModule: ApiModule,
+      providers: [
+        {
+          provide: ApiConfiguration,
+          useValue: params
+        }
+      ]
     }
+  }
 
-    constructor( @Optional() @SkipSelf() parentModule: ApiModule,
-                 @Optional() http: HttpClient) {
-        if (parentModule) {
-            throw new Error('ApiModule is already loaded. Import in your base AppModule only.');
-        }
-        if (!http) {
-            throw new Error('You need to import the HttpClientModule in your AppModule! \n' +
-            'See also https://github.com/angular/angular/issues/20575');
-        }
+  constructor( 
+    @Optional() @SkipSelf() parentModule: ApiModule,
+    @Optional() http: HttpClient
+  ) {
+    if (parentModule) {
+      throw new Error('ApiModule is already loaded. Import in your base AppModule only.');
     }
+    if (!http) {
+      throw new Error('You need to import the HttpClientModule in your AppModule! \n' +
+      'See also https://github.com/angular/angular/issues/20575');
+    }
+  }
 }
