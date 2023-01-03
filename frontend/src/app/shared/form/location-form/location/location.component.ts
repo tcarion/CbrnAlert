@@ -5,8 +5,8 @@ import { Component, OnDestroy } from '@angular/core';
 import { first, skip } from 'rxjs/operators';
 import { MapState, MapAction } from 'src/app/core/state/map.state';
 import { GeoPoint } from 'src/app/core/api/models';
-import { ControlsOf, ControlValueAccessor, FormControl, FormGroup } from '@ngneat/reactive-forms';
-
+import { ControlValueAccessor, FormControl, FormGroup } from '@angular/forms';
+import { ControlsOf } from 'src/app/shared/form/controls-of';
 // interface Locations {
 //     locations: FormArray<GeoPoint>
 // }
@@ -27,8 +27,8 @@ export class LocationComponent implements ControlValueAccessor, OnDestroy {
     value: GeoPoint = { lon: 0., lat: 0. };
 
     form = new FormGroup<ControlsOf<GeoPoint>>({
-        lon: new FormControl<number>(0, [wrongLonValidator, Validators.required]),
-        lat: new FormControl<number>(0, [wrongLatValidator, Validators.required])
+        lon: new FormControl(0, {nonNullable: true, validators: [wrongLonValidator, Validators.required]}),
+        lat: new FormControl(0, {nonNullable: true, validators: [wrongLatValidator, Validators.required]})
     })
 
     markerSub: Subscription;
@@ -79,7 +79,7 @@ export class LocationComponent implements ControlValueAccessor, OnDestroy {
     onEnter() {
         const value = this.form.value
         if (value !== undefined) {
-            this.store.dispatch(new MapAction.ChangeMarker(value))
+            this.store.dispatch(new MapAction.ChangeMarker(value as GeoPoint))
         }
     }
 

@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FormArray, FormControl, FormGroup } from '@ngneat/reactive-forms';
+import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import { GeoPoint } from 'src/app/core/api/models';
+import { ControlsOf } from 'src/app/shared/form/controls-of';
 
 @Component({
   selector: 'app-location-array',
@@ -9,7 +10,7 @@ import { GeoPoint } from 'src/app/core/api/models';
 })
 export class LocationArrayComponent implements OnInit {
 
-    locationsControls: FormArray<GeoPoint, FormControl<GeoPoint>> = new FormArray([this.newControl()])
+    locationsControls= new FormArray([this.newControl()])
 
     // @Input() formGroup: FormGroup<{locations:  FormArray<GeoPoint, FormControl<GeoPoint>>}>;
     @Input() formGroup: FormGroup<any>;
@@ -17,14 +18,14 @@ export class LocationArrayComponent implements OnInit {
     constructor(
     ) {
     }
-    
+
     ngOnInit(): void {
         this.formGroup.addControl('locations', this.locationsControls)
     }
 
-    
+
     get locations() {
-        return this.formGroup.get('locations') as FormArray<GeoPoint, FormControl<GeoPoint>>;
+        return this.formGroup.get('locations') as FormArray;
     }
 
     newControl() {

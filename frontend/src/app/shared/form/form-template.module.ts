@@ -17,15 +17,14 @@ import { DynamicFormComponent } from './dynamic-form/dynamic-form.component';
 import { MapObjectSelectComponent } from './map-object-select/map-object-select.component';
 import { MapObjectInputComponent } from './map-object-input/map-object-input.component';
 import { TextFieldModule } from '@angular/cdk/text-field';
-import { LocationComponent } from './location/location.component';
 import { ForecastTimeSelectComponent } from './forecast-time-select/forecast-time-select.component';
 import { MatSelectModule } from '@angular/material/select';
 import { DynFormComponent } from './dyn-form/dyn-form.component';
 import { DynFormQuestionComponent } from './dyn-form-question/dyn-form-question.component';
-import { LocationArrayComponent } from './location-array/location-array.component';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AreaInputComponent } from './area-input/area-input.component';
 import { DatetimePickerModule } from './datetime-picker/datetime-picker.module';
+import { LocationFormModule } from 'src/app/shared/form/location-form/location-form.module';
 
 
 
@@ -36,11 +35,9 @@ import { DatetimePickerModule } from './datetime-picker/datetime-picker.module';
     DynamicFormComponent,
     MapObjectSelectComponent,
     MapObjectInputComponent,
-    LocationComponent,
     ForecastTimeSelectComponent,
     DynFormComponent,
     DynFormQuestionComponent,
-    LocationArrayComponent,
     AreaInputComponent,
   ],
   imports: [
@@ -58,16 +55,14 @@ import { DatetimePickerModule } from './datetime-picker/datetime-picker.module';
     MatIconModule,
     MatTooltipModule,
     DatetimePickerModule,
+    LocationFormModule
   ],
   exports: [
     AutoformatSelectComponent,
-    LocationComponent,
     DynamicFormComponent,
     ForecastTimeSelectComponent,
     DynFormQuestionComponent,
     DynFormComponent,
-    LocationArrayComponent,
-    LocationComponent,
     AreaInputComponent,
     DatetimePickerModule
   ],
