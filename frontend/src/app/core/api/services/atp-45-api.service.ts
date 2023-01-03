@@ -9,6 +9,7 @@ import { RequestBuilder } from '../request-builder';
 import { Observable } from 'rxjs';
 import { map, filter } from 'rxjs/operators';
 
+import { Atp45DecisionTree } from '../models/atp-45-decision-tree';
 import { Atp45Result } from '../models/atp-45-result';
 import { CbrnContainer } from '../models/cbrn-container';
 import { ForecastAtp45Input } from '../models/forecast-atp-45-input';
@@ -215,6 +216,53 @@ export class Atp45ApiService extends BaseService {
 
     return this.atp45ContainersGet$Response(params).pipe(
       map((r: StrictHttpResponse<Array<CbrnContainer>>) => r.body as Array<CbrnContainer>)
+    );
+  }
+
+  /**
+   * Path part for operation atp45TreeGet
+   */
+  static readonly Atp45TreeGetPath = '/atp45/tree';
+
+  /**
+   * Get the decision tree discriminating between the ATP-45 cases.
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `atp45TreeGet()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  atp45TreeGet$Response(params?: {
+  }): Observable<StrictHttpResponse<Atp45DecisionTree>> {
+
+    const rb = new RequestBuilder(this.rootUrl, Atp45ApiService.Atp45TreeGetPath, 'get');
+    if (params) {
+    }
+
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<Atp45DecisionTree>;
+      })
+    );
+  }
+
+  /**
+   * Get the decision tree discriminating between the ATP-45 cases.
+   *
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `atp45TreeGet$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  atp45TreeGet(params?: {
+  }): Observable<Atp45DecisionTree> {
+
+    return this.atp45TreeGet$Response(params).pipe(
+      map((r: StrictHttpResponse<Atp45DecisionTree>) => r.body as Atp45DecisionTree)
     );
   }
 

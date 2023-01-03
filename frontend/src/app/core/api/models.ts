@@ -1,4 +1,5 @@
 export { User } from './models/user';
+export { Atp45DecisionTree } from './models/atp-45-decision-tree';
 export { BasicAtp45Input } from './models/basic-atp-45-input';
 export { WindAtp45Input } from './models/wind-atp-45-input';
 export { ForecastAtp45Input } from './models/forecast-atp-45-input';
