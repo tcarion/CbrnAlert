@@ -17,6 +17,7 @@ import { RunComponent } from './run/run.component';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import { MatDividerModule } from '@angular/material/divider';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
+import { Atp45RunModule } from 'src/app/atp45/atp45-run/atp45-run.module';
 
 @NgModule({
     declarations: [
@@ -29,6 +30,7 @@ import {MatButtonToggleModule} from '@angular/material/button-toggle';
     ],
     imports: [
         Atp45RoutingModule,
+        Atp45RunModule,
         CommonModule,
         MatButtonModule,
         SharedModule,

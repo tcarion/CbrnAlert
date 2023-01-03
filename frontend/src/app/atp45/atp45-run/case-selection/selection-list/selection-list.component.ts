@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Atp45DecisionTree } from 'src/app/core/api/models';
 
 @Component({
   selector: 'app-selection-list',
@@ -7,4 +8,11 @@ import { Component } from '@angular/core';
 })
 export class SelectionListComponent {
 
+  @Input() children: Atp45DecisionTree[]
+  @Output() selected = new EventEmitter<number>()
+
+  select(event:number) {
+    console.log(event)
+    this.selected.emit(event)
+  }
 }

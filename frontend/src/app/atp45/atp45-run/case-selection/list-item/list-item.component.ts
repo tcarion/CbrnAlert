@@ -1,5 +1,5 @@
 import { Component, Input, Output } from '@angular/core';
-import { Atp45DecisionTree } from 'src/app/core/api';
+import { Atp45DecisionTree } from 'src/app/core/api/models';
 
 @Component({
   selector: 'app-list-item',

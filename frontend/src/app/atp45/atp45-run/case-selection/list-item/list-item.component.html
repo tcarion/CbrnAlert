@@ -1,7 +1,7 @@
 <div
   href="#!"
   class="
-    block
+    flex
     px-6
     py-2
     border-b border-gray-200
@@ -9,7 +9,16 @@
     hover:bg-gray-100 hover:text-gray-500
     focus:outline-none focus:ring-0 focus:bg-gray-200 focus:text-gray-600
     transition
-    duration-500
+    duration-200
     cursor-pointer
+    flex-row
+    justify-between
   "
-    > {{ item.longname }} </div>
+    > <span>
+      {{ item.longname }}
+    </span>
+    <div>
+      <mat-icon [ngClass] = "{'hidden': item.description === undefined}" [matTooltip]="item.description || ''">info</mat-icon>
+      <mat-icon [ngClass] = "{'hidden': item.note === undefined}" [matTooltip]="item.note || ''">notes</mat-icon>
+    </div>
+  </div>

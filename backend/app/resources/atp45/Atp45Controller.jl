@@ -312,7 +312,7 @@ end
 
 function get_tree()
     json(
-        ATP45.ATP45_DICT_TREE
+        ATP45.decision_tree(typedict = true)
     )
 end
 """

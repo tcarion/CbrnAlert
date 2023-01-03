@@ -1,1 +1,8 @@
-<p>selection-list works!</p>
+<div>
+  <div class="pb-3 font-medium"> Please choose the required ATP-45 category: </div>
+  <div
+  class = "bg-white rounded-lg border border-gray-200 w-full text-gray-900"
+  *ngFor="let item of children; let i = index">
+    <app-list-item [item]="item" (click)="select(i)"></app-list-item>
+  </div>
+</div>
