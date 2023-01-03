@@ -1,3 +1,4 @@
+import { LocationFormModule } from 'src/app/shared/form/location-form/location-form.module';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -19,7 +20,7 @@ import { Atp45RunComponent } from './atp45-run/atp45-run.component';
     MatTooltipModule,
     MatIconModule,
     ReactiveFormsModule,
-    SharedModule
+    LocationFormModule
   ],
   providers: [
     Atp45ApiService

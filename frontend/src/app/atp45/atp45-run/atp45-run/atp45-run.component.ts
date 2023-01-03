@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { FormRecord } from '@angular/forms';
+import { FormGroup, FormRecord } from '@angular/forms';
 
 @Component({
   selector: 'app-atp45-run',
@@ -8,7 +8,7 @@ import { FormRecord } from '@angular/forms';
 })
 export class Atp45RunComponent {
 
-  runForm = new FormRecord({
+  runForm = new FormGroup({
   })
 
 }
