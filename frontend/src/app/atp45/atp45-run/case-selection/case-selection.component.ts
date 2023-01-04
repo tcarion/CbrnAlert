@@ -1,3 +1,4 @@
+import { StabilityClass } from './../form-interfaces';
 import { Atp45ApiService } from 'src/app/core/api/services';
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { Atp45DecisionTree } from 'src/app/core/api/models';
@@ -10,13 +11,16 @@ import { Atp45DecisionTree } from 'src/app/core/api/models';
 export class CaseSelectionComponent implements OnInit {
   @Output() selectedEvent = new EventEmitter<string[]>()
   @Output() isValid = new EventEmitter<boolean>()
-
+  @Output() requiredInputs = new EventEmitter<{ stabilityRequired: boolean, numberOfLocations: number }>()
 
   decisionTree: Atp45DecisionTree;
   currentChildren: Atp45DecisionTree[];
 
   isRoot = true;
   isLeaf = false;
+
+  stabilityRequired = false;
+  numberOfLocations = 1;
 
   selectedCategories: string[] = [];
   savedIndices: number[] = [];
@@ -40,15 +44,36 @@ export class CaseSelectionComponent implements OnInit {
     // We save the previous selected indices for the `goToPreviousCategory` function
     this.savedIndices.push(event);
 
-    if (this.currentChildren[0] == null) {
+    if (selectedChild.children[0].children.length == 1) {
       // Leaf of the tree has been reached
       console.log('Leaf reached');
       this.isLeaf = true;
-    } else {
-      // Go to the next children
-      this.currentChildren = selectedChild.children;
-      this.isRoot = false;
+      this.updateEvents();
+      return
     }
+
+    if (this.childrenIsStability(selectedChild)) {
+      this.stabilityRequired = true;
+
+      // we pass through the stability choice, since it's handle by the Meteo form, or retrived by meteo data.
+      this.currentChildren = selectedChild.children[0].children;
+      this.isRoot = false;
+      this.updateEvents();
+      return;
+    }
+
+    if (this.childrenIsWind(selectedChild)) {
+      // we pass through the wind choice, since it's handle by the Meteo form, or retrived by meteo data.
+      this.currentChildren = selectedChild.children[0].children;
+      this.isRoot = false;
+      this.updateEvents();
+      return;
+    }
+
+    // Go to the next children
+    this.currentChildren = selectedChild.children;
+    this.isRoot = false;
+
     this.updateEvents()
   }
 
@@ -56,15 +81,29 @@ export class CaseSelectionComponent implements OnInit {
     this.selectedCategories.pop();
     this.savedIndices.pop();
     let previousTree = this.decisionTree;
+    this.isLeaf = false;
 
+    this.stabilityRequired = false;
     this.savedIndices.forEach(i => {
       previousTree = previousTree.children[i];
+
+      if (this.childrenIsStability(previousTree)) {
+        this.stabilityRequired = true;
+        previousTree = previousTree.children[0];
+      }
+
+      if (this.childrenIsWind(previousTree)) {
+        previousTree = previousTree.children[0];
+      }
+
     });
+
 
     this.currentChildren = previousTree.children;
 
     if (previousTree.id == "root") {
       this.isRoot = true;
+      this.updateEvents()
     }
     this.updateEvents()
   }
@@ -72,6 +111,24 @@ export class CaseSelectionComponent implements OnInit {
   updateEvents() {
     this.selectedEvent.emit(this.selectedCategories);
     this.isValid.emit(this.isLeaf);
+    this.requiredInputs.emit(this.getRequired())
   }
 
+  getRequired() {
+    return {
+      stabilityRequired: this.stabilityRequired,
+      numberOfLocations: this.numberOfLocations
+    }
+  }
+
+  childrenIsStability(tree:Atp45DecisionTree) {
+    return tree.children[0].paramtype == "meteo"
+  }
+
+  childrenIsWind(tree:Atp45DecisionTree) {
+    return tree.children[0].paramtype == "windchoice"
+  }
+  // nextChoiceIsWind() {
+  //   this.currentChildren[0].children.length == 1
+  // }
 }

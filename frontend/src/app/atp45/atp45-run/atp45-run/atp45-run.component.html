@@ -1,8 +1,10 @@
 <div class="flex flex-row">
-  <app-case-selection></app-case-selection>
+  <app-case-selection (isValid)="changeValidity($event)" (selectedEvent)="changeSelected($event)" (requiredInputs)="changeRequired($event)"></app-case-selection>
 
   <app-location-array [formGroup]="runForm"></app-location-array>
 
   <app-meteo-form></app-meteo-form>
 </div>
+
+<button class="m-3" [ngClass]="{'btn-primary' : isCaseSelectionValid, 'btn-disabled' : !isCaseSelectionValid}" btn-primary> Submit </button>
 

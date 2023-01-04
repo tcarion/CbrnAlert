@@ -1,12 +1,14 @@
-<div *ngIf="!isLeaf; else leaf" class="flex flex-col max-w-lg">
-  <app-selection-list (selected)="saveAndChangeChildren($event)" [children]="currentChildren"></app-selection-list>
+<div class="flex flex-col max-w-lg">
+  <app-selection-list *ngIf="!isLeaf; else leaf" (selected)="saveAndChangeChildren($event)" [children]="currentChildren"></app-selection-list>
+
+  <ng-template #leaf>
+    You selected the following categories: {{ this.selectedCategories }}
+  </ng-template>
+
 
   <div class="flex flex-row justify-between">
     <button class="m-3" [ngClass]="{'btn-primary' : !isRoot, 'btn-disabled' : isRoot}" (click)="goToPreviousCategory()"> Previous </button>
-    <button class="m-3" [ngClass]="{'btn-primary' : isLeaf, 'btn-disabled' : !isLeaf}" btn-primary> Submit </button>
   </div>
 </div>
 
-<ng-template #leaf>
-  You selected the following categories: {{ this.selectedCategories }}
-</ng-template>
+

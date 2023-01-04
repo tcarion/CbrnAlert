@@ -15,7 +15,7 @@
     justify-between
   "
     > <span>
-      {{ item.longname }}
+      {{ item.paramtype == "group" ? item.content : item.longname }}
     </span>
     <div>
       <mat-icon [ngClass] = "{'hidden': item.description === undefined}" [matTooltip]="item.description || ''">info</mat-icon>
