@@ -1,10 +1,20 @@
-<form [formGroup]="windForm">
-  <input
-    type="number"
-    formControlName="speed"
-    >
-  <input
-    type="number"
-    formControlName="azimuth"
-    >
-</form>
+<!-- <div class="border-2 p-2 pt-6 pb-0 m-4 relative">
+  <div class="-top-4 bg-gray-200 flex flex-row items-center h-10 absolute w-11/12" style="height: 25px">
+
+    <span class="text-xs pl-1">Wind:</span>
+  </div>
+</div> -->
+
+<fieldset [formGroup]="windForm" class="items-center border border-solid border-gray-300 p-3 max-w-sm">
+  <legend class="text-sm">Wind:</legend>
+  <div class="flex flex-wrap">
+    <div class="flex-col">
+      <label for="speed" class="text-xs">Speed:</label>
+      <input appFormInput type="number" formControlName="speed" id="speed" class="w-20 mx-3">
+    </div>
+    <div class="flex-col">
+      <label for="azimuth" class="text-xs">Direction:</label>
+      <input appFormInput type="number" formControlName="azimuth" id="azimuth" class="w-20 mx-3">
+    </div>
+  </div>
+</fieldset>

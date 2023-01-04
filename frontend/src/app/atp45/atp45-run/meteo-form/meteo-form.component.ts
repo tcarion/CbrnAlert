@@ -10,7 +10,7 @@ import { Component, Input } from '@angular/core';
 export class MeteoFormComponent {
 
   @Input() withWind: boolean = true;
-  @Input() withStability: boolean = false;
+  @Input() withStability: boolean = true;
 
   meteoForm = new FormRecord({})
   // meteoForm = new FormGroup<MeteoForm>({})

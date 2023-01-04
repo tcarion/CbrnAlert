@@ -11,8 +11,8 @@ export interface MeteoForm {
 
 export enum StabilityClass {
   UNSTABLE = 'unstable',
-  STABLE = 'stable',
   NEUTRAL = 'neutral',
+  STABLE = 'stable',
 }
 
 export interface WindForm {

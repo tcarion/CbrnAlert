@@ -1,3 +1,4 @@
+import { FormDirectivesModule } from './../../directives/form-directives/form-directives.module';
 import { LocationFormModule } from 'src/app/shared/form/location-form/location-form.module';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { NgModule } from '@angular/core';
@@ -12,15 +13,17 @@ import { MeteoFormComponent } from './meteo-form/meteo-form.component';
 import { WindFormComponent } from './meteo-form/wind-form/wind-form.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Atp45RunComponent } from './atp45-run/atp45-run.component';
+import { StabilityFormComponent } from './meteo-form/stability-form/stability-form.component';
 
 @NgModule({
-  declarations: [CaseSelectionComponent, ListItemComponent, SelectionListComponent, MeteoFormComponent, WindFormComponent, Atp45RunComponent],
+  declarations: [CaseSelectionComponent, ListItemComponent, SelectionListComponent, MeteoFormComponent, WindFormComponent, Atp45RunComponent, StabilityFormComponent],
   imports: [
     CommonModule,
     MatTooltipModule,
     MatIconModule,
     ReactiveFormsModule,
-    LocationFormModule
+    LocationFormModule,
+    FormDirectivesModule,
   ],
   providers: [
     Atp45ApiService
