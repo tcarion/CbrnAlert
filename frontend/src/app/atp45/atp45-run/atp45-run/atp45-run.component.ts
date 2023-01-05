@@ -10,14 +10,16 @@ import { Atp45Category } from 'src/app/core/api/models';
 export class Atp45RunComponent {
 
   isCaseSelectionValid = false;
+  canSubmit = false;
   stabilityRequired: boolean;
-  numberOfLocations: number;
+  numberOfLocations: number = 1;
   selectedCases: Atp45Category[];
 
   runForm = new FormGroup({});
 
-  changeValidity($event: boolean) {
+  onCaseValidityChange($event: boolean) {
     this.isCaseSelectionValid = $event
+    this.updateCanSubmit();
   }
 
   changeRequired($event: any) {
@@ -27,5 +29,9 @@ export class Atp45RunComponent {
 
   changeSelected($event: Atp45Category[]) {
     this.selectedCases = $event
+  }
+
+  updateCanSubmit() {
+    this.canSubmit = this.isCaseSelectionValid && this.runForm.valid;
   }
 }
