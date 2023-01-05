@@ -3,7 +3,7 @@
 
   <app-location-array [formGroup]="runForm"></app-location-array>
 
-  <app-meteo-form></app-meteo-form>
+  <app-meteo-form [withStability]="stabilityRequired" [parentForm]="runForm"></app-meteo-form>
 </div>
 
 <button class="m-3" [ngClass]="{'btn-primary' : isCaseSelectionValid, 'btn-disabled' : !isCaseSelectionValid}" btn-primary> Submit </button>

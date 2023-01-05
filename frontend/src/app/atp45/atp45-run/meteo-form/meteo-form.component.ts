@@ -11,7 +11,19 @@ export class MeteoFormComponent {
 
   @Input() withWind: boolean = true;
   @Input() withStability: boolean = true;
+  @Input() parentForm: FormRecord;
 
   meteoForm = new FormRecord({})
   // meteoForm = new FormGroup<MeteoForm>({})
+  ngOnInit(): void {
+    this.parentForm.addControl('meteo', this.meteoForm);
+  }
+
+  isValid(): boolean {
+    return this.meteoForm.valid;
+  }
+
+  ngOnDestroy(): void {
+    this.parentForm.removeControl('meteo');
+  }
 }

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { FormGroup, FormRecord } from '@angular/forms';
+import { Atp45Category } from 'src/app/core/api/models';
 
 @Component({
   selector: 'app-atp45-run',
@@ -11,7 +12,7 @@ export class Atp45RunComponent {
   isCaseSelectionValid = false;
   stabilityRequired: boolean;
   numberOfLocations: number;
-  selectedCases: string[];
+  selectedCases: Atp45Category[];
 
   runForm = new FormGroup({});
 
@@ -24,7 +25,7 @@ export class Atp45RunComponent {
     this.numberOfLocations = $event.numberOfLocations;
   }
 
-  changeSelected($event: string[]) {
+  changeSelected($event: Atp45Category[]) {
     this.selectedCases = $event
   }
 }

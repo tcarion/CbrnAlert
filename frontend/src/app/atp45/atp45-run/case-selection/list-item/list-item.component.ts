@@ -1,5 +1,5 @@
 import { Component, Input, Output } from '@angular/core';
-import { Atp45DecisionTree } from 'src/app/core/api/models';
+import { Atp45Category, Atp45DecisionTree } from 'src/app/core/api/models';
 
 @Component({
   selector: 'app-list-item',
@@ -8,6 +8,6 @@ import { Atp45DecisionTree } from 'src/app/core/api/models';
 })
 export class ListItemComponent {
 
-  @Input() item: Atp45DecisionTree
+  @Input() item: Atp45Category
 
 }
