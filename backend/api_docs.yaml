@@ -29,11 +29,10 @@ components:
           type: string
         name:
           type: string
-    Atp45DecisionTree:
+    Atp45Category:
       type: object
       required: 
         - "id"
-        - "children"
       properties:
         id:
           type: string
@@ -51,10 +50,19 @@ components:
           type: array
           items:
             type: string
-        children:
-          type: array
-          items:
-            $ref: '#/components/schemas/Atp45DecisionTree'
+
+    Atp45DecisionTree:
+      allOf:
+        - $ref: '#/components/schemas/Atp45Category'
+        - type: object
+          required:
+            - "children"
+          properties:
+            children:
+              type: array
+              items:
+                $ref: '#/components/schemas/Atp45DecisionTree'
+
     BasicAtp45Input:
       type: object
       required:
@@ -80,6 +88,7 @@ components:
           example: "chem"
 
     WindAtp45Input:
+
       allOf:
         - $ref: '#/components/schemas/BasicAtp45Input'
         - type: object

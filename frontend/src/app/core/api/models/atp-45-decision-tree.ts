@@ -1,12 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-export interface Atp45DecisionTree {
-  children: Array<Atp45DecisionTree>;
-  content?: Array<string>;
-  description?: string;
-  id: string;
-  internalname?: string;
-  longname?: string;
-  note?: string;
-  paramtype?: string;
-}
+import { Atp45Category } from './atp-45-category';
+export type Atp45DecisionTree = Atp45Category & {
+'children': Array<Atp45DecisionTree>;
+};
