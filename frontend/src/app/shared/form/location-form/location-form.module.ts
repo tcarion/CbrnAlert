@@ -24,7 +24,8 @@ import { MatButtonModule } from '@angular/material/button';
     MatButtonModule,
   ],
   exports: [
-    LocationArrayComponent
+    LocationArrayComponent,
+    LocationComponent,
   ]
 })
 export class LocationFormModule { }

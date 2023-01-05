@@ -1,7 +1,7 @@
-import { AbstractControl, NG_VALUE_ACCESSOR, ValidationErrors, Validators } from '@angular/forms';
+import { AbstractControl, NgControl, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validator, Validators } from '@angular/forms';
 import { Observable, Subscription } from 'rxjs';
 import { Select, Store } from '@ngxs/store';
-import { Component, OnDestroy } from '@angular/core';
+import { Component, forwardRef, OnDestroy, Optional, Self } from '@angular/core';
 import { first, skip } from 'rxjs/operators';
 import { MapState, MapAction } from 'src/app/core/state/map.state';
 import { GeoPoint } from 'src/app/core/api/models';
@@ -15,20 +15,26 @@ import { ControlsOf } from 'src/app/shared/form/controls-of';
     templateUrl: './location.component.html',
     styleUrls: ['./location.component.scss'],
     providers: [
-        {
-            provide: NG_VALUE_ACCESSOR,
-            multi: true,
-            useExisting: LocationComponent
-        }
-    ]
+      {
+        provide: NG_VALUE_ACCESSOR,
+        useExisting: forwardRef(() => LocationComponent),
+        multi: true,
+      },
+      {
+        provide: NG_VALIDATORS,
+        useExisting: forwardRef(() => LocationComponent),
+        multi: true,
+      },
+    ],
 })
-export class LocationComponent implements ControlValueAccessor, OnDestroy {
+export class LocationComponent implements ControlValueAccessor, OnDestroy, Validator {
 
     value: GeoPoint = { lon: 0., lat: 0. };
 
-    form = new FormGroup<ControlsOf<GeoPoint>>({
-        lon: new FormControl(0, {nonNullable: true, validators: [wrongLonValidator, Validators.required]}),
-        lat: new FormControl(0, {nonNullable: true, validators: [wrongLatValidator, Validators.required]})
+
+    form = new FormGroup({
+        lon: new FormControl(0, {nonNullable: false, validators: [wrongLonValidator, Validators.required]}),
+        lat: new FormControl(0, {nonNullable: false, validators: [wrongLatValidator, Validators.required]})
     })
 
     markerSub: Subscription;
@@ -42,14 +48,26 @@ export class LocationComponent implements ControlValueAccessor, OnDestroy {
 
     onTouched = () => { };
 
+    onValidationChange = () => {};
+
     onChangeSubs: Subscription[] = [];
 
     @Select(MapState.userPoint) marker$: Observable<GeoPoint>;
 
     constructor(
         public store: Store,
+        // @Self() @Optional() private control: NgControl
     ) {
+      // this.control.valueAccessor = this;
     }
+
+    // public get invalid(): boolean {
+    //   return this.form.invalid
+    // }
+
+    // public get valid(): boolean {
+    //   return !this.invalid
+    // }
 
     // ngOnInit(): void {
     // }
@@ -109,6 +127,15 @@ export class LocationComponent implements ControlValueAccessor, OnDestroy {
         this.disabled = disabled;
     }
 
+    validate(control: AbstractControl): ValidationErrors | null {
+      const isIncorrect = this.form.invalid;
+
+      return isIncorrect ? { invalidLocation: {wrongLon: this.getErrors('lon'), wrongLat: this.getErrors('lat')} } : null;
+    }
+
+    getErrors(name:string) {
+      return this.form.get(name)!.errors
+    }
     ngOnDestroy() {
         for (let sub of this.onChangeSubs) {
             sub.unsubscribe();
