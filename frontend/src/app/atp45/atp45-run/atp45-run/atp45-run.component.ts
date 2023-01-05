@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormRecord } from '@angular/forms';
 import { Atp45Category } from 'src/app/core/api/models';
 
@@ -8,7 +8,6 @@ import { Atp45Category } from 'src/app/core/api/models';
   styleUrls: ['./atp45-run.component.scss'],
 })
 export class Atp45RunComponent {
-
   isCaseSelectionValid = false;
   canSubmit = false;
   stabilityRequired: boolean;
@@ -16,6 +15,12 @@ export class Atp45RunComponent {
   selectedCases: Atp45Category[];
 
   runForm = new FormGroup({});
+
+  constructor() {
+    this.runForm.statusChanges.subscribe(() => {
+      this.updateCanSubmit();
+    })
+  }
 
   onCaseValidityChange($event: boolean) {
     this.isCaseSelectionValid = $event

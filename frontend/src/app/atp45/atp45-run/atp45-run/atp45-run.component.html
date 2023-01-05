@@ -6,6 +6,5 @@
 
   <app-meteo-form class="px-2" [withStability]="stabilityRequired" [parentForm]="runForm"></app-meteo-form>
 </div>
-
-<button class="m-3" [ngClass]="{'btn-primary' : isCaseSelectionValid, 'btn-disabled' : !isCaseSelectionValid}" btn-primary> Submit </button>
+<button class="m-3" [ngClass]="{'btn-primary' : canSubmit, 'btn-disabled' : !canSubmit}"> Submit </button>
 

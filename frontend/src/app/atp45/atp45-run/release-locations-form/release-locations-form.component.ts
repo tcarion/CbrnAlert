@@ -45,7 +45,7 @@ export class ReleaseLocationsFormComponent implements OnInit, OnChanges, OnDestr
   createForm(n: number) {
     const initForm = new FormArray([this.createControl()]);
 
-    for (let i = 1; i <= this.numberOfLocations; i++) {
+    for (let i = 1; i < this.numberOfLocations; i++) {
       initForm.push(this.createControl())
     }
     return initForm;

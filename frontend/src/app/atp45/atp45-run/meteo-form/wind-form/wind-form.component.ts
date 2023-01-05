@@ -14,8 +14,8 @@ export class WindFormComponent {
 
   windForm = new FormGroup({
     // windForm = new FormGroup<WindForm>({
-    speed: new FormControl(8, {nonNullable: true}),
-    azimuth: new FormControl(45, {nonNullable: true}),
+    speed: new FormControl(8, [Validators.required]),
+    azimuth: new FormControl(45, [Validators.required]),
   });
 
 
