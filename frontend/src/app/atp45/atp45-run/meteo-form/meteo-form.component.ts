@@ -16,7 +16,7 @@ export class MeteoFormComponent {
   meteoForm = new FormRecord({})
   // meteoForm = new FormGroup<MeteoForm>({})
   ngOnInit(): void {
-    this.parentForm.addControl('meteo', this.meteoForm);
+    this.parentForm.addControl('weather', this.meteoForm);
   }
 
   isValid(): boolean {
@@ -24,6 +24,6 @@ export class MeteoFormComponent {
   }
 
   ngOnDestroy(): void {
-    this.parentForm.removeControl('meteo');
+    this.parentForm.removeControl('weather');
   }
 }

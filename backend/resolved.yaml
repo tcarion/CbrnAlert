@@ -39,6 +39,44 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/JsonErrorBody'
+  /atp45/tree:
+    get:
+      tags:
+      - Atp45
+      description: Get the decision tree discriminating between the ATP-45 cases.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Atp45DecisionTree'
+  /atp45/run:
+    post:
+      tags:
+      - Atp45
+      parameters:
+      - name: weathertype
+        in: query
+        description: Determine if the weather conditions are retrieved in archive forecasts (`archive`), in latest forecast (`forecast`) or are provided in the request (`manually`)
+        required: true
+        style: form
+        explode: true
+        schema:
+          $ref: '#/components/schemas/Atp45RunTypes'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Atp45Input'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Atp45Result'
   /atp45/run/forecast:
     post:
       tags:
@@ -403,18 +441,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CbrnContainer'
-  /atp45/tree:
-    get:
-      tags:
-      - Atp45
-      description: Get the decision tree discriminating between the ATP-45 cases.
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Atp45DecisionTree'
   /atp45/procedures:
     get:
       tags:
@@ -456,39 +482,86 @@ components:
         name:
           type: string
     Atp45Category:
+      required:
+      - id
       type: object
-      required: 
-        - "id"
       properties:
         id:
           type: string
+          example: chem
         description:
           type: string
         note:
           type: string
         longname:
           type: string
+          example: Chemical Weapon
         paramtype:
           type: string
+          example: category
         internalname:
           type: string
         content:
           type: array
           items:
             type: string
-
+      description: Describe the ATP45 categories that will determine which case needs to be considered.
     Atp45DecisionTree:
+      description: A tree of `Atp45Category`, representing the decision sequence leading to the final ATP45 case.
       allOf:
-        - $ref: '#/components/schemas/Atp45Category'
-        - type: object
-          required:
-            - "children"
-          properties:
-            children:
-              type: array
-              items:
-                $ref: '#/components/schemas/Atp45DecisionTree'
-
+      - $ref: '#/components/schemas/Atp45Category'
+      - required:
+        - children
+        type: object
+        properties:
+          children:
+            type: array
+            items:
+              $ref: '#/components/schemas/Atp45DecisionTree'
+    Atp45Input:
+      description: "Information needed to run ATP45. It requires at least the list of id's for discriminating the decision tree and some release location(s)."
+      type: object
+      required:
+        - categories
+        - locations
+      properties:
+        categories:
+          $ref: '#/components/schemas/Atp45Categories'
+        locations:
+          type: array
+          items:
+            $ref: '#/components/schemas/GeoPoint'
+        weather:
+          $ref: '#/components/schemas/Atp45Weather'
+    Atp45Categories:
+      type: array
+      description: Array of ids, identifying the categories.
+      example:
+      - simplified
+      - chem
+      items:
+        type: string
+    Atp45Weather:
+      type: object
+      properties:
+        wind:
+          $ref: '#/components/schemas/WindVelocity'
+        stability:
+          $ref: '#/components/schemas/Atp45Weather_stability'
+      description: Weather conditions description for ATP45, in case it is provided by the user.
+    Atp45StabilityClasses:
+      type: string
+      example: unstable
+      enum:
+      - unstable
+      - neutral
+      - stable
+    Atp45RunTypes:
+      type: string
+      enum:
+      - forecast
+      - archive
+      - manually
     BasicAtp45Input:
       required:
       - containerId
@@ -1109,6 +1182,13 @@ components:
       oneOf:
       - $ref: '#/components/schemas/RawSliceResponse'
       - $ref: '#/components/schemas/GeoJsonSliceResponse'
+    Atp45Weather_stability:
+      required:
+      - stabilityClass
+      type: object
+      properties:
+        stabilityClass:
+          $ref: '#/components/schemas/Atp45StabilityClasses'
     Atp45Result_metadata:
       type: object
       properties:

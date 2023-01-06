@@ -1,6 +1,6 @@
-import { StabilityClass } from './../../form-interfaces';
 import { Component, Input } from '@angular/core';
 import { FormControl, FormGroup, FormRecord } from '@angular/forms';
+import { Atp45StabilityClasses } from 'src/app/core/api/models';
 
 @Component({
   selector: 'app-stability-form',
@@ -12,11 +12,11 @@ export class StabilityFormComponent {
   @Input() parentForm: FormRecord;
 
 
-  stabilityClasses = Object.values(StabilityClass)
+  stabilityClasses = Object.values(Atp45StabilityClasses)
 
   stabilityForm = new FormGroup({
     // windForm = new FormGroup<WindForm>({
-    stabilityClass: new FormControl(StabilityClass.STABLE, {nonNullable: true}),
+    stabilityClass: new FormControl(Atp45StabilityClasses.Stable, {nonNullable: true}),
   });
 
   ngOnInit(): void {

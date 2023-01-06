@@ -1,4 +1,4 @@
-import { StabilityClass } from './../form-interfaces';
+import { Atp45StabilityClasses } from './../form-interfaces';
 import { Atp45ApiService } from 'src/app/core/api/services';
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { Atp45Category, Atp45DecisionTree } from 'src/app/core/api/models';

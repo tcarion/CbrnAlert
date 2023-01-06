@@ -6,10 +6,10 @@ import { FormControl, FormGroup } from "@angular/forms"
 
 export interface MeteoForm {
   wind?: FormGroup<WindForm>,
-  stability?: FormControl<StabilityClass>
+  stability?: FormControl<Atp45StabilityClasses>
 }
 
-export enum StabilityClass {
+export enum Atp45StabilityClasses {
   UNSTABLE = 'unstable',
   NEUTRAL = 'neutral',
   STABLE = 'stable',
