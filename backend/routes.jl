@@ -34,6 +34,7 @@ route("/api/login", AuthenticationController.login, method = POST)
 api_routes = Dict(
     "/forecast/available" => (f=Atp45Controller.available_steps, keyargs=(method=GET,)),
     "/atp45/tree" => (f=Atp45Controller.get_tree, keyargs=(method=GET,)),
+    "/atp45/run" => (f=Atp45Controller.post_run, keyargs=(method=POST,)),
     "/atp45/containers" => (f=Atp45Controller.get_container, keyargs=(method=GET,)),
     "/atp45/procedures" => (f=Atp45Controller.get_procedure, keyargs=(method=GET,)),
     "/atp45/incidents" => (f=Atp45Controller.get_incident, keyargs=(method=GET,)),

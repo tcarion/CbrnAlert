@@ -3,6 +3,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormRecord } from '@angular/forms';
 import { Atp45Category } from 'src/app/core/api/models';
 import { Atp45ApiService } from 'src/app/core/api/services';
+import { Store } from '@ngxs/store';
+import { MapPlotAction } from 'src/app/core/state/map-plot.state';
 
 @Component({
   selector: 'app-atp45-run',
@@ -20,7 +22,8 @@ export class Atp45RunComponent {
   runForm = new FormGroup({});
 
   constructor(
-    private api: Atp45ApiService
+    private api: Atp45ApiService,
+    private store: Store
   ) {
     this.runForm.statusChanges.subscribe(() => {
       this.updateCanSubmit();
@@ -55,6 +58,8 @@ export class Atp45RunComponent {
       }
     };
     console.log(params)
-    this.api.atp45RunPost(params);
+    this.api.atp45RunPost(params).subscribe(res => {
+      this.store.dispatch(new MapPlotAction.Add(res, 'atp45'))
+    });
   }
 }
