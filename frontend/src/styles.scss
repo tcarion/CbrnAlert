@@ -2,7 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 // @import '../node_modules/@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
+@layer components {
+  .btn-primary {
+    @apply bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 border border-blue-700 rounded;
+  }
+}
 
+@layer components {
+  .btn-disabled {
+    @apply bg-blue-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed
+  }
+}
 /* You can add global styles to this file, and also import other style files */
 :root {
   --sidebarMinWidth: 14rem;

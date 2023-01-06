@@ -18,7 +18,7 @@ paths:
   /login:
     post:
       tags:
-      - auth
+      - Auth
       description: Authentication request
       requestBody:
         content:
@@ -39,10 +39,48 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/JsonErrorBody'
+  /atp45/tree:
+    get:
+      tags:
+      - Atp45
+      description: Get the decision tree discriminating between the ATP-45 cases.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Atp45DecisionTree'
+  /atp45/run:
+    post:
+      tags:
+      - Atp45
+      parameters:
+      - name: weathertype
+        in: query
+        description: Determine if the weather conditions are retrieved in archive forecasts (`archive`), in latest forecast (`forecast`) or are provided in the request (`manually`)
+        required: true
+        style: form
+        explode: true
+        schema:
+          $ref: '#/components/schemas/Atp45RunTypes'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Atp45Input'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Atp45Result'
   /atp45/run/forecast:
     post:
       tags:
-      - atp45
+      - Atp45
       description: Run ATP45 with forecast wind data
       requestBody:
         content:
@@ -60,7 +98,7 @@ paths:
   /atp45/run/wind:
     post:
       tags:
-      - atp45
+      - Atp45
       description: Run ATP45 with request wind data
       requestBody:
         content:
@@ -78,7 +116,7 @@ paths:
   /forecast/available:
     get:
       tags:
-      - atp45
+      - Atp45
       description: Return the last forecast datetimes available at ECMWF
       responses:
         "200":
@@ -90,7 +128,7 @@ paths:
   /flexpart/input:
     post:
       tags:
-      - flexpart
+      - Flexpart
       description: Retrieve the meteorological data needed for flexpart
       parameters:
       - name: retrievalType
@@ -121,7 +159,7 @@ paths:
   /flexpart/inputs:
     get:
       tags:
-      - flexpart
+      - Flexpart
       description: Return all the Flexpart inputs available (default finished)
       parameters:
       - name: status
@@ -143,7 +181,7 @@ paths:
   /flexpart/run:
     post:
       tags:
-      - flexpart
+      - Flexpart
       description: Run flexpart
       parameters:
       - name: runType
@@ -183,7 +221,7 @@ paths:
   /flexpart/runs:
     get:
       tags:
-      - flexpart
+      - Flexpart
       description: Return all the Flexpart runs (default finished)
       parameters:
       - name: status
@@ -205,7 +243,7 @@ paths:
   /flexpart/runs/{runId}:
     get:
       tags:
-      - flexpart
+      - Flexpart
       parameters:
       - name: runId
         in: path
@@ -225,7 +263,7 @@ paths:
   /flexpart/runs/{runId}/outputs:
     get:
       tags:
-      - flexpart
+      - Flexpart
       description: Return the outputs of the Flexpart run `runId`
       parameters:
       - name: runId
@@ -248,7 +286,7 @@ paths:
   /flexpart/outputs/{outputId}:
     get:
       tags:
-      - flexpart
+      - Flexpart
       parameters:
       - name: outputId
         in: path
@@ -268,7 +306,7 @@ paths:
   /flexpart/outputs/{outputId}/layers:
     get:
       tags:
-      - flexpart
+      - Flexpart
       description: Return the layers of the Flexpart output `outputId`
       parameters:
       - name: outputId
@@ -300,7 +338,7 @@ paths:
   /flexpart/outputs/{outputId}/dimensions:
     get:
       tags:
-      - flexpart
+      - Flexpart
       description: Return the dimensions layers of the Flexpart output `outputId` with their values
       parameters:
       - name: outputId
@@ -338,7 +376,7 @@ paths:
   /flexpart/outputs/{outputId}/slice:
     post:
       tags:
-      - flexpart
+      - Flexpart
       description: Return a slice of the `output` according to some dimensions.
       parameters:
       - name: layer
@@ -393,7 +431,7 @@ paths:
   /atp45/containers:
     get:
       tags:
-      - atp45
+      - Atp45
       responses:
         "200":
           description: OK
@@ -406,7 +444,7 @@ paths:
   /atp45/procedures:
     get:
       tags:
-      - atp45
+      - Atp45
       responses:
         "200":
           description: OK
@@ -419,7 +457,7 @@ paths:
   /atp45/incidents:
     get:
       tags:
-      - atp45
+      - Atp45
       responses:
         "200":
           description: OK
@@ -443,6 +481,87 @@ components:
           type: string
         name:
           type: string
+    Atp45Category:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          type: string
+          example: chem
+        description:
+          type: string
+        note:
+          type: string
+        longname:
+          type: string
+          example: Chemical Weapon
+        paramtype:
+          type: string
+          example: category
+        internalname:
+          type: string
+        content:
+          type: array
+          items:
+            type: string
+      description: Describe the ATP45 categories that will determine which case needs to be considered.
+    Atp45DecisionTree:
+      description: A tree of `Atp45Category`, representing the decision sequence leading to the final ATP45 case.
+      allOf:
+      - $ref: '#/components/schemas/Atp45Category'
+      - required:
+        - children
+        type: object
+        properties:
+          children:
+            type: array
+            items:
+              $ref: '#/components/schemas/Atp45DecisionTree'
+    Atp45Input:
+      description: "Information needed to run ATP45. It requires at least the list of id's for discriminating the decision tree and some release location(s)."
+      type: object
+      required:
+        - categories
+        - locations
+      properties:
+        categories:
+          $ref: '#/components/schemas/Atp45Categories'
+        locations:
+          type: array
+          items:
+            $ref: '#/components/schemas/GeoPoint'
+        weather:
+          $ref: '#/components/schemas/Atp45Weather'
+    Atp45Categories:
+      type: array
+      description: Array of ids, identifying the categories.
+      example:
+      - simplified
+      - chem
+      items:
+        type: string
+    Atp45Weather:
+      type: object
+      properties:
+        wind:
+          $ref: '#/components/schemas/WindVelocity'
+        stability:
+          $ref: '#/components/schemas/Atp45Weather_stability'
+      description: Weather conditions description for ATP45, in case it is provided by the user.
+    Atp45StabilityClasses:
+      type: string
+      example: unstable
+      enum:
+      - unstable
+      - neutral
+      - stable
+    Atp45RunTypes:
+      type: string
+      enum:
+      - forecast
+      - archive
+      - manually
     BasicAtp45Input:
       required:
       - containerId
@@ -611,7 +730,10 @@ components:
     Atp45Zone:
       allOf:
       - $ref: '#/components/schemas/Feature'
-      - type: object
+      - required:
+        - geometry
+        - properties
+        type: object
         properties:
           properties:
             $ref: '#/components/schemas/Atp45Zone_properties'
@@ -822,7 +944,9 @@ components:
         collection:
           allOf:
           - $ref: '#/components/schemas/FeatureCollection'
-          - type: object
+          - required:
+            - features
+            type: object
             properties:
               features:
                 type: array
@@ -851,6 +975,9 @@ components:
           items:
             type: number
     GeoCell:
+      required:
+      - geometry
+      - properties
       type: object
       allOf:
       - $ref: '#/components/schemas/Feature'
@@ -1055,6 +1182,13 @@ components:
       oneOf:
       - $ref: '#/components/schemas/RawSliceResponse'
       - $ref: '#/components/schemas/GeoJsonSliceResponse'
+    Atp45Weather_stability:
+      required:
+      - stabilityClass
+      type: object
+      properties:
+        stabilityClass:
+          $ref: '#/components/schemas/Atp45StabilityClasses'
     Atp45Result_metadata:
       type: object
       properties:
@@ -1072,6 +1206,8 @@ components:
           type: string
           example: circle
     GeoCell_properties:
+      required:
+      - val
       type: object
       properties:
         val:

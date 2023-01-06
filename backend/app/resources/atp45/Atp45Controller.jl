@@ -309,6 +309,55 @@ end
     
 #     shape_data
 # end
+
+function get_tree()
+    json(
+        ATP45.decision_tree(typedict = true)
+    )
+end
+
+function post_run()
+    payload = Genie.Requests.jsonpayload()
+    runtype = Genie.Router.params(:weathertype, "manually")
+
+    categories = payload["categories"]
+    locations = payload["locations"]
+    releases = ReleaseLocation(_parse_locations(locations))
+
+    weather_inputs = if runtype == "manually"
+        _inputs_from_request(payload)
+    else
+        error("Not implemented yet")
+    end
+    result = ATP45.run(categories..., weather_inputs..., releases)
+    response = Dict(
+        :collection => geo2dict(result),
+        :metadata => Dict(:meta => "test")
+    )
+    response |> json
+end
+
+function _inputs_from_request(payload)
+    input_collection = []
+    weather = get(payload, "weather", nothing)
+    isnothing(weather) && (return input_collection)
+
+    wind_payload = get(weather, "wind", nothing)
+    if !isnothing(wind_payload)
+        wind = WindDirection(wind_payload.speed / 3.6, wind_payload.azimuth)
+        push!(input_collection, wind)
+    end
+
+    stability_payload = get(weather, "stability", nothing)
+    if !isnothing(stability_payload)
+        stabilityClass = stability_payload.stabilityClass
+        push!(input_collection, stabilityClass)
+    end
+
+    return input_collection
+end
+
+_parse_locations(locations) = [Float64.([loc.lon, loc.lat]) for loc in locations] 
 """
     mars_request()
 Send a mars request for archive data with the requested date, time and area

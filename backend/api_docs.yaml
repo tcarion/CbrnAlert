@@ -29,6 +29,97 @@ components:
           type: string
         name:
           type: string
+    Atp45Category:
+      description: 'Describe the ATP45 categories that will determine which case needs to be considered.'
+      type: object
+      required: 
+        - "id"
+      properties:
+        id:
+          type: string
+          example: "chem"
+        description:
+          type: string
+        note:
+          type: string
+        longname:
+          type: string
+          example: "Chemical Weapon"
+        paramtype:
+          type: string
+          example: "category"
+        internalname:
+          type: string
+        content:
+          type: array
+          items:
+            type: string
+
+    Atp45DecisionTree:
+      description: 'A tree of `Atp45Category`, representing the decision sequence leading to the final ATP45 case.'
+      allOf:
+        - $ref: '#/components/schemas/Atp45Category'
+        - type: object
+          required:
+            - "children"
+          properties:
+            children:
+              type: array
+              items:
+                $ref: '#/components/schemas/Atp45DecisionTree'
+
+    Atp45Input:
+      description: "Information needed to run ATP45. It requires at least the list of id's for discriminating the decision tree and some release location(s)."
+      type: object
+      required:
+        - categories
+        - locations
+      properties:
+        categories:
+          $ref: '#/components/schemas/Atp45Categories'
+        locations:
+          type: array
+          items:
+            $ref: '#/components/schemas/GeoPoint'
+        weather:
+          $ref: '#/components/schemas/Atp45Weather'
+
+    Atp45Categories:
+      description: 'Array of ids, identifying the categories.'
+      type: array
+      items: 
+        type: string
+      example: [simplified, chem]
+    
+    Atp45Weather:
+      description: 'Weather conditions description for ATP45, in case it is provided by the user.'
+      type: object
+      properties:
+        wind:
+          $ref: '#/components/schemas/WindVelocity'
+        stability:
+          type: object
+          required:
+            - "stabilityClass"
+          properties:
+            stabilityClass:
+              $ref: '#/components/schemas/Atp45StabilityClasses'
+
+    Atp45StabilityClasses:
+      type: string
+      enum:
+        - unstable
+        - neutral
+        - stable
+      example: "unstable"
+
+    Atp45RunTypes:
+      type: string
+      enum:
+        - forecast
+        - archive
+        - manually
+
     BasicAtp45Input:
       type: object
       required:
@@ -54,6 +145,7 @@ components:
           example: "chem"
 
     WindAtp45Input:
+
       allOf:
         - $ref: '#/components/schemas/BasicAtp45Input'
         - type: object
@@ -609,6 +701,47 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedError'
                   
+  /atp45/tree:
+    get:
+      description: "Get the decision tree discriminating between the ATP-45 cases."
+      tags:
+        - Atp45
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Atp45DecisionTree'
+
+  /atp45/run:
+    post:
+      tags:
+        - Atp45
+      parameters:
+        - in: query
+          name: weathertype
+          schema:
+            $ref: '#/components/schemas/Atp45RunTypes'
+            default: manually
+          required: true
+          description: 'Determine if the weather conditions are retrieved in archive forecasts (`archive`), in latest forecast (`forecast`) or are provided in the request (`manually`)'
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Atp45Input'
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Atp45Result'
+
   /atp45/run/forecast:
     post:
       tags:

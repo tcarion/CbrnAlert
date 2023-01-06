@@ -1,0 +1,6 @@
+<fieldset [formGroup]="parentForm" class="items-center border border-solid border-gray-300 p-3 max-w-sm">
+  <legend class="text-sm">Releases:</legend>
+  <div *ngFor="let locationControl of locationsControl" class="flex-col">
+    <app-location [formControl]="locationControl"></app-location>
+  </div>
+</fieldset>

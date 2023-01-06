@@ -9,7 +9,10 @@ import { RequestBuilder } from '../request-builder';
 import { Observable } from 'rxjs';
 import { map, filter } from 'rxjs/operators';
 
+import { Atp45DecisionTree } from '../models/atp-45-decision-tree';
+import { Atp45Input } from '../models/atp-45-input';
 import { Atp45Result } from '../models/atp-45-result';
+import { Atp45RunTypes } from '../models/atp-45-run-types';
 import { CbrnContainer } from '../models/cbrn-container';
 import { ForecastAtp45Input } from '../models/forecast-atp-45-input';
 import { ForecastAvailableSteps } from '../models/forecast-available-steps';
@@ -26,6 +29,110 @@ export class Atp45ApiService extends BaseService {
     http: HttpClient
   ) {
     super(config, http);
+  }
+
+  /**
+   * Path part for operation atp45TreeGet
+   */
+  static readonly Atp45TreeGetPath = '/atp45/tree';
+
+  /**
+   * Get the decision tree discriminating between the ATP-45 cases.
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `atp45TreeGet()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  atp45TreeGet$Response(params?: {
+  }): Observable<StrictHttpResponse<Atp45DecisionTree>> {
+
+    const rb = new RequestBuilder(this.rootUrl, Atp45ApiService.Atp45TreeGetPath, 'get');
+    if (params) {
+    }
+
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<Atp45DecisionTree>;
+      })
+    );
+  }
+
+  /**
+   * Get the decision tree discriminating between the ATP-45 cases.
+   *
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `atp45TreeGet$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  atp45TreeGet(params?: {
+  }): Observable<Atp45DecisionTree> {
+
+    return this.atp45TreeGet$Response(params).pipe(
+      map((r: StrictHttpResponse<Atp45DecisionTree>) => r.body as Atp45DecisionTree)
+    );
+  }
+
+  /**
+   * Path part for operation atp45RunPost
+   */
+  static readonly Atp45RunPostPath = '/atp45/run';
+
+  /**
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `atp45RunPost()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  atp45RunPost$Response(params: {
+
+    /**
+     * Determine if the weather conditions are retrieved in archive forecasts (&#x60;archive&#x60;), in latest forecast (&#x60;forecast&#x60;) or are provided in the request (&#x60;manually&#x60;)
+     */
+    weathertype: Atp45RunTypes;
+    body: Atp45Input
+  }): Observable<StrictHttpResponse<Atp45Result>> {
+
+    const rb = new RequestBuilder(this.rootUrl, Atp45ApiService.Atp45RunPostPath, 'post');
+    if (params) {
+      rb.query('weathertype', params.weathertype, {"style":"form","explode":true});
+      rb.body(params.body, 'application/json');
+    }
+
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<Atp45Result>;
+      })
+    );
+  }
+
+  /**
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `atp45RunPost$Response()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  atp45RunPost(params: {
+
+    /**
+     * Determine if the weather conditions are retrieved in archive forecasts (&#x60;archive&#x60;), in latest forecast (&#x60;forecast&#x60;) or are provided in the request (&#x60;manually&#x60;)
+     */
+    weathertype: Atp45RunTypes;
+    body: Atp45Input
+  }): Observable<Atp45Result> {
+
+    return this.atp45RunPost$Response(params).pipe(
+      map((r: StrictHttpResponse<Atp45Result>) => r.body as Atp45Result)
+    );
   }
 
   /**

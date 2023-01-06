@@ -1,0 +1,10 @@
+<div class="flex flex-row">
+  <app-case-selection class="px-2" (isValid)="onCaseValidityChange($event)" (selectedEvent)="changeSelected($event)" (requiredInputs)="changeRequired($event)"></app-case-selection>
+
+  <!-- <app-location-array [formGroup]="runForm"></app-location-array> -->
+  <app-release-locations-form class="px-2" [numberOfLocations]="numberOfLocations" [parentForm]="runForm"></app-release-locations-form>
+
+  <app-meteo-form class="px-2" [withStability]="stabilityRequired" [parentForm]="runForm"></app-meteo-form>
+</div>
+<button type="submit" (click)="onSubmit()" class="m-3" [ngClass]="{'btn-primary' : canSubmit, 'btn-disabled' : !canSubmit}"> Submit </button>
+

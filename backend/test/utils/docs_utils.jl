@@ -3,7 +3,7 @@ using YAML
 using Test
 
 # const API_DOCS = YAML.load_file(joinpath("..", API_DOC_FILE); dicttype=Dict{String, Any})
-const API_DOCS = YAML.load_file(joinpath("..", "resolved.yaml"); dicttype=Dict{String, Any})
+const API_DOCS = YAML.load_file(joinpath("..", "api_docs.yaml"); dicttype=Dict{String, Any})
 
 
 function response_schema(testroute; method = "get", response = "200", only_required = true)

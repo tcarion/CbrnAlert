@@ -16,25 +16,14 @@ using Test, Main.UserApp, Main.UserApp.Atp45Controller
     schema = response_schema(routepath; method = "GET", response = "200")
     @test keys_in(schema, result)
 
-    routepath = "/atp45/containers"
+    routepath = "/atp45/tree"
     result = get_request_body(routepath; token = token)
-    schema = response_schema(routepath; method = "GET", response = "200")
-    @test keys_in(schema, result)
-    
-    routepath = "/atp45/procedures" 
-    result = get_request_body(routepath; token = token)
-    schema = response_schema(routepath; method = "GET", response = "200")
-    @test keys_in(schema, result)
+    @test result.id == "root"
+    @test haskey(result, :children)
 
-    routepath = "/atp45/incidents"
-    result = get_request_body(routepath; token = token)
-    @test keys_in(schema, result)
-    
     routepath = "/atp45/run/wind"
     payload = post_request_body_schema(routepath)
     schema = response_schema(routepath; method = "POST", response = "200")
     result = post_request_body(routepath, payload; token)
     @test keys_in(schema, result)
-
-
 end

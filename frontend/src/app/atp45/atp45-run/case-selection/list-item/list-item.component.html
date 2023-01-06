@@ -1,0 +1,24 @@
+<div
+  href="#!"
+  class="
+    flex
+    px-6
+    py-2
+    border-b border-gray-200
+    w-full
+    hover:bg-gray-100 hover:text-gray-500
+    focus:outline-none focus:ring-0 focus:bg-gray-200 focus:text-gray-600
+    transition
+    duration-200
+    cursor-pointer
+    flex-row
+    justify-between
+  "
+    > <span>
+      {{ item.paramtype == "group" ? item.content : item.longname }}
+    </span>
+    <div>
+      <mat-icon [ngClass] = "{'hidden': item.description === undefined}" [matTooltip]="item.description || ''">info</mat-icon>
+      <mat-icon [ngClass] = "{'hidden': item.note === undefined}" [matTooltip]="item.note || ''">notes</mat-icon>
+    </div>
+  </div>
