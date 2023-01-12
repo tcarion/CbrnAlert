@@ -20,9 +20,7 @@ using CbrnAlertApp.FlexpartOutputs
 
 const DEFAULT_COLOR_SCHEME = ColorSchemes.jet
 
-function _output_by_uuid()
-    output_id = Genie.Router.params(:outputId)
-    @show output_id
+function _output_by_uuid(output_id)
     findone(FlexpartOutput, uuid = output_id)
 end
 
@@ -94,7 +92,8 @@ function _slice(path::String, layerName, zdims)
 end
 function get_slice()
     pl = jsonpayload()
-    fpoutput = _output_by_uuid()
+    outputId = Genie.Router.params(:outputId)
+    fpoutput = _output_by_uuid(outputId)
     layerName = Genie.Router.params(:layer)
     to_geojson = Genie.Router.params(:geojson, "false")
     to_geojson = Base.parse(Bool, to_geojson)
@@ -163,7 +162,7 @@ function cell_coords(raster, i, j, dx, dy)
 end
 
 function getcolors(collection)
-    vals = [f.val for f in collect(collection)]
+    vals = collection.val
     minval = minimum(vals)
     maxval = maximum(vals)
     ticks = range(minval, maxval, length=10)
