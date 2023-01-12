@@ -329,7 +329,7 @@ function post_run()
     else
         error("Not implemented yet")
     end
-    result = ATP45.run(categories..., weather_inputs..., releases)
+    result = run_atp(categories..., weather_inputs..., releases)
     response = Dict(
         :collection => geo2dict(result),
         :metadata => Dict(:meta => "test")

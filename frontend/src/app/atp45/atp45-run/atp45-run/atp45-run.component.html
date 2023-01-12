@@ -6,5 +6,5 @@
 
   <app-meteo-form class="px-2" [withStability]="stabilityRequired" [parentForm]="runForm"></app-meteo-form>
 </div>
-<button type="submit" (click)="onSubmit()" class="m-3" [ngClass]="{'btn-primary' : canSubmit, 'btn-disabled' : !canSubmit}"> Submit </button>
+<button type="submit" (click)="onSubmit()" [attr.disabled]="!canSubmit ? true: null" class="m-3" [ngClass]="{'btn-primary' : canSubmit, 'btn-disabled' : !canSubmit}"> Submit </button>
 
