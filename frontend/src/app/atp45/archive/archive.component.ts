@@ -1,4 +1,3 @@
-import { wrongLonValidator } from 'src/app/shared/validators';
 import { WebsocketService } from 'src/app/core/services/websocket.service';
 import { NotificationService } from 'src/app/core/services/notification.service';
 import { FormService } from '../../core/services/form.service';
@@ -67,8 +66,6 @@ export class ArchiveComponent extends AbstractWsComponent implements OnInit, OnD
         this.mapSubscription = this.mapService.mapEventSubject.subscribe({
             next: (event) => {
                 if (event == 'areaSelection') {
-                    let area = this.mapService.cbrnMap.layerToArea(this.mapService.cbrnMap.areaSelection);
-                    this.formGroup.get('area')?.patchValue(area);
                 }
             }
         });
@@ -79,8 +76,6 @@ export class ArchiveComponent extends AbstractWsComponent implements OnInit, OnD
         super.ngOnInit();
         this.formGroup = this.formService.toFormGroup(this.formItems.items);
 
-        this.mapService.addDrawControl();
-        this.mapService.onAreaSelectionInit();
     }
 
     onSubmit() {
@@ -97,8 +92,6 @@ export class ArchiveComponent extends AbstractWsComponent implements OnInit, OnD
 
     ngOnDestroy() {
         super.ngOnDestroy();
-        this.mapService.cbrnMap.removeDrawControl();
-        this.mapService.cbrnMap.removeLayer(this.mapService.cbrnMap.areaSelection);
         this.mapSubscription.unsubscribe();
     }
 

@@ -107,6 +107,5 @@ export class RealtimeComponent implements OnInit, OnDestroy, AfterViewInit {
 
     ngOnDestroy() {
         // this.mapSubscription.unsubscribe();
-        this.mapService.offClickEvent();
     }
 }

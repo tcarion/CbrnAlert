@@ -65,7 +65,6 @@ export class PreloadedFormComponent implements OnInit, OnDestroy, OnChanges, Aft
     ngAfterViewInit() {
 
         this.formService.lonlatValid(this.formGroup).subscribe(() => {
-            this.mapService.cbrnMap.marker = this.formService.getLonlat(this.formGroup);
         })
     }
 
@@ -74,20 +73,16 @@ export class PreloadedFormComponent implements OnInit, OnDestroy, OnChanges, Aft
             const newGribData = changes.gribData.currentValue;
 
             this.updateStepSelection(newGribData);
-            this.mapService.cbrnMap.newAvailableArea(newGribData.area);
         }
     }
 
     ngOnInit(): void {
         this.formGroup = this.formService.toFormGroup(this.formItems.items);
 
-        this.mapService.onClickInit();
 
         this.mapSubscription = this.mapService.mapEventSubject.subscribe(
             (event) => {
                 if (event == 'newMarker') {
-                    let marker = this.mapService.cbrnMap.marker;
-                    this.formService.patchMarker(this.formGroup, marker);
                 }
             }
         );
@@ -123,8 +118,6 @@ export class PreloadedFormComponent implements OnInit, OnDestroy, OnChanges, Aft
 
     ngOnDestroy() {
         this.mapSubscription.unsubscribe();
-        this.mapService.offClickEvent();
-        this.mapService.cbrnMap.removeAvailableArea();
     }
 
 }

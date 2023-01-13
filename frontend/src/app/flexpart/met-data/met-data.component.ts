@@ -1,6 +1,5 @@
 import { AroundPipe } from 'src/app/core/pipes/around.pipe';
 
-import { CbrnMap } from '../../core/models/cbrn-map';
 import { Subscription } from 'rxjs';
 import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
@@ -114,8 +113,6 @@ export class MetDataComponent extends AbstractWsComponent implements OnInit, OnD
         this.mapSubscription = this.mapService.mapEventSubject.subscribe({
             next: (event) => {
                 if (event == 'areaSelection') {
-                    let area = this.mapService.cbrnMap.layerToArea(this.mapService.cbrnMap.areaSelection);
-                    this.formGroup.get('area')?.patchValue(area);
                 }
             }
         });
@@ -125,8 +122,6 @@ export class MetDataComponent extends AbstractWsComponent implements OnInit, OnD
         super.ngOnInit();
         this.formGroup = this.formService.toFormGroup(this.formItems.items);
 
-        this.mapService.addDrawControl();
-        this.mapService.onAreaSelectionInit();
     }
 
     onSubmit() {
@@ -140,8 +135,6 @@ export class MetDataComponent extends AbstractWsComponent implements OnInit, OnD
 
     ngOnDestroy() {
         super.ngOnDestroy();
-        this.mapService.cbrnMap.removeDrawControl();
-        this.mapService.cbrnMap.removeLayer(this.mapService.cbrnMap.areaSelection);
         this.mapSubscription.unsubscribe();
     }
 

@@ -149,23 +149,15 @@ export class FlexpartRunPreloadedFormComponent extends AbstractWsComponent imple
 
     ngOnInit(): void {
         super.ngOnInit();
-        this.mapService.onClickInit();
-
-        this.mapService.addDrawControl();
-        this.mapService.onAreaSelectionInit();
 
         this.formGroup = this.formService.toFormGroup(this.formItems.items);
 
         this.mapSubscription = this.mapService.mapEventSubject.subscribe({
             next: (event) => {
                 if (event == 'areaSelection') {
-                    let area = this.mapService.cbrnMap.layerToArea(this.mapService.cbrnMap.areaSelection);
-                    this.formGroup.get('area')?.patchValue(area);
                 }
 
                 if (event == 'newMarker') {
-                    let marker = this.mapService.cbrnMap.marker;
-                    this.formService.patchMarker(this.formGroup, marker);
                 }
             }
         });
@@ -173,7 +165,6 @@ export class FlexpartRunPreloadedFormComponent extends AbstractWsComponent imple
 
     ngAfterViewInit() {
         this.formService.lonlatValid(this.formGroup).subscribe(() => {
-            this.mapService.cbrnMap.marker = this.formService.getLonlat(this.formGroup);
         })
     }
 
@@ -246,9 +237,7 @@ export class FlexpartRunPreloadedFormComponent extends AbstractWsComponent imple
     ngOnDestroy(): void {
         super.ngOnDestroy();
         this.store.dispatch(new MapAction.RemoveArea());
-        this.mapService.cbrnMap.removeDrawControl();
         this.mapSubscription.unsubscribe();
-        this.mapService.offClickEvent();
     }
 
 }
