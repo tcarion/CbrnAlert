@@ -8,7 +8,6 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { FlexpartPlotComponent } from './flexpart-plot/flexpart-plot.component';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FlexpartRunPreloadedFormComponent } from './flexpart-run-preloaded/flexpart-run-preloaded-form/flexpart-run-preloaded-form.component';
 import { SharedModule } from '../shared/shared.module';
 import { FlexpartService } from './flexpart.service';
 import { FlexpartRoutingModule } from './flexpart-routing.module';
@@ -30,7 +29,6 @@ import { RetrieveMeteoSimpleComponent } from './retrieve-meteo-simple/retrieve-m
 
 @NgModule({
     declarations: [
-        FlexpartRunPreloadedFormComponent,
         FlexpartPlotComponent,
         OutputsComponent,
         VariableSelectionComponent,
