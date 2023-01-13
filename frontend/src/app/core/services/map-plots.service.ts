@@ -67,6 +67,7 @@ export class MapPlotsService {
     let newPlot = new MapPlot(type);
     console.log(geoRaster);
     newPlot.data = geoRaster;
+    newPlot.metadata = this._colorbarFromGeoRaster(geoRaster)
     return newPlot
   }
 
@@ -77,11 +78,19 @@ export class MapPlotsService {
     const min = geoRaster.mins[0];
     const max = geoRaster.maxs[0];
     const range = geoRaster.ranges[0];
-    let scale = chroma.scale("Viridis");
-
+    let scale = this._colorScale()
     const imageryLayer = new GeoRasterLayer({
       georaster: geoRaster,
-      pixelValuesToColorFn: pixelValues => this._mapPixels(pixelValues, scale, min, range),
+      pixelValuesToColorFn: pixelValues => {
+        let pixelValue = pixelValues[0]; // there's just one band in this raster
+
+        if (pixelValue === 0) return "";
+        // console.log("nir:", nir);
+        let scaledPixelValue = (pixelValue - min) / range;
+        let color = scale(scaledPixelValue).hex();
+
+        return color;
+      },
       resolution: 64,
       opacity: 0.8
     });
@@ -89,15 +98,27 @@ export class MapPlotsService {
     return imageryLayer as typeof GeoRasterLayer;
   }
 
-  _mapPixels(pixelValues: number[], scale:chroma.Scale, min: number, range: any) {
-    let pixelValue = pixelValues[0]; // there's just one band in this raster
+  _colorScale() {
+    return chroma.scale("Viridis");
+  }
 
-      if (pixelValue === 0) return "";
-      // console.log("nir:", nir);
-      let scaledPixelValue = (pixelValue - min) / range;
-      let color = scale(scaledPixelValue).hex();
-
-      return color;
+  _colorbarFromGeoRaster(geoRaster: any, length = 10): ColorbarData {
+    const min: number = geoRaster.mins[0];
+    const max: number = geoRaster.maxs[0];
+    const range = geoRaster.ranges[0];
+    let scale = this._colorScale().domain([min, max]);
+    let ticks: number[] = [];
+    let colors: string[] = [];
+    let step = range / (length - 1);
+    for (let i = 0; i < length; i++) {
+      let tick = min + (step * i)
+      ticks.push(tick);
+      colors.push(scale(tick).hex())
+    }
+    return {
+      colors,
+      ticks
+    };
   }
 
   setColors(layers: LayerGroup, colorbar: ColorbarData) {
