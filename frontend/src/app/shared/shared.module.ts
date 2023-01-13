@@ -8,7 +8,6 @@ import { FormTemplateModule } from './form/form-template.module';
 import { SelectionTableModule } from './selection-table/selection-table.module';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
-import { MapComponent } from './map/map.component';
 import { MatListModule } from '@angular/material/list';
 import { TopbarModule } from './topbar/topbar.module';
 // import { SelectionDialogModule } from 'src/app/flexpart/selection-dialog/selection-dialog.module';
@@ -21,7 +20,6 @@ import { SetDateExtremaDirective } from './set-date-extrema.directive';
 
 @NgModule({
   declarations: [
-    MapComponent,
     SetDateExtremaDirective,
     // InfoButtonComponent
   ],
@@ -42,7 +40,6 @@ import { SetDateExtremaDirective } from './set-date-extrema.directive';
     // SelectionDialogModule,
     SelectionListModule,
     TopbarModule,
-    MapComponent,
     LeafletMapComponent,
     SetDateExtremaDirective,
     // InfoButtonComponent,
