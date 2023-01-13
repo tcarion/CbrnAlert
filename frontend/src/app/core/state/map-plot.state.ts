@@ -13,6 +13,12 @@ export namespace MapPlotAction {
     constructor(public plotData: GeoJsonSliceResponse | Atp45Result, public type: PlotType) { }
   }
 
+  export class AddTiff {
+    static readonly type = '[MapPlot] AddTiff'
+
+    constructor(public plotData: Blob, public type: PlotType) { }
+  }
+
   export class Hide {
     static readonly type = '[MapPlot] Hide'
 
@@ -93,12 +99,31 @@ export class MapPlotState {
     //     mapPlots: [...state.mapPlots, mapPlot]
     // })
 
-    let mapPlot = this.mapPlotService.createMapPlot(action);
+    let mapPlot = this.mapPlotService.createMapPlotGeoJSON(action);
     ctx.setState(produce(draft => {
       draft.mapPlots.push(mapPlot);
     }))
 
     return ctx.dispatch(new MapPlotAction.SetActive(mapPlot.id))
+  }
+
+  @Action(MapPlotAction.AddTiff)
+  addTiff(ctx: StateContext<MapPlotStateModel>, action: MapPlotAction.AddTiff) {
+    // const state = ctx.getState();
+    // let mapPlot = this.mapPlotService.createMapPlot(action);
+
+    // ctx.patchState({
+    //     mapPlots: [...state.mapPlots, mapPlot]
+    // })
+
+    this.mapPlotService.createMapPlotTiff(action).then(res => {
+      let mapPlot = res
+      ctx.setState(produce(draft => {
+        draft.mapPlots.push(mapPlot);
+      }))
+
+      return ctx.dispatch(new MapPlotAction.SetActive(mapPlot.id))
+    });
   }
 
   @Action(MapPlotAction.Show)

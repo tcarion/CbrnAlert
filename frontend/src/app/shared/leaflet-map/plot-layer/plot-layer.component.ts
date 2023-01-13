@@ -7,7 +7,7 @@ import {
   OnDestroy,
 } from '@angular/core';
 import { Feature, FeatureCollection } from 'geojson';
-import { FeatureGroup, Layer, LayerGroup } from 'leaflet';
+import { FeatureGroup, Layer, LayerGroup, TileLayer } from 'leaflet';
 import { ColorbarData } from 'src/app/core/api/models';
 import { MapPlot } from 'src/app/core/models/map-plot';
 import { MapPlotsService } from 'src/app/core/services/map-plots.service';
@@ -42,7 +42,7 @@ export class PlotLayerComponent implements OnInit, OnDestroy {
 
   @Select(MapPlotState.activePlot) activePlot$: Observable<MapPlot>;;
 
-  layer: FeatureGroup;
+  layer: FeatureGroup | TileLayer;
   sub: Subscription;
 
   constructor(
@@ -52,20 +52,38 @@ export class PlotLayerComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     if (this.mapPlot.type == 'flexpart') {
-      this.layer = this.mapPlotsService.flexpartPlotToLayer(this.mapPlot.geojson as FeatureCollection);
-      this.mapPlotsService.setColors(this.layer as LayerGroup, this.mapPlot.metadata as ColorbarData);
+      if (this.mapPlot.geojson !== undefined) {
+        this.layer = this.mapPlotsService.flexpartPlotToLayer(this.mapPlot.geojson as FeatureCollection);
+        this.mapPlotsService.setColors(this.layer as LayerGroup, this.mapPlot.metadata as ColorbarData);
+
+        this.sub = this.activePlot$.subscribe(plot => {
+          if (plot !== undefined) {
+            const layer = this.layer as FeatureGroup
+            if (this.mapPlot.id == plot.id) {
+              layer.setStyle({ opacity: 0.6 })
+            } else {
+              layer.setStyle({ opacity: 0.2 })
+            }
+          }
+        });
+      } else {
+        this.layer = this.mapPlotsService.addTiff(this.mapPlot.data) as unknown as TileLayer;
+
+        this.sub = this.activePlot$.subscribe(plot => {
+          if (plot !== undefined) {
+            const layer = this.layer as TileLayer
+            if (this.mapPlot.id == plot.id) {
+              layer.setOpacity(0.6)
+            } else {
+              layer.setOpacity(0.2)
+            }
+          }
+        });
+      }
+
       this.layer.on('click', layer => {
         this.store.dispatch(new MapPlotAction.SetActive(this.mapPlot.id))
       })
-      this.sub = this.activePlot$.subscribe(plot => {
-        if (plot !== undefined) {
-          if (this.mapPlot.id == plot.id) {
-            (this.layer as FeatureGroup).setStyle({ opacity: 0.6, fillOpacity: 0.8 })
-          } else {
-            (this.layer as FeatureGroup).setStyle({ opacity: 0.2, fillOpacity: 0.2 })
-          }
-        }
-      });
     } else if (this.mapPlot.type == 'atp45') {
       let featureGroup = this.mapPlotsService.atp45PlotToLayer(this.mapPlot.geojson as FeatureCollection);
       featureGroup.eachLayer((layers: any) => {

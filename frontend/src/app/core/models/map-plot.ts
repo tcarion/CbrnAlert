@@ -10,6 +10,8 @@ export interface MapPlot {
   type: PlotType,
   name: string,
   id: number,
+  // TODO: make it parametric
+  data?: any,
   geojson?: FeatureCollection | FeatureCollection[],
   // layer?: L.Layer,
   // info?: Object,

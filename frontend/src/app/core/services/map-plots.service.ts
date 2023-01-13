@@ -6,6 +6,10 @@ import { MapService } from './map.service';
 import { Feature, FeatureCollection } from 'geojson';
 import { ColorbarData } from '../api/models';
 import { circle, circleMarker, FeatureGroup, geoJSON, LayerGroup } from 'leaflet';
+import parseGeoraster from 'georaster';
+import GeoRasterLayer from 'georaster-layer-for-leaflet';
+import chroma from 'chroma-js';
+
 
 const POINT_MARKER_OPTIONS = {
   radius: 2,
@@ -49,12 +53,51 @@ export class MapPlotsService {
     private mapService: MapService,
   ) { }
 
-  fillPlot(plotData: Atp45Result | GeoJsonSliceResponse, type: PlotType) {
+  fillPlotGeoJSON(plotData: Atp45Result | GeoJsonSliceResponse, type: PlotType) {
     let newPlot = new MapPlot(type);
 
     newPlot.metadata = plotData.metadata
     newPlot.geojson = plotData.collection as FeatureCollection;
     return newPlot;
+  }
+
+  async fillPlotTiff(plotData: Blob, type: PlotType) {
+    const arrayBuffer = await plotData.arrayBuffer()
+    const geoRaster = await parseGeoraster(arrayBuffer);
+    let newPlot = new MapPlot(type);
+    console.log(geoRaster);
+    newPlot.data = geoRaster;
+    return newPlot
+  }
+
+  addTiff(geoRaster: any) {
+    console.log(geoRaster)
+
+    // inspired from https://github.com/GeoTIFF/georaster-layer-for-leaflet-example/blob/master/examples/color-scale.html
+    const min = geoRaster.mins[0];
+    const max = geoRaster.maxs[0];
+    const range = geoRaster.ranges[0];
+    let scale = chroma.scale("Viridis");
+
+    const imageryLayer = new GeoRasterLayer({
+      georaster: geoRaster,
+      pixelValuesToColorFn: pixelValues => this._mapPixels(pixelValues, scale, min, range),
+      resolution: 64,
+      opacity: 0.8
+    });
+
+    return imageryLayer as typeof GeoRasterLayer;
+  }
+
+  _mapPixels(pixelValues: number[], scale:chroma.Scale, min: number, range: any) {
+    let pixelValue = pixelValues[0]; // there's just one band in this raster
+
+      if (pixelValue === 0) return "";
+      // console.log("nir:", nir);
+      let scaledPixelValue = (pixelValue - min) / range;
+      let color = scale(scaledPixelValue).hex();
+
+      return color;
   }
 
   setColors(layers: LayerGroup, colorbar: ColorbarData) {
@@ -123,8 +166,13 @@ export class MapPlotsService {
   }
 
 
-  createMapPlot({ type, plotData }: any) {
-    let mapPlot = this.fillPlot(plotData, type)
+  createMapPlotGeoJSON({ type, plotData }: any) {
+    let mapPlot = this.fillPlotGeoJSON(plotData, type)
+    return mapPlot;
+  }
+
+  createMapPlotTiff({ type, plotData }: any) {
+    let mapPlot = this.fillPlotTiff(plotData, type)
     return mapPlot;
   }
 }

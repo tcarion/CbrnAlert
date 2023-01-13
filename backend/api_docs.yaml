@@ -1047,6 +1047,10 @@ paths:
                 oneOf:
                  - $ref: '#/components/schemas/RawSliceResponse'
                  - $ref: '#/components/schemas/GeoJsonSliceResponse'
+            image/tiff:
+              schema:
+                type: string
+                format: binary
 
 
   /atp45/containers:

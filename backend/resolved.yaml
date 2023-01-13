@@ -428,6 +428,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/inline_response_200_1'
+            image/tiff:
+              schema:
+                type: string
+                format: binary
   /atp45/containers:
     get:
       tags:

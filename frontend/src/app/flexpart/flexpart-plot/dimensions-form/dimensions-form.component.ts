@@ -10,6 +10,11 @@ import { FlexpartService } from '../../flexpart.service';
 import { Store } from '@ngxs/store';
 import { switchMap } from 'rxjs/operators';
 
+enum SliceResponseType {
+  GEOJSON = 'geojson',
+  GEOTIFF = 'geotiff',
+}
+
 @Component({
   selector: 'app-dimensions-form',
   templateUrl: './dimensions-form.component.html',
@@ -26,6 +31,8 @@ export class DimensionsFormComponent implements OnChanges {
   questions$: Observable<QuestionBase<any>[]>;
 
   dimForm: UntypedFormGroup;
+
+  responseFormat: SliceResponseType = SliceResponseType.GEOTIFF
 
   constructor(
     private route: ActivatedRoute,
@@ -67,12 +74,21 @@ export class DimensionsFormComponent implements OnChanges {
       }
     });
 
+    const toGeoJSON = this.responseFormat == SliceResponseType.GEOJSON
     console.log(this.formGroup.value.dimensions)
-    this.flexpartService.getSlice(outputId as string, layerName as string, this.formGroup.value.dimensions).subscribe(res => {
-      const geores = res as GeoJsonSliceResponse;
-      console.log(geores)
-      this.store.dispatch(new MapPlotAction.Add(geores, 'flexpart'))
-    });
+
+    if (toGeoJSON) {
+      this.flexpartService.getSliceJson(outputId as string, layerName as string, toGeoJSON, this.formGroup.value.dimensions).subscribe(res => {
+        const geores = res as GeoJsonSliceResponse;
+        console.log(geores)
+        this.store.dispatch(new MapPlotAction.Add(geores, 'flexpart'))
+      })
+    } else {
+      this.flexpartService.getSliceTiff(outputId as string, layerName as string, toGeoJSON, this.formGroup.value.dimensions).subscribe(res => {
+        console.log(res)
+        this.store.dispatch(new MapPlotAction.AddTiff(res, 'flexpart'))
+      })
+    }
   }
 
 }

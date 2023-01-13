@@ -598,11 +598,11 @@ export class FlexpartApiService extends BaseService {
    * Return a slice of the `output` according to some dimensions.
    *
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `flexpartOutputsOutputIdSlicePost()` instead.
+   * To access only the response body, use `flexpartOutputsOutputIdSlicePost$Json()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  flexpartOutputsOutputIdSlicePost$Response(params: {
+  flexpartOutputsOutputIdSlicePost$Json$Response(params: {
 
     /**
      * Name of the layer to slice
@@ -655,11 +655,11 @@ export class FlexpartApiService extends BaseService {
    * Return a slice of the `output` according to some dimensions.
    *
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `flexpartOutputsOutputIdSlicePost$Response()` instead.
+   * To access the full response (for headers, for example), `flexpartOutputsOutputIdSlicePost$Json$Response()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  flexpartOutputsOutputIdSlicePost(params: {
+  flexpartOutputsOutputIdSlicePost$Json(params: {
 
     /**
      * Name of the layer to slice
@@ -688,8 +688,107 @@ export class FlexpartApiService extends BaseService {
 }
   }): Observable<InlineResponse2001> {
 
-    return this.flexpartOutputsOutputIdSlicePost$Response(params).pipe(
+    return this.flexpartOutputsOutputIdSlicePost$Json$Response(params).pipe(
       map((r: StrictHttpResponse<InlineResponse2001>) => r.body as InlineResponse2001)
+    );
+  }
+
+  /**
+   * Return a slice of the `output` according to some dimensions.
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `flexpartOutputsOutputIdSlicePost$Tiff()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  flexpartOutputsOutputIdSlicePost$Tiff$Response(params: {
+
+    /**
+     * Name of the layer to slice
+     */
+    layer: string;
+
+    /**
+     * If true, the output is given in geojson format. The sliced layer must be a surface.
+     */
+    geojson?: boolean;
+
+    /**
+     * If true, data for legend is provided
+     */
+    legend?: boolean;
+
+    /**
+     * The output ID
+     */
+    outputId: string;
+
+    /**
+     * dimensions to be sliced along
+     */
+    body: {
+}
+  }): Observable<StrictHttpResponse<Blob>> {
+
+    const rb = new RequestBuilder(this.rootUrl, FlexpartApiService.FlexpartOutputsOutputIdSlicePostPath, 'post');
+    if (params) {
+      rb.query('layer', params.layer, {"style":"form","explode":true});
+      rb.query('geojson', params.geojson, {"style":"form","explode":true});
+      rb.query('legend', params.legend, {"style":"form","explode":true});
+      rb.path('outputId', params.outputId, {"style":"simple","explode":false});
+      rb.body(params.body, 'application/json');
+    }
+
+    return this.http.request(rb.build({
+      responseType: 'blob',
+      accept: 'image/tiff'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<Blob>;
+      })
+    );
+  }
+
+  /**
+   * Return a slice of the `output` according to some dimensions.
+   *
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `flexpartOutputsOutputIdSlicePost$Tiff$Response()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  flexpartOutputsOutputIdSlicePost$Tiff(params: {
+
+    /**
+     * Name of the layer to slice
+     */
+    layer: string;
+
+    /**
+     * If true, the output is given in geojson format. The sliced layer must be a surface.
+     */
+    geojson?: boolean;
+
+    /**
+     * If true, data for legend is provided
+     */
+    legend?: boolean;
+
+    /**
+     * The output ID
+     */
+    outputId: string;
+
+    /**
+     * dimensions to be sliced along
+     */
+    body: {
+}
+  }): Observable<Blob> {
+
+    return this.flexpartOutputsOutputIdSlicePost$Tiff$Response(params).pipe(
+      map((r: StrictHttpResponse<Blob>) => r.body as Blob)
     );
   }
 

@@ -132,11 +132,32 @@ export class FlexpartService {
     return this.apiService.flexpartOutputsOutputIdDimensionsGet({ outputId, layer, horizontal: false })
   }
 
-  getSlice(outputId: string, layerName: string, dimensions: Object) {
-    return this.apiService.flexpartOutputsOutputIdSlicePost({
+  getSlice(outputId: string, layerName: string, geojson: boolean, dimensions: Object) {
+    const f = geojson ? this.apiService.flexpartOutputsOutputIdSlicePost$Json : this.apiService.flexpartOutputsOutputIdSlicePost$Tiff
+    return f({
       outputId,
       layer: layerName,
-      geojson: true,
+      geojson: geojson,
+      legend: true,
+      body: dimensions
+    })
+  }
+
+  getSliceJson(outputId: string, layerName: string, geojson: boolean, dimensions: Object) {
+    return this.apiService.flexpartOutputsOutputIdSlicePost$Json({
+      outputId,
+      layer: layerName,
+      geojson: geojson,
+      legend: true,
+      body: dimensions
+    })
+  }
+
+  getSliceTiff(outputId: string, layerName: string, geojson: boolean, dimensions: Object) {
+    return this.apiService.flexpartOutputsOutputIdSlicePost$Tiff({
+      outputId,
+      layer: layerName,
+      geojson: geojson,
       legend: true,
       body: dimensions
     })

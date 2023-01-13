@@ -6,6 +6,8 @@ using Genie.Renderer.Json: json
 using SearchLight
 using SearchLight.Relationships
 
+using UUIDs
+
 using JSON3
 using Dates
 # using GeoJSON
@@ -108,10 +110,24 @@ function get_slice()
         end
         result |> json
     else
-        viewed |> read |> json
+        _respond_tiff(viewed)
+        # viewed |> read |> json
     end
 end
 
+function _respond_tiff(raster)
+    filename = string(UUIDs.uuid4()) * ".tiff"
+    tmpfile = joinpath("tmp", filename)
+    trimed = Rasters.trim(replace(raster, 0. => nothing))
+    try
+        filename = Rasters.write(tmpfile, replace(trimed, nothing => 0.); options= Dict("COMPRESS"=>"DEFLATE"))
+        Genie.Router.serve_file(filename)
+    catch
+        rethrow()
+    finally
+        rm(tmpfile)
+    end
+end
 
 function to_geointerface(raster)
     if !hasdim(raster, X) || !hasdim(raster, Y) || ndims(raster) !== 2
