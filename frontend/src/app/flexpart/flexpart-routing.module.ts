@@ -1,10 +1,8 @@
 import { RetrieveMeteoSimpleComponent } from './retrieve-meteo-simple/retrieve-meteo-simple.component';
 import { VariableSelectionComponent } from './flexpart-plot/variable-selection/variable-selection.component';
-import { MetDataComponent } from './met-data/met-data.component';
 import { FlexpartPlotComponent } from './flexpart-plot/flexpart-plot.component';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { FlexpartRunPreloadedComponent } from './flexpart-run-preloaded/flexpart-run-preloaded.component';
 import { DimensionsFormComponent } from './flexpart-plot/dimensions-form/dimensions-form.component';
 import { OutputsResolverService } from 'src/app/flexpart/resolvers/output-resolver.service';
 import { PlotStepperComponent } from 'src/app/flexpart/plot-stepper/plot-stepper.component';
@@ -12,10 +10,6 @@ import { OutputsComponent } from './flexpart-plot/outputs/outputs.component';
 import { RunStepperComponent } from './run-stepper/run-stepper.component';
 
 const routes: Routes = [
-  {
-    path: 'metdata',
-    component: MetDataComponent,
-  },
   {
     path: 'retrieve',
     component: RetrieveMeteoSimpleComponent,

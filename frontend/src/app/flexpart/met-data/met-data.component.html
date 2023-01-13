@@ -1,9 +1,0 @@
-<form [formGroup]="formGroup" (ngSubmit)="onSubmit()">
-    <app-dynamic-form
-    *ngFor="let item of formItems.items;"
-    [formGroup]="formGroup"
-    [item]="item"
-    ></app-dynamic-form>
-    <button
-    mat-raised-button color="primary" type="submit" [disabled]="formGroup.invalid">Request archive data</button>
-</form>
