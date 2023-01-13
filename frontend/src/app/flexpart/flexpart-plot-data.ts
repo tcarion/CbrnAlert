@@ -6,3 +6,8 @@ export interface FlexpartPlotData {
     cells: FeatureCollection,
     legendData: {colorbar: string, ticksLabel: any}
 }
+
+export enum SliceResponseType {
+  GEOJSON = 'geojson',
+  GEOTIFF = 'geotiff',
+}

@@ -115,6 +115,7 @@ export class MapPlotsService {
       ticks.push(tick);
       colors.push(scale(tick).hex())
     }
+    colors.shift()
     return {
       colors,
       ticks

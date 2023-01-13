@@ -9,17 +9,12 @@ import { QuestionBase } from 'src/app/shared/form/question-base';
 import { FlexpartService } from '../../flexpart.service';
 import { Store } from '@ngxs/store';
 import { switchMap } from 'rxjs/operators';
-
-enum SliceResponseType {
-  GEOJSON = 'geojson',
-  GEOTIFF = 'geotiff',
-}
+import { SliceResponseType } from 'src/app/flexpart/flexpart-plot-data';
 
 @Component({
   selector: 'app-dimensions-form',
   templateUrl: './dimensions-form.component.html',
   styleUrls: ['./dimensions-form.component.scss'],
-  providers: [FlexpartService]
 })
 export class DimensionsFormComponent implements OnChanges {
 
@@ -32,7 +27,9 @@ export class DimensionsFormComponent implements OnChanges {
 
   dimForm: UntypedFormGroup;
 
-  responseFormat: SliceResponseType = SliceResponseType.GEOTIFF
+  get responseFormat() {
+    return this.flexpartService.selectedSliceType;
+  }
 
   constructor(
     private route: ActivatedRoute,

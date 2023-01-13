@@ -1,3 +1,4 @@
+import { SliceResponseType } from './flexpart-plot-data';
 import { FlexpartRetrieveSimple } from './../core/api/models/flexpart-retrieve-simple';
 import { BehaviorSubject, Observable, of, Subject, throwError } from 'rxjs';
 import { Injectable } from '@angular/core';
@@ -26,6 +27,12 @@ export class FlexpartService {
   resultsSubject = new Subject<FlexpartResult[]>();
   inputsSubject = new Subject<FlexpartInput[]>();
   // plotsSubject = new Subject<FlexpartPlot>();
+
+  _selectedSliceType = SliceResponseType.GEOTIFF
+  get selectedSliceType() { return this._selectedSliceType }
+  set selectedSliceType(t: SliceResponseType) {
+    this._selectedSliceType = t
+  }
 
   constructor(
     private apiService: FlexpartApiService,

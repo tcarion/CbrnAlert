@@ -1,3 +1,6 @@
+<select>
+  <option *ngFor="let stype of sliceTypes" [value]="stype" (click)="selectType(stype)" [attr.selected]="stype == selectedSliceType">{{stype}}</option>
+</select>
 <mat-horizontal-stepper (selectionChange)="selectionChanged($event)" [linear]="true">
   <!-- <mat-step *ngFor="let step of steps; let i = index" [routerLink]="['/step' + i]" [label]="step.title">
       <router-outlet *ngIf="i === selectedStepIndex"></router-outlet>

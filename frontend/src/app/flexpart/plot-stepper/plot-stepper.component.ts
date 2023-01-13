@@ -1,3 +1,5 @@
+import { FlexpartService } from 'src/app/flexpart/flexpart.service';
+import { SliceResponseType } from './../flexpart-plot-data';
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
@@ -12,11 +14,24 @@ export class PlotStepperComponent implements OnInit {
   selectedOutputId: string
   selectedLayer: string
 
-  constructor() {
+  sliceTypes = Object.values(SliceResponseType);
+
+  constructor(
+    private flexpartService: FlexpartService,
+  ) {
   }
 
   ngOnInit(): void {
   }
 
+  selectType(val: SliceResponseType) {
+    console.log(val)
+    this.flexpartService.selectedSliceType = val;
+  }
+  get selectedSliceType() {
+    return this.flexpartService.selectedSliceType;
+  }
+
   selectionChanged(e: any) { }
+
 }
