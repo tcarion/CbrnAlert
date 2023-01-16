@@ -325,9 +325,9 @@ function post_run()
     releases = ReleaseLocation(_parse_locations(locations))
 
     weather_inputs = if runtype == "manually"
-        _inputs_from_request(payload)
-    else
-        error("Not implemented yet")
+        _manual_weather_inputs(payload)
+    elseif runtype == "forecast"
+        _forecast_weather_inputs(payload)
     end
     result = run_atp(categories..., weather_inputs..., releases)
     response = Dict(
@@ -337,7 +337,59 @@ function post_run()
     response |> json
 end
 
-function _inputs_from_request(payload)
+function _forecast_weather_inputs(payload)
+    locations = payload["locations"]
+    lon, lat = locations[1].lon, locations[1].lat 
+
+    input_collection = []
+    weather = get(payload, "weatherInput", nothing)
+    isnothing(weather) && (return input_collection)
+
+    forecasttime = DateTime(weather["start"])
+    leadtime = DateTime(weather["leadtime"])
+
+    step_number = Dates.Hour(leadtime - forecasttime).value
+    fc_req = default_request()
+    target = joinpath("tmp", "tmp.grib")
+
+    # We retrieve a bounding box because I experienced MARS errors when taking too small areas
+    fc_req[:area] = join([ceil(Int, lat) + 1, floor(Int, lon) - 1, floor(Int, lat) - 1, ceil(Int, lon) + 1], "/")
+    fc_req[:target] = target
+
+    fc_req_s = Dict(string(k)=>v for (k,v) in fc_req)
+
+    # Retrieval of the meteorological data with MARS
+    EcRequests.runmars(fc_req_s)
+
+    # Retrieve the 4 nearest points from the input location by reading the grib file `target`
+    nearests = Dict()
+    GribFile(target, mode="r") do grib
+        for message in grib
+            Nearest(message) do near
+                nearests[message["shortName"]] = find(near, message, lon, lat)
+            end
+        end
+    end
+
+    # From the 4 nearest points, we take the first (nearest neigbour interpolation)
+    nearest = (
+        # Coordinates of the nearest point to `lon`, `lat`
+        lon = nearests["10u"][1][1],
+        lat = nearests["10u"][2][1],
+        # West to east horizontal wind component
+        u = nearests["10u"][3][1],
+        # south to north horizontal wind component
+        v = nearests["10v"][3][1],
+        # distance between the the nearest point and `lon`, `lat`
+        distance = nearests["10u"][4][1],
+    )
+
+    @show nearest
+    
+    return [WindVector(nearest.u, nearest.v)]
+end
+
+function _manual_weather_inputs(payload)
     input_collection = []
     weather = get(payload, "weatherInput", nothing)
     isnothing(weather) && (return input_collection)
