@@ -25,6 +25,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { AreaInputComponent } from './area-input/area-input.component';
 import { DatetimePickerModule } from './datetime-picker/datetime-picker.module';
 import { LocationFormModule } from 'src/app/shared/form/location-form/location-form.module';
+import { FieldsetComponent } from 'src/app/shared/form/fieldset/fieldset.component';
 
 
 
@@ -55,7 +56,8 @@ import { LocationFormModule } from 'src/app/shared/form/location-form/location-f
     MatIconModule,
     MatTooltipModule,
     DatetimePickerModule,
-    LocationFormModule
+    LocationFormModule,
+    FieldsetComponent
   ],
   exports: [
     AutoformatSelectComponent,

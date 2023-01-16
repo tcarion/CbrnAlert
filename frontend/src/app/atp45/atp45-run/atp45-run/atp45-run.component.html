@@ -10,7 +10,7 @@
         <app-meteo-form class="px-2" [withStability]="stabilityRequired" [parentForm]="runForm" *ngIf="tab1.active"></app-meteo-form>
       </app-tab>
       <app-tab #tab2 [title]="runTypes.Forecast" [active]="default_runType == runTypes.Forecast">
-        aeazezae
+        <app-forecast-time-select [formGroup]="runForm" [leadtimes]="leadtimes$ | async"  *ngIf="tab2.active"></app-forecast-time-select>
       </app-tab>
       <app-tab #tab3 [title]="runTypes.Archive" [active]="default_runType == runTypes.Archive">
         aeazezae

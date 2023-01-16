@@ -1,3 +1,4 @@
+import { Atp45ApiService } from 'src/app/core/api/services';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { ApiService_old } from 'src/app/core/services/api.service';
@@ -10,7 +11,9 @@ import { FeatureCollection } from 'geojson';
 import { MapPlotsService } from 'src/app/core/services/map-plots.service';
 import { NotificationService } from '../core/services/notification.service';
 import { WebsocketService } from '../core/services/websocket.service';
-import { WindAtp45Input } from '../core/api/models';
+import { ForecastAvailableSteps, WindAtp45Input } from '../core/api/models';
+import { ForecastStartAction } from 'src/app/core/state/atp45.state';
+import { Store } from '@ngxs/store';
 
 @Injectable({
     providedIn: 'root',
@@ -23,17 +26,19 @@ export class Atp45Service {
     inputs$ = this.inputsSubject.asObservable();
     // resultSubject = new Subject<Atp45ShapeData>();
     // result$ = this.resultSubject.asObservable();
-
+    availableForecastSubject = new BehaviorSubject<ForecastAvailableSteps | null>(null);
+    availableForecast$ = this.availableForecastSubject.asObservable();
 
     constructor(
-        private apiService: ApiService_old,
-        private mapPlotsService: MapPlotsService,
+        private apiService_old: ApiService_old,
+        private apiService: Atp45ApiService,
+        private store: Store,
         private notificationService: NotificationService,
         private websocketService: WebsocketService,
     ) { }
 
     getInputs(): Observable<GribData[]> {
-        return this.apiService
+        return this.apiService_old
             .atp45Request({ request: 'available_gribfiles' })
             .pipe(
                 map((data: any) => {
@@ -50,7 +55,7 @@ export class Atp45Service {
             ...payload,
             request: request
         }
-        return this.apiService
+        return this.apiService_old
             .atp45Request(payload)
             .pipe(
                 map((data: any) => {
@@ -108,14 +113,22 @@ export class Atp45Service {
     }
 
     availablesSteps(gribData: GribData) {
-        return this.apiService.atp45Request({
+        return this.apiService_old.atp45Request({
             ...gribData,
             request: "available_steps"
         })
     }
 
+    getAvailableSteps() {
+      // only get the available once
+      this.apiService.forecastAvailableGet().subscribe(res => {
+        this.store.dispatch(new ForecastStartAction.Update(res));
+        this.availableForecastSubject.next(res)
+      })
+    }
+
     realtimeAvailableSteps() {
-        return this.apiService.atp45Request({
+        return this.apiService_old.atp45Request({
             request: "realtime_available_steps"
         })
     }

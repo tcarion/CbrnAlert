@@ -1,16 +1,10 @@
-<form [formGroup]="formGroup">
-    <mat-form-field
-    class="form-control" 
-    appearance="outline" 
-    floatLabel="never">
-        <mat-label> Forecast time </mat-label>
-        <mat-select
+<form [formGroup]="formGroup" appFieldset="Forecast time">
+        <select
         formControlName = "leadtime"
         >
-            <mat-option *ngFor="let option of leadtimes;" [value]="option">
+            <option *ngFor="let option of leadtimes;" [value]="option">
                 {{ option }}
-            </mat-option>
+            </option>
             <!-- </ng-container> -->
-        </mat-select>
-    </mat-form-field>
+        </select>
 </form>

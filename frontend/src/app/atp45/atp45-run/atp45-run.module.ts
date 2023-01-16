@@ -1,3 +1,4 @@
+import { ForecastTimeSelectComponent } from './../../shared/form/forecast-time-select/forecast-time-select.component';
 import { FormDirectivesModule } from './../../directives/form-directives/form-directives.module';
 import { LocationFormModule } from 'src/app/shared/form/location-form/location-form.module';
 import { SharedModule } from 'src/app/shared/shared.module';
@@ -11,7 +12,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconModule } from '@angular/material/icon';
 import { MeteoFormComponent } from './meteo-form/meteo-form.component';
 import { WindFormComponent } from './meteo-form/wind-form/wind-form.component';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Atp45RunComponent } from './atp45-run/atp45-run.component';
 import { StabilityFormComponent } from './meteo-form/stability-form/stability-form.component';
 import { ReleaseLocationsFormComponent } from './release-locations-form/release-locations-form.component';
@@ -30,6 +31,7 @@ import { FieldsetComponent } from 'src/app/shared/form/fieldset/fieldset.compone
     TabsComponent,
     TabComponent,
     FieldsetComponent,
+    SharedModule,
   ],
   providers: [
     Atp45ApiService
