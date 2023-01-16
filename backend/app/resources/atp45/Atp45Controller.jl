@@ -339,7 +339,7 @@ end
 
 function _inputs_from_request(payload)
     input_collection = []
-    weather = get(payload, "weather", nothing)
+    weather = get(payload, "weatherInput", nothing)
     isnothing(weather) && (return input_collection)
 
     wind_payload = get(weather, "wind", nothing)

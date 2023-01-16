@@ -5,14 +5,14 @@
   <app-release-locations-form class="px-2" [numberOfLocations]="numberOfLocations" [parentForm]="runForm"></app-release-locations-form>
 
   <div>
-    <app-tabs>
-      <app-tab #tab1 [title]="runTypes.Manually" [active]="default_runType == runTypes.Manually">
+    <app-tabs #tabs>
+      <app-tab #tab1 [title]="runTypes.Manually" [id]="runTypes.Manually" [active]="default_runType == runTypes.Manually">
         <app-meteo-form class="px-2" [withStability]="stabilityRequired" [parentForm]="runForm" *ngIf="tab1.active"></app-meteo-form>
       </app-tab>
-      <app-tab #tab2 [title]="runTypes.Forecast" [active]="default_runType == runTypes.Forecast">
+      <app-tab #tab2 [title]="runTypes.Forecast" [id]="runTypes.Forecast" [active]="default_runType == runTypes.Forecast">
         <app-forecast-time-select [formGroup]="runForm" [leadtimes]="leadtimes$ | async"  *ngIf="tab2.active"></app-forecast-time-select>
       </app-tab>
-      <app-tab #tab3 [title]="runTypes.Archive" [active]="default_runType == runTypes.Archive">
+      <app-tab #tab3 [title]="runTypes.Archive" [id]="runTypes.Archive" [active]="default_runType == runTypes.Archive">
         aeazezae
       </app-tab>
     </app-tabs>

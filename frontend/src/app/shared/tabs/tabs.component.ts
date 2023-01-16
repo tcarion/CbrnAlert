@@ -17,6 +17,7 @@ import {
   standalone: true,
 })
 export class TabComponent {
+  @Input() id = '';
   @Input() title: string;
   @Input() active = false;
 }
@@ -60,6 +61,10 @@ export class TabsComponent implements AfterContentInit {
     if (activeTabs.length === 0) {
       this.selectTab(this.tabs.first);
     }
+  }
+
+  get activeTab() {
+    return this.tabs.filter((tab) => tab.active)[0];
   }
 
   selectTab(tab: TabComponent) {

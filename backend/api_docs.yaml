@@ -74,6 +74,7 @@ components:
       required:
         - categories
         - locations
+        - weatherInput
       properties:
         categories:
           $ref: '#/components/schemas/Atp45Categories'
@@ -81,8 +82,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/GeoPoint'
-        weather:
-          $ref: '#/components/schemas/Atp45Weather'
+        weatherInput:
+          oneOf:
+            - $ref: '#/components/schemas/Atp45WeatherManual'
+            - $ref: '#/components/schemas/ForecastStep'
+
 
     Atp45Categories:
       description: 'Array of ids, identifying the categories.'
@@ -91,9 +95,12 @@ components:
         type: string
       example: [simplified, chem]
     
-    Atp45Weather:
+    Atp45WeatherManual:
       description: 'Weather conditions description for ATP45, in case it is provided by the user.'
       type: object
+      required:
+        - "stability"
+        - "wind"
       properties:
         wind:
           $ref: '#/components/schemas/WindVelocity'

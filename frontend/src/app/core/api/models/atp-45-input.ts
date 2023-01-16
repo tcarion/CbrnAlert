@@ -1,7 +1,8 @@
 /* tslint:disable */
 /* eslint-disable */
 import { Atp45Categories } from './atp-45-categories';
-import { Atp45Weather } from './atp-45-weather';
+import { Atp45WeatherManual } from './atp-45-weather-manual';
+import { ForecastStep } from './forecast-step';
 import { GeoPoint } from './geo-point';
 
 /**
@@ -10,5 +11,5 @@ import { GeoPoint } from './geo-point';
 export interface Atp45Input {
   categories: Atp45Categories;
   locations: Array<GeoPoint>;
-  weather?: Atp45Weather;
+  weatherInput: (Atp45WeatherManual | ForecastStep);
 }

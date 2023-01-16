@@ -1,14 +1,17 @@
+import { Atp45State } from './../../../core/state/atp45.state';
+import { Atp45Input } from './../../../core/api/models/atp-45-input';
 import { Atp45Service } from 'src/app/atp45/atp45.service';
 import { from, Observable, of } from 'rxjs';
 import { Atp45RunTypes } from './../../../core/api/models/atp-45-run-types';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormGroup, FormRecord } from '@angular/forms';
-import { Atp45Category, ForecastAvailableSteps } from 'src/app/core/api/models';
+import { Atp45Category, Atp45WeatherManual, ForecastAvailableSteps, ForecastStep, GeoPoint } from 'src/app/core/api/models';
 import { Atp45ApiService } from 'src/app/core/api/services';
-import { Store } from '@ngxs/store';
+import { Select, Store } from '@ngxs/store';
 import { MapPlotAction } from 'src/app/core/state/map-plot.state';
-import { map } from 'rxjs/operators';
+import { map, take } from 'rxjs/operators';
 import { ForecastStartAction } from 'src/app/core/state/atp45.state';
+import { TabsComponent } from 'src/app/shared/tabs/tabs.component';
 
 @Component({
   selector: 'app-atp45-run',
@@ -24,6 +27,7 @@ export class Atp45RunComponent implements OnInit {
 
   default_runType: Atp45RunTypes = Atp45RunTypes.Forecast;
   runTypes = Atp45RunTypes;
+  @ViewChild(TabsComponent) tabs: TabsComponent;
 
   leadtimes$: Observable<string[]>;
 
@@ -64,14 +68,34 @@ export class Atp45RunComponent implements OnInit {
     this.canSubmit = this.isCaseSelectionValid && this.runForm.valid;
   }
 
+  get activeTabId() {
+    return this.tabs.activeTab.id;
+  }
+
   onSubmit() {
+    console.log(this.tabs)
+    const locations = this.runForm.get('locations')!.value as GeoPoint[];
+    let weatherInput;
+    const activeTab = this.activeTabId as Atp45RunTypes;
+    if (activeTab == Atp45RunTypes.Manually) {
+      weatherInput = this.runForm.get('weather')!.value as Atp45WeatherManual
+    } else if (activeTab == Atp45RunTypes.Forecast) {
+      const leadtime = this.runForm.get('leadtime')!.value as string
+      let start = "";
+      this.store.select(Atp45State.forecastStart).pipe(take(1)).subscribe(val => start = val)
+      weatherInput = {
+        start,
+        leadtime
+      } as ForecastStep
+    }
+    const body = {
+      categories: this.selectedCases.map((cat) => cat.id),
+      locations,
+      weatherInput
+    } as Atp45Input
     const params = {
-      weathertype: this.default_runType,
-      body: {
-        categories: this.selectedCases.map((cat) => cat.id),
-        locations: this.runForm.get('locations')!.value,
-        weather: this.runForm.get('weather')!.value,
-      },
+      weathertype: activeTab,
+      body
     };
     console.log(params);
     this.api.atp45RunPost(params).subscribe((res) => {

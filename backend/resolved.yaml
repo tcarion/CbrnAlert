@@ -523,11 +523,11 @@ components:
             items:
               $ref: '#/components/schemas/Atp45DecisionTree'
     Atp45Input:
-      description: "Information needed to run ATP45. It requires at least the list of id's for discriminating the decision tree and some release location(s)."
-      type: object
       required:
-        - categories
-        - locations
+      - categories
+      - locations
+      - weatherInput
+      type: object
       properties:
         categories:
           $ref: '#/components/schemas/Atp45Categories'
@@ -535,8 +535,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/GeoPoint'
-        weather:
-          $ref: '#/components/schemas/Atp45Weather'
+        weatherInput:
+          oneOf:
+          - $ref: '#/components/schemas/Atp45WeatherManual'
+          - $ref: '#/components/schemas/ForecastStep'
+      description: Information needed to run ATP45. It requires at least the list of id's for discriminating the decision tree and some release location(s).
     Atp45Categories:
       type: array
       description: Array of ids, identifying the categories.
@@ -545,13 +548,13 @@ components:
       - chem
       items:
         type: string
-    Atp45Weather:
+    Atp45WeatherManual:
       type: object
       properties:
         wind:
           $ref: '#/components/schemas/WindVelocity'
         stability:
-          $ref: '#/components/schemas/Atp45Weather_stability'
+          $ref: '#/components/schemas/Atp45WeatherManual_stability'
       description: Weather conditions description for ATP45, in case it is provided by the user.
     Atp45StabilityClasses:
       type: string
@@ -1186,7 +1189,7 @@ components:
       oneOf:
       - $ref: '#/components/schemas/RawSliceResponse'
       - $ref: '#/components/schemas/GeoJsonSliceResponse'
-    Atp45Weather_stability:
+    Atp45WeatherManual_stability:
       required:
       - stabilityClass
       type: object
