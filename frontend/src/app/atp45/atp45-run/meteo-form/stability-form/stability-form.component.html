@@ -1,6 +1,5 @@
-<fieldset [formGroup]="stabilityForm" class="items-center border border-solid border-gray-300 p-3 max-w-sm">
-  <legend class="text-sm">Stability class:</legend>
+<form [formGroup]="stabilityForm" appFieldset="Stability class">
   <select formControlName="stabilityClass" name="stability" id="stability" class="block w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
     <option *ngFor="let stab of stabilityClasses" [value]="stab">{{ stab }}</option>
   </select>
-</fieldset>
+</form>

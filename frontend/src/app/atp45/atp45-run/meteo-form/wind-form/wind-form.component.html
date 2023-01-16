@@ -5,8 +5,7 @@
   </div>
 </div> -->
 
-<fieldset [formGroup]="windForm" class="items-center border border-solid border-gray-300 p-3 max-w-sm">
-  <legend class="text-sm">Wind:</legend>
+<form [formGroup]="windForm" appFieldset="Wind">
   <div class="flex flex-wrap">
     <div class="flex-col">
       <label for="speed" class="text-xs">Speed:</label>
@@ -17,4 +16,4 @@
       <input appFormInput type="number" formControlName="azimuth" id="azimuth" class="w-20 mx-3">
     </div>
   </div>
-</fieldset>
+</form>

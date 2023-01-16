@@ -1,6 +1,4 @@
 <form [formGroup]="meteoForm">
-  <fieldset [disabled]="isDisabled">
     <app-wind-form *ngIf="withWind" [parentForm]="meteoForm"></app-wind-form>
     <app-stability-form *ngIf="withStability" [parentForm]="meteoForm"></app-stability-form>
-  </fieldset>
 </form>
