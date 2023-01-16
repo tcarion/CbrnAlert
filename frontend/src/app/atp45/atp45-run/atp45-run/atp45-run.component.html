@@ -4,7 +4,19 @@
   <!-- <app-location-array [formGroup]="runForm"></app-location-array> -->
   <app-release-locations-form class="px-2" [numberOfLocations]="numberOfLocations" [parentForm]="runForm"></app-release-locations-form>
 
-  <app-meteo-form class="px-2" [withStability]="stabilityRequired" [parentForm]="runForm"></app-meteo-form>
+  <div>
+    <app-tabs>
+      <app-tab #tab1 [title]="runTypes.Manually" [active]="default_runType == runTypes.Manually">
+        <app-meteo-form class="px-2" [withStability]="stabilityRequired" [parentForm]="runForm" *ngIf="tab1.active"></app-meteo-form>
+      </app-tab>
+      <app-tab #tab2 [title]="runTypes.Forecast" [active]="default_runType == runTypes.Forecast">
+        aeazezae
+      </app-tab>
+      <app-tab #tab3 [title]="runTypes.Archive" [active]="default_runType == runTypes.Archive">
+        aeazezae
+      </app-tab>
+    </app-tabs>
+  </div>
 </div>
 <button type="submit" (click)="onSubmit()" [attr.disabled]="!canSubmit ? true: null" class="m-3" [ngClass]="{'btn-primary' : canSubmit, 'btn-disabled' : !canSubmit}"> Submit </button>
 

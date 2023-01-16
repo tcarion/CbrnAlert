@@ -18,6 +18,7 @@ import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import { MatDividerModule } from '@angular/material/divider';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import { Atp45RunModule } from 'src/app/atp45/atp45-run/atp45-run.module';
+import { TabsComponent } from 'src/app/shared/tabs/tabs.component';
 
 @NgModule({
     declarations: [

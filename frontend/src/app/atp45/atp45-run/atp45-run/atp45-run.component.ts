@@ -17,7 +17,9 @@ export class Atp45RunComponent {
   stabilityRequired: boolean;
   numberOfLocations: number = 1;
   selectedCases: Atp45Category[];
-  runType: Atp45RunTypes = Atp45RunTypes.Manually
+
+  default_runType: Atp45RunTypes = Atp45RunTypes.Forecast
+  runTypes = Atp45RunTypes;
 
   runForm = new FormGroup({});
 
@@ -50,7 +52,7 @@ export class Atp45RunComponent {
 
   onSubmit() {
     const params = {
-      weathertype : this.runType,
+      weathertype : this.default_runType,
       body : {
         categories: this.selectedCases.map(cat => cat.id),
         locations: this.runForm.get('locations')!.value,

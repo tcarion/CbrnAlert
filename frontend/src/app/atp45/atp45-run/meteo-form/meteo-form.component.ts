@@ -12,6 +12,7 @@ export class MeteoFormComponent {
   @Input() withWind: boolean = true;
   @Input() withStability: boolean = true;
   @Input() parentForm: FormRecord;
+  @Input() isDisabled = false;
 
   meteoForm = new FormRecord({})
   // meteoForm = new FormGroup<MeteoForm>({})

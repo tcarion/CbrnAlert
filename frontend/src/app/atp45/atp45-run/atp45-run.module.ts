@@ -15,6 +15,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { Atp45RunComponent } from './atp45-run/atp45-run.component';
 import { StabilityFormComponent } from './meteo-form/stability-form/stability-form.component';
 import { ReleaseLocationsFormComponent } from './release-locations-form/release-locations-form.component';
+import { TabComponent, TabsComponent } from 'src/app/shared/tabs/tabs.component';
 
 @NgModule({
   declarations: [CaseSelectionComponent, ListItemComponent, SelectionListComponent, MeteoFormComponent, WindFormComponent, Atp45RunComponent, StabilityFormComponent, ReleaseLocationsFormComponent],
@@ -25,6 +26,8 @@ import { ReleaseLocationsFormComponent } from './release-locations-form/release-
     ReactiveFormsModule,
     LocationFormModule,
     FormDirectivesModule,
+    TabsComponent,
+    TabComponent,
   ],
   providers: [
     Atp45ApiService
