@@ -41,7 +41,7 @@ const formItems: FormItemBase[] = [
     }),
 ]
 @Component({
-    selector: 'app-archive',
+    selector: 'app-archive-legacy',
     templateUrl: './archive.component.html',
     styleUrls: ['./archive.component.scss']
 })

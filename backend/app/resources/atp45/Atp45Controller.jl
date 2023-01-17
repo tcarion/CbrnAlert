@@ -85,6 +85,10 @@ function post_run()
         _manual_weather_inputs(payload)
     elseif runtype == "forecast"
         _forecast_weather_inputs(payload)
+    elseif runtype == "archive"
+        error("not implemented yes")
+    else
+        error("Wrong parameter")
     end
     result = run_atp(categories..., weather_inputs..., releases)
     response = Dict(

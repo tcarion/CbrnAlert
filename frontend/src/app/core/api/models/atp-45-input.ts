@@ -11,5 +11,7 @@ import { GeoPoint } from './geo-point';
 export interface Atp45Input {
   categories: Atp45Categories;
   locations: Array<GeoPoint>;
-  weatherInput: (Atp45WeatherManual | ForecastStep);
+  weatherInput: (Atp45WeatherManual | ForecastStep | {
+'archiveDate': string;
+});
 }

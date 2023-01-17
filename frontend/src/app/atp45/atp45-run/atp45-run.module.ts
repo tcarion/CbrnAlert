@@ -18,9 +18,10 @@ import { StabilityFormComponent } from './meteo-form/stability-form/stability-fo
 import { ReleaseLocationsFormComponent } from './release-locations-form/release-locations-form.component';
 import { TabComponent, TabsComponent } from 'src/app/shared/tabs/tabs.component';
 import { FieldsetComponent } from 'src/app/shared/form/fieldset/fieldset.component';
+import { ArchiveComponent } from './archive/archive.component';
 
 @NgModule({
-  declarations: [CaseSelectionComponent, ListItemComponent, SelectionListComponent, MeteoFormComponent, WindFormComponent, Atp45RunComponent, StabilityFormComponent, ReleaseLocationsFormComponent],
+  declarations: [CaseSelectionComponent, ListItemComponent, SelectionListComponent, MeteoFormComponent, WindFormComponent, Atp45RunComponent, StabilityFormComponent, ReleaseLocationsFormComponent, ArchiveComponent],
   imports: [
     CommonModule,
     MatTooltipModule,

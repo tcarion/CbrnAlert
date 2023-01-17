@@ -539,6 +539,14 @@ components:
           oneOf:
           - $ref: '#/components/schemas/Atp45WeatherManual'
           - $ref: '#/components/schemas/ForecastStep'
+          - type: object
+            required:
+              - archiveDate
+            properties:
+              archiveDate:
+                type: string
+                format: date-time
+
       description: Information needed to run ATP45. It requires at least the list of id's for discriminating the decision tree and some release location(s).
     Atp45Categories:
       type: array

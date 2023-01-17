@@ -1,0 +1,3 @@
+<form [formGroup]="parentForm" appFieldset="Archive date">
+  <app-datetime-picker formControlName="archiveDate" [max]="maxDate" [steps]="{hour: 1, minute : 60, second : 60}"></app-datetime-picker>
+</form>

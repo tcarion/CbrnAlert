@@ -1,22 +1,28 @@
 <div class="flex flex-row">
-  <app-case-selection class="px-2" (isValid)="onCaseValidityChange($event)" (selectedEvent)="changeSelected($event)" (requiredInputs)="changeRequired($event)"></app-case-selection>
+  <app-case-selection class="px-2" (isValid)="onCaseValidityChange($event)" (selectedEvent)="changeSelected($event)"
+    (requiredInputs)="changeRequired($event)"></app-case-selection>
 
   <!-- <app-location-array [formGroup]="runForm"></app-location-array> -->
-  <app-release-locations-form class="px-2" [numberOfLocations]="numberOfLocations" [parentForm]="runForm"></app-release-locations-form>
+  <app-release-locations-form class="px-2" [numberOfLocations]="numberOfLocations"
+    [parentForm]="runForm"></app-release-locations-form>
 
   <div>
     <app-tabs #tabs>
-      <app-tab #tab1 [title]="runTypes.Manually" [id]="runTypes.Manually" [active]="default_runType == runTypes.Manually">
-        <app-meteo-form class="px-2" [withStability]="stabilityRequired" [parentForm]="runForm" *ngIf="tab1.active"></app-meteo-form>
+      <app-tab #tab1 [title]="runTypes.Manually" [id]="runTypes.Manually"
+        [active]="default_runType == runTypes.Manually">
+        <app-meteo-form class="px-2" [withStability]="stabilityRequired" [parentForm]="runForm"
+          *ngIf="tab1.active"></app-meteo-form>
       </app-tab>
-      <app-tab #tab2 [title]="runTypes.Forecast" [id]="runTypes.Forecast" [active]="default_runType == runTypes.Forecast">
-        <app-forecast-time-select [formGroup]="runForm" [leadtimes]="leadtimes$ | async"  *ngIf="tab2.active"></app-forecast-time-select>
+      <app-tab #tab2 [title]="runTypes.Forecast" [id]="runTypes.Forecast"
+        [active]="default_runType == runTypes.Forecast">
+        <app-forecast-time-select [formGroup]="runForm" [leadtimes]="leadtimes$ | async"
+          *ngIf="tab2.active"></app-forecast-time-select>
       </app-tab>
       <app-tab #tab3 [title]="runTypes.Archive" [id]="runTypes.Archive" [active]="default_runType == runTypes.Archive">
-        aeazezae
+        <app-archive [parentForm]="runForm" *ngIf="tab3.active"></app-archive>
       </app-tab>
     </app-tabs>
   </div>
 </div>
-<button type="submit" (click)="onSubmit()" [attr.disabled]="!canSubmit ? true: null" class="m-3" [ngClass]="{'btn-primary' : canSubmit, 'btn-disabled' : !canSubmit}"> Submit </button>
-
+<button type="submit" (click)="onSubmit()" [attr.disabled]="!canSubmit ? true: null" class="m-3"
+  [ngClass]="{'btn-primary' : canSubmit, 'btn-disabled' : !canSubmit}"> Submit </button>

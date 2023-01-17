@@ -86,6 +86,13 @@ components:
           oneOf:
             - $ref: '#/components/schemas/Atp45WeatherManual'
             - $ref: '#/components/schemas/ForecastStep'
+            - type: object
+              required:
+                - archiveDate
+              properties:
+                archiveDate:
+                  type: string
+                  format: date-time
 
 
     Atp45Categories:

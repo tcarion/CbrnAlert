@@ -87,6 +87,13 @@ export class Atp45RunComponent implements OnInit {
         start,
         leadtime
       } as ForecastStep
+    } else if (activeTab == Atp45RunTypes.Archive) {
+      const archiveDate = this.runForm.get('archiveDate')!.value
+      weatherInput = {
+        archiveDate
+      }
+    } else {
+      throw new Error("Wrong tab ID");
     }
     const body = {
       categories: this.selectedCases.map((cat) => cat.id),
