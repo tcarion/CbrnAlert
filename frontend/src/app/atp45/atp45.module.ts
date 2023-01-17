@@ -6,7 +6,6 @@ import { CommonModule } from '@angular/common';
 import { PreloadedComponent } from './preloaded/preloaded.component';
 import { PreloadedFormComponent } from './preloaded/preloaded-form/preloaded-form.component';
 import { RealtimeComponent } from './realtime/realtime.component';
-import { ArchiveComponent } from './archive/archive.component';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { Atp45Service } from './atp45.service';
 import { Atp45RoutingModule } from './atp45-routing.module';
@@ -18,14 +17,12 @@ import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import { MatDividerModule } from '@angular/material/divider';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import { Atp45RunModule } from 'src/app/atp45/atp45-run/atp45-run.module';
-import { TabsComponent } from 'src/app/shared/tabs/tabs.component';
 
 @NgModule({
     declarations: [
         PreloadedComponent,
         PreloadedFormComponent,
         RealtimeComponent,
-        ArchiveComponent,
         WindFormComponent,
         RunComponent
     ],
@@ -49,7 +46,6 @@ import { TabsComponent } from 'src/app/shared/tabs/tabs.component';
     exports: [
         PreloadedComponent,
         RealtimeComponent,
-        ArchiveComponent,
     ]
 })
 export class Atp45Module { }
