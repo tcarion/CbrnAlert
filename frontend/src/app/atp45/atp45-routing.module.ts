@@ -8,18 +8,7 @@ import { Atp45RunComponent } from 'src/app/atp45/atp45-run/atp45-run/atp45-run.c
 
 
 const routes: Routes = [
-    { path: 'preloaded', component: PreloadedComponent },
-    { path: 'realtime', component: RealtimeComponent },
-    { path: 'run_old', component: RunComponent },
     { path: 'run', component: Atp45RunComponent },
-    // {
-    //     path: ':slug',
-    //     component: EditorComponent,
-    //     canActivate: [AuthGuard],
-    //     resolve: {
-    //         article: EditableArticleResolver
-    //     }
-    // }
 ];
 
 @NgModule({
