@@ -5,7 +5,7 @@ import { Atp45ShapeData } from './shape-data';
 
 import { formatDate } from '@angular/common';
 import { FeatureCollection } from 'geojson';
-import { ForecastAvailableSteps, WindAtp45Input } from '../core/api/models';
+import { ForecastAvailableSteps } from '../core/api/models';
 import { ForecastStartAction } from 'src/app/core/state/atp45.state';
 import { Store } from '@ngxs/store';
 

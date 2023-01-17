@@ -77,42 +77,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Atp45Result'
-  /atp45/run/forecast:
-    post:
-      tags:
-      - Atp45
-      description: Run ATP45 with forecast wind data
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ForecastAtp45Input'
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Atp45Result'
-  /atp45/run/wind:
-    post:
-      tags:
-      - Atp45
-      description: Run ATP45 with request wind data
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/WindAtp45Input'
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Atp45Result'
   /forecast/available:
     get:
       tags:
@@ -432,45 +396,6 @@ paths:
               schema:
                 type: string
                 format: binary
-  /atp45/containers:
-    get:
-      tags:
-      - Atp45
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CbrnContainer'
-  /atp45/procedures:
-    get:
-      tags:
-      - Atp45
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ProcedureType'
-  /atp45/incidents:
-    get:
-      tags:
-      - Atp45
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/IncidentType'
 components:
   schemas:
     User:
@@ -539,14 +464,13 @@ components:
           oneOf:
           - $ref: '#/components/schemas/Atp45WeatherManual'
           - $ref: '#/components/schemas/ForecastStep'
-          - type: object
-            required:
-              - archiveDate
+          - required:
+            - archiveDate
+            type: object
             properties:
               archiveDate:
                 type: string
                 format: date-time
-
       description: Information needed to run ATP45. It requires at least the list of id's for discriminating the decision tree and some release location(s).
     Atp45Categories:
       type: array
@@ -557,6 +481,9 @@ components:
       items:
         type: string
     Atp45WeatherManual:
+      required:
+      - stability
+      - wind
       type: object
       properties:
         wind:
@@ -577,54 +504,6 @@ components:
       - forecast
       - archive
       - manually
-    BasicAtp45Input:
-      required:
-      - containerId
-      - incidentTypeId
-      - locations
-      - procedureTypeId
-      type: object
-      properties:
-        locations:
-          type: array
-          description: Array of release points
-          items:
-            $ref: '#/components/schemas/GeoPoint'
-        procedureTypeId:
-          type: string
-          example: A
-        containerId:
-          type: string
-          example: BML
-        incidentTypeId:
-          type: string
-          example: chem
-    WindAtp45Input:
-      allOf:
-      - $ref: '#/components/schemas/BasicAtp45Input'
-      - required:
-        - stabilityClass
-        - wind
-        type: object
-        properties:
-          wind:
-            $ref: '#/components/schemas/WindVelocity'
-          stabilityClass:
-            type: string
-            example: Unstable
-            enum:
-            - Unstable
-            - Neutral
-            - Stable
-    ForecastAtp45Input:
-      allOf:
-      - $ref: '#/components/schemas/BasicAtp45Input'
-      - required:
-        - date
-        type: object
-        properties:
-          step:
-            $ref: '#/components/schemas/ForecastStep'
     WindVelocity:
       required:
       - azimuth
@@ -694,54 +573,7 @@ components:
                 items:
                   $ref: '#/components/schemas/Atp45Zone'
         metadata:
-          $ref: '#/components/schemas/Atp45Result_metadata'
-    CbrnType:
-      required:
-      - procedureType
-      type: object
-      properties:
-        procedureType:
-          $ref: '#/components/schemas/ProcedureType'
-        container:
-          $ref: '#/components/schemas/CbrnContainer'
-        incident:
-          $ref: '#/components/schemas/IncidentType'
-    CbrnContainer:
-      required:
-      - description
-      - id
-      type: object
-      properties:
-        id:
-          type: string
-          example: SB_RKT
-        description:
-          type: string
-          example: Surface Burst Rocket
-    ProcedureType:
-      required:
-      - description
-      - id
-      type: object
-      properties:
-        id:
-          type: string
-          example: typeA
-        description:
-          type: string
-          example: Non Persistent Agents
-    IncidentType:
-      required:
-      - description
-      - id
-      type: object
-      properties:
-        id:
-          type: string
-          example: chem
-        description:
-          type: string
-          example: Chemical
+          type: object
     Atp45Zone:
       allOf:
       - $ref: '#/components/schemas/Feature'
@@ -1204,13 +1036,6 @@ components:
       properties:
         stabilityClass:
           $ref: '#/components/schemas/Atp45StabilityClasses'
-    Atp45Result_metadata:
-      type: object
-      properties:
-        cbrnType:
-          $ref: '#/components/schemas/CbrnType'
-        wind:
-          $ref: '#/components/schemas/WindVelocity'
     Atp45Zone_properties:
       type: object
       properties:

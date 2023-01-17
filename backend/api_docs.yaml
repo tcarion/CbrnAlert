@@ -134,60 +134,6 @@ components:
         - archive
         - manually
 
-    BasicAtp45Input:
-      type: object
-      required:
-        - "locations"
-        - "procedureTypeId"
-        - "containerId"
-        - "incidentTypeId"
-
-      properties:
-        locations:
-          type: array
-          items:
-            $ref: '#/components/schemas/GeoPoint'
-          description: 'Array of release points'
-        procedureTypeId:
-          type: string
-          example: "A"
-        containerId:
-          type: string
-          example: "BML"
-        incidentTypeId:
-          type: string
-          example: "chem"
-
-    WindAtp45Input:
-
-      allOf:
-        - $ref: '#/components/schemas/BasicAtp45Input'
-        - type: object
-          required:
-            - wind
-            - stabilityClass
-          properties:
-            wind:
-              $ref: '#/components/schemas/WindVelocity'
-            stabilityClass:
-              type: string
-              enum:
-                - Unstable
-                - Neutral
-                - Stable
-              example: "Unstable"
-
-    ForecastAtp45Input:
-      allOf:
-        - $ref: '#/components/schemas/BasicAtp45Input'
-        - type: object
-          required:
-            - date
-          properties:
-            step:
-              $ref: '#/components/schemas/ForecastStep'
-              description: 'Step of the forecast'
-    
     WindVelocity:
       type: object
       required:
@@ -275,63 +221,6 @@ components:
                     #             type: string
         'metadata':
           type: object
-          properties:
-            'cbrnType':
-              $ref: '#/components/schemas/CbrnType'
-            'wind':
-              $ref: '#/components/schemas/WindVelocity'
-
-    CbrnType:
-      type: object
-      required:
-        - 'procedureType'
-      properties:
-        'procedureType':
-          $ref: '#/components/schemas/ProcedureType'
-        'container':
-          $ref: '#/components/schemas/CbrnContainer'
-        'incident':
-          $ref: '#/components/schemas/IncidentType'
-
-    CbrnContainer:
-      type: object
-      required:
-        - 'id'
-        - 'description'
-      properties:
-        'id':
-          type: string
-          example: SB_RKT
-        'description':
-          type: string
-          example: "Surface Burst Rocket"
-
-    ProcedureType:
-      type: object
-      required:
-        - 'id'
-        - 'description'
-      properties:
-        'id':
-          type: string
-          example: typeA
-        'description':
-          type: string
-          example: "Non Persistent Agents"
-
-    IncidentType:
-      type: object
-      required:
-        - 'id'
-        - 'description'
-      properties:
-        'id':
-          type: string
-          example: chem
-        'description':
-          type: string
-          example: "Chemical"
-
 
     Atp45Zone:
       allOf:
@@ -755,44 +644,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Atp45Result'
-
-  /atp45/run/forecast:
-    post:
-      tags:
-        - Atp45
-      description: 'Run ATP45 with forecast wind data'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ForecastAtp45Input'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Atp45Result'
-
-  /atp45/run/wind:
-    post:
-      tags:
-        - Atp45
-      description: 'Run ATP45 with request wind data'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/WindAtp45Input'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Atp45Result'
           
   /forecast/available:
     get:
@@ -1065,46 +916,3 @@ paths:
               schema:
                 type: string
                 format: binary
-
-
-  /atp45/containers:
-    get:
-      tags:
-        - Atp45
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CbrnContainer'
-
-  /atp45/procedures:
-    get:
-      tags:
-        - Atp45
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ProcedureType'
-
-  /atp45/incidents:
-    get:
-      tags:
-        - Atp45
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/IncidentType'
