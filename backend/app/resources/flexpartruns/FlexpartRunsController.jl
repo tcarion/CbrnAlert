@@ -11,24 +11,15 @@ using Flexpart
 using Dates
 
 using CbrnAlertApp: CREATED, FINISHED, ONGOING, ERRORED
+using CbrnAlertApp: _area
 
 using CbrnAlertApp.Users
+using CbrnAlertApp.Users: current_user
 using CbrnAlertApp.FlexpartInputs
 using CbrnAlertApp.FlexpartRuns
 using CbrnAlertApp.FlexpartOutputs
 
 const FLEXPART_RUN_FAILED = Genie.Router.error(500, "Flexpart run failed", "application/json", error_info="Flexpart run failed")
-
-_area(area) = [
-  area["top"],
-  area["left"],
-  area["bottom"],
-  area["right"],
-]
-
-function round_area(area)
-  return [ceil(area[1]), floor(area[2]), floor(area[3]), ceil(area[4])]
-end
 
 function _iscompleted(fpdir)
   lines = readlines(joinpath(fpdir.path, "output.log"))

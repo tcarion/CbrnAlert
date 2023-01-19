@@ -9,7 +9,10 @@ using Genie.Renderer.Json: json
 using Flexpart
 using Flexpart.FlexExtract
 
+using CbrnAlertApp: _area, round_area
+
 using CbrnAlertApp.Users
+using CbrnAlertApp.Users: current_user
 using CbrnAlertApp.FlexpartInputs
 
 
@@ -50,7 +53,7 @@ function data_retrieval()
   set_area!(fcontrol, area)
   set_steps!(fcontrol, start_date, end_date, time_step)
 
-  FlexExtract.write(fcontrol)
+  FlexExtract.save(fcontrol)
 
   FlexpartInputs.change_control(newinput.uuid, fcontrol)
   FlexpartInputs.change_status(newinput.uuid, ONGOING)
