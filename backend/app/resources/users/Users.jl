@@ -7,6 +7,7 @@ using SearchLight.Relationships
 using SHA
 using StructTypes
 using JSONWebTokens
+using HTTP
 
 using CbrnAlertApp: PUK_PATH, PRK_PATH, UNAUTHORIZED, FORBIDDEN
 
@@ -56,13 +57,23 @@ function add(email, password; username = "", name= "")
     ) |> SearchLight.save!
 end
 
+current_user(email::AbstractString) = findone(User, email = email)
+function current_user(http_request::HTTP.Messages.Request)
+    email = getsubject(http_request)
+    findone(User, email = email)
+end
 function current_user()
     email = getsubject()
-    findone(User, email = email)
+    current_user(email) 
 end
 
 function getsubject()
     jwt = _decode()
+    jwt["sub"]
+end
+
+function getsubject(http_request)
+    jwt = _decode(http_request)
     jwt["sub"]
 end
 
@@ -119,9 +130,9 @@ macro hasaccess!(model, exception=FORBIDDEN)
     :(hasaccess($model) || throw($exception))
 end
 
-function user_related(model::Type{<:AbstractModel})
-    related(current_user(), model)
-end
+user_related(model::Type{<:AbstractModel}) = related(current_user(), model)
+user_related(model::Type{<:AbstractModel}, http_request::HTTP.Messages.Request) = related(current_user(http_request), model)
+
 
 function add_auth_header(req, res, params)
     @warn "IN ADD AUTH"

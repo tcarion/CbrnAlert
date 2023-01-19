@@ -88,8 +88,8 @@ function change_status(uuid::String, value::String)
     input |> save!
 end
 
-function assign_to_user!(user::Users.User, fpres::FlexpartInput)
-    Relationship!(user, fpres)
+function assign_to_user!(user::Users.User, fpinput::FlexpartInput)
+    Relationship!(user, fpinput)
 end
 
 function change_control(uuid::String, fcontrol::FeControl)
