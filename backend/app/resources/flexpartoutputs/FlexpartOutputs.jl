@@ -44,7 +44,7 @@ function add(output::AbstractOutputFile)
     end
     @show output
 	rast = RasterStack(path)
-	meta = JSON3.write(Dict(rast.metadata))
+	meta = JSON3.write(Dict(Rasters.metadata(rast)))
     newentry = FlexpartOutput(
         uuid = string(UUIDs.uuid4()),
         name = basename(path),

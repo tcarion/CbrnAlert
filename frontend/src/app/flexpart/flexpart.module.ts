@@ -26,6 +26,7 @@ import { ReleaseFormComponent } from './run-simple/release-form/release-form.com
 import { CommandFormComponent } from './run-simple/command-form/command-form.component';
 import { OutgridFormComponent } from './run-simple/outgrid-form/outgrid-form.component';
 import { RetrieveMeteoSimpleComponent } from './retrieve-meteo-simple/retrieve-meteo-simple.component';
+import { LocationFormModule } from 'src/app/shared/form/location-form/location-form.module';
 
 @NgModule({
     declarations: [
@@ -61,7 +62,8 @@ import { RetrieveMeteoSimpleComponent } from './retrieve-meteo-simple/retrieve-m
         MatFormFieldModule,
         MatInputModule,
         MatIconModule,
-        MatTooltipModule
+        MatTooltipModule,
+        LocationFormModule
         // MatDialog
     ],
     exports: [
