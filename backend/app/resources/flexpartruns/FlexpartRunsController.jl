@@ -145,11 +145,7 @@ function run(fpdir::FlexpartDir, fprun::FlexpartRun)
 
   FlexpartRuns.assign_to_user!(current_user(), fprun)
 
-  outfiles = Flexpart.OutputFiles(fpdir)
-  for outfile in outfiles
-    fpoutput = FlexpartOutputs.add(outfile)
-    FlexpartOutputs.assign_to_run!(fprun.uuid, fpoutput)
-  end
+  FlexpartOutputs.add!(fprun)
 
   return fprun
 end

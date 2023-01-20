@@ -9,10 +9,13 @@ using UUIDs
 using Dates
 using Rasters
 using JSON3
+using Flexpart
 using Flexpart: AbstractOutputFile
 
 using CbrnAlertApp.FlexpartOutputs
 using CbrnAlertApp.FlexpartRuns
+
+using CbrnAlertApp: FLEXPART_RUNS_DIR
 
 export FlexpartOutput
 
@@ -34,7 +37,7 @@ Validation.validator(::Type{FlexpartOutput}) = ModelValidator([
     # ValidationRule(:path, FlexpartValidator.is_unique),
 ])
 
-function add(output::AbstractOutputFile)
+function add!(output::AbstractOutputFile)
     path = output.path
     d = Dict()
     if occursin("nest", path)
@@ -56,10 +59,31 @@ function add(output::AbstractOutputFile)
     newentry |> save!
 end
 
+function add!(fprun::FlexpartRun)
+    isempty(related(fprun, FlexpartOutput)) || return nothing
+    fpdir = FlexpartDir(fprun.path)
+    outfiles = Flexpart.OutputFiles(fpdir)
+    for outfile in outfiles
+      fpoutput = FlexpartOutputs.add!(outfile)
+      FlexpartOutputs.assign_to_run!(fprun, fpoutput)
+    end
+end
+
+function add_all!()
+    all_runs = all(FlexpartRun)
+    for fprun in all_runs
+        add!(fprun)
+    end
+end
+
 function assign_to_run!(uuid::String, fpoutput::FlexpartOutput)
     fprun = findone(FlexpartRuns.FlexpartRun, uuid = uuid)
-    Relationship!(fprun, fpoutput)
+    assign_to_run!(fprun, fpoutput)
 end
+
+assign_to_run!(fprun::FlexpartRun, fpoutput::FlexpartOutput) = Relationship!(fprun, fpoutput)
+
+
 
 Base.Dict(x::FlexpartOutput) = Dict(
     :uuid => x.uuid,
@@ -67,5 +91,14 @@ Base.Dict(x::FlexpartOutput) = Dict(
     :date_created => x.date_created,
     :metadata => x.metadata,
 )
+
+function delete_non_existing!()
+    entries = all(FlexpartOutput)
+    for entry in entries
+        if !isfile(entry.path)
+            SearchLight.delete(entry)
+        end
+    end
+end
 
 end
