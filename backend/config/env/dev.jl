@@ -12,7 +12,7 @@ Genie.Configuration.config!(
   cors_headers                    = Dict(
                                       "Access-Control-Allow-Origin" => "http://localhost:4200",
                                       "Access-Control-Allow-Headers" => "Content-Type,authorization",
-                                      "Access-Control-Allow-Methods" => "GET,POST")
+                                      "Access-Control-Allow-Methods" => "GET,POST, DELETE, PUT")
 )
 
 ENV["JULIA_REVISE"] = "auto"

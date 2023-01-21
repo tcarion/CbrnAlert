@@ -785,6 +785,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FlexpartRun'
+    delete:
+      tags:
+        - Flexpart
+      parameters:
+        - $ref: '#/components/parameters/runIdParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlexpartRun'
 
   /flexpart/runs/{runId}/outputs:
     get:

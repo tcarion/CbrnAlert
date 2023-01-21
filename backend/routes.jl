@@ -41,6 +41,7 @@ api_routes = Dict(
     "/flexpart/run" => (f=FlexpartRunsController.run, keyargs=(method=POST,)),
     "/flexpart/runs" => (f=FlexpartRunsController.get_runs, keyargs=(method = GET,)),
     "/flexpart/runs/:runId::String" => (f=FlexpartRunsController.get_run, keyargs=(method = GET,)),
+    "/flexpart/runs/:runId::String" => (f=FlexpartRunsController.delete_run, keyargs=(method = DELETE,)),
     "/flexpart/runs/:runId::String/outputs" => (f=FlexpartOutputsController.get_outputs, keyargs=(method = GET,)),
     "/flexpart/outputs/:outputId::String" => (f=FlexpartOutputsController.get_output, keyargs=(method = GET,)),
     "/flexpart/outputs/:outputId::String/layers/" => (f=FlexpartOutputsController.get_layers, keyargs=(method = GET,)),

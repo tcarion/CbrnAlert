@@ -3,23 +3,11 @@ import { DatePipe } from '@angular/common';
 import {
   Component,
   OnInit,
-  OnDestroy,
-  ViewChild,
-  AfterViewInit,
-  ElementRef,
   Output,
   EventEmitter,
 } from '@angular/core';
-import { SelectionTableComponent } from 'src/app/shared/selection-table/selection-table.component';
 import { FlexpartService } from '../flexpart.service';
-import { ApiService_old } from 'src/app/core/services/api.service';
-import { map } from 'rxjs/operators';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Select, Store } from '@ngxs/store';
-import {
-  FlexpartRunAction,
-  FlexpartState,
-} from 'src/app/core/state/flexpart.state';
+import { Store } from '@ngxs/store';
 import { FlexpartRun } from 'src/app/core/api/models';
 
 @Component({
@@ -35,13 +23,13 @@ export class FlexpartPlotComponent implements OnInit {
   @Output() selectedIdEvent = new EventEmitter<string>();
 
   constructor(
-    private flexpartService: FlexpartService,
+    public flexpartService: FlexpartService,
     private store: Store
   ) {}
 
   ngOnInit(): void {
     // this.store.selectSnapshot((state) => state.flexpart.runs).length == 0 &&
-    this.runs$ = this.flexpartService.getRuns();
+    // this.runs$ = this.flexpartService.getRuns();
       // this.flexpartService
       //   .getRuns()
       //   .subscribe((run) =>
@@ -51,11 +39,17 @@ export class FlexpartPlotComponent implements OnInit {
       //   );
 
     // this.runIds$ = this.runs$.pipe(map((res) => res.map((r) => r.uuid)));
+    this.runs$ = this.flexpartService.runs$;
+    this.flexpartService.updateRunsFromServer();
   }
 
   onClick(id: string) {
     this.value = id
     this.selectedIdEvent.emit(id)
+  }
+
+  deleteRun(uuid: string) {
+    this.flexpartService.deleteRun(uuid);
   }
 
 //   goToOuput(index: number) {

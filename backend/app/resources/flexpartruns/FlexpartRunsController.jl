@@ -163,5 +163,11 @@ function get_run()
   Dict(fprun) |> json
 end
 
+function delete_run()
+  id = Genie.Router.params(:runId)
+  to_delete = findone(FlexpartRun, uuid = id)
+#   FlexpartRuns.delete!(to_delete)
+  Dict(to_delete) |> json
+end
 
 end

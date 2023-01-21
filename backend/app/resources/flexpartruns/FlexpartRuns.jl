@@ -128,9 +128,16 @@ function delete_unfinished()
     end
 end
 
-function delete(entry)
+function delete(entry::FlexpartRun)
     isdir(entry.path) && rm(entry.path, recursive=true)
     SearchLight.delete(entry)
+end
+
+function delete!(uuid::String)
+    entry = findone(FlexpartRun, uuid=uuid)
+    isdir(entry.path) && rm(entry.path, recursive=true)
+    SearchLight.delete(entry)
+    return entry
 end
 
 end

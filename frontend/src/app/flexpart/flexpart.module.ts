@@ -27,6 +27,8 @@ import { CommandFormComponent } from './run-simple/command-form/command-form.com
 import { OutgridFormComponent } from './run-simple/outgrid-form/outgrid-form.component';
 import { RetrieveMeteoSimpleComponent } from './retrieve-meteo-simple/retrieve-meteo-simple.component';
 import { LocationFormModule } from 'src/app/shared/form/location-form/location-form.module';
+import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faEraser, faTrash } from '@fortawesome/free-solid-svg-icons';
 
 @NgModule({
     declarations: [
@@ -63,8 +65,8 @@ import { LocationFormModule } from 'src/app/shared/form/location-form/location-f
         MatInputModule,
         MatIconModule,
         MatTooltipModule,
-        LocationFormModule
-        // MatDialog
+        LocationFormModule,
+        FontAwesomeModule,
     ],
     exports: [
         // MetDataComponent,
@@ -72,4 +74,9 @@ import { LocationFormModule } from 'src/app/shared/form/location-form/location-f
         // FlexpartPlotComponent,
     ]
 })
-export class FlexpartModule { }
+export class FlexpartModule {
+  constructor(library: FaIconLibrary) {
+    // Add an icon to the library for convenient access in other components
+    library.addIcons(faTrash);
+  }
+ }

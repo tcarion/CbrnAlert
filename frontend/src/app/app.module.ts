@@ -27,7 +27,8 @@ import { LoginComponent } from './login/login.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { LoginModule } from './login/login.module';
 import { HandleDateInterceptor } from './core/helpers/handle-date.interceptor';
-import './core/config/custom-methods'
+import './core/config/custom-methods';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome'
 @NgModule({
     declarations: [
         AppComponent,
@@ -50,6 +51,7 @@ import './core/config/custom-methods'
         Atp45Module,
         FlexpartModule,
         LoginModule,
+        FontAwesomeModule,
     ],
     providers: [
         { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },

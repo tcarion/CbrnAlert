@@ -11,6 +11,7 @@ import * as dayjs from 'dayjs';
 import { MapArea } from 'src/app/core/models/map-area';
 import { NiceInput } from 'src/app/flexpart/models/nice-input';
 import { FlexpartApiService } from 'src/app/core/api/services';
+import { concatMap, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -24,7 +25,9 @@ export class FlexpartService {
   selectedInputSubject = new BehaviorSubject<FlexpartInput | undefined>(undefined);
   selectedInput$: Observable<FlexpartInput | undefined> = this.selectedInputSubject.asObservable();
 
-  resultsSubject = new Subject<FlexpartResult[]>();
+  runsSubject = new BehaviorSubject<FlexpartRun[]>([]);
+  runs$ = this.runsSubject.asObservable()
+
   inputsSubject = new Subject<FlexpartInput[]>();
   // plotsSubject = new Subject<FlexpartPlot>();
 
@@ -117,6 +120,24 @@ export class FlexpartService {
 
   getRuns(): Observable<FlexpartRun[]> {
     return this.apiService.flexpartRunsGet();
+  }
+
+  updateRunsFromServer() {
+    this.getRuns().pipe(map(runs => {
+      this.runsSubject.next(runs);
+    })).subscribe();
+  }
+
+  deleteRun(runId: string) {
+    this.apiService.flexpartRunsRunIdDelete({ runId }).pipe(
+      withLatestFrom(this.runs$),
+      map(([apiRes, currentRuns]) => {
+        const newRuns = currentRuns.filter(r => r.uuid !== apiRes.uuid);
+        return newRuns;
+      }),
+    ).subscribe(newruns => {
+      this.runsSubject.next(newruns);
+    });
   }
 
   getRun(runId: string): Observable<FlexpartRun> {
@@ -307,9 +328,5 @@ export class FlexpartService {
 
   emitInputsSubject() {
     this.inputsSubject.next(this.inputs);
-  }
-
-  emitResultsSubject() {
-    this.resultsSubject.next(this.results);
   }
 }

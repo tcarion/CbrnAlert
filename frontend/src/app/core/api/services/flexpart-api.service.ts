@@ -324,6 +324,60 @@ export class FlexpartApiService extends BaseService {
   }
 
   /**
+   * Path part for operation flexpartRunsRunIdDelete
+   */
+  static readonly FlexpartRunsRunIdDeletePath = '/flexpart/runs/{runId}';
+
+  /**
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `flexpartRunsRunIdDelete()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  flexpartRunsRunIdDelete$Response(params: {
+
+    /**
+     * The flexpart run ID
+     */
+    runId: string;
+  }): Observable<StrictHttpResponse<FlexpartRun>> {
+
+    const rb = new RequestBuilder(this.rootUrl, FlexpartApiService.FlexpartRunsRunIdDeletePath, 'delete');
+    if (params) {
+      rb.path('runId', params.runId, {"style":"simple","explode":false});
+    }
+
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<FlexpartRun>;
+      })
+    );
+  }
+
+  /**
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `flexpartRunsRunIdDelete$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  flexpartRunsRunIdDelete(params: {
+
+    /**
+     * The flexpart run ID
+     */
+    runId: string;
+  }): Observable<FlexpartRun> {
+
+    return this.flexpartRunsRunIdDelete$Response(params).pipe(
+      map((r: StrictHttpResponse<FlexpartRun>) => r.body as FlexpartRun)
+    );
+  }
+
+  /**
    * Path part for operation flexpartRunsRunIdOutputsGet
    */
   static readonly FlexpartRunsRunIdOutputsGetPath = '/flexpart/runs/{runId}/outputs';
