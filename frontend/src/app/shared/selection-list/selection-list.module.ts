@@ -11,7 +11,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   ],
   imports: [
     CommonModule,
-    MatListModule,
     MatProgressSpinnerModule
   ],
   exports: [SelectionListComponent]

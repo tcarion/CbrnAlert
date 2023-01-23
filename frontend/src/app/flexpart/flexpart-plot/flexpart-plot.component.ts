@@ -21,7 +21,6 @@ export class FlexpartPlotComponent implements OnInit {
   value: string
   // runIds$: Observable<string[]>;
   @Output() selectedIdEvent = new EventEmitter<string>();
-
   constructor(
     public flexpartService: FlexpartService,
     private store: Store

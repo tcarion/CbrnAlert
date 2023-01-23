@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 
 @Component({
-    selector: 'app-selection-list-shared',
+    selector: 'my-selection-list',
     templateUrl: './selection-list.component.html',
     styleUrls: ['./selection-list.component.scss']
 })
