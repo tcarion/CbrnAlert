@@ -81,7 +81,7 @@ end
 
 isfinished(entry) = entry.status == FINISHED
 
-function change_status(uuid::String, value::String)
+function change_status!(uuid::String, value::String)
     input = findone(FlexpartInput, uuid=uuid)
     input.status = value
     input |> save!

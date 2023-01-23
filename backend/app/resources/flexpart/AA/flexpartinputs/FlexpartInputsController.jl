@@ -56,7 +56,7 @@ function data_retrieval()
   FlexExtract.save(fcontrol)
 
   FlexpartInputs.change_control(newinput.uuid, fcontrol)
-  FlexpartInputs.change_status(newinput.uuid, ONGOING)
+  FlexpartInputs.change_status!(newinput.uuid, ONGOING)
   log_file_path = joinpath(fedir.path, "output_log.log")
   open(log_file_path, "w") do logf
       try 
@@ -67,16 +67,16 @@ function data_retrieval()
               flush(logf)
           end
       catch
-          FlexpartInputs.change_status(newinput.uuid, ERRORED)
+          FlexpartInputs.change_status!(newinput.uuid, ERRORED)
           rethrow()
       end
   end
 
   try
       _check_mars_errors(log_file_path)
-      FlexpartInputs.change_status(newinput.uuid, FINISHED)
+      FlexpartInputs.change_status!(newinput.uuid, FINISHED)
   catch e
-      FlexpartInputs.change_status(newinput.uuid, ERRORED)
+      FlexpartInputs.change_status!(newinput.uuid, ERRORED)
       if e isa MarsDataNotAvailableError
           # throw(Genie.Exceptions.RuntimeException("Mars Retrieval error: DATA_NOT_YET_AVAILABLE", "The data you're requesting is not yet available", 500, e))
           return DATA_NOT_YET_AVAILABLE

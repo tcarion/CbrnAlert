@@ -88,13 +88,13 @@ end
 
 isfinished(entry) = entry.status == FINISHED
 
-function change_status(name::String, value::String)
+function change_status!(name::String, value::String)
     entry = findone(FlexpartRun, name=name)
     entry.status = value
     entry |> save!
 end
 
-function change_options(name::String, fpoptions::FlexpartOption)
+function change_options!(name::String, fpoptions::FlexpartOption)
     entry = findone(FlexpartRun, name=name)
     entry.options = JSON3.write(fpoptions.options)
     # entry.options = fpoptions.options
@@ -110,33 +110,32 @@ function assign_to_user!(user::Users.User, fpres::FlexpartRun)
     Relationship!(user, fpres)
 end
 
-function delete_non_existing()
+function delete_non_existing!()
     entries = all(FlexpartRun)
     for entry in entries
         if !isdir(entry.path)
-            delete(entry)
+            SearchLight.delete(entry)
         end
     end
 end
 
-function delete_unfinished()
+function delete_unfinished!()
     entries = all(FlexpartRun)
     unfinished = filter(x -> x.status !== FINISHED, entries)
     for entry in unfinished
-        delete(entry)
+        SearchLight.delete(entry)
     end
 end
 
-function delete(entry::FlexpartRun)
-    isdir(entry.path) && rm(entry.path, recursive=true)
-    SearchLight.delete(entry)
-end
-
-function delete!(uuid::String)
-    entry = findone(FlexpartRun, uuid=uuid)
+function delete!(entry::FlexpartRun)::FlexpartRun
     isdir(entry.path) && rm(entry.path, recursive=true)
     SearchLight.delete(entry)
     return entry
+end
+
+function delete!(uuid::String)::FlexpartRun
+    entry = findone(FlexpartRun, uuid=uuid)
+    delete!(entry)
 end
 
 end
