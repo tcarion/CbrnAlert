@@ -17,7 +17,6 @@ using StructTypes
 using CbrnAlertApp: CREATED, FINISHED, ONGOING, ERRORED
 using CbrnAlertApp: FLEXPART_RUNS_DIR
 
-using CbrnAlertApp.FlexpartRuns
 using CbrnAlertApp.Users
 
 export FlexpartRun

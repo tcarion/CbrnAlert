@@ -18,7 +18,6 @@ using CbrnAlertApp: EXTRACTED_WEATHER_DATA_DIR
 
 using CbrnAlertApp.FlexpartValidator
 using CbrnAlertApp.Users
-using CbrnAlertApp.FlexpartRuns
 
 export FlexpartInput
 

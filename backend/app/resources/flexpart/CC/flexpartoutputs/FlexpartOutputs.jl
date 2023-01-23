@@ -12,8 +12,8 @@ using JSON3
 using Flexpart
 using Flexpart: AbstractOutputFile
 
-using CbrnAlertApp.FlexpartOutputs
 using CbrnAlertApp.FlexpartRuns
+using CbrnAlertApp.FlexpartRuns: FlexpartRun
 
 using CbrnAlertApp: FLEXPART_RUNS_DIR
 
@@ -36,6 +36,13 @@ Validation.validator(::Type{FlexpartOutput}) = ModelValidator([
     # ValidationRule(:path, FlexpartValidator.not_empty),
     # ValidationRule(:path, FlexpartValidator.is_unique),
 ])
+
+Base.Dict(x::FlexpartOutput) = Dict(
+    :uuid => x.uuid,
+    :name => x.name,
+    :date_created => x.date_created,
+    :metadata => x.metadata,
+)
 
 function add!(output::AbstractOutputFile)
     path = output.path
@@ -82,15 +89,6 @@ function assign_to_run!(uuid::String, fpoutput::FlexpartOutput)
 end
 
 assign_to_run!(fprun::FlexpartRun, fpoutput::FlexpartOutput) = Relationship!(fprun, fpoutput)
-
-
-
-Base.Dict(x::FlexpartOutput) = Dict(
-    :uuid => x.uuid,
-    :name => x.name,
-    :date_created => x.date_created,
-    :metadata => x.metadata,
-)
 
 function delete_non_existing!()
     entries = all(FlexpartOutput)
