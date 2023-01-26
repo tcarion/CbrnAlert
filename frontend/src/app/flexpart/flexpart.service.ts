@@ -1,6 +1,6 @@
 import { SliceResponseType } from './flexpart-plot-data';
 import { FlexpartRetrieveSimple } from './../core/api/models/flexpart-retrieve-simple';
-import { BehaviorSubject, Observable, of, Subject, throwError } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of, Subject, throwError } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { FlexpartResult } from 'src/app/flexpart/flexpart-result';
 import { FlexpartOptionsSimple, FlexpartOutput, FlexpartRun } from 'src/app/core/api/models';
@@ -133,11 +133,22 @@ export class FlexpartService {
       withLatestFrom(this.runs$),
       map(([apiRes, currentRuns]) => {
         const newRuns = currentRuns.filter(r => r.uuid !== apiRes.uuid);
+        console.log(`deleted to ${newRuns}`)
         return newRuns;
       }),
     ).subscribe(newruns => {
       this.runsSubject.next(newruns);
     });
+
+    // @COMMENT: Other idea FROM: https://www.youtube.com/watch?v=SXOZaWLs4q0. Not using it since I don't know if the subscription is killed when call to API completes
+    // combineLatest({
+    //   apiRes: this.apiService.flexpartRunsRunIdDelete({ runId }),
+    //   currentRuns: this.runs$
+    // }).subscribe(({ apiRes, currentRuns }) => {
+    //   const newRuns = currentRuns.filter(r => r.uuid !== apiRes.uuid);
+    //   console.log(`deleted to ${newRuns}`);
+    //   this.runsSubject.next(newRuns);
+    // })
   }
 
   getRun(runId: string): Observable<FlexpartRun> {
