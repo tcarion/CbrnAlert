@@ -166,7 +166,11 @@ end
 function delete_run()
   id = Genie.Router.params(:runId)
   to_delete = findone(FlexpartRun, uuid = id)
-#   FlexpartRuns.delete!(to_delete)
+  related_outputs = related(to_delete, FlexpartOutput)
+  for out in related_outputs
+      SearchLight.delete(out)
+  end
+  FlexpartRuns.delete!(to_delete)
   Dict(to_delete) |> json
 end
 
