@@ -1,4 +1,3 @@
-import { ApiService_old } from 'src/app/core/services/api.service';
 import { MapState } from './state/map.state';
 import { FlexpartState } from './state/flexpart.state';
 import { MapPlotsService } from './services/map-plots.service';
@@ -40,7 +39,6 @@ import { ApiModule } from './api/api.module';
     MapService,
     FormService,
     WebsocketService,
-    ApiService_old,
     ApiModule,
     NotificationService,
     MapPlotsService,
