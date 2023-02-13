@@ -1,5 +1,5 @@
 {
-  "input": "../backend/resolved.yaml",
+  "input": "../backend/public/docs/resolved.yaml",
   "output": "src/app/core/api",
   "ignoreUnusedModels": true,
   "serviceSuffix": "ApiService"
