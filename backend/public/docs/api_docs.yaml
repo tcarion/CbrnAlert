@@ -2,15 +2,17 @@ openapi: '3.0.2'
 info:
   title: CbrnAlert API
   version: '1.0'
+  description: 'API for the preparing, running and getting the results of atmospheric dispersion models in case of CBRN-type incidents.'
+  contact:
+    name: 'Tristan Carion'
+    email: 'tristan.carion@mil.be'
 servers:
   # TODO: CHANGE TO HTTPS FOR PROD
-  - url: '{protocol}://localhost:8000/api'
-    variables:
-      protocol:
-        enum:
-          - http
-          - https
-        default: http
+  - url: 'http://localhost:8000/api'
+    description: Dev Server
+  - url: 'https://cbrnalert.rma.ac.be/api'
+    description: Production server
+
 externalDocs:
   url: /docs
   description: Find more info here

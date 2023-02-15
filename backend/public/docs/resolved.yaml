@@ -2,18 +2,19 @@
 openapi: 3.0.2
 info:
   title: CbrnAlert API
+  description: API for the preparing, running and getting the results of atmospheric dispersion models in case of CBRN-type incidents.
+  contact:
+    name: Tristan Carion
+    email: tristan.carion@mil.be
   version: "1.0"
 externalDocs:
   description: Find more info here
   url: /docs
 servers:
-- url: '{protocol}://localhost:8000/api'
-  variables:
-    protocol:
-      default: http
-      enum:
-      - http
-      - https
+- url: http://localhost:8000/api
+  description: Dev Server
+- url: https://cbrnalert.rma.ac.be/api
+  description: Production server
 paths:
   /login:
     post:
@@ -226,17 +227,23 @@ paths:
                 $ref: '#/components/schemas/FlexpartRun'
     delete:
       tags:
-        - Flexpart
+      - Flexpart
       parameters:
-        - $ref: '#/components/parameters/runIdParam'
+      - name: runId
+        in: path
+        description: The flexpart run ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/FlexpartRun'
-
   /flexpart/runs/{runId}/outputs:
     get:
       tags:
