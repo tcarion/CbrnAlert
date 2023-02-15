@@ -1,7 +1,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpResponse, HttpContext } from '@angular/common/http';
 import { BaseService } from '../base-service';
 import { ApiConfiguration } from '../api-configuration';
 import { StrictHttpResponse } from '../strict-http-response';
@@ -40,7 +40,10 @@ export class Atp45ApiService extends BaseService {
    * This method doesn't expect any request body.
    */
   atp45TreeGet$Response(params?: {
-  }): Observable<StrictHttpResponse<Atp45DecisionTree>> {
+  },
+  context?: HttpContext
+
+): Observable<StrictHttpResponse<Atp45DecisionTree>> {
 
     const rb = new RequestBuilder(this.rootUrl, Atp45ApiService.Atp45TreeGetPath, 'get');
     if (params) {
@@ -48,7 +51,8 @@ export class Atp45ApiService extends BaseService {
 
     return this.http.request(rb.build({
       responseType: 'json',
-      accept: 'application/json'
+      accept: 'application/json',
+      context: context
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
@@ -60,15 +64,18 @@ export class Atp45ApiService extends BaseService {
   /**
    * Get the decision tree discriminating between the ATP-45 cases.
    *
-   * This method provides access to only to the response body.
+   * This method provides access only to the response body.
    * To access the full response (for headers, for example), `atp45TreeGet$Response()` instead.
    *
    * This method doesn't expect any request body.
    */
   atp45TreeGet(params?: {
-  }): Observable<Atp45DecisionTree> {
+  },
+  context?: HttpContext
 
-    return this.atp45TreeGet$Response(params).pipe(
+): Observable<Atp45DecisionTree> {
+
+    return this.atp45TreeGet$Response(params,context).pipe(
       map((r: StrictHttpResponse<Atp45DecisionTree>) => r.body as Atp45DecisionTree)
     );
   }
@@ -87,11 +94,14 @@ export class Atp45ApiService extends BaseService {
   atp45RunPost$Response(params: {
 
     /**
-     * Determine if the weather conditions are retrieved in archive forecasts (&#x60;archive&#x60;), in latest forecast (&#x60;forecast&#x60;) or are provided in the request (&#x60;manually&#x60;)
+     * Determine if the weather conditions are retrieved in archive forecasts (`archive`), in latest forecast (`forecast`) or are provided in the request (`manually`)
      */
     weathertype: Atp45RunTypes;
     body: Atp45Input
-  }): Observable<StrictHttpResponse<Atp45Result>> {
+  },
+  context?: HttpContext
+
+): Observable<StrictHttpResponse<Atp45Result>> {
 
     const rb = new RequestBuilder(this.rootUrl, Atp45ApiService.Atp45RunPostPath, 'post');
     if (params) {
@@ -101,7 +111,8 @@ export class Atp45ApiService extends BaseService {
 
     return this.http.request(rb.build({
       responseType: 'json',
-      accept: 'application/json'
+      accept: 'application/json',
+      context: context
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
@@ -111,7 +122,7 @@ export class Atp45ApiService extends BaseService {
   }
 
   /**
-   * This method provides access to only to the response body.
+   * This method provides access only to the response body.
    * To access the full response (for headers, for example), `atp45RunPost$Response()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
@@ -119,13 +130,16 @@ export class Atp45ApiService extends BaseService {
   atp45RunPost(params: {
 
     /**
-     * Determine if the weather conditions are retrieved in archive forecasts (&#x60;archive&#x60;), in latest forecast (&#x60;forecast&#x60;) or are provided in the request (&#x60;manually&#x60;)
+     * Determine if the weather conditions are retrieved in archive forecasts (`archive`), in latest forecast (`forecast`) or are provided in the request (`manually`)
      */
     weathertype: Atp45RunTypes;
     body: Atp45Input
-  }): Observable<Atp45Result> {
+  },
+  context?: HttpContext
 
-    return this.atp45RunPost$Response(params).pipe(
+): Observable<Atp45Result> {
+
+    return this.atp45RunPost$Response(params,context).pipe(
       map((r: StrictHttpResponse<Atp45Result>) => r.body as Atp45Result)
     );
   }
@@ -144,7 +158,10 @@ export class Atp45ApiService extends BaseService {
    * This method doesn't expect any request body.
    */
   forecastAvailableGet$Response(params?: {
-  }): Observable<StrictHttpResponse<ForecastAvailableSteps>> {
+  },
+  context?: HttpContext
+
+): Observable<StrictHttpResponse<ForecastAvailableSteps>> {
 
     const rb = new RequestBuilder(this.rootUrl, Atp45ApiService.ForecastAvailableGetPath, 'get');
     if (params) {
@@ -152,7 +169,8 @@ export class Atp45ApiService extends BaseService {
 
     return this.http.request(rb.build({
       responseType: 'json',
-      accept: 'application/json'
+      accept: 'application/json',
+      context: context
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
@@ -164,15 +182,18 @@ export class Atp45ApiService extends BaseService {
   /**
    * Return the last forecast datetimes available at ECMWF
    *
-   * This method provides access to only to the response body.
+   * This method provides access only to the response body.
    * To access the full response (for headers, for example), `forecastAvailableGet$Response()` instead.
    *
    * This method doesn't expect any request body.
    */
   forecastAvailableGet(params?: {
-  }): Observable<ForecastAvailableSteps> {
+  },
+  context?: HttpContext
 
-    return this.forecastAvailableGet$Response(params).pipe(
+): Observable<ForecastAvailableSteps> {
+
+    return this.forecastAvailableGet$Response(params,context).pipe(
       map((r: StrictHttpResponse<ForecastAvailableSteps>) => r.body as ForecastAvailableSteps)
     );
   }

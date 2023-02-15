@@ -1,7 +1,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpResponse, HttpContext } from '@angular/common/http';
 import { BaseService } from '../base-service';
 import { ApiConfiguration } from '../api-configuration';
 import { StrictHttpResponse } from '../strict-http-response';
@@ -38,7 +38,10 @@ export class AuthApiService extends BaseService {
    */
   loginPost$Response(params: {
     body: LoginBody
-  }): Observable<StrictHttpResponse<InlineResponse200>> {
+  },
+  context?: HttpContext
+
+): Observable<StrictHttpResponse<InlineResponse200>> {
 
     const rb = new RequestBuilder(this.rootUrl, AuthApiService.LoginPostPath, 'post');
     if (params) {
@@ -47,7 +50,8 @@ export class AuthApiService extends BaseService {
 
     return this.http.request(rb.build({
       responseType: 'json',
-      accept: 'application/json'
+      accept: 'application/json',
+      context: context
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
@@ -59,16 +63,19 @@ export class AuthApiService extends BaseService {
   /**
    * Authentication request
    *
-   * This method provides access to only to the response body.
+   * This method provides access only to the response body.
    * To access the full response (for headers, for example), `loginPost$Response()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
   loginPost(params: {
     body: LoginBody
-  }): Observable<InlineResponse200> {
+  },
+  context?: HttpContext
 
-    return this.loginPost$Response(params).pipe(
+): Observable<InlineResponse200> {
+
+    return this.loginPost$Response(params,context).pipe(
       map((r: StrictHttpResponse<InlineResponse200>) => r.body as InlineResponse200)
     );
   }
