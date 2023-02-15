@@ -31,25 +31,26 @@ export class WebsocketService {
   ) { }
 
   connect() {
-    console.log(environment.rootWs)
-    this.connection$ = webSocket({
-      url: environment.rootWs,
-      deserializer: msg => {
-        let r;
-        try {
-          r = JSON.parse(msg.data);
-        } catch (error) {
-          r = msg.data;
-        }
-        return r;
-      }
-    });
+    // console.log(environment.rootWs)
+    // this.connection$ = webSocket({
+    //   url: environment.rootWs,
+    //   deserializer: msg => {
+    //     let r;
+    //     try {
+    //       r = JSON.parse(msg.data);
+    //     } catch (error) {
+    //       r = msg.data;
+    //     }
+    //     return r;
+    //   }
+    // });
     // this.connection$.subscribe();
     // this.initHandler();
     // this.initChannel();
-    this.channel = this.authenticationService.currentUserValue.email
-    this.channelSubscribe(this.channel)
-    console.log("connected to ws");
+    // this.channel = this.authenticationService.currentUserValue.email
+    // this.channelSubscribe(this.channel)
+    // console.log("connected to ws");
+    console.log("websocket currently disabled");
   }
 
   disconnect() {
