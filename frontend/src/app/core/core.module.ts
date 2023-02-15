@@ -34,6 +34,9 @@ import { ApiModule } from './api/api.module';
     { developmentMode: !environment.production }),
     NgxsReduxDevtoolsPluginModule.forRoot(),
     NgxsLoggerPluginModule.forRoot(),
+    ApiModule.forRoot({
+        rootUrl: environment.apiUrl
+    }),
   ],
   providers: [
     MapService,

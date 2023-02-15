@@ -1,3 +1,6 @@
+
+const rootApiUrl = 'https://cbrnalert.rma.ac.be'
 export const environment = {
-  production: true
+  production: true,
+  apiUrl: rootApiUrl + '/api',
 };
