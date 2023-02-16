@@ -9,6 +9,7 @@ using Genie.Renderer.Json: json
 using Flexpart
 using Flexpart.FlexExtract
 
+using CbrnAlertApp: STATUS_ONGOING, STATUS_ERRORED, STATUS_FINISHED
 using CbrnAlertApp: _area, round_area
 
 using CbrnAlertApp.Users
@@ -56,7 +57,7 @@ function data_retrieval()
   FlexExtract.save(fcontrol)
 
   FlexpartInputs.change_control(newinput.uuid, fcontrol)
-  FlexpartInputs.change_status!(newinput.uuid, ONGOING)
+  FlexpartInputs.change_status!(newinput.uuid, STATUS_ONGOING)
   log_file_path = joinpath(fedir.path, "output_log.log")
   open(log_file_path, "w") do logf
       try 
@@ -67,16 +68,18 @@ function data_retrieval()
               flush(logf)
           end
       catch
-          FlexpartInputs.change_status!(newinput.uuid, ERRORED)
+          FlexpartInputs.change_status!(newinput.uuid, STATUS_ERRORED)
+          FlexpartInputs.delete_from_disk(newinput)
           rethrow()
       end
   end
 
   try
       _check_mars_errors(log_file_path)
-      FlexpartInputs.change_status!(newinput.uuid, FINISHED)
+      FlexpartInputs.change_status!(newinput.uuid, STATUS_FINISHED)
   catch e
-      FlexpartInputs.change_status!(newinput.uuid, ERRORED)
+      FlexpartInputs.change_status!(newinput.uuid, STATUS_ERRORED)
+      FlexpartInputs.delete_from_disk(newinput)
       if e isa MarsDataNotAvailableError
           # throw(Genie.Exceptions.RuntimeException("Mars Retrieval error: DATA_NOT_YET_AVAILABLE", "The data you're requesting is not yet available", 500, e))
           return DATA_NOT_YET_AVAILABLE
@@ -137,6 +140,8 @@ function get_inputs()
   return response |> json
 end
 
-
+function delete_input()
+    id = Genie.Router.params(:inputId)
+end
 
 end

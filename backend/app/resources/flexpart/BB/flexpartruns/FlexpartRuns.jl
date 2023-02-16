@@ -14,7 +14,7 @@ using Flexpart.FlexpartOptions: OptionType
 using JSON3
 using StructTypes
 
-using CbrnAlertApp: CREATED, FINISHED, ONGOING, ERRORED
+using CbrnAlertApp: STATUS_CREATED, STATUS_FINISHED, STATUS_ONGOING, STATUS_ERRORED
 using CbrnAlertApp: FLEXPART_RUNS_DIR
 
 using CbrnAlertApp.Users
@@ -47,7 +47,7 @@ export FlexpartRun
     name::String = ""
     path::String = ""
     date_created::DateTime = Dates.now()
-    status::String = CREATED
+    status::String = STATUS_CREATED
     options::String = ""
     # options::OptionType = OptionType()
 end
@@ -86,7 +86,7 @@ function create()
     newentry |> save!
 end
 
-isfinished(entry) = entry.status == FINISHED
+isfinished(entry) = entry.status == STATUS_FINISHED
 
 function change_status!(name::String, value::String)
     entry = findone(FlexpartRun, name=name)
@@ -121,7 +121,7 @@ end
 
 function delete_unfinished!()
     entries = all(FlexpartRun)
-    unfinished = filter(x -> x.status !== FINISHED, entries)
+    unfinished = filter(x -> x.status !== STATUS_FINISHED, entries)
     for entry in unfinished
         SearchLight.delete(entry)
     end

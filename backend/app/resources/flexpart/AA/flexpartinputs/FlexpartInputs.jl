@@ -13,7 +13,7 @@ using Flexpart.FlexExtract
 using JSON3
 using StructTypes
 
-using CbrnAlertApp: CREATED, FINISHED, ONGOING, ERRORED
+using CbrnAlertApp: STATUS_CREATED, STATUS_FINISHED, STATUS_ONGOING, STATUS_ERRORED
 using CbrnAlertApp: EXTRACTED_WEATHER_DATA_DIR
 
 using CbrnAlertApp.FlexpartValidator
@@ -41,7 +41,7 @@ export FlexpartInput
     # Control file options in JSON format
     control::String = ""
     date_created::DateTime = Dates.now()
-    status::String = CREATED
+    status::String = STATUS_CREATED
 end
 
 Validation.validator(::Type{FlexpartInput}) = ModelValidator([
@@ -50,6 +50,15 @@ Validation.validator(::Type{FlexpartInput}) = ModelValidator([
     ValidationRule(:path, FlexpartValidator.not_empty),
     ValidationRule(:path, FlexpartValidator.is_unique),
 ])
+
+Base.Dict(x::FlexpartInput) = Dict(
+    # :type => "flexpartResultId",
+    :uuid => x.uuid,
+    :name => x.name,
+    :status => x.status,
+    :date_created => x.date_created,
+    :control => get_control(x)
+)
 
 function create()
     uuid = string(UUIDs.uuid4())
@@ -79,7 +88,7 @@ function add(fepath::String)
     newentry |> save!
 end
 
-isfinished(entry) = entry.status == FINISHED
+isfinished(entry) = entry.status == STATUS_FINISHED
 
 function change_status!(uuid::String, value::String)
     input = findone(FlexpartInput, uuid=uuid)
@@ -103,13 +112,30 @@ function get_control(input::FlexpartInput)
     JSON3.read(input.control)
 end
 
-Base.Dict(x::FlexpartInput) = Dict(
-    # :type => "flexpartResultId",
-    :uuid => x.uuid,
-    :name => x.name,
-    :status => x.status,
-    :date_created => x.date_created,
-    :control => get_control(x)
-)
+function clear!()
+    non_finished_inputs = find(FlexpartInput, SQLWhereExpression("status == ? OR status == ? OR status == ?", STATUS_ERRORED, STATUS_ONGOING, STATUS_CREATED))
+    for entry in non_finished_inputs
+        delete!(entry)
+    end
+end
+
+function delete_empty_output()
+    entries = all(FlexpartInput)
+    for entry in entries
+        fedir = FlexExtractDir(entry.path)
+        inputs = readdir(fedir[:output])
+        if length(inputs) == 0
+            delete!(entry)
+        end
+    end
+end
+
+delete_from_disk(entry::FlexpartInput) = isdir(entry.path) && rm(entry.path, recursive=true)
+
+function delete!(entry::FlexpartInput)::FlexpartInput
+    delete_from_disk(entry)
+    SearchLight.delete(entry)
+    return entry
+end
 
 end

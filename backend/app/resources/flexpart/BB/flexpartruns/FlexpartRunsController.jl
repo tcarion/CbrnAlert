@@ -10,7 +10,7 @@ using SearchLight.Relationships
 using Flexpart
 using Dates
 
-using CbrnAlertApp: CREATED, FINISHED, ONGOING, ERRORED
+using CbrnAlertApp: STATUS_CREATED, STATUS_FINISHED, STATUS_ONGOING, STATUS_ERRORED
 using CbrnAlertApp: _area
 
 using CbrnAlertApp.Users
@@ -123,7 +123,7 @@ function run(fpdir::FlexpartDir, fprun::FlexpartRun)
   Flexpart.remove_unused_species!(fpoptions)
   FlexpartRuns.change_options!(fprun.name, fpoptions)
   open(joinpath(fpdir.path, "output.log"), "w") do logf
-    FlexpartRuns.change_status!(fprun.name, ONGOING)
+    FlexpartRuns.change_status!(fprun.name, STATUS_ONGOING)
     Flexpart.run(fpdir) do stream
       # log_and_broadcast(stream, request_data["ws_info"], logf)
       line = readline(stream, keep=true)
@@ -133,10 +133,10 @@ function run(fpdir::FlexpartDir, fprun::FlexpartRun)
   end
 
   if _iscompleted(fpdir)
-    FlexpartRuns.change_status!(fprun.name, FINISHED)
+    FlexpartRuns.change_status!(fprun.name, STATUS_FINISHED)
   else
     @warn "Flexpart run failed"
-    FlexpartRuns.change_status!(fprun.name, ERRORED)
+    FlexpartRuns.change_status!(fprun.name, STATUS_ERRORED)
     if ENV["GENIE_ENV"] == "prod"
       rm(fpdir.path, recursive=true)
     end
