@@ -1,12 +1,9 @@
-<select>
+<!-- <select>
   <option *ngFor="let stype of sliceTypes" [value]="stype" (click)="selectType(stype)" [attr.selected]="stype == selectedSliceType">{{stype}}</option>
-</select>
+</select> -->
+
 <mat-horizontal-stepper (selectionChange)="selectionChanged($event)" [linear]="true">
-  <!-- <mat-step *ngFor="let step of steps; let i = index" [routerLink]="['/step' + i]" [label]="step.title">
-      <router-outlet *ngIf="i === selectedStepIndex"></router-outlet>
-  </mat-step> -->
   <mat-step label="Choose Flexpart Run">
-    <!-- <router-outlet></router-outlet> -->
     <app-flexpart-plot #run></app-flexpart-plot>
     <div>
       <button mat-raised-button matStepperNext [disabled]="run.value == undefined">Next</button>
@@ -14,9 +11,6 @@
   </mat-step>
 
   <mat-step label="Choose Flexpart output">
-    <!-- <ng-template #template [value]="output.value" matStepContent> -->
-      <!-- <router-outlet></router-outlet> -->
-    <!-- <div *ngIf="run.value"> -->
     <ng-template matStepContent>
       <app-choose-output (selectedIdEvent)="selectedOutputId = $event" [runId] = "run.value"></app-choose-output>
       <div>
@@ -24,19 +18,9 @@
         <button mat-raised-button matStepperNext [disabled]="selectedOutputId == undefined">Next</button>
       </div>
     </ng-template>
-    <!-- </div> -->
-    <!-- </ng-template> -->
-    <!-- <app-choose-output *ngIf="run.value" [runId]="run.value"></app-choose-output> -->
-
-    <!-- <app-flexpart-plot (selectedIdEvent)="selectedRunId = $event"></app-flexpart-plot>
-    <div>
-      <button mat-button matStepperNext [disabled]="selectedRunId == undefined">Next</button>
-    </div> -->
-
   </mat-step>
 
   <mat-step label="Choose variable to plot">
-
     <ng-template matStepContent>
       <app-variable-selection (selectedIdEvent)="selectedLayer = $event"  [outputId] = "selectedOutputId"></app-variable-selection>
       <div>
@@ -44,33 +28,13 @@
         <button mat-raised-button matStepperNext [disabled]="selectedOutputId == undefined">Next</button>
       </div>
     </ng-template>
-      <!-- <router-outlet></router-outlet> -->
-      <!-- <app-choose-output #output [runId] = "run.value"></app-choose-output> -->
-    <!-- <app-choose-output *ngIf="run.value" [runId]="run.value"></app-choose-output> -->
-
-    <!-- <app-flexpart-plot (selectedIdEvent)="selectedRunId = $event"></app-flexpart-plot>
-    <div>
-      <button mat-button matStepperNext [disabled]="selectedRunId == undefined">Next</button>
-    </div> -->
   </mat-step>
 
-  <!-- <mat-step [routerLink]="['/flexpart', 'plots', 'outputs', selectedOutputId, 'dimensions', selectedLayer]" label="Choose the dimensions to plot"> -->
   <mat-step label="Choose the dimensions to plot">
-
-    <!-- <router-outlet></router-outlet> -->
     <ng-template matStepContent>
       <app-dimensions-form [outputId]="selectedOutputId" [layerName]="selectedLayer"></app-dimensions-form>
       <button mat-raised-button matStepperPrevious>Go back</button>
     </ng-template>
-
-      <!-- <router-outlet></router-outlet> -->
-      <!-- <app-choose-output #output [runId] = "run.value"></app-choose-output> -->
-    <!-- <app-choose-output *ngIf="run.value" [runId]="run.value"></app-choose-output> -->
-
-    <!-- <app-flexpart-plot (selectedIdEvent)="selectedRunId = $event"></app-flexpart-plot>
-    <div>
-      <button mat-button matStepperNext [disabled]="selectedRunId == undefined">Next</button>
-    </div> -->
   </mat-step>
 
 </mat-horizontal-stepper>
