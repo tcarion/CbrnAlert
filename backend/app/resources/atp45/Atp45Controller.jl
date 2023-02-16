@@ -15,6 +15,7 @@ using GeoJSON
 using DataStructures: OrderedDict
 
 using CbrnAlertApp.Users
+using CbrnAlertApp: TMP_DIR_PATH
 
 const AVAILABLE_STEPS = 0:6:240
 
@@ -111,7 +112,7 @@ function _forecast_weather_inputs(payload)
 
     step_number = Dates.Hour(leadtime - forecasttime).value
     fc_req = default_request()
-    target = joinpath("tmp", "tmp.grib")
+    target = joinpath(TMP_DIR_PATH, "tmp.grib")
 
     # We retrieve a bounding box because I experienced MARS errors when taking too small areas
     fc_req[:area] = join([ceil(Int, lat) + 1, floor(Int, lon) - 1, floor(Int, lat) - 1, ceil(Int, lon) + 1], "/")
