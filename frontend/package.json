@@ -50,7 +50,7 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^15.0.4",
-    "@angular/cli": "^15.1.5",
+    "@angular/cli": "^15.1.6",
     "@angular/compiler-cli": "^15.0.4",
     "@ngxs/devtools-plugin": "^3.7.6",
     "@ngxs/logger-plugin": "^3.7.6",
