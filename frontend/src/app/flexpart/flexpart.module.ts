@@ -29,6 +29,7 @@ import { RetrieveMeteoSimpleComponent } from './retrieve-meteo-simple/retrieve-m
 import { LocationFormModule } from 'src/app/shared/form/location-form/location-form.module';
 import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faEraser, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { DialogModule } from 'src/app/shared/ui/dialogs/dialog.module';
 
 @NgModule({
     declarations: [
@@ -67,6 +68,7 @@ import { faEraser, faTrash } from '@fortawesome/free-solid-svg-icons';
         MatTooltipModule,
         LocationFormModule,
         FontAwesomeModule,
+        DialogModule
     ],
     exports: [
         // MetDataComponent,

@@ -1,4 +1,4 @@
-import { Observable, Subject, Subscription } from 'rxjs';
+import { filter, Observable, Subject, Subscription, take } from 'rxjs';
 import { DatePipe } from '@angular/common';
 import {
   Component,
@@ -9,6 +9,7 @@ import {
 import { FlexpartService } from '../flexpart.service';
 import { Store } from '@ngxs/store';
 import { FlexpartRun } from 'src/app/core/api/models';
+import { DialogService } from 'src/app/shared/ui/dialogs/dialog.service';
 
 @Component({
   selector: 'app-flexpart-plot',
@@ -23,7 +24,8 @@ export class FlexpartPlotComponent implements OnInit {
   @Output() selectedIdEvent = new EventEmitter<string>();
   constructor(
     public flexpartService: FlexpartService,
-    private store: Store
+    private store: Store,
+    private dialogService: DialogService
   ) {}
 
   ngOnInit(): void {
@@ -47,8 +49,22 @@ export class FlexpartPlotComponent implements OnInit {
     this.selectedIdEvent.emit(id)
   }
 
+  openDialog() {
+    const dialogData = {
+      title: 'Please confirm',
+      // message: 'Are you sure you want to delete this run?'
+    }
+    return this.dialogService.confirmDialog(dialogData).pipe(
+      take(1)
+    );
+  }
+
   deleteRun(uuid: string) {
-    this.flexpartService.deleteRun(uuid);
+    this.openDialog().pipe(
+      filter(res => res == true)
+    ).subscribe(res => {
+      this.flexpartService.deleteRun(uuid);
+    })
   }
 
 //   goToOuput(index: number) {
