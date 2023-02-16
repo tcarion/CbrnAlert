@@ -32,8 +32,12 @@ import { ApiModule } from './api/api.module';
         NotifState
     ],
     { developmentMode: !environment.production }),
-    NgxsReduxDevtoolsPluginModule.forRoot(),
-    NgxsLoggerPluginModule.forRoot(),
+    NgxsReduxDevtoolsPluginModule.forRoot({
+        disabled: environment.production,
+    }),
+    NgxsLoggerPluginModule.forRoot({
+        disabled: environment.production,
+    }),
     ApiModule.forRoot({
         rootUrl: environment.apiUrl
     }),
