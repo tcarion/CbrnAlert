@@ -42,6 +42,7 @@ export FlexpartInput
     control::String = ""
     date_created::DateTime = Dates.now()
     status::String = STATUS_CREATED
+    error_message::Union{String, Nothing} = ""
 end
 
 Validation.validator(::Type{FlexpartInput}) = ModelValidator([
@@ -90,11 +91,17 @@ end
 
 isfinished(entry) = entry.status == STATUS_FINISHED
 
-function change_status!(uuid::String, value::String)
-    input = findone(FlexpartInput, uuid=uuid)
+function change_status!(input::FlexpartInput, value::String)
     input.status = value
     input |> save!
 end
+
+function add_error_message(input::FlexpartInput, value::String)
+    input.error_message = value
+    input |> save!
+end
+
+change_status!(uuid::String, value::String) = change_status!(findone(FlexpartInput, uuid=uuid), value)
 
 function assign_to_user!(user::Users.User, fpinput::FlexpartInput)
     Relationship!(user, fpinput)

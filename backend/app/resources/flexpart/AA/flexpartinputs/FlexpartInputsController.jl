@@ -16,7 +16,6 @@ using CbrnAlertApp.Users
 using CbrnAlertApp.Users: current_user
 using CbrnAlertApp.FlexpartInputs
 
-
 const DATA_NOT_YET_AVAILABLE = Genie.Router.error(500, "Mars Retrieval error: DATA_NOT_YET_AVAILABLE", "application/json", error_info="The data you're requesting is not yet available")
 const UNKNOWN_MARS_ERROR = Genie.Router.error(500, "Mars Retrieval error: Unknown", "application/json", error_info="Unknown error during data retrieval")
 struct MarsDataNotAvailableError <: Exception end
@@ -69,6 +68,7 @@ function data_retrieval()
           end
       catch
           FlexpartInputs.change_status!(newinput.uuid, STATUS_ERRORED)
+          FlexpartInputs.add_error_message(newinput, join(readlines(log_file_path; keep = true), ""))
           FlexpartInputs.delete_from_disk(newinput)
           rethrow()
       end
@@ -79,6 +79,7 @@ function data_retrieval()
       FlexpartInputs.change_status!(newinput.uuid, STATUS_FINISHED)
   catch e
       FlexpartInputs.change_status!(newinput.uuid, STATUS_ERRORED)
+      FlexpartInputs.add_error_message(newinput, join(readlines(log_file_path; keep = true), ""))
       FlexpartInputs.delete_from_disk(newinput)
       if e isa MarsDataNotAvailableError
           # throw(Genie.Exceptions.RuntimeException("Mars Retrieval error: DATA_NOT_YET_AVAILABLE", "The data you're requesting is not yet available", 500, e))
