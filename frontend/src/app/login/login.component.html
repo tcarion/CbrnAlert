@@ -1,40 +1,43 @@
-<div class="rounded-md shadow-2xl bg-white flex flex-col justify-center items-center w-80">
+<div class="rounded-md shadow-2xl bg-white flex flex-col justify-center items-center w-80 max-w-80">
     <div class="rounded-t-md h-11 flex flex-col justify-center items-center font-medium bg-blue-400 w-full">
         Please authenticate
     </div>
 
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex-col py-3">
-        <mat-form-field 
-            class = "w-56" 
-            appearance="outline" 
+        <mat-form-field
+            class = "w-56"
+            appearance="outline"
             floatLabel="never">
             <mat-label> Email </mat-label>
-            <input 
+            <input
                 matInput
                 formControlName="email">
             <!-- <mat-error *ngIf="(formItem.controlName | formControl).invalid"> error ! </mat-error> -->
         </mat-form-field>
 
-        <mat-form-field 
-        class = "w-56" 
-            appearance="outline" 
+        <mat-form-field
+        class = "w-56"
+            appearance="outline"
             floatLabel="never">
             <mat-label> Password </mat-label>
-            <input 
+            <input
                 matInput
                 type="password"
                 formControlName="password">
             <!-- <mat-error *ngIf="(formItem.controlName | formControl).invalid"> error ! </mat-error> -->
         </mat-form-field>
 
-        <button 
-            mat-raised-button 
-            color="primary" 
-            type="submit" 
+        <div *ngIf="errorMessage$ | async as errorMessage" class="p-1 mb-2 text-xs bg-red-200 text-red-700 rounded-sm border-0 border-red-700">
+          {{errorMessage}}
+        </div>
+        <button
+            mat-raised-button
+            color="primary"
+            type="submit"
             [disabled]="loginForm.invalid">Login</button>
         <!-- <div class="form-group">
             <label for="username">Username</label>
-            <input matInput type="text" formControlName="username" class="form-control" 
+            <input matInput type="text" formControlName="username" class="form-control"
             />
             <div *ngIf="submitted && f.username.errors" class="invalid-feedback">
                 <div *ngIf="f.username.errors.required">Username is required</div>

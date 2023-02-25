@@ -518,7 +518,7 @@ components:
         - "ongoing"
         - "errored"
 
-    JsonErrorBody:
+    UnauthorizedError:
       type: object
       required:
         - error
@@ -551,12 +551,12 @@ components:
       description: The output ID
   
   responses:
-    UnauthorizedError:
+    UnauthorizedResponse:
       description: Access token is missing or invalid
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/JsonErrorBody'
+            $ref: '#/components/schemas/UnauthorizedError'
 
 
   securitySchemes:
@@ -604,7 +604,7 @@ paths:
                   expiresIn:
                     type: number
         '401':
-          $ref: '#/components/responses/UnauthorizedError'
+          $ref: '#/components/responses/UnauthorizedResponse'
                   
   /atp45/tree:
     get:

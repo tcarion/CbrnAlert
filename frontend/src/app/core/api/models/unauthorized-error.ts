@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-export interface JsonErrorBody {
+export interface UnauthorizedError {
   error: string;
   info?: string;
 }

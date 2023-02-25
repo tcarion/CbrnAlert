@@ -1,46 +1,54 @@
-import { Component, OnInit } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { UnauthorizedError } from 'src/app/core/api/models/unauthorized-error';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { first } from 'rxjs/operators';
+import { BehaviorSubject, of, throwError } from 'rxjs';
+import { catchError, first } from 'rxjs/operators';
 import { AuthenticationService } from '../core/services/authentication.service';
 
 @Component({
-    selector: 'app-login',
-    templateUrl: './login.component.html',
-    styleUrls: ['./login.component.scss']
+  selector: 'app-login',
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginComponent implements OnInit {
 
-    loginForm: UntypedFormGroup;
+  errorMessageSubject = new BehaviorSubject('');
+  errorMessage$ = this.errorMessageSubject.asObservable();
 
-    constructor(
-        private formBuilder: UntypedFormBuilder,
-        private router: Router,
-        private authenticationService: AuthenticationService
-    ) {
-     }
+  loginForm: FormGroup = this.formBuilder.group({
+    email: ['', Validators.required],
+    password: ['', Validators.required]
+  });;
 
-    ngOnInit(): void {
-        this.loginForm = this.formBuilder.group({
-            email: ['', Validators.required],
-            password: ['', Validators.required]
-        });
+  // errorMessage$ = this.authenticationService.login()
+  constructor(
+    private formBuilder: FormBuilder,
+    private router: Router,
+    private authenticationService: AuthenticationService
+  ) {
+  }
+
+  ngOnInit(): void {
+  }
 
 
-    }
-
-
-    onSubmit() {
-        const val = this.loginForm.value;
-        if (val.email && val.password) {
-            this.authenticationService.login(val.email, val.password)
-                .subscribe(
-                    (res) => {
-                        console.log("User is logged in");
-                        console.log(res);
-                        this.router.navigateByUrl('/');
-                    }
-                );
+  onSubmit() {
+    const val = this.loginForm.value;
+    this.authenticationService.login(val.email, val.password).pipe(
+      catchError( (error: UnauthorizedError, _) => {
+        this.errorMessageSubject.next("Your email or password seems to be wrong.")
+        return of(1)
+      })
+    )
+      .subscribe(
+        (res) => {
+          if (res == 1) {
+            return;
+          }
+          this.router.navigateByUrl('/');
         }
-    }
+      );
+  }
 }

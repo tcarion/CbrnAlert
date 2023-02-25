@@ -34,12 +34,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/inline_response_200'
-        "401":
-          description: Access token is missing or invalid
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/JsonErrorBody'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
   /atp45/tree:
     get:
       tags:
@@ -861,7 +857,7 @@ components:
       - finished
       - ongoing
       - errored
-    JsonErrorBody:
+    UnauthorizedError:
       required:
       - error
       type: object
@@ -1073,12 +1069,12 @@ components:
         val:
           type: number
   responses:
-    UnauthorizedError:
+    UnauthorizedResponse:
       description: Access token is missing or invalid
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/JsonErrorBody'
+            $ref: '#/components/schemas/UnauthorizedError'
   parameters:
     inputIdParam:
       name: inputId

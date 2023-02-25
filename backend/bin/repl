@@ -1,2 +1,2 @@
 #!/bin/sh
-julia --color=yes --depwarn=no --project=@. -q -L $(dirname $0)/../bootstrap.jl -- "$@"
+/home/tcarion/julia-1.7.0/bin/julia --color=yes --depwarn=no --project=@. -q -L $(dirname $0)/../bootstrap.jl -- "$@"

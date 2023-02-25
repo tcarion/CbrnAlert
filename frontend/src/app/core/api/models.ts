@@ -26,7 +26,7 @@ export { GeoJsonSliceResponse } from './models/geo-json-slice-response';
 export { ColorbarData } from './models/colorbar-data';
 export { GeoCell } from './models/geo-cell';
 export { RunStatus } from './models/run-status';
-export { JsonErrorBody } from './models/json-error-body';
+export { UnauthorizedError } from './models/unauthorized-error';
 export { FeatureCollection } from './models/feature-collection';
 export { GeoJsonObject } from './models/geo-json-object';
 export { Feature } from './models/feature';

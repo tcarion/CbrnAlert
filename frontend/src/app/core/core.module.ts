@@ -1,3 +1,4 @@
+import { ErrorHandlerService } from './services/error-handler.service';
 import { MapState } from './state/map.state';
 import { FlexpartState } from './state/flexpart.state';
 import { MapPlotsService } from './services/map-plots.service';
@@ -46,6 +47,7 @@ import { ApiModule } from './api/api.module';
     NotificationService,
     MapPlotsService,
     AuthenticationService,
+    ErrorHandlerService,
   ]
 })
 export class CoreModule { }
