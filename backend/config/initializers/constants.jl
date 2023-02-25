@@ -1,6 +1,8 @@
 const PRK_PATH = joinpath(pwd(), "config", "private.pem")
 const PUK_PATH = joinpath(pwd(), "config", "public.pem")
 
+const TMP_DIR_PATH = joinpath("public", "tmp")
+
 const API_DOC_FILE = joinpath(pwd(), "public", "docs", "api_docs.yaml")
 
 const DATE_FORMAT = "yyyy-mm-ddTHH:MM:SS"
