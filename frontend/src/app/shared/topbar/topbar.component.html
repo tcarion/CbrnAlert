@@ -4,6 +4,12 @@
             <mat-icon>menu</mat-icon>
         </button>
         <h1 class="app-name">CBRN Dispersion app</h1>
+        <div
+        class="p-1 ml-5 my-2 bg-green-400 rounded text-sm justify-center"
+        *ngIf="currentUser$ | async as currentUser"
+        >
+          User: {{ currentUser.username }}
+        </div>
     </div>
     <div class="topbar-icons">
         <button style="margin-right: 2em" mat-raised-button color="warn" (click)="onLogout()">

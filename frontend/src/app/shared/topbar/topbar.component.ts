@@ -20,6 +20,8 @@ export class TopbarComponent implements OnInit, OnDestroy {
 
     showPlotList: boolean = false;
 
+    currentUser$ = this.auth.currentUser$
+
     constructor(
         private notificationService: NotificationService,
         private auth: AuthenticationService
