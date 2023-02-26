@@ -1,6 +1,8 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import dayjs from 'dayjs';
+import { catchError, of, throwError } from 'rxjs';
+import { NotificationService } from 'src/app/core/services/notification.service';
 import { FlexpartService } from '../flexpart.service';
 
 const gridResolutions = [
@@ -28,7 +30,7 @@ const timeSteps = [{
   styleUrls: ['./retrieve-meteo-simple.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class RetrieveMeteoSimpleComponent implements OnInit {
+export class RetrieveMeteoSimpleComponent {
 
   form = new UntypedFormGroup({
     start: new UntypedFormControl(dayjs().startOf('hour').toDate(), Validators.required),
@@ -45,16 +47,24 @@ export class RetrieveMeteoSimpleComponent implements OnInit {
 
   constructor(
     private flexpartService: FlexpartService,
+    private notification: NotificationService
   ) { }
-
-  ngOnInit(): void {
-  }
 
   submit(form: UntypedFormGroup) {
     console.log(form)
-    this.flexpartService.retrieveSimple(form.value).subscribe(res => {
+    this.flexpartService.retrieveSimple(form.value).pipe(
+      catchError((err, caught) => {
+        this.notification.snackBar(`The retrieval failed with the following message: ${err.message}.`, {timeout: 10000, status: "error"})
+
+        return throwError(() => err)
+
+      })
+    )
+
+    .subscribe(res => {
       // TODO: add the result input to the app state (flexpartService.fpInputs$ ?)
-      console.log(res)
+      // console.log(res)
+      this.notification.snackBar("Your request for meteorological retrieval has been started. It can take up to 2 hours to be fullfilled.", {timeout: 10000, status: "info"})
     })
   }
 }

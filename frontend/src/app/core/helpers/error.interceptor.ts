@@ -12,7 +12,6 @@ export class ErrorInterceptor implements HttpInterceptor {
       private authenticationService: AuthenticationService,
       private errorHandlerService: ErrorHandlerService
       ) { }
-    // ? nice example to handle errors: https://github.com/cyclosproject/cyclos4-ui/blob/65ee1600b624de09fe093d25c44b9c3a6b09522c/src/app/core/error-handler.service.ts
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
       return next.handle(req).
         pipe(

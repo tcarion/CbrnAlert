@@ -4,6 +4,7 @@ import { Injectable } from '@angular/core';
 import { throwError } from 'rxjs';
 
 
+// ? nice example to handle errors: https://github.com/cyclosproject/cyclos4-ui/blob/65ee1600b624de09fe093d25c44b9c3a6b09522c/src/app/core/error-handler.service.ts
 
 @Injectable({
   providedIn: 'root'

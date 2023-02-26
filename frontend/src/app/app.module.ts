@@ -23,12 +23,12 @@ import { CoreModule } from './core/core.module';
 import { Atp45Module } from 'src/app/atp45/atp45.module';
 import { FlexpartModule } from './flexpart/flexpart.module';
 import { HomeComponent } from './home/home.component';
-import { LoginComponent } from './login/login.component';
-import { ReactiveFormsModule } from '@angular/forms';
 import { LoginModule } from './login/login.module';
-import { HandleDateInterceptor } from './core/helpers/handle-date.interceptor';
 import './core/config/custom-methods';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome'
+
+import { SnackbarModule } from './shared/ui/snackbar/snackbar.module';
+
 @NgModule({
     declarations: [
         AppComponent,
@@ -52,6 +52,9 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome'
         FlexpartModule,
         LoginModule,
         FontAwesomeModule,
+
+        SnackbarModule
+
     ],
     providers: [
         { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
