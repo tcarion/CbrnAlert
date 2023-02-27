@@ -87,6 +87,7 @@ function create()
 end
 
 isfinished(entry) = entry.status == STATUS_FINISHED
+iserrored(entry) = entry.status == STATUS_ERRORED
 
 function change_status!(name::String, value::String)
     entry = findone(FlexpartRun, name=name)

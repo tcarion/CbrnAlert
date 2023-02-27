@@ -19,12 +19,37 @@ using CbrnAlertApp.FlexpartInputs
 using CbrnAlertApp.FlexpartRuns
 using CbrnAlertApp.FlexpartOutputs
 
-const FLEXPART_RUN_FAILED = Genie.Router.error(500, "Flexpart run failed", "application/json", error_info="Flexpart run failed")
+using CbrnAlertAPI
+const API = CbrnAlertAPI
+
+# const FLEXPART_RUN_FAILED = Genie.Router.error(500, "Flexpart run failed", "application/json", error_info="Flexpart run failed")
+
+struct FlexpartRunException{T} <: Exception
+  error::API.OpenAPI.APIModel
+end
+FlexpartRunException(code::AbstractString) = FlexpartRunException{Symbol(code)}(API.FlexpartRunError(;error = "The Flexpart run failed.", code))
+
+run_error_throw(e::FlexpartRunException) = throw(Genie.Exceptions.ExceptionalResponse(json(e.error, status = 500)))
+
+const UNAVAILABLE_METEO_EXCEPTION = FlexpartRunException("noMeteoFieldsAvailable")
+const UNKNOWN_EXCEPTION = FlexpartRunException("unknownFlexpartRunError")
+
 
 function _iscompleted(fpdir)
   lines = readlines(joinpath(fpdir.path, "output.log"))
   any(occursin.("CONGRATULATIONS", lines))
 end
+
+function _throw_run_errors(filepath)
+  lines = readlines(filepath)
+  for line in lines
+      if occursin("STOP NO METEO FIELDS AVAILABLE", line)
+          throw(UNAVAILABLE_METEO_EXCEPTION)
+      end
+  end
+  throw(UNKNOWN_EXCEPTION)
+end
+_check_run_errors(fpdir::FlexpartDir) = joinpath(fpdir.path, "output.log")
 
 function run()
   runtype = Genie.Router.params(:runType, "simple")
@@ -122,7 +147,8 @@ function run(fpdir::FlexpartDir, fprun::FlexpartRun)
   fpoptions = FlexpartOption(fpdir)
   Flexpart.remove_unused_species!(fpoptions)
   FlexpartRuns.change_options!(fprun.name, fpoptions)
-  open(joinpath(fpdir.path, "output.log"), "w") do logf
+  output_path = joinpath(fpdir.path, "output.log")
+  open(output_path, "w") do logf
     FlexpartRuns.change_status!(fprun.name, STATUS_ONGOING)
     Flexpart.run(fpdir) do stream
       # log_and_broadcast(stream, request_data["ws_info"], logf)
@@ -137,10 +163,19 @@ function run(fpdir::FlexpartDir, fprun::FlexpartRun)
   else
     @warn "Flexpart run failed"
     FlexpartRuns.change_status!(fprun.name, STATUS_ERRORED)
-    if ENV["GENIE_ENV"] == "prod"
-      rm(fpdir.path, recursive=true)
+    try _throw_run_errors(output_path)
+    catch e
+      # With this error, an output has normally been produced, so we relate it to the run.
+      if e isa FlexpartRunException{:noMeteoFieldsAvailable}
+        FlexpartOutputs.add!(fprun)
+      end
+      run_error_throw(e)
+    finally
+      FlexpartRuns.assign_to_user!(current_user(), fprun)
+      if ENV["GENIE_ENV"] == "prod"
+        rm(fpdir.path, recursive=true)
+      end
     end
-    return FLEXPART_RUN_FAILED
   end
 
   FlexpartRuns.assign_to_user!(current_user(), fprun)
@@ -152,7 +187,8 @@ end
 
 function get_runs()
   fpruns = user_related(FlexpartRun)
-  filter!(FlexpartRuns.isfinished, fpruns)
+  # filter!(FlexpartRuns.isfinished, fpruns)
+  filter!(x -> x.status == STATUS_ERRORED || x.status == STATUS_FINISHED, fpruns)
   Dict.(fpruns) |> json
 end
 

@@ -10,7 +10,7 @@
     "generate:api": "openapi-generator-cli generate -i ../backend/public/docs/api_docs.yaml -g typescript-angular -o src/app/core/api/oa-gen",
     "resolve:api": "openapi-generator-cli generate -i ../backend/public/docs/api_docs.yaml -g openapi-yaml -o ../backend/resolved_.yaml",
     "ng-generate:api": "ng-openapi-gen --config ng-open-api-gen.config.json",
-    "generate:api-backend": "openapi-generator-cli generate -i ../backend/public/docs/api_docs.yaml -g julia-server -o ../backend/tmp/joa",
+    "generate:api-backend": "openapi-generator-cli generate -i ../backend/public/docs/api_docs.yaml -g julia-server -o ${HOME}/.julia/dev/CbrnAlertAPI --additional-properties=packageName=CbrnAlertAPI --additional-properties=exportModels=false",
     "generate:version": "openapi-generator-cli version",
     "setoaversion": "openapi-generator-cli version-manager set 6.3.0",
     "build": "npm run ng-generate:api && npm run ng build -- --configuration production"
