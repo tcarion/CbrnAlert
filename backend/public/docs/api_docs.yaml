@@ -321,6 +321,32 @@ components:
           type: object
           additionalProperties: 
             type: string
+
+    FlexpartInputError:
+      type: object
+      properties:
+        error:
+          type: string
+        info:
+          type: string
+        code:
+          $ref: '#/components/schemas/WeatherRetrievalErrorCode'
+
+    WeatherRetrievalErrorCode:
+      description: >-
+        Application specific error code when a retrieval to MARS from ECMWF fails.
+
+        Possible values area:
+
+        - 'dataNotYetAvailable': The requested weather data are not available yet.
+
+        - 'unknownMarsError': MARS error that couldn't be identified.
+      
+      type: string
+      enum:
+        - dataNotYetAvailable
+        - unknownMarsError
+
     FlexpartReleaseSimple:
       type: object
       required:
@@ -430,6 +456,35 @@ components:
         options:
           type: object
 
+    FlexpartRunError:
+      description: >-
+        Error when a Flexpart run fails.
+      
+      type: object
+      properties:
+        error:
+          type: string
+        info:
+          type: string
+        code:
+          type:
+          $ref : '#/components/schemas/FlexpartRunErrorCode'
+
+    FlexpartRunErrorCode:
+      description: >-
+        Application specific error code when a Flexpart run fails.
+
+        Possible values area:
+
+        - 'noMeteoFieldsAvailable': The Flexpart run time window exceeds the available meteorological fields valid time.
+        
+        - 'unknownFlexpartRunError': Flexpart run error that couldn't be identified.
+      
+      type: string
+      enum:
+        - noMeteoFieldsAvailable
+        - unknownFlexpartRunError
+
     FlexpartOutput:
       type: object
       required:
@@ -527,6 +582,7 @@ components:
           type: string
         'info':
           type: string
+
   parameters:
     inputIdParam:
       in: path
@@ -691,6 +747,13 @@ paths:
                 schema:
                   $ref: '#/components/schemas/FlexpartInput'
 
+        '500':
+          description: The Flexpart input retrieval failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlexpartInputError'
+
   /flexpart/inputs:
     get:
       tags:
@@ -750,6 +813,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FlexpartRun'
+
+        '500':
+          description: The Flexpart run has failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlexpartRunError'
 
   /flexpart/runs:
     get:

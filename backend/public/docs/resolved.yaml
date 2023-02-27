@@ -34,8 +34,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/inline_response_200'
-        '401':
-          $ref: '#/components/responses/UnauthorizedResponse'
+        "401":
+          description: Access token is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
   /atp45/tree:
     get:
       tags:
@@ -117,6 +121,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FlexpartInput'
+
+        '500':
+          description: The Flexpart input retrieval failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlexpartInputError'
   /flexpart/inputs:
     get:
       tags:
@@ -179,6 +190,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FlexpartRun'
+        "500":
+          description: The Flexpart run has failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlexpartRunError'
   /flexpart/runs:
     get:
       tags:
@@ -676,6 +693,25 @@ components:
           type: object
           additionalProperties:
             type: string
+    FlexpartInputError:
+      type: object
+      properties:
+        error:
+          type: string
+        info:
+          type: string
+        code:
+          $ref: '#/components/schemas/WeatherRetrievalErrorCode'
+    WeatherRetrievalErrorCode:
+      type: string
+      description: |-
+        Application specific error code when a retrieval to MARS from ECMWF fails.
+        Possible values area:
+        - 'dataNotYetAvailable': The requested weather data are not available yet.
+        - 'unknownMarsError': MARS error that couldn't be identified.
+      enum:
+      - dataNotYetAvailable
+      - unknownMarsError
     FlexpartReleaseSimple:
       required:
       - end
@@ -778,6 +814,26 @@ components:
           format: date-time
         options:
           type: object
+    FlexpartRunError:
+      type: object
+      properties:
+        error:
+          type: string
+        info:
+          type: string
+        code:
+          $ref: '#/components/schemas/FlexpartRunErrorCode'
+      description: Error when a Flexpart run fails.
+    FlexpartRunErrorCode:
+      type: string
+      description: |-
+        Application specific error code when a Flexpart run fails.
+        Possible values area:
+        - 'noMeteoFieldsAvailable': The Flexpart run time window exceeds the available meteorological fields valid time.
+        - 'unknownFlexpartRunError': Flexpart run error that couldn't be identified.
+      enum:
+      - noMeteoFieldsAvailable
+      - unknownFlexpartRunError
     FlexpartOutput:
       required:
       - date_created
