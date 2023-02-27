@@ -161,7 +161,7 @@ function run(fpdir::FlexpartDir, fprun::FlexpartRun)
   if _iscompleted(fpdir)
     FlexpartRuns.change_status!(fprun.name, STATUS_FINISHED)
   else
-    @warn "Flexpart run failed"
+    @warn "Flexpart run with name $(fprun.name) has failed"
     FlexpartRuns.change_status!(fprun.name, STATUS_ERRORED)
     try _throw_run_errors(output_path)
     catch e
@@ -188,7 +188,7 @@ end
 function get_runs()
   fpruns = user_related(FlexpartRun)
   # filter!(FlexpartRuns.isfinished, fpruns)
-  filter!(x -> x.status == STATUS_ERRORED || x.status == STATUS_FINISHED, fpruns)
+  filter!(x -> x.status == STATUS_FINISHED, fpruns)
   Dict.(fpruns) |> json
 end
 
