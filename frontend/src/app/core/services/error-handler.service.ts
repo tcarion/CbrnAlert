@@ -47,7 +47,9 @@ export class ErrorHandlerService {
 
         case 0:
           this.notification.snackBar('An unexpected server error occured. Please contact the web admin to report it.', {timeout: 10000, status: 'error'});
+          break
       }
+      this.notification.snackBar(`An unknown error has occured with status ${err.status}.`, {timeout: 10000, status: 'error'});
     }
 
     return;
