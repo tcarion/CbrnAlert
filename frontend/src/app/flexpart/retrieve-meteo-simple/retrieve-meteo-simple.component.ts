@@ -32,15 +32,17 @@ const timeSteps = [{
 })
 export class RetrieveMeteoSimpleComponent {
 
+  startTime = dayjs().subtract(2, 'day').startOf('day').toDate()
+  endTime = dayjs().subtract(1, 'day').startOf('day').toDate()
+  steps = {hour: 12, minute: 0, second: 0};
+
   form = new UntypedFormGroup({
-    start: new UntypedFormControl(dayjs().startOf('hour').toDate(), Validators.required),
-    end: new UntypedFormControl(dayjs().startOf('hour').toDate(), Validators.required),
+    start: new UntypedFormControl(this.startTime, Validators.required),
+    end: new UntypedFormControl(this.endTime, Validators.required),
     area: new UntypedFormControl('', Validators.required),
     timeStep: new UntypedFormControl(timeSteps[0].key, Validators.required),
     gridres: new UntypedFormControl(gridResolutions[0], Validators.required),
   })
-
-  steps = {hour: 1, minute: 0, second: 0};
 
   gridResolutions = gridResolutions;
   timeSteps = timeSteps;
