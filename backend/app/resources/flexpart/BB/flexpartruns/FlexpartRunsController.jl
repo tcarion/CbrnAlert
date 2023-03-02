@@ -19,8 +19,9 @@ using CbrnAlertApp.FlexpartInputs
 using CbrnAlertApp.FlexpartRuns
 using CbrnAlertApp.FlexpartOutputs
 
-using CbrnAlertAPI
-const API = CbrnAlertAPI
+using CbrnAlertApp: API
+
+# const API = CbrnAlertApp.API
 
 # const FLEXPART_RUN_FAILED = Genie.Router.error(500, "Flexpart run failed", "application/json", error_info="Flexpart run failed")
 
