@@ -35,7 +35,7 @@ export class SnackbarComponent {
   }
 
   show(message: string, options?: SnackBarOptions) {
-    const timeout = (options || {}).timeout || 3000;
+    const timeout = (options || {}).timeout || 5000;
     const status = (options || {}).status || 'info';
     this.message$.next(message);
     const style = this.element.style;

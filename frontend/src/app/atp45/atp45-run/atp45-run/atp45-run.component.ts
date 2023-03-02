@@ -12,6 +12,7 @@ import { MapPlotAction } from 'src/app/core/state/map-plot.state';
 import { map, take } from 'rxjs/operators';
 import { ForecastStartAction } from 'src/app/core/state/atp45.state';
 import { TabsComponent } from 'src/app/shared/tabs/tabs.component';
+import { NotificationService } from 'src/app/core/services/notification.service';
 
 @Component({
   selector: 'app-atp45-run',
@@ -36,7 +37,8 @@ export class Atp45RunComponent implements OnInit {
   constructor(
     private api: Atp45ApiService,
     private atp45Service: Atp45Service,
-    private store: Store
+    private store: Store,
+    private notification: NotificationService
   ) {
     this.runForm.statusChanges.subscribe(() => {
       this.updateCanSubmit();
@@ -107,6 +109,7 @@ export class Atp45RunComponent implements OnInit {
     console.log(params);
     this.api.atp45RunPost(params).subscribe((res) => {
       this.store.dispatch(new MapPlotAction.Add(res, 'atp45'));
+      this.notification.snackBar("ATP45 run successful. The result has been added to the map.")
     });
   }
 }
