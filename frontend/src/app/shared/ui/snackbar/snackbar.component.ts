@@ -19,6 +19,11 @@ export class SnackbarComponent {
   ) {
   }
 
+  backgroundMap = new Map([
+    ['info', 'darkblue'],
+    ['error', 'crimson'],
+    ['warn', 'goldenrod'],
+  ])
   message$ = new BehaviorSubject('');
   private timeoutHandle: any;
 
@@ -39,17 +44,7 @@ export class SnackbarComponent {
     const status = (options || {}).status || 'info';
     this.message$.next(message);
     const style = this.element.style;
-    switch (status) {
-      case 'info':
-        style.backgroundColor = 'darkblue';
-        break;
-      case 'error':
-        style.backgroundColor = 'crimson';
-        break;
-      case 'warn':
-        style.backgroundColor = 'goldenrod';
-        break;
-    }
+    style.backgroundColor = this.backgroundMap.get(status) || 'darkblue';
     style.opacity = '1';
     style.transform = 'translate(-50%, 0)';
     this.timeoutHandle = setTimeout(() => this.hide(), timeout);
