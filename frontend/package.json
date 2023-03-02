@@ -7,13 +7,14 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "generate:api": "openapi-generator-cli generate -i ../backend/public/docs/api_docs.yaml -g typescript-angular -o src/app/core/api/oa-gen",
+    "generate:api": "openapi-generator-cli generate -i ../api/api_docs.yaml -g typescript-angular -o src/app/core/api/oa-gen",
     "resolve:api": "openapi-generator-cli generate -i ../backend/public/docs/api_docs.yaml -g openapi-yaml -o ../backend/resolved_.yaml",
-    "ng-generate:api": "ng-openapi-gen --config ng-open-api-gen.config.json",
-    "generate:api-backend": "openapi-generator-cli generate -i ../backend/public/docs/api_docs.yaml -g julia-server -o ${HOME}/.julia/dev/CbrnAlertAPI --additional-properties=packageName=CbrnAlertAPI --additional-properties=exportModels=false",
-    "generate:version": "openapi-generator-cli version",
+    "generate:api-client": "ng-openapi-gen --config ng-open-api-gen.config.json",
+    "generate:api-server": "openapi-generator-cli generate -i ../api/api_docs.yaml -g julia-server -o ../api/CbrnAlertAPI/ --additional-properties=packageName=CbrnAlertAPI --additional-properties=exportModels=false",
+    "generator:version": "openapi-generator-cli version",
     "setoaversion": "openapi-generator-cli version-manager set 6.3.0",
-    "build": "npm run ng-generate:api && npm run ng build -- --configuration production"
+    "generate:all": "npm run generate:api-client && npm run generate:api-server",
+    "build": "npm run generate:all && npm run ng build -- --configuration production"
   },
   "private": true,
   "dependencies": {
