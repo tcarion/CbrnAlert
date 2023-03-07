@@ -1,17 +1,26 @@
 import { ColorbarData } from './../../../core/api/models/colorbar-data';
 import { Component, OnInit, ChangeDetectionStrategy, Input } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-legend-colorbar',
   templateUrl: './legend-colorbar.component.html',
   styleUrls: ['./legend-colorbar.component.scss'],
-  // changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LegendColorbarComponent implements OnInit {
 
-  @Input() colorbar: ColorbarData;
+  formatedTicks: string[];
+  colors?: string[];
+
+  units = 'ng/m³';
+  @Input() set colorbar(value: ColorbarData) {
+    this.formatedTicks = value.ticks.map(i => this.formatTick(i));
+    this.colors = value.colors;
+    // this.units = value.units;
+  }
+
   // ticksLabels: string[];
   // colors: string[];
   // ticksLabels$: Observable<string[]>;
