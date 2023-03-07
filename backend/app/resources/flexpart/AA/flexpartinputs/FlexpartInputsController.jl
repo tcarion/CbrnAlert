@@ -56,7 +56,7 @@ function data_retrieval()
   FlexExtract.save(fcontrol)
 
   FlexpartInputs.change_control(newinput.uuid, fcontrol)
-  FlexpartInputs.change_status!(newinput.uuid, STATUS_ONGOING)
+  FlexpartInputs.change_status!(newinput, STATUS_ONGOING)
   log_file_path = joinpath(fedir.path, "output_log.log")
   open(log_file_path, "w") do logf
       try 
@@ -67,7 +67,7 @@ function data_retrieval()
               flush(logf)
           end
       catch
-          FlexpartInputs.change_status!(newinput.uuid, STATUS_ERRORED)
+          FlexpartInputs.change_status!(newinput, STATUS_ERRORED)
           FlexpartInputs.add_error_message(newinput, join(readlines(log_file_path; keep = true), ""))
           FlexpartInputs.delete_from_disk(newinput)
           rethrow()
@@ -76,9 +76,9 @@ function data_retrieval()
 
   try
       _check_mars_errors(log_file_path)
-      FlexpartInputs.change_status!(newinput.uuid, STATUS_FINISHED)
+      FlexpartInputs.change_status!(newinput, STATUS_FINISHED)
   catch e
-      FlexpartInputs.change_status!(newinput.uuid, STATUS_ERRORED)
+      FlexpartInputs.change_status!(newinput, STATUS_ERRORED)
       FlexpartInputs.add_error_message(newinput, join(readlines(log_file_path; keep = true), ""))
       FlexpartInputs.delete_from_disk(newinput)
       if e isa MarsDataNotAvailableError
