@@ -19,6 +19,8 @@ using CbrnAlertApp: FLEXPART_RUNS_DIR
 
 using CbrnAlertApp.Users
 
+using CbrnAlertApp: API
+
 export FlexpartRun
 
 # import ..UserApp: FLEXPART_RUNS_DIR
@@ -59,13 +61,12 @@ Validation.validator(::Type{FlexpartRun}) = ModelValidator([
     ValidationRule(:path, FlexpartValidator.is_unique),
 ])
 
-Base.Dict(x::FlexpartRun) = Dict(
-  :type => "flexpartResultId",
-  :uuid => x.uuid,
-  :name => x.name,
-  :status => x.status,
-  :date_created => x.date_created,
-  :options => FlexpartRuns.get_options(x)
+API.FlexpartRun(x::FlexpartRun) = API.FlexpartRun(;
+  uuid = x.uuid,
+  name = x.name,
+  status = x.status,
+  date_created = x.date_created,
+  options = FlexpartRuns.get_options(x)
 )
 
 _get_run(id) = findone(FlexpartRun, uuid = id)

@@ -138,7 +138,7 @@ function run_simple()
   Flexpart.save(fpdir)
 
 
-  return run(fpdir, fprun) |> json
+  return run(fpdir, fprun) |> API.FlexpartRun |> json
 end
 
 function run_detailed()
@@ -190,14 +190,14 @@ function get_runs()
   fpruns = user_related(FlexpartRun)
   # filter!(FlexpartRuns.isfinished, fpruns)
   filter!(x -> x.status == STATUS_FINISHED, fpruns)
-  Dict.(fpruns) |> json
+  API.FlexpartRun.(fpruns) |> json
 end
 
 function get_run()
   id = Genie.Router.params(:runId)
   fprun = FlexpartRuns._get_run(id)
   Users.@hasaccess!(fprun)
-  Dict(fprun) |> json
+  API.FlexpartRun(fprun) |> json
 end
 
 function delete_run()
@@ -208,7 +208,7 @@ function delete_run()
       SearchLight.delete(out)
   end
   FlexpartRuns.delete!(to_delete)
-  Dict(to_delete) |> json
+  API.FlexpartRun(to_delete) |> json
 end
 
 end
