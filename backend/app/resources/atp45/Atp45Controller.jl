@@ -9,6 +9,8 @@ using EcRequests
 using ATP45
 using GRIB
 using JSON3
+using JSON
+using StructTypes
 
 using GeoInterface
 using GeoJSON
@@ -17,7 +19,26 @@ using DataStructures: OrderedDict
 using CbrnAlertApp.Users
 using CbrnAlertApp: TMP_DIR_PATH
 
+using CbrnAlertApp: API
+
 const AVAILABLE_STEPS = 0:6:240
+
+# Define the serializations of ATP45 objects. We do it for JSON3 and JSON since, unfortunately Genie uses JSON3 and OpenPI uses JSON.
+StructTypes.StructType(::Type{<:ATP45.AbstractCategory}) = StructTypes.DictType()
+
+StructTypes.pairs(c::ATP45.AbstractCategory) = pairs(ATP45.properties(c))
+JSON.lower(c::ATP45.AbstractCategory) = ATP45.properties(c)
+
+API.Atp45Result(result::ATP45.Atp45Result) = API.Atp45Result(;
+    collection = geo2dict(result),
+    metadata = ATP45.properties(result)
+    # metadata = Dict(:t => "dsd")
+)
+
+API.WindVelocity(wind::ATP45.WindDirection) = API.WindVelocity(;
+    speed = wind.speed,
+    azimuth = wind.direction
+)
 
 struct MarsRequest
     date::String
@@ -92,11 +113,7 @@ function post_run()
         error("Wrong parameter")
     end
     result = run_atp(categories..., weather_inputs..., releases)
-    response = Dict(
-        :collection => geo2dict(result),
-        :metadata => Dict(:meta => "test")
-    )
-    response |> json
+    result |> API.Atp45Result |> json
 end
 
 function _forecast_weather_inputs(payload)
