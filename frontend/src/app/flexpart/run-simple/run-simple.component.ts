@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, AfterViewInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { UntypedFormArray, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { NgFormsManager } from '@ngneat/forms-manager';
 import * as dayjs from 'dayjs';
@@ -12,7 +12,7 @@ import { FlexpartService } from '../flexpart.service';
   styleUrls: ['./run-simple.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class RunSimpleComponent implements OnInit, OnDestroy {
+export class RunSimpleComponent implements OnInit, AfterViewInit, OnDestroy {
 
   input$: Observable<FlexpartInput | undefined>;
   input?: FlexpartInput
@@ -28,7 +28,7 @@ export class RunSimpleComponent implements OnInit, OnDestroy {
   // https://indepth.dev/posts/1055/never-again-be-confused-when-implementing-controlvalueaccessor-in-angular-forms
   // https://indepth.dev/posts/1245/angular-nested-reactive-forms-using-controlvalueaccessors-cvas
   runForm = new UntypedFormGroup({
-    releases: new UntypedFormArray([new UntypedFormControl({lon: 4, lat: 50}, Validators.required)]),
+    releases: new UntypedFormArray([new UntypedFormControl('', Validators.required)]),
     // command: new FormControl('', Validators.required),
     command: new UntypedFormControl('', Validators.required),
     // command: new FormGroup({}),
@@ -42,11 +42,18 @@ export class RunSimpleComponent implements OnInit, OnDestroy {
   constructor(
     public flexpartService: FlexpartService,
     public formsManager: NgFormsManager,
-    public fb: UntypedFormBuilder
+    public fb: UntypedFormBuilder,
   ) { }
 
   ngOnInit(): void {
     this.input$ = this.flexpartService.selectedInput$;
+
+    this.formsManager.upsert('flexpartRunSimple', this.runForm, {
+      arrControlFactory: { releases: val => new UntypedFormControl(val) }
+    })
+  }
+
+  ngAfterViewInit(): void {
     this.sub = this.input$.subscribe(input => {
       if (input !== undefined) {
         this.input = input;
@@ -65,14 +72,12 @@ export class RunSimpleComponent implements OnInit, OnDestroy {
           start,
           end: endRel
         })
+
+        // ? for some reason, the parent form is correctly updated for command. But for outgrid, we have
+        // ? to manually set the fields or they won't be present by default on runForm.value.outgrid
         this.runForm.get('command')!.patchValue({start, end})
-        this.runForm.get('outgrid')!.patchValue({area : this.niceInput.area})
+        this.runForm.get('outgrid')!.patchValue({area : this.niceInput.area, heights: '100.0', gridres: 0.1})
       }
-    })
-
-
-    this.formsManager.upsert('flexpartRunSimple', this.runForm, {
-      arrControlFactory: { releases: val => new UntypedFormControl(val) }
     })
   }
 
