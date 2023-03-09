@@ -1,4 +1,4 @@
-using Users
+using CbrnAlertApp.Users
 using SearchLight
 
 function add_user(email, password, username)
