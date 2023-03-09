@@ -20,6 +20,12 @@ using CbrnAlertApp.Users
 
 using CbrnAlertApp: API_DOC_FILE
 
+using CbrnAlertApp: EXTRACTED_WEATHER_DATA_DIR, FLEXPART_RUNS_DIR
+
+mkpath(EXTRACTED_WEATHER_DATA_DIR)
+mkpath(FLEXPART_RUNS_DIR)
+mkpath(TMP_DIR_PATH)
+
 global DEBUG_PAYLOAD = 0
 global DEBUG_PARAMS = 0
 global DEBUG_REQUEST = 0
