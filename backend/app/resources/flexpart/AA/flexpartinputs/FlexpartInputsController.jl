@@ -24,7 +24,7 @@ struct UnknownMarsError <: Exception end
 function _check_mars_errors(filepath)
   lines = readlines(filepath)
   haserror = false
-  map(lines) do line
+  for line in lines
       if occursin("DATA_NOT_YET_AVAILABLE", line)
           throw(MarsDataNotAvailableError())
       end
