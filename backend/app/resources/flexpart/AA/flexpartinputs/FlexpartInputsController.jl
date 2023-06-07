@@ -50,14 +50,15 @@ function data_retrieval()
   fcontrol = FeControl(fedir)
   fcontrol[:GRID] = gridres
   fcontrol[:REQUEST] = 0
+#   fcontrol[:CLASS] = "FOO"
   set_area!(fcontrol, area)
   set_steps!(fcontrol, start_date, end_date, time_step)
 
   FlexExtract.save(fcontrol)
 
+  log_file_path = joinpath(fedir.path, "output_log.log")
   FlexpartInputs.change_control(newinput.uuid, fcontrol)
   FlexpartInputs.change_status!(newinput, STATUS_ONGOING)
-  log_file_path = joinpath(fedir.path, "output_log.log")
   open(log_file_path, "w") do logf
       try 
           FlexExtract.submit(fedir) do stream
@@ -68,7 +69,7 @@ function data_retrieval()
           end
       catch
           FlexpartInputs.change_status!(newinput, STATUS_ERRORED)
-          FlexpartInputs.add_error_message(newinput, join(readlines(log_file_path; keep = true), ""))
+          FlexpartInputs.add_error_message!(newinput, join(readlines(log_file_path; keep = true), ""))
           FlexpartInputs.delete_from_disk(newinput)
           rethrow()
       end
@@ -79,7 +80,7 @@ function data_retrieval()
       FlexpartInputs.change_status!(newinput, STATUS_FINISHED)
   catch e
       FlexpartInputs.change_status!(newinput, STATUS_ERRORED)
-      FlexpartInputs.add_error_message(newinput, join(readlines(log_file_path; keep = true), ""))
+      FlexpartInputs.add_error_message!(newinput, join(readlines(log_file_path; keep = true), ""))
       FlexpartInputs.delete_from_disk(newinput)
       if e isa MarsDataNotAvailableError
           # throw(Genie.Exceptions.RuntimeException("Mars Retrieval error: DATA_NOT_YET_AVAILABLE", "The data you're requesting is not yet available", 500, e))

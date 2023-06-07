@@ -19,6 +19,8 @@ using CbrnAlertApp: EXTRACTED_WEATHER_DATA_DIR
 using CbrnAlertApp.FlexpartValidator
 using CbrnAlertApp.Users
 
+using CbrnAlertApp: API
+
 export FlexpartInput
 
 # import ..UserApp: EXTRACTED_WEATHER_DATA_DIR
@@ -61,6 +63,14 @@ Base.Dict(x::FlexpartInput) = Dict(
     :control => get_control(x)
 )
 
+API.FlexpartInput(x::FlexpartInput) = API.FlexpartInput(
+    uuid = x.uuid,
+    name = x.name,
+    status = x.status,
+    date_created = x.date_created,
+    control = get_control(x)
+)
+
 function create()
     uuid = string(UUIDs.uuid4())
     path = joinpath(EXTRACTED_WEATHER_DATA_DIR, uuid)
@@ -96,7 +106,7 @@ function change_status!(input::FlexpartInput, value::String)
     input |> save!
 end
 
-function add_error_message(input::FlexpartInput, value::String)
+function add_error_message!(input::FlexpartInput, value::String)
     input.error_message = value
     input |> save!
 end
@@ -133,6 +143,15 @@ function delete_empty_output()
         inputs = readdir(fedir[:output])
         if length(inputs) == 0
             delete!(entry)
+        end
+    end
+end
+
+function delete_non_existing!()
+    entries = all(FlexpartInput)
+    for entry in entries
+        if !isdir(entry.path)
+            SearchLight.delete(entry)
         end
     end
 end
