@@ -18,7 +18,7 @@ import { DialogService } from 'src/app/shared/ui/dialogs/dialog.service';
 })
 export class FlexpartPlotComponent implements OnInit {
   // @Select(FlexpartState.fpResults) runs$: Observable<FlexpartRun[]>;
-  runs$: Observable<FlexpartRun[]>;
+  runs$ = this.flexpartService.runs$;
   value: string
   // runIds$: Observable<string[]>;
   @Output() selectedIdEvent = new EventEmitter<string>();
@@ -40,7 +40,6 @@ export class FlexpartPlotComponent implements OnInit {
       //   );
 
     // this.runIds$ = this.runs$.pipe(map((res) => res.map((r) => r.uuid)));
-    this.runs$ = this.flexpartService.runs$;
     this.flexpartService.updateRunsFromServer();
   }
 

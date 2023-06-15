@@ -26,9 +26,11 @@ export class FlexpartService {
   selectedInput$: Observable<FlexpartInput | undefined> = this.selectedInputSubject.asObservable();
 
   runsSubject = new BehaviorSubject<FlexpartRun[]>([]);
-  runs$ = this.runsSubject.asObservable()
+  runs$ = this.runsSubject.asObservable();
 
-  inputsSubject = new Subject<FlexpartInput[]>();
+  inputsSubject = new BehaviorSubject<FlexpartInput[]>([]);
+  inputs$ = this.inputsSubject.asObservable();
+
   // plotsSubject = new Subject<FlexpartPlot>();
 
   _selectedSliceType = SliceResponseType.GEOTIFF
@@ -126,6 +128,28 @@ export class FlexpartService {
     this.getRuns().pipe(map(runs => {
       this.runsSubject.next(runs);
     })).subscribe();
+  }
+
+  updateInputsFromServer() {
+    this.getInputs().pipe(map(inputs => {
+      this.inputsSubject.next(inputs);
+    })).subscribe();
+  }
+
+  deleteInput(inputId: string) {
+    var deleted: FlexpartInput|undefined;
+    this.apiService.flexpartInputsInputIdDelete({ inputId }).pipe(
+      withLatestFrom(this.inputs$),
+      map(([apiRes, currentInputs]) => {
+        deleted = apiRes;
+        const newInputs = currentInputs.filter(r => r.uuid !== apiRes.uuid);
+        console.log(`deleted to ${newInputs}`)
+        return newInputs;
+      }),
+    ).subscribe(newInputs => {
+      this.inputsSubject.next(newInputs);
+    });
+    return deleted;
   }
 
   deleteRun(runId: string) {

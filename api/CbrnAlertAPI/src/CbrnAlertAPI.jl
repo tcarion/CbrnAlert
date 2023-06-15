@@ -25,6 +25,12 @@ The following server methods must be implemented:
 - **flexpart_inputs_get**
     - *invocation:* GET /flexpart/inputs
     - *signature:* flexpart_inputs_get(req::HTTP.Request; status=nothing,) -> Vector{FlexpartInput}
+- **flexpart_inputs_input_id_delete**
+    - *invocation:* DELETE /flexpart/inputs/{inputId}
+    - *signature:* flexpart_inputs_input_id_delete(req::HTTP.Request, input_id::String;) -> FlexpartInput
+- **flexpart_inputs_input_id_get**
+    - *invocation:* GET /flexpart/inputs/{inputId}
+    - *signature:* flexpart_inputs_input_id_get(req::HTTP.Request, input_id::String;) -> FlexpartInput
 - **flexpart_outputs_output_id_dimensions_get**
     - *invocation:* GET /flexpart/outputs/{outputId}/dimensions
     - *signature:* flexpart_outputs_output_id_dimensions_get(req::HTTP.Request, output_id::String; layer=nothing, horizontal=nothing,) -> Any

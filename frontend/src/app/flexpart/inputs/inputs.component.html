@@ -11,7 +11,7 @@
     >
       {{ input.name }} - {{ input.date_created }}
     </mat-list-option>
-    <button
+    <!-- <button
       matTooltip="Draw available area"
       type="button"
       mat-stroked-button
@@ -19,6 +19,9 @@
       (click)="drawArea(input)"
     >
       <mat-icon class="text-base">crop</mat-icon>
+    </button> -->
+    <button class="w-5" (click)="delete(input.uuid)">
+      <fa-icon icon="trash"></fa-icon>
     </button>
   </div>
 </mat-selection-list>

@@ -774,6 +774,33 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/FlexpartInput'
+
+  /flexpart/inputs/{inputId}:
+    get:
+      tags:
+        - Flexpart
+      parameters:
+        - $ref: '#/components/parameters/inputIdParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlexpartInput'
+    delete:
+      tags:
+        - Flexpart
+      parameters:
+        - $ref: '#/components/parameters/inputIdParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlexpartInput'
+
   /flexpart/run:
     post:
       tags:

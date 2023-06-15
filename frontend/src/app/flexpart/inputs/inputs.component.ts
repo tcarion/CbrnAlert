@@ -1,9 +1,10 @@
 import { MapAction } from 'src/app/core/state/map.state';
 import { Component, OnInit, ChangeDetectionStrategy, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { Store } from '@ngxs/store';
-import { Observable } from 'rxjs';
+import { Observable, filter, take } from 'rxjs';
 import { FlexpartInput } from 'src/app/core/api/models/flexpart-input';
 import { FlexpartService } from '../flexpart.service';
+import { DialogService } from 'src/app/shared/ui/dialogs/dialog.service';
 
 @Component({
   selector: 'app-inputs',
@@ -13,7 +14,7 @@ import { FlexpartService } from '../flexpart.service';
 })
 export class InputsComponent implements OnInit, OnDestroy {
 
-  inputs$: Observable<FlexpartInput[]>;
+  inputs$ = this.flexpartService.inputs$;
   value: string
   // runIds$: Observable<string[]>;
   @Output() selectedIdEvent = new EventEmitter<string>();
@@ -21,10 +22,11 @@ export class InputsComponent implements OnInit, OnDestroy {
   constructor(
     public flexpartService: FlexpartService,
     private store: Store,
+    private dialogService: DialogService
   ) { }
 
   ngOnInit(): void {
-    this.inputs$ = this.flexpartService.getInputs();
+    this.flexpartService.updateInputsFromServer();
   }
 
   onClick(input:FlexpartInput) {
@@ -37,6 +39,26 @@ export class InputsComponent implements OnInit, OnDestroy {
   drawArea(input:FlexpartInput) {
     const niceInput = this.flexpartService.niceInput(input);
     this.store.dispatch(new MapAction.ChangeArea(niceInput.area));
+  }
+
+  openDialog() {
+    const dialogData = {
+      title: 'Please confirm',
+      message: 'Are you sure you want to delete this input?'
+    }
+    return this.dialogService.confirmDialog(dialogData).pipe(
+      take(1)
+    );
+  }
+
+  delete(uuid: string) {
+    this.openDialog().pipe(
+      filter(res => res == true)
+    ).subscribe(res => {
+      let deleted = this.flexpartService.deleteInput(uuid);
+      console.log("Deleted:")
+      console.log(deleted)
+    })
   }
 
   ngOnDestroy(): void {

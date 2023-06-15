@@ -6,6 +6,8 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**flexpart_input_post**](FlexpartApi.md#flexpart_input_post) | **POST** /flexpart/input | 
 [**flexpart_inputs_get**](FlexpartApi.md#flexpart_inputs_get) | **GET** /flexpart/inputs | 
+[**flexpart_inputs_input_id_delete**](FlexpartApi.md#flexpart_inputs_input_id_delete) | **DELETE** /flexpart/inputs/{inputId} | 
+[**flexpart_inputs_input_id_get**](FlexpartApi.md#flexpart_inputs_input_id_get) | **GET** /flexpart/inputs/{inputId} | 
 [**flexpart_outputs_output_id_dimensions_get**](FlexpartApi.md#flexpart_outputs_output_id_dimensions_get) | **GET** /flexpart/outputs/{outputId}/dimensions | 
 [**flexpart_outputs_output_id_get**](FlexpartApi.md#flexpart_outputs_output_id_get) | **GET** /flexpart/outputs/{outputId} | 
 [**flexpart_outputs_output_id_layers_get**](FlexpartApi.md#flexpart_outputs_output_id_layers_get) | **GET** /flexpart/outputs/{outputId}/layers | 
@@ -74,6 +76,60 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**Vector{FlexpartInput}**](FlexpartInput.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **flexpart_inputs_input_id_delete**
+> flexpart_inputs_input_id_delete(req::HTTP.Request, input_id::String;) -> FlexpartInput
+
+
+
+### Required Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **req** | **HTTP.Request** | The HTTP Request object | 
+**input_id** | **String**| The input ID | [default to nothing]
+
+### Return type
+
+[**FlexpartInput**](FlexpartInput.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **flexpart_inputs_input_id_get**
+> flexpart_inputs_input_id_get(req::HTTP.Request, input_id::String;) -> FlexpartInput
+
+
+
+### Required Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **req** | **HTTP.Request** | The HTTP Request object | 
+**input_id** | **String**| The input ID | [default to nothing]
+
+### Return type
+
+[**FlexpartInput**](FlexpartInput.md)
 
 ### Authorization
 

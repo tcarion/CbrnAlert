@@ -63,12 +63,12 @@ Base.Dict(x::FlexpartInput) = Dict(
     :control => get_control(x)
 )
 
-API.FlexpartInput(x::FlexpartInput) = API.FlexpartInput(
+API.FlexpartInput(x::FlexpartInput) = API.FlexpartInput(;
     uuid = x.uuid,
     name = x.name,
     status = x.status,
     date_created = x.date_created,
-    control = get_control(x)
+    control = Dict{String, String}([string(k) => string(v) for (k,v) in get_control(x)])
 )
 
 function create()
@@ -163,5 +163,7 @@ function delete!(entry::FlexpartInput)::FlexpartInput
     SearchLight.delete(entry)
     return entry
 end
+
+delete!(uuid::String)::FlexpartInput = delete!(SearchLight.findone(FlexpartInput, uuid = uuid))
 
 end

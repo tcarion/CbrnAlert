@@ -16,6 +16,8 @@ using CbrnAlertApp.Users
 using CbrnAlertApp.Users: current_user
 using CbrnAlertApp.FlexpartInputs
 
+using CbrnAlertApp: API
+
 const DATA_NOT_YET_AVAILABLE = Genie.Router.error(500, "Mars Retrieval error: DATA_NOT_YET_AVAILABLE", "application/json", error_info="The data you're requesting is not yet available")
 const UNKNOWN_MARS_ERROR = Genie.Router.error(500, "Mars Retrieval error: Unknown", "application/json", error_info="Unknown error during data retrieval")
 struct MarsDataNotAvailableError <: Exception end
@@ -130,20 +132,15 @@ end
 function get_inputs()
   fpinputs = user_related(FlexpartInput)
   filter!(FlexpartInputs.isfinished, fpinputs)
-  # metdata_dirs = [input.path for input in fpinputs]
-  # names = [input.name for input in fpinputs]
-  # fedirs = _find_control_path.(metdata_dirs)
-  # fcontrols = FeControl.(fedirs)
-  # clarified_controls = _clarify_control.(fcontrols)
-  # response = map(zip(clarified_controls, names)) do (c, n)
-  #     push!(c, :name => n)
-  # end
   response = Dict.(fpinputs)
   return response |> json
 end
 
 function delete_input()
-    id = Genie.Router.params(:inputId)
+    uuid = Genie.Router.params(:inputId)
+    to_delete = FlexpartInputs.delete!(uuid)
+    @show to_delete
+    return API.FlexpartInput(to_delete) |> json
 end
 
 end

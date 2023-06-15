@@ -154,6 +154,128 @@ export class FlexpartApiService extends BaseService {
   }
 
   /**
+   * Path part for operation flexpartInputsInputIdGet
+   */
+  static readonly FlexpartInputsInputIdGetPath = '/flexpart/inputs/{inputId}';
+
+  /**
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `flexpartInputsInputIdGet()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  flexpartInputsInputIdGet$Response(params: {
+
+    /**
+     * The input ID
+     */
+    inputId: string;
+  },
+  context?: HttpContext
+
+): Observable<StrictHttpResponse<FlexpartInput>> {
+
+    const rb = new RequestBuilder(this.rootUrl, FlexpartApiService.FlexpartInputsInputIdGetPath, 'get');
+    if (params) {
+      rb.path('inputId', params.inputId, {"style":"simple","explode":false});
+    }
+
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json',
+      context: context
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<FlexpartInput>;
+      })
+    );
+  }
+
+  /**
+   * This method provides access only to the response body.
+   * To access the full response (for headers, for example), `flexpartInputsInputIdGet$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  flexpartInputsInputIdGet(params: {
+
+    /**
+     * The input ID
+     */
+    inputId: string;
+  },
+  context?: HttpContext
+
+): Observable<FlexpartInput> {
+
+    return this.flexpartInputsInputIdGet$Response(params,context).pipe(
+      map((r: StrictHttpResponse<FlexpartInput>) => r.body as FlexpartInput)
+    );
+  }
+
+  /**
+   * Path part for operation flexpartInputsInputIdDelete
+   */
+  static readonly FlexpartInputsInputIdDeletePath = '/flexpart/inputs/{inputId}';
+
+  /**
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `flexpartInputsInputIdDelete()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  flexpartInputsInputIdDelete$Response(params: {
+
+    /**
+     * The input ID
+     */
+    inputId: string;
+  },
+  context?: HttpContext
+
+): Observable<StrictHttpResponse<FlexpartInput>> {
+
+    const rb = new RequestBuilder(this.rootUrl, FlexpartApiService.FlexpartInputsInputIdDeletePath, 'delete');
+    if (params) {
+      rb.path('inputId', params.inputId, {"style":"simple","explode":false});
+    }
+
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json',
+      context: context
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<FlexpartInput>;
+      })
+    );
+  }
+
+  /**
+   * This method provides access only to the response body.
+   * To access the full response (for headers, for example), `flexpartInputsInputIdDelete$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  flexpartInputsInputIdDelete(params: {
+
+    /**
+     * The input ID
+     */
+    inputId: string;
+  },
+  context?: HttpContext
+
+): Observable<FlexpartInput> {
+
+    return this.flexpartInputsInputIdDelete$Response(params,context).pipe(
+      map((r: StrictHttpResponse<FlexpartInput>) => r.body as FlexpartInput)
+    );
+  }
+
+  /**
    * Path part for operation flexpartRunPost
    */
   static readonly FlexpartRunPostPath = '/flexpart/run';

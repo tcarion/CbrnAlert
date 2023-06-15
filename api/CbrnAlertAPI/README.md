@@ -47,6 +47,8 @@ Class | Method | HTTP request | Description
 *AuthApi* | [**login_post**](docs/AuthApi.md#login_post) | **POST** /login | 
 *FlexpartApi* | [**flexpart_input_post**](docs/FlexpartApi.md#flexpart_input_post) | **POST** /flexpart/input | 
 *FlexpartApi* | [**flexpart_inputs_get**](docs/FlexpartApi.md#flexpart_inputs_get) | **GET** /flexpart/inputs | 
+*FlexpartApi* | [**flexpart_inputs_input_id_delete**](docs/FlexpartApi.md#flexpart_inputs_input_id_delete) | **DELETE** /flexpart/inputs/{inputId} | 
+*FlexpartApi* | [**flexpart_inputs_input_id_get**](docs/FlexpartApi.md#flexpart_inputs_input_id_get) | **GET** /flexpart/inputs/{inputId} | 
 *FlexpartApi* | [**flexpart_outputs_output_id_dimensions_get**](docs/FlexpartApi.md#flexpart_outputs_output_id_dimensions_get) | **GET** /flexpart/outputs/{outputId}/dimensions | 
 *FlexpartApi* | [**flexpart_outputs_output_id_get**](docs/FlexpartApi.md#flexpart_outputs_output_id_get) | **GET** /flexpart/outputs/{outputId} | 
 *FlexpartApi* | [**flexpart_outputs_output_id_layers_get**](docs/FlexpartApi.md#flexpart_outputs_output_id_layers_get) | **GET** /flexpart/outputs/{outputId}/layers | 

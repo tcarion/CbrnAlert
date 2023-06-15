@@ -44,6 +44,7 @@ api_routes = Dict(
     # "/flexpart/meteo_data_request" => (f=FlexpartController.meteo_data_request, keyargs=(method=POST, named=:meteo_data_request)),
     "/flexpart/input" => (f=FlexpartInputsController.data_retrieval, keyargs=(method=POST,)),
     "/flexpart/inputs" => (f=FlexpartInputsController.get_inputs, keyargs=(method=GET,)),
+    "/flexpart/inputs/:inputId::String" => (f=FlexpartInputsController.delete_input, keyargs=(method=DELETE,)),
     "/flexpart/run" => (f=FlexpartRunsController.run, keyargs=(method=POST,)),
     "/flexpart/runs" => (f=FlexpartRunsController.get_runs, keyargs=(method = GET,)),
     "/flexpart/runs/:runId::String" => (f=FlexpartRunsController.get_run, keyargs=(method = GET,)),

@@ -2,7 +2,7 @@
 openapi: 3.0.2
 info:
   title: CbrnAlert API
-  description: API for the preparing, running and getting the results of atmospheric dispersion models in case of CBRN-type incidents.
+  description: "API for the preparing, running and getting the results of atmospheric dispersion models in case of CBRN-type incidents."
   contact:
     name: Tristan Carion
     email: tristan.carion@mil.be
@@ -59,7 +59,7 @@ paths:
       parameters:
       - name: weathertype
         in: query
-        description: Determine if the weather conditions are retrieved in archive forecasts (`archive`), in latest forecast (`forecast`) or are provided in the request (`manually`)
+        description: "Determine if the weather conditions are retrieved in archive forecasts (`archive`), in latest forecast (`forecast`) or are provided in the request (`manually`)"
         required: true
         style: form
         explode: true
@@ -98,7 +98,7 @@ paths:
       parameters:
       - name: retrievalType
         in: query
-        description: If `simple`, use the simplified options structure defined by `FlexpartRetrieveSimple`. If `detailed`, a full Flexpart options object is expected (see Flexpart docs)
+        description: "If `simple`, use the simplified options structure defined by `FlexpartRetrieveSimple`. If `detailed`, a full Flexpart options object is expected (see Flexpart docs)"
         required: false
         style: form
         explode: true
@@ -121,8 +121,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FlexpartInput'
-
-        '500':
+        "500":
           description: The Flexpart input retrieval failed.
           content:
             application/json:
@@ -150,6 +149,45 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/FlexpartInput'
+  /flexpart/inputs/{inputId}:
+    get:
+      tags:
+      - Flexpart
+      parameters:
+      - name: inputId
+        in: path
+        description: The input ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlexpartInput'
+    delete:
+      tags:
+      - Flexpart
+      parameters:
+      - name: inputId
+        in: path
+        description: The input ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlexpartInput'
   /flexpart/run:
     post:
       tags:
@@ -158,7 +196,7 @@ paths:
       parameters:
       - name: runType
         in: query
-        description: If `simple`, use the simplified options structure defined by `FlexpartOptionsSimple`. If `detailed`, a full Flexpart options object is expected (see Flexpart docs)
+        description: "If `simple`, use the simplified options structure defined by `FlexpartOptionsSimple`. If `detailed`, a full Flexpart options object is expected (see Flexpart docs)"
         required: false
         style: form
         explode: true
@@ -348,7 +386,7 @@ paths:
           type: string
       - name: layer
         in: query
-        description: If the name of the layer is given, only returns the dimensions of the layer
+        description: "If the name of the layer is given, only returns the dimensions of the layer"
         required: false
         style: form
         explode: true
@@ -356,7 +394,7 @@ paths:
           type: string
       - name: horizontal
         in: query
-        description: If false, don't return the horizontal dimensions (lons and lats)
+        description: "If false, don't return the horizontal dimensions (lons and lats)"
         required: false
         style: form
         explode: true
@@ -386,7 +424,7 @@ paths:
           type: string
       - name: geojson
         in: query
-        description: If true, the output is given in geojson format. The sliced layer must be a surface.
+        description: "If true, the output is given in geojson format. The sliced layer must be a surface."
         required: false
         style: form
         explode: true
@@ -395,7 +433,7 @@ paths:
           default: false
       - name: legend
         in: query
-        description: If true, data for legend is provided
+        description: "If true, data for legend is provided"
         required: false
         style: form
         explode: true
@@ -469,7 +507,7 @@ components:
             type: string
       description: Describe the ATP45 categories that will determine which case needs to be considered.
     Atp45DecisionTree:
-      description: A tree of `Atp45Category`, representing the decision sequence leading to the final ATP45 case.
+      description: "A tree of `Atp45Category`, representing the decision sequence leading to the final ATP45 case."
       allOf:
       - $ref: '#/components/schemas/Atp45Category'
       - required:
@@ -507,7 +545,7 @@ components:
       description: Information needed to run ATP45. It requires at least the list of id's for discriminating the decision tree and some release location(s).
     Atp45Categories:
       type: array
-      description: Array of ids, identifying the categories.
+      description: "Array of ids, identifying the categories."
       example:
       - simplified
       - chem
@@ -523,7 +561,7 @@ components:
           $ref: '#/components/schemas/WindVelocity'
         stability:
           $ref: '#/components/schemas/Atp45WeatherManual_stability'
-      description: Weather conditions description for ATP45, in case it is provided by the user.
+      description: "Weather conditions description for ATP45, in case it is provided by the user."
     Atp45StabilityClasses:
       type: string
       example: unstable
@@ -545,11 +583,11 @@ components:
       properties:
         speed:
           type: number
-          description: Wind speed - units [m/s]
+          description: "Wind speed - units [m/s]"
           example: 5
         azimuth:
           type: number
-          description: angle from North - units [m/s]
+          description: "angle from North - units [m/s]"
           example: 30
     GeoPoint:
       required:
@@ -559,11 +597,11 @@ components:
       properties:
         lon:
           type: number
-          description: Longitude [°]
+          description: "Longitude [°]"
           example: 4
         lat:
           type: number
-          description: Latitude [°]
+          description: "Latitude [°]"
           example: 50
     GeoRectangle:
       required:
@@ -575,19 +613,19 @@ components:
       properties:
         top:
           type: number
-          description: north lat [°]
+          description: "north lat [°]"
           example: 51
         bottom:
           type: number
-          description: south lat [°]
+          description: "south lat [°]"
           example: 49
         left:
           type: number
-          description: west lon [°]
+          description: "west lon [°]"
           example: 3
         right:
           type: number
-          description: east lon [°]
+          description: "east lon [°]"
           example: 5
     Atp45Result:
       required:
@@ -665,11 +703,11 @@ components:
           format: date-time
         gridres:
           type: number
-          description: 'units: [°]'
+          description: "units: [°]"
           default: 1
         timeStep:
           type: number
-          description: 'units: [s]'
+          description: "units: [s]"
           default: 3600
       description: Simplified data structure needed for a retrieval of meteorological data for Flexpart
     FlexpartInput:
@@ -753,7 +791,7 @@ components:
           format: date-time
         timeStep:
           type: number
-          description: 'units: [s]'
+          description: "units: [s]"
           default: 3600
         specie:
           type: string
@@ -773,7 +811,7 @@ components:
           $ref: '#/components/schemas/GeoRectangle'
         gridres:
           type: number
-          description: 'units: [°]'
+          description: "units: [°]"
           default: 1
         heights:
           type: array
