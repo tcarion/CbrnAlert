@@ -12,7 +12,6 @@ import { SharedModule } from '../shared/shared.module';
 import { FlexpartService } from './flexpart.service';
 import { FlexpartRoutingModule } from './flexpart-routing.module';
 import { VariableSelectionComponent } from './flexpart-plot/variable-selection/variable-selection.component';
-import { FlexpartInputComponent } from './flexpart-input/flexpart-input.component';
 import { DimensionsFormComponent } from './flexpart-plot/dimensions-form/dimensions-form.component';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
@@ -36,7 +35,6 @@ import { DialogModule } from 'src/app/shared/ui/dialogs/dialog.module';
         FlexpartPlotComponent,
         OutputsComponent,
         VariableSelectionComponent,
-        FlexpartInputComponent,
         DimensionsFormComponent,
         PlotStepperComponent,
         RunStepperComponent,

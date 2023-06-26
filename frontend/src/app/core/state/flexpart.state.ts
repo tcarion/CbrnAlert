@@ -2,20 +2,19 @@ import { FlexpartRun } from './../api/models/flexpart-run';
 import { MapPlotsService } from '../services/map-plots.service';
 import { Injectable } from "@angular/core";
 import { Action, Selector, State, StateContext } from "@ngxs/store";
-import { FlexpartInput } from 'src/app/flexpart/flexpart-input';
 import { MapService } from 'src/app/core/services/map.service';
-import { FlexpartOutput } from 'src/app/core/api/models';
+import { FlexpartInput, FlexpartOutput } from 'src/app/core/api/models';
 
 export namespace FlexpartInputAction {
     export class Add {
         static readonly type = '[FlexpartInput] Add'
-    
+
         constructor(public payload: FlexpartInput) {}
     }
-    
+
     export class Remove {
         static readonly type = '[FlexpartInput] Remove'
-    
+
         constructor(public payload: string) {}
     }
 }
@@ -23,13 +22,13 @@ export namespace FlexpartInputAction {
 export namespace FlexpartRunAction {
     export class Add {
         static readonly type = '[FlexpartRun] Add'
-    
+
         constructor(public payload: FlexpartRun) {}
     }
-    
+
     export class Remove {
         static readonly type = '[FlexpartRun] Remove'
-    
+
         constructor(public payload: string) {}
     }
 }
@@ -37,13 +36,13 @@ export namespace FlexpartRunAction {
 export namespace FlexpartOutputAction {
     export class Add {
         static readonly type = '[FlexpartOutput] Add'
-    
+
         constructor(public payload: FlexpartOutput) {}
     }
-    
+
     export class Remove {
         static readonly type = '[FlexpartOutput] Remove'
-    
+
         constructor() {}
     }
 }
@@ -68,7 +67,7 @@ export class FlexpartState {
     constructor(
         private mapService: MapService,
     ) {}
-    
+
     @Selector()
     static fpResults(state: FlexpartStateModel) {
         return state.runs;
