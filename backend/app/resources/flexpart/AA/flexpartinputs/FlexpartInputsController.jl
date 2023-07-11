@@ -63,6 +63,7 @@ function data_retrieval()
   FlexpartInputs.change_status!(newinput, STATUS_ONGOING)
   open(log_file_path, "w") do logf
       try 
+          @info "Start retrieving at $(fedir.path). Starting date: $(fcontrol[:START_DATE])"
           FlexExtract.submit(fedir) do stream
               # log_and_broadcast(stream, ws_info, log_file)
               line = readline(stream, keep=true)
@@ -70,6 +71,7 @@ function data_retrieval()
               flush(logf)
           end
       catch
+          @info "An error occured while submitting. UUID : $(newinput.uuid)"
           FlexpartInputs.change_status!(newinput, STATUS_ERRORED)
           FlexpartInputs.add_error_message!(newinput, join(readlines(log_file_path; keep = true), ""))
           FlexpartInputs.delete_from_disk(newinput)
@@ -80,7 +82,10 @@ function data_retrieval()
   try
       _check_mars_errors(log_file_path)
       FlexpartInputs.change_status!(newinput, STATUS_FINISHED)
+      FlexpartInputs.change_control(newinput.uuid, FeControl(FlexExtractDir(newinput.path)))
+      @info "Flexpart with uuid = $(newinput.uuid) succeeded."
   catch e
+      @info "The submission with uuid = $(newinput.uuid) failed."
       FlexpartInputs.change_status!(newinput, STATUS_ERRORED)
       FlexpartInputs.add_error_message!(newinput, join(readlines(log_file_path; keep = true), ""))
       FlexpartInputs.delete_from_disk(newinput)

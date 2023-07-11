@@ -162,7 +162,7 @@ function run(fpdir::FlexpartDir, fprun::FlexpartRun)
   if _iscompleted(fpdir)
     FlexpartRuns.change_status!(fprun.name, STATUS_FINISHED)
   else
-    @warn "Flexpart run with name $(fprun.name) has failed"
+    @info "Flexpart run with name $(fprun.name) has failed"
     FlexpartRuns.change_status!(fprun.name, STATUS_ERRORED)
     try _throw_run_errors(output_path)
     catch e
