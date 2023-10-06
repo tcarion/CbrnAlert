@@ -20,25 +20,37 @@ The application needs to retrieve weather forecasts from ECMWF. That means you'l
 
 ### Install Julia
 Due to an issue with Flexpart.jl (see [this](https://github.com/tcarion/Flexpart.jl/issues/9)), the application will only work with Julia v1.7. To easily install Julia v1.7, you can use [Juliaup](https://github.com/JuliaLang/juliaup):
-`curl -fsSL https://install.julialang.org | sh`
+
+```bash
+curl -fsSL https://install.julialang.org | sh
+```
 
 Accept the basic configuration, restart your shell session, and install the Julia v1.7 binary with:
-`juliaup add 1.7`
+
+```bash
+juliaup add 1.7
+```
 
 Now you should be able to run this julia version with:
-`julia +1.7`
+
+```bash
+julia +1.7
+```
 
 ### Install nodejs
 The app needs at least nodejs v16.
 
 **On Rocky Linux**
 The registry version of nodejs is should be at least v16, so it can be installed globally:
-`sudo yum update nodejs`
+
+```bash
+sudo yum update nodejs
+```
 
 **On CentOS 7**
 On CentOS 7, nodejs is limited to v14, so we'll need to install it locally with [nvm](https://github.com/nvm-sh/nvm):
 
-See https://stackoverflow.com/questions/72921215/getting-glibc-2-28-not-found
+
 1. `curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash`
 1. Uncomment NVM related lines in `~/.bashrc`
 1. `chmod +x ~/.nvm/nvm.sh`
@@ -55,15 +67,23 @@ sudo yum install java-11-openjdk-devel
 ### Install eccodes globally.
 Unfortunately, the python program for flex_extract is executing the `grib_set` command with `subprocess.check_call()`. I couldn't find a way to make this command available in the PATH when running the python script. So `eccodes` and the `grib_*` commands must be available in the path.
 
-`sudo yum install eccodes`
+```bash
+sudo yum install eccodes
+```
 
 ### Clone the repo
 The first step is to clone the git repository to get the source code:
-`git clone https://github.com/tcarion/CbrnAlert`
+
+```bash
+git clone https://github.com/tcarion/CbrnAlert
+```
 
 ### Set up the frontend
 Install the Angular command line interface:
-`npm install @angular/cli`
+
+```bash
+npm install @angular/cli
+```
 
 Download and install the required javascript librairies for the frontend:
 ```
@@ -123,9 +143,11 @@ You should see those lines, meaning that a server is listening on `localhost:800
 
 If you want, you can also set up a `screen` session like this:
 
-`screen -S cbrnalert_backend`
+```bash
+screen -S cbrnalert_backend
+```
  
- and then follow the above steps.
+and then follow the above steps.
 
 If you need to start the server again, you just need to run `repl` script and run `up()` in the Julia REPL:
 
