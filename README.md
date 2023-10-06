@@ -167,7 +167,10 @@ npm run generate:all
 This will read the [OpenAPI](https://www.openapis.org/) specifications file to generate all the files needed for both the frontend and the backend.
 
 Finally, run the frontend server that will listen to `localhost:4200`:
-`npm run start`
+
+```bash
+npm run start
+```
 
 At this point you should be able to connect to `localhost:4200` and start using the application. If you set everything up on a remote machine, you might need to use `ssh` tunnels to redirect the application ports. When using the VS code editor, this is done automatically.
 
