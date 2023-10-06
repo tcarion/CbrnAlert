@@ -41,6 +41,7 @@ julia +1.7
 The app needs at least nodejs v16.
 
 **On Rocky Linux**
+
 The registry version of nodejs is should be at least v16, so it can be installed globally:
 
 ```bash
@@ -48,6 +49,7 @@ sudo yum update nodejs
 ```
 
 **On CentOS 7**
+
 On CentOS 7, nodejs is limited to v14, so we'll need to install it locally with [nvm](https://github.com/nvm-sh/nvm):
 
 
@@ -58,7 +60,7 @@ On CentOS 7, nodejs is limited to v14, so we'll need to install it locally with 
 1. `nvm install 16` (v18 won't work because of glibc incompatibilities)
 
 ### Install Java
-Unfortunatley, Java is needed for the `openapi-generator-cli` to work properly:
+At the moment, Java is needed for the `openapi-generator-cli` to work properly:
 
 ```bash
 sudo yum install java-11-openjdk-devel
@@ -72,7 +74,6 @@ sudo yum install eccodes
 ```
 
 ### Clone the repo
-The first step is to clone the git repository to get the source code:
 
 ```bash
 git clone https://github.com/tcarion/CbrnAlert
