@@ -68,8 +68,8 @@ end
 
 function add!(fprun::FlexpartRun)
     isempty(related(fprun, FlexpartOutput)) || return nothing
-    fpdir = FlexpartDir(fprun.path)
-    outfiles = Flexpart.OutputFiles(fpdir)
+    fpsim = FlexpartSim(joinpath(fprun.path, "pathnames"))
+    outfiles = Flexpart.OutputFiles(fpsim)
     for outfile in outfiles
       fpoutput = FlexpartOutputs.add!(outfile)
       FlexpartOutputs.assign_to_run!(fprun, fpoutput)

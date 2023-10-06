@@ -36,8 +36,8 @@ const UNAVAILABLE_METEO_EXCEPTION = FlexpartRunException("noMeteoFieldsAvailable
 const UNKNOWN_EXCEPTION = FlexpartRunException("unknownFlexpartRunError")
 
 
-function _iscompleted(fpdir)
-  lines = readlines(joinpath(fpdir.path, "output.log"))
+function _iscompleted(fpsim)
+  lines = readlines(joinpath(Flexpart.getpath(fpsim), "output.log"))
   any(occursin.("CONGRATULATIONS", lines))
 end
 
@@ -50,7 +50,7 @@ function _throw_run_errors(filepath)
   end
   throw(UNKNOWN_EXCEPTION)
 end
-_check_run_errors(fpdir::FlexpartDir) = joinpath(fpdir.path, "output.log")
+_check_run_errors(fpsim::FlexpartSim) = joinpath(Flexpart.getpath(fpsim), "output.log")
 
 function run()
   runtype = Genie.Router.params(:runType, "simple")
@@ -85,13 +85,13 @@ function run_simple()
   heights = payload["outgrid"]["heights"]
 
   fprun = FlexpartRuns.create()
-  fpdir = Flexpart.FlexpartDir(fprun.path)
+  fpsim = Flexpart.FlexpartSim(joinpath(fprun.path, "pathnames"))
+  @info "FlexpartSim created at $(Flexpart.getpath(fpsim))"
 
-  fpoptions = FlexpartOption(fpdir)
+  fpoptions = FlexpartOption(fpsim)
   Flexpart.remove_unused_species!(fpoptions)
 
   # Set simulation start and end
-  # TODO: update to set_cmd_dates! when new version available
   Flexpart.set_cmd_dates!(fpoptions, sim_start, sim_end)
 
   cmd = Dict(
@@ -127,31 +127,32 @@ function run_simple()
 
   # Save the options
   Flexpart.save(fpoptions)
+  @warn "Flexpart options saved"
 
   # Get the input and adapt the Available file
   fpinput = findone(FlexpartInput, uuid=input_id)
-  fpdir[:input] = abspath(joinpath(fpinput.path, "output"))
-  avs = Available(fpdir)
+  fpsim[:input] = abspath(joinpath(fpinput.path, "output"))
+  avs = Available(fpsim)
 
   # Save the available file and the flexpart paths
   Flexpart.save(avs)
-  Flexpart.save(fpdir)
+  Flexpart.save(fpsim)
 
 
-  return run(fpdir, fprun) |> API.FlexpartRun |> json
+  return run(fpsim, fprun) |> API.FlexpartRun |> json
 end
 
 function run_detailed()
 end
 
-function run(fpdir::FlexpartDir, fprun::FlexpartRun)
-  fpoptions = FlexpartOption(fpdir)
+function run(fpsim::FlexpartSim, fprun::FlexpartRun)
+  fpoptions = FlexpartOption(fpsim)
   Flexpart.remove_unused_species!(fpoptions)
   FlexpartRuns.change_options!(fprun.name, fpoptions)
-  output_path = joinpath(fpdir.path, "output.log")
+  output_path = joinpath(Flexpart.getpath(fpsim), "output.log")
   open(output_path, "w") do logf
     FlexpartRuns.change_status!(fprun.name, STATUS_ONGOING)
-    Flexpart.run(fpdir) do stream
+    Flexpart.run(fpsim) do stream
       # log_and_broadcast(stream, request_data["ws_info"], logf)
       line = readline(stream, keep=true)
       Base.write(logf, line)
@@ -159,7 +160,7 @@ function run(fpdir::FlexpartDir, fprun::FlexpartRun)
     end
   end
 
-  if _iscompleted(fpdir)
+  if _iscompleted(fpsim)
     FlexpartRuns.change_status!(fprun.name, STATUS_FINISHED)
   else
     @info "Flexpart run with name $(fprun.name) has failed"
@@ -174,7 +175,7 @@ function run(fpdir::FlexpartDir, fprun::FlexpartRun)
     finally
       FlexpartRuns.assign_to_user!(current_user(), fprun)
       if ENV["GENIE_ENV"] == "prod"
-        rm(fpdir.path, recursive=true)
+        rm(Flexpart.getpath(fpsim), recursive=true)
       end
     end
   end

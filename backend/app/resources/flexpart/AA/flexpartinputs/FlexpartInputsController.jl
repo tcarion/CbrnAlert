@@ -7,7 +7,7 @@ using Genie.Requests
 using Genie.Renderer.Json: json
 
 using Flexpart
-using Flexpart.FlexExtract
+using FlexExtract
 
 using CbrnAlertApp: STATUS_ONGOING, STATUS_ERRORED, STATUS_FINISHED
 using CbrnAlertApp: _area, round_area

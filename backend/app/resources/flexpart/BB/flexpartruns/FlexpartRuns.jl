@@ -10,7 +10,6 @@ using CbrnAlertApp.FlexpartValidator
 
 using UUIDs
 using Flexpart
-using Flexpart.FlexpartOptions: OptionType
 using JSON3
 using StructTypes
 
@@ -74,9 +73,9 @@ _get_run(id) = findone(FlexpartRun, uuid = id)
 function create()
     uuid = string(UUIDs.uuid4())
     path = joinpath(FLEXPART_RUNS_DIR, uuid)
-    fpdir = Flexpart.create(path)
-    fpdir = FlexpartDir(path)
-    fpoptions = FlexpartOption(fpdir)
+    mkpath(path)
+    fpsim = Flexpart.create(path)
+    fpoptions = FlexpartOption(fpsim)
     newentry = FlexpartRun(
         uuid=uuid,
         name=uuid,

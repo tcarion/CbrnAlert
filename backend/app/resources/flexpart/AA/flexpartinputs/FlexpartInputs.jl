@@ -9,7 +9,7 @@ using Dates
 
 using UUIDs
 using Dates
-using Flexpart.FlexExtract
+using FlexExtract
 using JSON3
 using StructTypes
 
