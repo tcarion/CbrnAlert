@@ -3,7 +3,7 @@ Web application sources for CBRN dispersion modeling
 
 
 # Installation
-This section explains how to make the app ready both for development purpose and for production. The installation is meant to be done on Rocky Linux or Centos 7, but it should be easy to adapt on other Linux systems. The main softwares needed for the application is Julia, nodejs, Angular, java and eccodes.
+This section explains how to make the app ready both for development purpose and for production. The installation is meant to be done on Rocky Linux v9 or Centos 7, but it should be easy to adapt on other Linux systems. The main softwares needed for the application is [Julia](https://julialang.org/), [nodejs](https://nodejs.org/fr), [Angular](https://angular.io/), java and [eccodes](https://confluence.ecmwf.int/display/ECC).
 
 ## Common steps for both development and production
 
@@ -40,7 +40,7 @@ julia +1.7
 ### Install nodejs
 The app needs at least nodejs v16.
 
-**On Rocky Linux**
+**On Rocky Linux v9**
 
 The registry version of nodejs is should be at least v16, so it can be installed globally:
 
@@ -100,15 +100,28 @@ cd CbrnAlert/backend
 julia +1.7 --project
 ```
 
-Download the required Julia packages:
+Download the required Julia packages. You will have to enter the [Pkg REPL](https://docs.julialang.org/en/v1/stdlib/Pkg/#Pkg) by pressing `]` from the Julia REPL. Then, it's needed to install `Flexpart.jl`, `ATP45.jl` and `FlexExtract.jl` which are not on the Julia official registry:
 ```julia
 # In the Julia package mode:
-] add https://github.com/tcarion/Flexpart.jl#d803176a6a211581b302492823033e735597cf2d https://github.com/tcarion/ATP45.jl
-] instantiate
-] build Flexpart
-exit()
+(@v1.7) pkg> add https://github.com/tcarion/Flexpart.jl https://github.com/tcarion/ATP45.jl https://github.com/tcarion/FlexExtract.jl
+(@v1.7) pkg> build FlexExtract
 ```
 
+Finally, the following command will install all the required registered Julia packages:
+
+```julia
+(@v1.7) pkg> instantiate
+```
+
+### Set up the JSON Web Tokens keys
+We need now to generate the keys for encoding and decoding the JSON Web Tokens authentication. Go to the backend folder and write:
+
+```bash
+openssl genrsa -out config/private.pem 2048
+openssl rsa -in config/private.pem -out config/public.pem -outform PEM -pubout
+```
+
+*Note: These lines won't work with OpenSSL v1*
 ## Setup for development
 
 To get the app up and ready for development, you'll need to follow those few steps.
@@ -142,7 +155,7 @@ Genie.Server.ServersCollection(Task (runnable) @0x00007f821a6e42f0, nothing)
 
 You should see those lines, meaning that a server is listening on `localhost:8000`.
 
-If you want, you can also set up a `screen` session like this:
+If you want, you can also set up a `screen` session like this (probably you will have to install `screen` with `sudo yum install screen`):
 
 ```bash
 screen -S cbrnalert_backend
@@ -157,6 +170,12 @@ If you need to start the server again, you just need to run `repl` script and ru
 julia> up()
 ```
 
+In case you're using `screen` you can attach to your screen session with:
+
+```bash
+screen -R cbrnalert_backend
+```
+
 ### Run the frontend server
 Go to the frontend folder and run this command:
 
@@ -165,7 +184,7 @@ cd CbrnAlert/frontend
 npm run generate:all
 ```
 
-This will read the [OpenAPI](https://www.openapis.org/) specifications file to generate all the files needed for both the frontend and the backend.
+This will read the [OpenAPI specifications file](https://github.com/tcarion/CbrnAlert/blob/master/api/api_docs.yaml) to generate all the files needed for both the frontend and the backend.
 
 Finally, run the frontend server that will listen to `localhost:4200`:
 
