@@ -35,7 +35,7 @@ API.Atp45Result(result::ATP45.Atp45Result) = API.Atp45Result(;
     # metadata = Dict(:t => "dsd")
 )
 
-API.WindVelocity(wind::ATP45.WindDirection) = API.WindVelocity(;
+API.WindVelocity(wind::ATP45.WindAzimuth) = API.WindVelocity(;
     speed = wind.speed,
     azimuth = wind.direction
 )
@@ -101,7 +101,7 @@ function post_run()
 
     categories = payload["categories"]
     locations = payload["locations"]
-    releases = ReleaseLocation(_parse_locations(locations))
+    releases = ReleaseLocations(_parse_locations(locations))
 
     weather_inputs = if runtype == "manually"
         _manual_weather_inputs(payload)
@@ -164,8 +164,6 @@ function _forecast_weather_inputs(payload)
         distance = nearests["10u"][4][1],
     )
 
-    @show nearest
-
     return [WindVector(nearest.u, nearest.v)]
 end
 
@@ -176,7 +174,7 @@ function _manual_weather_inputs(payload)
 
     wind_payload = get(weather, "wind", nothing)
     if !isnothing(wind_payload)
-        wind = WindDirection(wind_payload.speed / 3.6, wind_payload.azimuth)
+        wind = WindAzimuth(wind_payload.speed / 3.6, wind_payload.azimuth)
         push!(input_collection, wind)
     end
 

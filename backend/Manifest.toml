@@ -10,7 +10,7 @@ version = "0.1.1"
 
 [[deps.ATP45]]
 deps = ["AbstractTrees", "GeoInterface", "InteractiveUtils", "LibGEOS", "OrderedCollections", "Proj", "RecipesBase", "WellKnownGeometry"]
-git-tree-sha1 = "7e2a678b5af7acfdd55ce7afa68908b7b5fb284b"
+git-tree-sha1 = "fca9f3232b91a5333af43851b46276f12ebd65df"
 repo-rev = "main"
 repo-url = "https://github.com/tcarion/ATP45.jl"
 uuid = "e618d77b-d0d4-44a4-84cd-7e2c5c764d14"

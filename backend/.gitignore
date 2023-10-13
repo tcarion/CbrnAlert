@@ -9,7 +9,6 @@ log/*
 session/*
 cache/*
 !*.gitkeep
-Manifest.toml
 
 # Vagrant
 .vagrant
