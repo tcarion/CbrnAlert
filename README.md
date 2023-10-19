@@ -100,18 +100,31 @@ cd CbrnAlert/backend
 julia +1.7 --project
 ```
 
-Download the required Julia packages. You will have to enter the [Pkg REPL](https://docs.julialang.org/en/v1/stdlib/Pkg/#Pkg) by pressing `]` from the Julia REPL. Then, it's needed to install `Flexpart.jl`, `ATP45.jl` and `FlexExtract.jl` which are not on the Julia official registry:
-```julia
-# In the Julia package mode:
-(@v1.7) pkg> add https://github.com/tcarion/Flexpart.jl https://github.com/tcarion/ATP45.jl https://github.com/tcarion/FlexExtract.jl
-(@v1.7) pkg> build FlexExtract
-```
-
-Finally, the following command will install all the required registered Julia packages:
+Download the required Julia packages. You will have to enter the [Pkg REPL](https://docs.julialang.org/en/v1/stdlib/Pkg/#Pkg) by pressing `]` from the Julia REPL. Then, the following command will install all the required registered Julia packages:
 
 ```julia
-(@v1.7) pkg> instantiate
+(CbrnAlertApp) pkg> instantiate
 ```
+
+You might get an error like that:
+
+```julia
+[ Info: Precompiling FlexExtract [5ad5ba56-8ec2-41bb-8b56-2065914898b5]
+ERROR: LoadError: InitError: PyError (PyImport_ImportModule
+
+The Python package ecmwfapi could not be imported by pyimport. Usually this means
+that you did not install ecmwfapi in the Python version being used by PyCall.
+```
+
+The simplest way to overcome this is to configure PyCall to use a Julia-specific Python distribution. To do that:
+
+```julia
+ENV["PYTHON"] = ""
+using Pkg
+Pkg.build("PyCall")
+```
+
+Then restart julia, and you should be to import FlexExtract without error.
 
 ### Set up the JSON Web Tokens keys
 We need now to generate the keys for encoding and decoding the JSON Web Tokens authentication. Go to the backend folder and write:
