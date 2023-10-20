@@ -74,7 +74,9 @@ function data_retrieval()
           @info "An error occured while submitting. UUID : $(newinput.uuid)"
           FlexpartInputs.change_status!(newinput, STATUS_ERRORED)
           FlexpartInputs.add_error_message!(newinput, join(readlines(log_file_path; keep = true), ""))
-          FlexpartInputs.delete_from_disk(newinput)
+          if ENV["GENIE_ENV"] == "prod"
+            FlexpartInputs.delete_from_disk(newinput)
+          end
           rethrow()
       end
   end

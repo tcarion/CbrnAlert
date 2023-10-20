@@ -20,6 +20,8 @@ using Colors
 using CbrnAlertApp.FlexpartRuns
 using CbrnAlertApp.FlexpartOutputs
 
+using CbrnAlertApp: TMP_DIR_PATH
+
 const DEFAULT_COLOR_SCHEME = ColorSchemes.jet
 
 function _output_by_uuid(output_id)
@@ -117,7 +119,7 @@ end
 
 function _respond_tiff(raster)
     filename = string(UUIDs.uuid4()) * ".tiff"
-    tmpfile = joinpath("tmp", filename)
+    tmpfile = joinpath(TMP_DIR_PATH, filename)
     trimed = Rasters.trim(replace(raster, 0. => nothing))
     try
         filename = Rasters.write(tmpfile, replace(trimed, nothing => 0.); options= Dict("COMPRESS"=>"DEFLATE"))
