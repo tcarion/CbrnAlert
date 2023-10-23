@@ -1,5 +1,9 @@
 # CbrnAlert
-Web application sources for CBRN dispersion modeling
+These are the sources for the CbrnAlert application. This application first consists in a REST API for preparing, running and getting the results of atmospheric dispersion models. The documentation of this API should be available [here](https://cbrnalert.rma.ac.be/api/docs). The access to this API is restricted, but it's possible to install your proper instance of the application.
+
+This repo also contains the sources for the Single Page Application developed with the Angular framework, which provides a GUI for calling the API.
+
+The API is defined using the [Open API](https://www.openapis.org/) specifications. The file with all the API definitions is availabe [here](https://github.com/tcarion/CbrnAlert/blob/master/api/api_docs.yaml). From these definitions, the API routes and data structures are generated in the Angular/Typescript world with [ng-openapi-gen](https://github.com/cyclosproject/ng-openapi-gen) and in the Julia/Genie world with [OpenAPI.jl](https://github.com/JuliaComputing/OpenAPI.jl) and [OpenAPI generator](https://openapi-generator.tech/).
 
 
 # Installation
