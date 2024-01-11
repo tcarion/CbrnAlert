@@ -2,8 +2,7 @@
 <fieldset [formGroup]="form">
   <app-area-input formControlName="area"></app-area-input>
 
-  <mat-form-field class="form-control" appearance="outline" floatLabel="never">
-    <mat-label> Horizontal resolution [°]</mat-label>
+  <mat-form-field class="form-control" appearance="outline" placeholder="Horizontal resolution [°]">
     <mat-select formControlName="gridres">
       <mat-option *ngFor="let option of gridResolutions" [value]="option">
         {{ option }}
@@ -11,8 +10,7 @@
     </mat-select>
   </mat-form-field>
 
-  <mat-form-field class="form-control" appearance="outline" floatLabel="never">
-    <mat-label> Heights [m] ex: "100.0, 500.0" </mat-label>
+  <mat-form-field class="form-control" appearance="outline" placeholder="Heights [m] ex: 100.0, 500.0">
     <input type="text" matInput formControlName="heights"/>
   </mat-form-field>
 </fieldset>

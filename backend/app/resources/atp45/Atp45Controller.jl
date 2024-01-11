@@ -133,7 +133,7 @@ function _forecast_weather_inputs(payload)
 
     # We retrieve a bounding box because I experienced MARS errors when taking too small areas
     fc_req[:area] = join([ceil(Int, lat) + 1, floor(Int, lon) - 1, floor(Int, lat) - 1, ceil(Int, lon) + 1], "/")
-    fc_req[:target] = target
+    fc_req[:target] = "\"$target\""
     fc_req[:step] = string(step_number)
 
     fc_req_s = Dict(string(k)=>v for (k,v) in fc_req)

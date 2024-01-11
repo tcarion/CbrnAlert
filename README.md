@@ -5,6 +5,30 @@ Web application sources for CBRN dispersion modeling
 # Installation
 This section explains how to make the app ready both for development purpose and for production. The installation is meant to be done on Rocky Linux v9 or Centos 7, but it should be easy to adapt on other Linux systems. The main softwares needed for the application is [Julia](https://julialang.org/), [nodejs](https://nodejs.org/fr), [Angular](https://angular.io/), java and [eccodes](https://confluence.ecmwf.int/display/ECC).
 
+## Docker quickstart for development
+
+The easiest way to develop is to use a VS Code devcontainer. Install the "Dev Containers" VS Code extension, and then after opening a clone of this repository choose to open it in a dev container. From there, start a first bash terminal and run:
+
+```bash
+cd backend
+./bin/repl
+```
+
+This will start a CLI into the backend server. Once you get the julia prompt, enter:
+
+```julia
+up()
+```
+
+Next, open a new terminal and enter:
+
+```bash
+cd frontend
+npm run start
+```
+
+You can now connect to http://localhost:4200 and login with login `test` and password `test`.
+
 ## Common steps for both development and production
 
 ### Credentials for the ECMWF API
