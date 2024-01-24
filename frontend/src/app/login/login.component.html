@@ -1,12 +1,12 @@
-<div class="rounded-md shadow-2xl bg-white flex flex-col justify-center items-center w-80 max-w-80">
-    <div class="rounded-t-md h-11 flex flex-col justify-center items-center font-medium bg-blue-400 w-full">
+<div class="rounded-md shadow-2xl bg-white flex flex-col justify-center items-center w-96 max-w-96">
+    <div class="rounded-t-md h-11 flex flex-col justify-center items-center font-medium text-lg text-black text-opacity-80 bg-blue-200 w-full">
         Please authenticate
     </div>
 
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex-col py-3">
         <mat-form-field
             class = "w-56"
-            appearance="outline">
+            appearance="fill">
             <mat-label> Email </mat-label>
             <input
                 matInput
@@ -15,8 +15,8 @@
         </mat-form-field>
 
         <mat-form-field
-        class = "w-56"
-            appearance="outline">
+            class = "w-56"
+            appearance="fill">
             <mat-label> Password </mat-label>
             <input
                 matInput
