@@ -76,6 +76,8 @@ function run_simple()
   release_start = DateTime(payload["releases"][1]["start"])
   release_end = DateTime(payload["releases"][1]["end"])
   lon, lat = values(payload["releases"][1]["location"])
+  release_substance_num = payload["releases"][1]["substanceNumber"]
+  release_substance1 = payload["releases"][1]["substanceName"]
   release_mass = payload["releases"][1]["mass"]
   release_height = payload["releases"][1]["height"]
 
@@ -107,6 +109,11 @@ function run_simple()
 
   # Set release options
   Flexpart.set_point_release!(fpoptions, lon, lat)
+  releases_control_options = Dict(
+    :NSPEC => release_substance_num,
+    :SPECNUM_REL => release_substance1
+  )
+  Flexpart.merge!(fpoptions["RELEASES"][:RELEASES_CTRL], releases_control_options)
   releases_options = Dict(
     :IDATE1 => Dates.format(release_start, "yyyymmdd"),
     :ITIME1 => Dates.format(release_start, "HHMMSS"),
