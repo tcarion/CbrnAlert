@@ -52,6 +52,7 @@ function data_retrieval()
   fcontrol = FeControl(fedir)
   fcontrol[:GRID] = gridres
   fcontrol[:REQUEST] = 0
+  fcontrol[:ACCTYPE] = "FC"
 #   fcontrol[:CLASS] = "FOO"
   set_area!(fcontrol, area)
   set_steps!(fcontrol, start_date, end_date, time_step)
@@ -59,7 +60,7 @@ function data_retrieval()
   FlexExtract.save(fcontrol)
 
   log_file_path = joinpath(fedir.path, "output_log.log")
-  FlexpartInputs.change_control(newinput.uuid, fcontrol)
+  FlexpartInputs.change_control!(newinput, fcontrol)
   FlexpartInputs.change_status!(newinput, STATUS_ONGOING)
   open(log_file_path, "w") do logf
       try 
@@ -84,7 +85,7 @@ function data_retrieval()
   try
       _check_mars_errors(log_file_path)
       FlexpartInputs.change_status!(newinput, STATUS_FINISHED)
-      FlexpartInputs.change_control(newinput.uuid, FeControl(FlexExtractDir(newinput.path)))
+      FlexpartInputs.change_control!(newinput, FeControl(FlexExtractDir(newinput.path)))
       @info "Flexpart with uuid = $(newinput.uuid) succeeded."
   catch e
       @info "The submission with uuid = $(newinput.uuid) failed."
