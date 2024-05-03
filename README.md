@@ -94,7 +94,7 @@ At the moment, Java is needed for the `openapi-generator-cli` to work properly:
 sudo yum install java-11-openjdk-devel
 ```
 
-### Install eccodes globally.
+### Install eccodes globally
 Unfortunately, the python program for flex_extract is executing the `grib_set` command with `subprocess.check_call()`. I couldn't find a way to make this command available in the PATH when running the python script. So `eccodes` and the `grib_*` commands must be available in the path.
 
 ```bash
@@ -104,7 +104,7 @@ sudo yum install eccodes
 ### Clone the repo
 
 ```bash
-git clone https://github.com/tcarion/CbrnAlert
+git clone https://github.com/PaulPerezRMA/CbrnAlert
 ```
 
 ### Set up the frontend
