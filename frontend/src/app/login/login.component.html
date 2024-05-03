@@ -1,57 +1,57 @@
 <div class="rounded-md shadow-2xl bg-white flex flex-col justify-center items-center w-96 max-w-96">
-    <div class="rounded-t-md h-11 flex flex-col justify-center items-center font-medium text-lg text-black text-opacity-80 bg-blue-200 w-full">
-        Please authenticate
-    </div>
+  <div class="rounded-t-md h-11 flex flex-col justify-center items-center font-medium text-lg text-black text-opacity-80 bg-blue-200 w-full">
+      Please authenticate
+  </div>
 
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex-col py-3">
-        <mat-form-field
-            class = "w-56"
-            appearance="fill">
-            <mat-label> Email </mat-label>
-            <input
-                matInput
-                formControlName="email">
-            <!-- <mat-error *ngIf="(formItem.controlName | formControl).invalid"> error ! </mat-error> -->
-        </mat-form-field>
+  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex-col py-3">
+      <mat-form-field
+          class = "w-56"
+          appearance="fill">
+          <mat-label> Email </mat-label>
+          <input
+              matInput
+              formControlName="email">
+          <!-- <mat-error *ngIf="(formItem.controlName | formControl).invalid"> error ! </mat-error> -->
+      </mat-form-field>
 
-        <mat-form-field
-            class = "w-56"
-            appearance="fill">
-            <mat-label> Password </mat-label>
-            <input
-                matInput
-                type="password"
-                formControlName="password">
-            <!-- <mat-error *ngIf="(formItem.controlName | formControl).invalid"> error ! </mat-error> -->
-        </mat-form-field>
+      <mat-form-field
+          class = "w-56"
+          appearance="fill">
+          <mat-label> Password </mat-label>
+          <input
+              matInput
+              type="password"
+              formControlName="password">
+          <!-- <mat-error *ngIf="(formItem.controlName | formControl).invalid"> error ! </mat-error> -->
+      </mat-form-field>
 
-        <div *ngIf="errorMessage$ | async as errorMessage" class="p-1 mb-2 text-xs bg-red-200 text-red-700 rounded-sm border-0 border-red-700">
-          {{errorMessage}}
-        </div>
-        <button
-            mat-raised-button
-            color="primary"
-            type="submit"
-            [disabled]="loginForm.invalid">Login</button>
-        <!-- <div class="form-group">
-            <label for="username">Username</label>
-            <input matInput type="text" formControlName="username" class="form-control"
-            />
-            <div *ngIf="submitted && f.username.errors" class="invalid-feedback">
-                <div *ngIf="f.username.errors.required">Username is required</div>
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input matInput type="password" formControlName="password" class="form-control"/>
-            <div *ngIf="submitted && f.password.errors" class="invalid-feedback">
-                <div *ngIf="f.password.errors.required">Password is required</div>
-            </div>
-        </div>
-        <button [disabled]="loading" class="btn btn-primary">
-            <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span>
-            Login
-        </button>
-        <div *ngIf="error" class="alert alert-danger mt-3 mb-0">{{error}}</div> -->
-    </form>
+      <div *ngIf="errorMessage$ | async as errorMessage" class="p-1 mb-2 text-xs bg-red-200 text-red-700 rounded-sm border-0 border-red-700">
+        {{errorMessage}}
+      </div>
+      <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          [disabled]="loginForm.invalid">Login</button>
+      <!-- <div class="form-group">
+          <label for="username">Username</label>
+          <input matInput type="text" formControlName="username" class="form-control"
+          />
+          <div *ngIf="submitted && f.username.errors" class="invalid-feedback">
+              <div *ngIf="f.username.errors.required">Username is required</div>
+          </div>
+      </div>
+      <div class="form-group">
+          <label for="password">Password</label>
+          <input matInput type="password" formControlName="password" class="form-control"/>
+          <div *ngIf="submitted && f.password.errors" class="invalid-feedback">
+              <div *ngIf="f.password.errors.required">Password is required</div>
+          </div>
+      </div>
+      <button [disabled]="loading" class="btn btn-primary">
+          <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span>
+          Login
+      </button>
+      <div *ngIf="error" class="alert alert-danger mt-3 mb-0">{{error}}</div> -->
+  </form>
 </div>
