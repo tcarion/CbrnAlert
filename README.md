@@ -3,35 +3,11 @@ These are the sources for the CbrnAlert application. This application first cons
 
 This repo also contains the sources for the Single Page Application developed with the Angular framework, which provides a GUI for calling the API.
 
-The API is defined using the [Open API](https://www.openapis.org/) specifications. The file with all the API definitions is availabe [here](https://github.com/tcarion/CbrnAlert/blob/master/api/api_docs.yaml). From these definitions, the API routes and data structures are generated in the Angular/Typescript world with [ng-openapi-gen](https://github.com/cyclosproject/ng-openapi-gen) and in the Julia/Genie world with [OpenAPI.jl](https://github.com/JuliaComputing/OpenAPI.jl) and [OpenAPI generator](https://openapi-generator.tech/).
+The API is defined using the [Open API](https://www.openapis.org/) specifications. The file with all the API definitions is availabe [here](https://github.com/PaulPerezRMA/CbrnAlert/blob/master/api/api_docs.yaml). From these definitions, the API routes and data structures are generated in the Angular/Typescript world with [ng-openapi-gen](https://github.com/cyclosproject/ng-openapi-gen) and in the Julia/Genie world with [OpenAPI.jl](https://github.com/JuliaComputing/OpenAPI.jl) and [OpenAPI generator](https://openapi-generator.tech/).
 
 
 # Installation
 This section explains how to make the app ready both for development purpose and for production. The installation is meant to be done on Rocky Linux v9 or Centos 7, but it should be easy to adapt on other Linux systems. The main softwares needed for the application is [Julia](https://julialang.org/), [nodejs](https://nodejs.org/fr), [Angular](https://angular.io/), java and [eccodes](https://confluence.ecmwf.int/display/ECC).
-
-## Docker quickstart for development
-
-The easiest way to develop is to use a VS Code devcontainer. Install the "Dev Containers" VS Code extension, and then after opening a clone of this repository choose to open it in a dev container. From there, start a first bash terminal and run:
-
-```bash
-cd backend
-./bin/repl
-```
-
-This will start a CLI into the backend server. Once you get the julia prompt, enter:
-
-```julia
-up()
-```
-
-Next, open a new terminal and enter:
-
-```bash
-cd frontend
-npm run start
-```
-
-You can now connect to http://localhost:4200 and login with login `test` and password `test`.
 
 ## Common steps for both development and production
 
@@ -47,7 +23,7 @@ The application needs to retrieve weather forecasts from ECMWF. That means you'l
 ```
 
 ### Install Julia
-Due to an issue with Flexpart.jl (see [this](https://github.com/tcarion/Flexpart.jl/issues/9)), the application will only work with Julia v1.7. To easily install Julia v1.7, you can use [Juliaup](https://github.com/JuliaLang/juliaup):
+Due to an issue with Flexpart.jl (see [this](https://github.com/PaulPerezRMA/Flexpart.jl/issues/9)), the application will only work with Julia v1.7. To easily install Julia v1.7, you can use [Juliaup](https://github.com/JuliaLang/juliaup):
 
 ```bash
 curl -fsSL https://install.julialang.org | sh
@@ -94,7 +70,7 @@ At the moment, Java is needed for the `openapi-generator-cli` to work properly:
 sudo yum install java-11-openjdk-devel
 ```
 
-### Install eccodes globally
+### Install eccodes globally.
 Unfortunately, the python program for flex_extract is executing the `grib_set` command with `subprocess.check_call()`. I couldn't find a way to make this command available in the PATH when running the python script. So `eccodes` and the `grib_*` commands must be available in the path.
 
 ```bash
@@ -234,7 +210,7 @@ cd CbrnAlert/frontend
 npm run generate:all
 ```
 
-This will read the [OpenAPI specifications file](https://github.com/tcarion/CbrnAlert/blob/master/api/api_docs.yaml) to generate all the files needed for both the frontend and the backend.
+This will read the [OpenAPI specifications file](https://github.com/PaulPerezRMA/CbrnAlert/blob/master/api/api_docs.yaml) to generate all the files needed for both the frontend and the backend.
 
 Finally, run the frontend server that will listen to `localhost:4200`:
 
