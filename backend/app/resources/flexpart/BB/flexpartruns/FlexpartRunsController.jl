@@ -66,11 +66,19 @@ function run_simple()
   payload = Genie.Requests.jsonpayload()
   input_id = Genie.Router.params(:inputId)
 
+  fprun = FlexpartRuns.create()
+  fpsim = Flexpart.FlexpartSim(joinpath(fprun.path, "pathnames"))
+  @info "FlexpartSim created at $(Flexpart.getpath(fpsim))"
+
+  fpoptions = FlexpartOption(fpsim)
+  Flexpart.remove_unused_species!(fpoptions)
+
   # COMMAND options
   sim_start = DateTime(payload["command"]["start"])
   sim_end = DateTime(payload["command"]["end"])
   time_step = payload["command"]["timeStep"]
   output_type = payload["command"]["outputType"]
+  oh_fields_path = joinpath(Flexpart.getpath(fpsim), "options/")
 
   # RELEASE options
   release_start = DateTime(payload["releases"][1]["start"])
@@ -86,13 +94,6 @@ function run_simple()
   area = payload["outgrid"]["area"]
   heights = payload["outgrid"]["heights"]
 
-  fprun = FlexpartRuns.create()
-  fpsim = Flexpart.FlexpartSim(joinpath(fprun.path, "pathnames"))
-  @info "FlexpartSim created at $(Flexpart.getpath(fpsim))"
-
-  fpoptions = FlexpartOption(fpsim)
-  Flexpart.remove_unused_species!(fpoptions)
-
   # Set simulation start and end
   Flexpart.set_cmd_dates!(fpoptions, sim_start, sim_end)
 
@@ -103,7 +104,9 @@ function run_simple()
     :LOUTSAMPLE => convert(Int64, time_step / 4),
     :LSYNCTIME => convert(Int64, time_step / 4),
     # Set netcdf output
-    :IOUT => output_type + 8
+    :IOUT => output_type + 8,
+    # Set OH fields path
+    :OHFIELDS_PATH => "\"$oh_fields_path\""
   )
   merge!(fpoptions["COMMAND"][:COMMAND], cmd)
 
