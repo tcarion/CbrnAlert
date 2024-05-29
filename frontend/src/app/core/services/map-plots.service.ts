@@ -106,7 +106,7 @@ export class MapPlotsService {
     const min: number = geoRaster.mins[0];
     const max: number = geoRaster.maxs[0];
     const range = geoRaster.ranges[0];
-    let scale = this._colorScale().domain([min, max]);
+    let scale = this._colorScale().domain([max, min]);
     let ticks: number[] = [];
     let colors: string[] = [];
     let step = range / (length - 1);
