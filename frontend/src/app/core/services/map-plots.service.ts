@@ -99,7 +99,7 @@ export class MapPlotsService {
   }
 
   _colorScale() {
-    return chroma.scale("Viridis");
+    return chroma.scale("Spectral").domain([1,0]);
   }
 
   _colorbarFromGeoRaster(geoRaster: any, length = 10): ColorbarData {
