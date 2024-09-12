@@ -91,7 +91,7 @@ end
 
 function get_tree()
     json(
-        ATP45.decision_tree(typedict = true)
+        ATP45.decision_tree(ATP45.WindAzimuth(0, 0), typedict = true)
     )
 end
 
@@ -108,7 +108,7 @@ function post_run()
     elseif runtype == "forecast"
         _forecast_weather_inputs(payload)
     elseif runtype == "archive"
-        error("not implemented yes")
+        error("not implemented yet")
     else
         error("Wrong parameter")
     end

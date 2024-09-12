@@ -7,7 +7,7 @@ import Base: @kwdef
 
 using UUIDs
 using Dates
-using Rasters
+using Rasters, NCDatasets
 using JSON3
 using Flexpart
 using Flexpart: AbstractOutputFile
@@ -33,8 +33,6 @@ end
 Validation.validator(::Type{FlexpartOutput}) = ModelValidator([
     ValidationRule(:uuid, FlexpartValidator.not_empty),
     ValidationRule(:uuid, FlexpartValidator.is_unique),
-    # ValidationRule(:path, FlexpartValidator.not_empty),
-    # ValidationRule(:path, FlexpartValidator.is_unique),
 ])
 
 Base.Dict(x::FlexpartOutput) = Dict(

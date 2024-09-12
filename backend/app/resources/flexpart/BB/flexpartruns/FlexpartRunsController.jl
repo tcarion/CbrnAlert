@@ -9,6 +9,7 @@ using SearchLight.Relationships
 
 using Flexpart
 using Dates
+using NCDatasets
 
 using CbrnAlertApp: STATUS_CREATED, STATUS_FINISHED, STATUS_ONGOING, STATUS_ERRORED
 using CbrnAlertApp: _area
@@ -161,6 +162,9 @@ function run(fpsim::FlexpartSim, fprun::FlexpartRun)
   end
 
   if _iscompleted(fpsim)
+    output_dir = joinpath(fprun.path, "output/")
+    nc_file = joinpath(output_dir, filter(x -> endswith(x, ".nc"), readdir(output_dir))[1])
+    _round_dims(nc_file)
     FlexpartRuns.change_status!(fprun.name, STATUS_FINISHED)
   else
     @info "Flexpart run with name $(fprun.name) has failed"
@@ -185,6 +189,24 @@ function run(fpsim::FlexpartSim, fprun::FlexpartRun)
   FlexpartOutputs.add!(fprun)
 
   return fprun
+end
+
+function _round_dims(netcdf_file::AbstractString)
+  # Check if the file path is valid
+  if !ispath(netcdf_file)
+      throw(ArgumentError("The provided file path '$netcdf_file' is not valid."))
+  end
+  ds = Dataset(netcdf_file, "r")
+  # Extract dimensions
+  longitudes = Float64.(round.(ds["longitude"][:], digits=6))
+  latitudes = Float64.(round.(ds["latitude"][:], digits=6))
+  close(ds)
+
+  ds = Dataset(netcdf_file, "a")
+  # Round the coordinates
+  ds["longitude"][:] = longitudes
+  ds["latitude"][:] = latitudes
+  close(ds)
 end
 
 function get_runs()

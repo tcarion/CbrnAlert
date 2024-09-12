@@ -57,7 +57,7 @@ export class LeafletMapComponent implements OnInit {
   layersControl = {
     baseLayers: {
       'Open Street Map': tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '...' }),
-      'Open Cycle Map': tileLayer('http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '...' })
+      'ESRI Satellite Map': tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18, noWrap: true, attribution: 'Esri, USGS | Esri, TomTom, Garmin, FAO, NOAA, USGS | Earthstar Geographics' })
     },
     overlays: {}
   }
@@ -95,16 +95,16 @@ export class LeafletMapComponent implements OnInit {
     });
     map.pm.enableDraw('Marker', { continueDrawing: false });
     map.pm.disableDraw();
-    map.pm.setGlobalOptions({
-      markerStyle: {
-        icon: icon({
-          ...Icon.Default.prototype.options,
-          iconUrl: 'assets/marker-icon.png',
-          iconRetinaUrl: 'assets/marker-icon-2x.png',
-          shadowUrl: 'assets/marker-shadow.png'
-        })
-      }
-    })
+    // map.pm.setGlobalOptions({
+    //   markerStyle: {
+    //     icon: icon({
+    //       ...Icon.Default.prototype.options,
+    //       iconUrl: 'assets/marker-icon.png',
+    //       iconRetinaUrl: 'assets/marker-icon-2x.png',
+    //       shadowUrl: 'assets/marker-shadow.png'
+    //     })
+    //   }
+    // })
 
     map.on('pm:create', (e) => {
       if (e.shape == 'Rectangle') {

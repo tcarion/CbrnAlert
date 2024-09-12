@@ -14,6 +14,7 @@ using Dates
 using GeoJSON: Feature, FeatureCollection, Polygon, write
 using GeoInterface
 using Rasters
+using ArchGDAL
 using ColorSchemes
 using Colors
 
@@ -77,7 +78,7 @@ function get_dimensions()
 end
 
 function _to_dim(k, v)
-    if k == "Time"
+    if k == "Ti"
         Ti(At(DateTime(v)))
     elseif k == "X"
         X(At(v))
@@ -94,6 +95,7 @@ function _slice(path::String, layerName, zdims)
     args = [_to_dim(dname, val) for (dname, val) in zdims]
     view(raster, args...)
 end
+
 function get_slice()
     pl = jsonpayload()
     outputId = Genie.Router.params(:outputId)
@@ -102,6 +104,7 @@ function get_slice()
     to_geojson = Genie.Router.params(:geojson, "false")
     to_geojson = Base.parse(Bool, to_geojson)
     viewed = _slice(fpoutput.path, layerName, pl)
+    viewed = reverse(viewed; dims=Y)
 
     if to_geojson
         collection = to_geointerface(viewed)
@@ -127,7 +130,9 @@ function _respond_tiff(raster)
     catch
         rethrow()
     finally
-        rm(tmpfile)
+        if isfile(tmpfile)
+            rm(tmpfile)
+        end
     end
 end
 

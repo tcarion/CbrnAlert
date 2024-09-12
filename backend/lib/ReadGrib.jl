@@ -2,8 +2,8 @@ module ReadGrib
 using GRIB
 
 export find_nearest_wind, get_area, get_key_values
-# filename = "/home/tcarion/CBRN-dispersion-app/public/grib_files/2021-02-24_0000_54--5-47-14.grib"
-# filename = "/home/tcarion/CBRN-dispersion-app/public/grib_files/2021-02-12_1200_60--28-36-47.grib"
+# filename = "/home/pperez/CBRN-dispersion-app/public/grib_files/2021-02-24_0000_54--5-47-14.grib"
+# filename = "/home/pperez/CBRN-dispersion-app/public/grib_files/2021-02-12_1200_60--28-36-47.grib"
 KEYS = ["date", "time", "level", "step"]
 
 struct OutOfBoundAreaError <: Exception
@@ -83,7 +83,7 @@ end
 # )
 
 
-# find_nearest_wind("/home/tcarion/CBRN-dispersion-app/public/grib_files/2021-02-24_0000_54--5-47-14.grib", keys_to_select, 4, 50)
+# find_nearest_wind("/home/pperez/CBRN-dispersion-app/public/grib_files/2021-02-24_0000_54--5-47-14.grib", keys_to_select, 4, 50)
 
 
 # reader = GribFile(filename)
