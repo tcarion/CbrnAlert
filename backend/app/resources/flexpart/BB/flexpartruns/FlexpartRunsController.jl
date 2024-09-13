@@ -164,7 +164,8 @@ function run(fpsim::FlexpartSim, fprun::FlexpartRun)
   if _iscompleted(fpsim)
     output_dir = joinpath(fprun.path, "output/")
     nc_file = joinpath(output_dir, filter(x -> endswith(x, ".nc"), readdir(output_dir))[1])
-    _round_dims(nc_file)
+    add_total_depo(nc_file)
+    #_round_dims(nc_file)
     FlexpartRuns.change_status!(fprun.name, STATUS_FINISHED)
   else
     @info "Flexpart run with name $(fprun.name) has failed"
@@ -189,6 +190,19 @@ function run(fpsim::FlexpartSim, fprun::FlexpartRun)
   FlexpartOutputs.add!(fprun)
 
   return fprun
+end
+
+function add_total_depo(fp_output)
+  ds = Dataset(fp_output, "a")
+  if haskey(ds,"WD_spec001") && haskey(ds, "DD_spec001")  && !haskey(ds,"TD_spec001")
+    wet_depo = ds["WD_spec001"]
+    dry_depo = ds["DD_spec001"]
+    total_depo = wet_depo[:] + dry_depo[:]
+    defVar(ds, "TD_spec001", total_depo, dimnames(wet_depo), attrib=["units" => wet_depo.attrib["units"]])
+  else
+    nothing
+  end
+  close(ds)
 end
 
 function _round_dims(netcdf_file::AbstractString)
