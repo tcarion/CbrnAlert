@@ -10,6 +10,7 @@ using Flexpart
 using FlexExtract
 
 using CbrnAlertApp: STATUS_ONGOING, STATUS_ERRORED, STATUS_FINISHED
+using CbrnAlertApp: EXTRACTED_WEATHER_DATA_DIR
 using CbrnAlertApp: _area, round_area
 
 using CbrnAlertApp.Users
@@ -52,14 +53,14 @@ function data_retrieval()
   fcontrol = FeControl(fedir)
   fcontrol[:GRID] = gridres
   fcontrol[:REQUEST] = 0
-#   fcontrol[:CLASS] = "FOO"
+  fcontrol[:ACCTYPE] = "FC"
   set_area!(fcontrol, area)
   set_steps!(fcontrol, start_date, end_date, time_step)
 
   FlexExtract.save(fcontrol)
 
   log_file_path = joinpath(fedir.path, "output_log.log")
-  FlexpartInputs.change_control(newinput.uuid, fcontrol)
+  FlexpartInputs.change_control!(newinput, fcontrol)
   FlexpartInputs.change_status!(newinput, STATUS_ONGOING)
   open(log_file_path, "w") do logf
       try 
@@ -84,7 +85,7 @@ function data_retrieval()
   try
       _check_mars_errors(log_file_path)
       FlexpartInputs.change_status!(newinput, STATUS_FINISHED)
-      FlexpartInputs.change_control(newinput.uuid, FeControl(FlexExtractDir(newinput.path)))
+      FlexpartInputs.change_control!(newinput, FeControl(FlexExtractDir(newinput.path)))
       @info "Flexpart with uuid = $(newinput.uuid) succeeded."
   catch e
       @info "The submission with uuid = $(newinput.uuid) failed."
@@ -110,6 +111,7 @@ function _find_control_path(fedirpath)::FlexExtractDir
   i = findfirst(x -> occursin("CONTROL", x), fefiles)
   FlexExtractDir(fedirpath, fefiles[1])
 end
+
 function _clarify_control(fcontrol)
   startday = Dates.DateTime(fcontrol[:START_DATE], "yyyymmdd")
   times = Base.parse.(Int, split(fcontrol[:TIME], " "))
@@ -137,10 +139,19 @@ function _clarify_control(fcontrol)
 end
 
 function get_inputs()
-  fpinputs = user_related(FlexpartInput)
-  filter!(FlexpartInputs.isfinished, fpinputs)
-  response = Dict.(fpinputs)
-  return response |> json
+    FlexpartInputs.delete_non_existing!()
+    fpinputs = user_related(FlexpartInput)
+    filter!(FlexpartInputs.isfinished, fpinputs)
+    fpinputs_names = [input.name for input in fpinputs]
+    if sort(readdir(EXTRACTED_WEATHER_DATA_DIR)) != sort(fpinputs_names)
+        for new_fedir in setdiff(readdir(EXTRACTED_WEATHER_DATA_DIR), fpinputs_names)
+            newinput = FlexpartInputs.add_existing(joinpath(EXTRACTED_WEATHER_DATA_DIR, new_fedir))
+            FlexpartInputs.assign_to_user!(current_user(), newinput)
+        end
+    end
+    fpinputs = user_related(FlexpartInput)
+    response = Dict.(fpinputs)
+    return response |> json
 end
 
 function delete_input()

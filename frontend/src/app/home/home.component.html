@@ -1,7 +1,7 @@
 <div class="h-screen flex-col absolute inset-0" [class.is-mobile]="mobileQuery.matches">
   <app-topbar [snav]="snav"></app-topbar>
 
-  <mat-sidenav-container class="sidenav-container h-screen" [style.marginTop.px]="mobileQuery.matches ? 40 : 0">
+  <mat-sidenav-container class="sidenav-container" [style.marginTop.px]="mobileQuery.matches ? 40 : 0">
     <mat-sidenav class="sidenav" role="navigation" #snav [mode]="mobileQuery.matches ? 'over' : 'side'"
       [fixedInViewport]="mobileQuery.matches" fixedTopGap="40" opened="true">
       <mat-nav-list>

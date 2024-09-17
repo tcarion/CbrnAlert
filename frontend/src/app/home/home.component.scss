@@ -17,16 +17,25 @@
 
 .sidenav {
   width: var(--sidebarMinWidth);
-
-  mat-panel-title,
-  mat-list-item {
-    font-size: 12px;
+  .dashboard-title {
+    font-size: calc(0.075 * var(--sidebarMinWidth));
+    font-weight: 500;
+    height: calc(0.2 * var(--sidebarMinWidth));
+    margin-left: calc(0.1 * var(--sidebarMinWidth));
   }
-
-  mat-expansion-panel-header,
-  mat-panel-title,
-  mat-list-item {
-    height: 36px;
+  .model-name {
+    font-size: calc(0.065 * var(--sidebarMinWidth));
+    height: calc(0.17 * var(--sidebarMinWidth));
+  }
+  .model-step {
+    font-size: calc(0.06 * var(--sidebarMinWidth));
+    height: calc(0.18 * var(--sidebarMinWidth));
+    color: var(--sidebarBackground);
+  }
+  .custom-divider {
+    height: 1px;
+    margin: 0 auto;
+    background-color: rgba(118, 144, 223, 0.734);
   }
 }
 
@@ -39,6 +48,7 @@
 .sidenav-container {
   /* When the sidenav is not fixed, stretch the sidenav container to fill the available space. This
          causes `<mat-sidenav-content>` to act as our scrolling element for desktop layouts. */
+  height: calc(100% - var(--toolbarHeight));
   flex: 1;
 
   .sidenav-content {

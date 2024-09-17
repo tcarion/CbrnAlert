@@ -86,7 +86,23 @@ function create()
     newentry |> save!
 end
 
+function add_existing(fppath::String)
+    fpsim = FlexpartSim(abspath(joinpath(fppath, "pathnames")))
+    name = basename(fppath)
+    fpoptions = FlexpartOption(fpsim)
+    Flexpart.remove_unused_species!(fpoptions)
+    newentry = FlexpartRun(
+        uuid=name,
+        name=name,
+        path=relpath(fppath),
+        options=JSON3.write(fpoptions.options),
+        status=STATUS_FINISHED
+    )
+    newentry |> save!
+end
+
 isfinished(entry) = entry.status == STATUS_FINISHED
+isongoing(entry) = entry.status == STATUS_ONGOING
 iserrored(entry) = entry.status == STATUS_ERRORED
 
 function change_status!(name::String, value::String)
@@ -117,6 +133,14 @@ function delete_non_existing!()
         if !isdir(entry.path)
             SearchLight.delete(entry)
         end
+    end
+end
+
+function delete_errored!()
+    entries = all(FlexpartRun)
+    errored = filter(x -> x.status == STATUS_ERRORED, entries)
+    for entry in errored
+        SearchLight.delete(entry)
     end
 end
 

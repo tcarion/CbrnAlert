@@ -15,14 +15,17 @@
 }
 /* You can add global styles to this file, and also import other style files */
 :root {
-  --sidebarMinWidth: 14rem;
+  --sidebarMinWidth: 13vw;
   --sidebarBackground: rgb(78, 115, 223);
   --sideColor: aliceblue;
   --smallWidth: 320px;
   --widthForDisplayChange: 780px;
   --widthForSidebarChange: 1024px;
   --formFontSize: 12px;
-  --toolbarHeight: 44px;
+  --toolbarHeight: 6vh;
+  --leafletBoxSize: 3vh;
+  --leafletFontSize: calc(0.5 * var(--leafletBoxSize));
+  --legendBoxSize: 25vh;
 }
 
 @mixin flexDir($dir) {
@@ -40,21 +43,22 @@ html {
     min-width: 100vw;
     position: relative;
     font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+}
 
-    body {
-        color: rgb(133, 135, 150);
-        min-height: 100%;
-        margin: 0;
+body {
+    color: rgb(133, 135, 150);
+    min-height: 100%;
+    margin: 0;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
 
-        .mat-form-field-flex > .mat-form-field-infix { padding: 0.4em 0px !important;}
-        .mat-form-field-label-wrapper { top: -1.5em; }
+    .mat-form-field-flex > .mat-form-field-infix { padding: 0.4em 0px !important;}
+    .mat-form-field-label-wrapper { top: -1.5em; }
 
-        .mat-form-field-appearance-outline.mat-form-field-can-float.mat-form-field-should-float .mat-form-field-label {
-            transform: translateY(-1.1em) scale(.75);
-            width: 133.33333%;
-        }
-        .mat-form-field-outline { background-color: white; }
+    .mat-form-field-appearance-outline.mat-form-field-can-float.mat-form-field-should-float .mat-form-field-label {
+        transform: translateY(-1.1em) scale(.75);
+        width: 133.33333%;
     }
+    .mat-form-field-outline { background-color: white; }
 }
 
 .selection-table.table-container {
@@ -87,43 +91,27 @@ html {
 .right-side-container {
     position: fixed;
     top: var(--toolbarHeight);
-    right: 0;
-    // width: 120px;
-    background-color: var(--sidebarBackground);
-    color: white;
-    // max-width: 365px;
+    right: calc(4 * var(--toolbarHeight));
+    background-color: white;
+    color: rgb(113, 184, 255);
     z-index: 100000;
 }
 
 form {
-    // min-width: 320px;
-    margin: auto;
-    max-width: 690px;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    column-gap: 1em;
-    // grid-template-columns: repeat(4, 1fr);
-    // grid-template-columns: repeat(4, minmax(0, 1fr));
-    // column-gap: 1em;
-    // row-gap: 1em;
-    // @media (max-width: 375px) {
-    //     max-width: 350px;
-    //     grid-template-columns: repeat(2, 1fr);
-    // }
-
-    .form-control {
-        width: 160px;
+    justify-content: center;
+    .form-control-long {
+        width: 13vw;
     }
-
-    // button {
-    //     width: 160px;
-    //     margin-bottom: 18.8px;
-    // }
+    .form-control-med {
+        width: 8vw;
+    }
+    .form-control-short {
+        width: 6vw;
+    }
 }
-
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 .leaflet-info {
     padding: 6px 8px;
@@ -133,54 +121,62 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     box-shadow: 0 0 15px rgba(0,0,0,0.2);
     border-radius: 5px;
 }
+
 .leaflet-info {
     margin: 0 0 5px;
     color: #777;
 }
 
-.legend {
-    line-height: 18px;
-    color: #555;
+.leaflet-tile {
+    outline: 1px solid transparent;
+}
+
+// Scaling of top-left control buttons with screen res
+.leaflet-touch .leaflet-bar a {
+    width: var(--leafletBoxSize);
+    height: var(--leafletBoxSize);
+    line-height: var(--leafletBoxSize);
+    padding: calc(0.15 * var(--leafletBoxSize));
+}
+.leaflet-touch .leaflet-control-zoom-in, .leaflet-touch .leaflet-control-zoom-out {
+    font-size: calc(0.7 * var(--leafletBoxSize));
     display: flex;
-    flex-direction: column-reverse;
-    // width: 70px;
-
-    .title {
-        padding-bottom: 1em;
-        font-size: 10px;
-    }
-}
-.legend i {
-    width: 18px;
-    height: 18px;
-    float: left;
-    // margin-right: 8px;
-    opacity: 0.7;
+    justify-content: center;
+    align-items: center;
 }
 
-.legend-ticklabel {
-    font-size: 10px;
-    /* float: right; */
-    position: absolute;
+// Scaling of control layers button with screen res
+.leaflet-touch .leaflet-control-layers-toggle {
+    width: calc(0.75 * var(--toolbarHeight));
+    height: calc(0.75 * var(--toolbarHeight));
+}
+.leaflet-control-layers-toggle {
+    background-size: calc(0.47 * var(--toolbarHeight));
+}
+.leaflet-retina .leaflet-control-layers-toggle {
+    background-size: calc(0.47 * var(--toolbarHeight));
+}
+.leaflet-control-layers label {
+    font-size: var(--leafletFontSize);
+}
+.leaflet-control-layers-expanded {
+    padding: calc(0.2 * var(--leafletBoxSize));
+    padding-right: calc(0.3 * var(--leafletBoxSize));
+}
+.leaflet-control-layers-list input[type="radio"] {
+    width: calc(0.7 * var(--leafletFontSize));
+    height: calc(0.7 * var(--leafletFontSize));
 }
 
-.legend-ticks-container {
-    position: relative;
+// Scaling of scale bar with screen res (see leaflet-map.component.ts for dynamic updating of scale maxWidth)
+.leaflet-control-scale-line {
+    height: calc(0.6 * var(--leafletBoxSize));
+    font-size: calc(0.8 * var(--leafletFontSize));
+    border-width: calc(0.2 * var(--leafletFontSize));
+    line-height: 1;
 }
 
-.legend-ticklabel:nth-of-type(1) {
-    transform: translateY(-11px)
-}
-
-.legend-ticklabel:nth-of-type(2) {
-    transform: translateY(11px)
-}
-
-.map-plot-list {
-    mat-list-item {
-        height: 36px;
-    }
-//     .mat-expansion-panel-body {
-//         padding: 10px;
-//     }
+// Scaling of layer attribution with screen res
+.leaflet-control-attribution {
+    font-size: calc(0.8 * var(--leafletFontSize));
 }

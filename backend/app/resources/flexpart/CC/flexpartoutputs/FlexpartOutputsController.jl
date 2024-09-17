@@ -14,7 +14,6 @@ using Dates
 using GeoJSON: Feature, FeatureCollection, Polygon, write
 using GeoInterface
 using Rasters
-using ArchGDAL
 using ColorSchemes
 using Colors
 
@@ -30,6 +29,7 @@ function _output_by_uuid(output_id)
 end
 
 function get_outputs()
+    FlexpartOutputs.delete_non_existing!()
     run_id = Genie.Router.params(:runId)
     outputs = related(FlexpartRuns._get_run(run_id), FlexpartOutput)
     Dict.(outputs) |> json
@@ -51,8 +51,8 @@ function get_layers()
 
     if isspatial
         layers = filter(layers) do layer
-            dimnames = name.(dims(stack[layer]))
-            return (:X in dimnames) && (:Y in dimnames)
+            dim_names = name.(dims(stack[layer]))
+            return (:X in dim_names) && (:Y in dim_names)
         end
     end
     layers |> json
@@ -188,7 +188,7 @@ function getcolors(collection)
     vals = collection.val
     minval = minimum(vals)
     maxval = maximum(vals)
-    ticks = range(minval, maxval, length=10)
+    ticks = exp10.(range(log10(minval), log10(maxval), length=10))
     cbar = get(DEFAULT_COLOR_SCHEME, ticks[2:end], :extrema)
     Dict(
         :colors => '#'.*hex.(cbar),

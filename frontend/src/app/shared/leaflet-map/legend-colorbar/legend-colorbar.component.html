@@ -1,27 +1,14 @@
-<!-- <ng-template *ngIf="ticks !== undefined"> -->
-<div
-  class="fixed w-32 bottom-9 right-14 bg-white rounded-lg border-4 p-2 flex flex-row justify-between"
-  style="z-index: 1000"
->
-
-  <div class="flex flex-col-reverse">
-    <div
-      *ngFor="let color of colors; let i = index"
-      class="flex flex-row"
-    >
-      <i [style.background]="color" class="w-6 h-6 float-left opacity-70"></i>
+<div class="legend-container">
+  <div class="legend-scale">
+    <div *ngFor="let color of colors; let i = index" class="flex flex-row">
+      <i [style.background]="color"></i>
       <span class="relative" *ngIf="formatedTicks">
-        <span class="absolute text-xs bottom-4 left-1">{{
-          formatedTicks[i + 1]
-        }}</span>
-        <span *ngIf="i === 0" class="absolute text-xs top-4 left-1">{{ formatedTicks[i] }}</span>
+        <span class="legend-ticks">{{ formatedTicks[i] }}</span>
       </span>
-      <!-- <span class="legend-ticklabel"> {{tick}}</span> -->
     </div>
   </div>
 
   <div class="self-center">
-    <div class="rotate-90 translate-x-2"> {{ units }} </div>
+    <div class="unit"> kBq / m<sup>2</sup> </div>
   </div>
 </div>
-<!-- </ng-template> -->

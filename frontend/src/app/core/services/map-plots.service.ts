@@ -9,6 +9,8 @@ import { circle, circleMarker, FeatureGroup, geoJSON, LayerGroup } from 'leaflet
 import parseGeoraster from 'georaster';
 import GeoRasterLayer from 'georaster-layer-for-leaflet';
 import chroma from 'chroma-js';
+import { actionMatcher } from '@ngxs/store';
+import { ActivatedRoute } from '@angular/router';
 
 
 const POINT_MARKER_OPTIONS = {
@@ -73,49 +75,103 @@ export class MapPlotsService {
 
   addTiff(geoRaster: any) {
     console.log(geoRaster)
-
     // inspired from https://github.com/GeoTIFF/georaster-layer-for-leaflet-example/blob/master/examples/color-scale.html
-    const min = geoRaster.mins[0];
-    const max = geoRaster.maxs[0];
-    const range = geoRaster.ranges[0];
-    let scale = this._colorScale()
+
+    const unit: string = "becquerel";
+    const output: string = "deposition";
+    let min: number;
+    let max: number;
+    let activity: number;
+    const length = 10;
+    let ticks: number[] = [];
+    let ticks_depo: number[] = [];
+    let ticks_mr: number[] = [];
+    let scale: chroma.Scale;
+
+    if (unit == "becquerel"){
+      activity = 3.215; // kBq in 1 ng of caesium-137
+      min = geoRaster.mins[0] * activity;
+      max = geoRaster.maxs[0] * activity;
+      ticks_depo = [0, 2, 4, 10, 20, 40, 100, 185, 555, 1480]; // ticks used in similar papers for deposition in kBq/m^2
+      ticks_mr = [0, 1, 2, 5, 10, 15, 25, 40, 100, 300]; // ticks used in similar papers for mixing ratio in kBq/m^3
+      ticks = ticks_depo;
+    } else {
+      min = 0.001;
+      max = geoRaster.maxs[0];
+      let step = Math.pow(max / min, 1 / (length - 1));
+      for (let i = 0; i < length; i++) {
+        let tick = min * Math.pow(step, i)
+        ticks.push(tick);
+      }
+    }
+    if (output == "deposition"){
+      scale = this._colorScale_depo().domain(ticks.slice().reverse());
+    }
+    else {
+      scale = this._colorScale_mr().domain(ticks.slice().reverse());
+    }
+
     const imageryLayer = new GeoRasterLayer({
       georaster: geoRaster,
       pixelValuesToColorFn: pixelValues => {
-        let pixelValue = pixelValues[0]; // there's just one band in this raster
+        let pixelValue = pixelValues[0] * activity; // there's just one band in this raster
 
         if (pixelValue === 0) return "";
-        // console.log("nir:", nir);
-        let scaledPixelValue = (pixelValue - min) / range;
-        let color = scale(scaledPixelValue).hex();
-
+        let color = scale(pixelValue).hex();
         return color;
       },
-      resolution: 64,
+      resolution: 256,
       opacity: 0.8
     });
 
     return imageryLayer as typeof GeoRasterLayer;
   }
 
-  _colorScale() {
-    return chroma.scale("Viridis");
+  _colorScale_mr() {
+    return chroma.scale("Spectral");
+  }
+  _colorScale_depo() {
+    return chroma.scale(['800000', 'F0E68C']);
   }
 
   _colorbarFromGeoRaster(geoRaster: any, length = 10): ColorbarData {
-    const min: number = geoRaster.mins[0];
-    const max: number = geoRaster.maxs[0];
-    const range = geoRaster.ranges[0];
-    let scale = this._colorScale().domain([min, max]);
+    const unit: string = "becquerel";
+    const output: string = "deposition";
+    let min: number;
+    let max: number;
+    let activity: number;
     let ticks: number[] = [];
+    let ticks_depo: number[] = [];
+    let ticks_mr: number[] = [];
     let colors: string[] = [];
-    let step = range / (length - 1);
-    for (let i = 0; i < length; i++) {
-      let tick = min + (step * i)
-      ticks.push(tick);
-      colors.push(scale(tick).hex())
+    let scale: chroma.Scale;
+
+    if (unit == "becquerel"){
+      activity = 3.215; // kBq in 1 ng of caesium-137
+      min = geoRaster.mins[0] * activity;
+      max = geoRaster.maxs[0] * activity;
+      ticks_depo = [0, 2, 4, 10, 20, 40, 100, 185, 555, 1480]; // ticks used in similar papers for deposition in kBq/m^2
+      ticks_mr = [0, 1, 2, 5, 10, 15, 25, 40, 100, 300]; // ticks used in similar papers for mixing ratio in kBq/m^3
+      ticks = ticks_depo;
+    } else {
+      min = 0.001;
+      max = geoRaster.maxs[0];
+      let step = Math.pow(max / min, 1 / (length - 1));
+      for (let i = 0; i < length; i++) {
+        let tick = min * Math.pow(step, i)
+        ticks.push(tick);
+      }
     }
-    colors.shift()
+    if (output == "deposition"){
+      scale = this._colorScale_depo().domain(ticks.slice().reverse());
+    }
+    else {
+      scale = this._colorScale_mr().domain(ticks.slice().reverse());
+    }
+    for (let i = 0; i < length; i++){
+      colors.push(scale(ticks[i]).hex())
+    }
+    //colors.shift()
     return {
       colors,
       ticks
@@ -154,9 +210,10 @@ export class MapPlotsService {
     let layers = geoJSON(undefined, {
       pmIgnore: true
     });
-
+    let featureGroup = new FeatureGroup()
     layers.addData(collection as FeatureCollection);
-    return layers;
+    featureGroup.addLayer(layers)
+    return featureGroup;
   }
 
   atp45PlotToLayer(collection: FeatureCollection) {

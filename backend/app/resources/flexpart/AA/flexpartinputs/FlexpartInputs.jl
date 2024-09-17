@@ -99,6 +99,20 @@ function add(fepath::String)
     newentry |> save!
 end
 
+function add_existing(fepath::String)
+    fedir = FlexExtractDir(fepath)
+    name = basename(fedir.path)
+    fcontrol = FeControl(fedir)
+    newentry = FlexpartInput(
+        uuid=name,
+        name=name,
+        path=relpath(fedir.path),
+        control=JSON3.write(fcontrol.dict),
+        status=STATUS_FINISHED
+    )
+    newentry |> save!
+end
+
 isfinished(entry) = entry.status == STATUS_FINISHED
 
 function change_status!(input::FlexpartInput, value::String)
@@ -117,12 +131,11 @@ function assign_to_user!(user::Users.User, fpinput::FlexpartInput)
     Relationship!(user, fpinput)
 end
 
-function change_control(uuid::String, fcontrol::FeControl)
-    entry = findone(FlexpartInput, uuid=uuid)
-    entry.control = JSON3.write(fcontrol)
+function change_control!(input::FlexpartInput, fcontrol::FeControl)
+    input.control = JSON3.write(fcontrol)
     # entry.options = fpoptions.options
     # entry.options = ""
-    entry |> save!
+    input |> save!
 end
 
 function get_control(input::FlexpartInput)
