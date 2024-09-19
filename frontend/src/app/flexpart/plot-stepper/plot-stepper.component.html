@@ -25,7 +25,7 @@
       <app-variable-selection (selectedIdEvent)="selectedLayer = $event"  [outputId] = "selectedOutputId"></app-variable-selection>
       <div>
         <button mat-raised-button matStepperPrevious>Go back</button>
-        <button mat-raised-button matStepperNext [disabled]="selectedOutputId == undefined">Next</button>
+        <button mat-raised-button matStepperNext [disabled]="selectedOutputId == undefined" (click)="showLayer()">Next</button>
       </div>
     </ng-template>
   </mat-step>

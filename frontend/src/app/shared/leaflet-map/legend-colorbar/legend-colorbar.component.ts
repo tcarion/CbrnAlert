@@ -22,13 +22,8 @@ export class LegendColorbarComponent implements OnInit {
     this.colors = value.colors;
     //this.unit = value.unit;
     // set unit based on the output variable
-    if (this.layerName == 'spec001_mass') {
-      this.unit = 'ng/m³';
-    } else if (this.layerName == ' spec001_pptv ') {
-      this.unit = 'pptv';
-    } else if (this.layerName == 'WD_spec001' || this.layerName == 'DD_spec001') {
-      this.unit = 'pg/m²';
-    }
+    
+    this.setUnit();
     // this.units = value.units;
   }
 
@@ -54,4 +49,27 @@ export class LegendColorbarComponent implements OnInit {
     //return tick.toExponential(2)
     return String(tick)
   }
+
+  setUnit() {
+    switch (this.layerName) {
+      case 'ORO':
+        this.unit = 'm';
+        break;
+      case 'spec001_mr':
+        this.unit = 'ng/m³';
+        break;
+      case 'WD_spec001':
+      case 'DD_spec001':
+      case 'TD_spec001':
+        this.unit = 'pg/m²';
+        break;
+      default:
+        this.unit = 'No units';  
+        break;
+  
+    }
+    console.log(this.unit)
+  }
+
+
 }

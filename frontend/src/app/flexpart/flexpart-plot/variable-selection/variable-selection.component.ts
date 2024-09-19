@@ -53,6 +53,7 @@ export class VariableSelectionComponent implements OnInit {
     }
 
     onClick(e: string) {
+    console.log(`clicked ${e}`);
       this.selectedIdEvent.emit(e);
       this.value = e;
     }

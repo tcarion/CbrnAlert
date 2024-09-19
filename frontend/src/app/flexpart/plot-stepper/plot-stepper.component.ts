@@ -32,6 +32,10 @@ export class PlotStepperComponent implements OnInit {
     return this.flexpartService.selectedSliceType;
   }
 
+  showLayer():void {
+    console.log("Selected layer : " + this.selectedLayer)
+  }
+
   selectionChanged(e: any) { }
 
 }
