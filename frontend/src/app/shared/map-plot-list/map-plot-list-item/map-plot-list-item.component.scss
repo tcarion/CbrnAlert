@@ -1,3 +1,13 @@
+mat-expansion-panel-header {
+    height: calc(0.85 * var(--toolbarHeight));
+    padding-left: calc(0.3 * var(--toolbarHeight));
+    //padding-top: calc(0.1 * var(--toolbarHeight));
+}
+
+mat-panel-title {
+    font-size: calc(0.3 * var(--toolbarHeight));
+}
+
 .plot-list-icon {
     width: 16px;
     height: 16px;
@@ -13,4 +23,5 @@
 
 .clickable {
     cursor: pointer;
+    font-size: calc(0.25 * var(--toolbarHeight));
 }

@@ -1,11 +1,5 @@
 import { Select, Store } from '@ngxs/store';
-import {
-  Component,
-  OnInit,
-  ChangeDetectionStrategy,
-  Input,
-  OnDestroy,
-} from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, Input, OnDestroy } from '@angular/core';
 import { Feature, FeatureCollection } from 'geojson';
 import { FeatureGroup, Layer, LayerGroup, TileLayer } from 'leaflet';
 import { ColorbarData } from 'src/app/core/api/models';

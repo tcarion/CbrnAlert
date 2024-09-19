@@ -1,5 +1,5 @@
 <mat-expansion-panel>
-    <mat-expansion-panel-header>
+    <mat-expansion-panel-header [collapsedHeight]="'calc(0.85 * var(--toolbarHeight))'" [expandedHeight]="'var(--toolbarHeight)'">
         <mat-panel-title>
             {{ title }}
         </mat-panel-title>
@@ -7,7 +7,7 @@
     <mat-action-list dense>
         <mat-list-item mat-ripple class="list-item" *ngFor="let plot of plots" checkboxPosition='before' [ngClass]="{'active' : plot.isActive}">
             <div class="content">
-                <mat-checkbox [checked]="plot.visible" (change)="onToggleVisibility(plot)" click-stop-propagation></mat-checkbox>
+                <mat-checkbox class="mat-checkbox-inner-container" [checked]="plot.visible" (change)="onToggleVisibility(plot)" click-stop-propagation></mat-checkbox>
                 <span class="clickable" (click)="onItemClick(plot.id)">
                     {{ plot.name }}
                 </span>
