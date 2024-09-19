@@ -1,20 +1,56 @@
 .topbar {
-    position: relative;
-    display: inline;
-    background-color: var(--sidebarBackground);
-    color: var(--sideColor);
+  position: relative;
+  display: inline;
+  background-color: var(--sidebarBackground);
+  color: var(--sideColor);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  height: var(--toolbarHeight);
+  .topbar-title {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    height: var(--toolbarHeight);
-    .topbar-title {
-      display: flex;
-      flex-direction: row;
-  
-      h1.app-name {
-        margin-left: 8px;
-        align-self: center;
-      }
+    h1.app-name {
+      margin-left: 8px;
+      align-self: center;
+      font-size: calc(0.5 * var(--toolbarHeight));
     }
   }
+}
+
+.username {
+  font-size: calc(0.28 * var(--toolbarHeight));
+  padding-left: calc(0.3 * var(--toolbarHeight));
+  padding-right: calc(0.3 * var(--toolbarHeight));
+  margin: calc(0.1 * var(--toolbarHeight)) calc(0.4 * var(--toolbarHeight));
+  background-color: #68D391;
+  border-radius: calc(0.1 * var(--toolbarHeight));
+  display: flex;
+  justify-content: center;
+  align-items: center
+}
+
+.icon-button {
+  width: calc(0.8 * var(--toolbarHeight));
+  height: calc(0.8 * var(--toolbarHeight));
+  margin: 0 calc(0.2 * var(--toolbarHeight));
+}
+
+.icon-button .mat-icon {
+  font-size: calc(0.5 * var(--toolbarHeight));
+  width: calc(0.5 * var(--toolbarHeight));
+  height: calc(0.5 * var(--toolbarHeight));
+  line-height: calc(0.5 * var(--toolbarHeight));
+}
+
+.logout-button {
+font-size: calc(0.32 * var(--toolbarHeight));
+line-height: calc(0.5 * var(--toolbarHeight));
+align-self: center;
+border-radius: calc(0.1 * var(--toolbarHeight));
+height: calc(0.8 * var(--toolbarHeight));
+margin: calc(0.1 * var(--toolbarHeight)) 0 calc(0.1 * var(--toolbarHeight)) calc(0.5 * var(--toolbarHeight));
+padding-left: calc(0.3 * var(--toolbarHeight));
+padding-right: calc(0.3 * var(--toolbarHeight));
+}
