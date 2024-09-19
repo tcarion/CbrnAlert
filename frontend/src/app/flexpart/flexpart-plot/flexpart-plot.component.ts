@@ -51,7 +51,7 @@ export class FlexpartPlotComponent implements OnInit {
   openDialog() {
     const dialogData = {
       title: 'Please confirm',
-      // message: 'Are you sure you want to delete this run?'
+      message: 'Are you sure you want to delete this run?'
     }
     return this.dialogService.confirmDialog(dialogData).pipe(
       take(1)
