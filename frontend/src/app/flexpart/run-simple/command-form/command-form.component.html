@@ -14,7 +14,7 @@
     [formGroup]="form"
   ></app-datetime-picker>
 
-  <mat-form-field class="form-control" appearance="outline" floatLabel="never">
+  <mat-form-field class="form-control-short" appearance="outline" floatLabel="never">
     <mat-label> Time step </mat-label>
     <mat-select formControlName="timeStep">
       <mat-option *ngFor="let option of timeSteps" [value]="option.key">
@@ -23,8 +23,8 @@
     </mat-select>
   </mat-form-field>
 
-  <mat-form-field class="form-control" appearance="outline" floatLabel="never">
-    <mat-label> Output types </mat-label>
+  <mat-form-field class="form-control-long" appearance="outline" floatLabel="never">
+    <mat-label> Output type </mat-label>
     <mat-select formControlName="outputType">
       <mat-option *ngFor="let option of outputTypes" [value]="option.key">
         {{ option.value }}

@@ -57,7 +57,7 @@ export class OutgridFormComponent implements ControlValueAccessor, OnDestroy {
     if (this.form.valid) {
       return null;
     }
-    return { invalidForm: { valid: false, message: 'all fields are required' } };
+    return { invalidForm: { valid: false, message: 'All fields are required' } };
   }
 
   writeValue(value: any) {

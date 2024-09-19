@@ -3,7 +3,7 @@
 </select> -->
 
 <mat-horizontal-stepper (selectionChange)="selectionChanged($event)" [linear]="true">
-  <mat-step label="Choose Flexpart Run">
+  <mat-step label="Choose Flexpart run">
     <app-flexpart-plot #run></app-flexpart-plot>
     <div>
       <button mat-raised-button matStepperNext [disabled]="run.value == undefined">Next</button>
@@ -30,7 +30,7 @@
     </ng-template>
   </mat-step>
 
-  <mat-step label="Choose the dimensions to plot">
+  <mat-step label="Choose dimensions to plot">
     <ng-template matStepContent>
       <app-dimensions-form [outputId]="selectedOutputId" [layerName]="selectedLayer"></app-dimensions-form>
       <button mat-raised-button matStepperPrevious>Go back</button>
