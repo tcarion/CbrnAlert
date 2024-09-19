@@ -14,6 +14,7 @@ using Dates
 using GeoJSON: Feature, FeatureCollection, Polygon, write
 using GeoInterface
 using Rasters
+using ArchGDAL
 using ColorSchemes
 using Colors
 
