@@ -11,6 +11,7 @@ import GeoRasterLayer from 'georaster-layer-for-leaflet';
 import chroma from 'chroma-js';
 import { actionMatcher } from '@ngxs/store';
 import { ActivatedRoute } from '@angular/router';
+import { BehaviorSubject } from 'rxjs';
 
 
 const POINT_MARKER_OPTIONS = {
@@ -54,6 +55,16 @@ export class MapPlotsService {
   constructor(
     private mapService: MapService,
   ) { }
+
+  //to handle the unit changing depending on selected layer
+  private selectedLayerSubject = new BehaviorSubject<string>('');
+  selectedLayer$ = this.selectedLayerSubject.asObservable();
+
+  setSelectedLayer(layer: string) {
+    console.log("in map plot, Setting layerName:", layer)
+    this.selectedLayerSubject.next(layer);
+  }
+
 
   fillPlotGeoJSON(plotData: Atp45Result | GeoJsonSliceResponse, type: PlotType) {
     let newPlot = new MapPlot(type);

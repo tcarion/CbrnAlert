@@ -3,6 +3,9 @@ import { ColorbarData } from './../../../core/api/models/colorbar-data';
 import { Component, OnInit, ChangeDetectionStrategy, Input } from '@angular/core';
 import { Observable, of, BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { MapPlotsService } from 'src/app/core/services/map-plots.service';
+import { StringifyOptions } from 'querystring';
+import { LegendUnitService } from 'src/app/core/services/legend-unit.service';
 
 @Component({
   selector: 'app-legend-colorbar',
@@ -15,15 +18,16 @@ export class LegendColorbarComponent implements OnInit {
   formatedTicks: string[];
   colors?: string[];
   layerName: string;
-  unit: string;
+  receivedData:string;
+  //unit: string;
 
   @Input() set colorbar(value: ColorbarData) {
     this.formatedTicks = value.ticks.map(i => this.formatTick(i));
     this.colors = value.colors;
     //this.unit = value.unit;
     // set unit based on the output variable
-    
-    this.setUnit();
+      this.setUnit(this.layerName);
+
     // this.units = value.units;
   }
 
@@ -33,12 +37,29 @@ export class LegendColorbarComponent implements OnInit {
   // colors$: Observable<string[]>;
 
   constructor(
-    private flexpartService: FlexpartService
+    private flexpartService: FlexpartService,
+    private mapPlotsService: MapPlotsService,
+    private legendUnitService: LegendUnitService
   ) {
 
   }
 
   ngOnInit(): void {
+    this.mapPlotsService.selectedLayer$.subscribe(layerName => {
+      console.log('Received layerName:', layerName); // Debug log
+      if (layerName) {
+        this.layerName = layerName;
+        this.setUnit(layerName);
+      }
+    });
+
+    this.legendUnitService.currentData.subscribe(data => {
+      this.receivedData = data;
+      //this.receivedData = "TEST "
+    })
+
+
+
     // this.ticksLabels$ = of(this.colorbar).pipe(map(cb => cb.ticks!.map((e: number) => { return e.toExponential(2) })))
     // this.ticksLabels = this.colorbar.ticks!.map((e: number) => { return e.toExponential(2) });
     // this.colors = <string[]>this.colorbar.colors
@@ -50,25 +71,17 @@ export class LegendColorbarComponent implements OnInit {
     return String(tick)
   }
 
-  setUnit() {
-    switch (this.layerName) {
-      case 'ORO':
-        this.unit = 'm';
-        break;
-      case 'spec001_mr':
-        this.unit = 'ng/m³';
-        break;
-      case 'WD_spec001':
-      case 'DD_spec001':
-      case 'TD_spec001':
-        this.unit = 'pg/m²';
-        break;
-      default:
-        this.unit = 'No units';  
-        break;
-  
+  setUnit(layerName: string) {
+    console.log("Checking the layerName! -> " + layerName)
+    if (layerName == 'ORO') {
+      this.layerName = 'm';
+    } else if (layerName == 'spec001_mr') {
+      this.layerName = 'ng/m³';
+    } else if (['WD_spec001', 'DD_spec001', 'TD_spec001'].includes(layerName)) {
+      this.layerName = 'pg/m²';
+    } else {
+      this.layerName = 'No units';
     }
-    console.log(this.unit)
   }
 
 
