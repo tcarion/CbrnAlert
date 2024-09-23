@@ -29,7 +29,6 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome'
 
 import { SnackbarModule } from './shared/ui/snackbar/snackbar.module';
 import { MapPlotsService } from './core/services/map-plots.service';
-import { LegendUnitService } from './core/services/legend-unit.service';
 
 @NgModule({
     declarations: [
@@ -68,7 +67,6 @@ import { LegendUnitService } from './core/services/legend-unit.service';
         DynamicPipe,
         DatePipe,
         MapPlotsService,
-        LegendUnitService
     ],
     bootstrap: [AppComponent]
 })

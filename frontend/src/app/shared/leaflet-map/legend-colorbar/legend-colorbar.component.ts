@@ -5,7 +5,7 @@ import { Observable, of, BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { MapPlotsService } from 'src/app/core/services/map-plots.service';
 import { StringifyOptions } from 'querystring';
-import { LegendUnitService } from 'src/app/core/services/legend-unit.service';
+
 
 @Component({
   selector: 'app-legend-colorbar',
@@ -39,7 +39,6 @@ export class LegendColorbarComponent implements OnInit {
   constructor(
     private flexpartService: FlexpartService,
     private mapPlotsService: MapPlotsService,
-    private legendUnitService: LegendUnitService
   ) {
 
   }
@@ -53,10 +52,6 @@ export class LegendColorbarComponent implements OnInit {
       }
     });
 
-    this.legendUnitService.currentData.subscribe(data => {
-      this.receivedData = data;
-      //this.receivedData = "TEST "
-    })
 
 
 
@@ -75,7 +70,7 @@ export class LegendColorbarComponent implements OnInit {
     console.log("Checking the layerName! -> " + layerName)
     if (layerName == 'ORO') {
       this.layerName = 'm';
-    } else if (layerName == 'spec001_mr') {
+    } else if (['spec001_mr'].includes(layerName)) {
       this.layerName = 'ng/m³';
     } else if (['WD_spec001', 'DD_spec001', 'TD_spec001'].includes(layerName)) {
       this.layerName = 'pg/m²';

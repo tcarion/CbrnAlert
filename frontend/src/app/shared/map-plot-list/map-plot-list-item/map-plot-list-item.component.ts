@@ -21,10 +21,12 @@ export class MapPlotListItemComponent implements OnInit {
 
     onToggleVisibility(plot: MapPlot) {
         this.visibilityEvent.emit(plot);
+        console.log("you changed visibility!")
     }
 
     onItemClick(plotId: number) {
         this.itemClickEvent.emit(plotId);
+        console.log("you selected Plot N° " + (plotId + 1))
     }
 
     onDelete(plotId: number) {
