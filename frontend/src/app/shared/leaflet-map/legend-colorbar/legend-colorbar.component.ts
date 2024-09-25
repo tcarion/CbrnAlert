@@ -19,7 +19,7 @@ export class LegendColorbarComponent implements OnInit {
   colors?: string[];
   layerName: string;
   receivedData:string;
-  //unit: string;
+  unit: string;
 
   @Input() set colorbar(value: ColorbarData) {
     this.formatedTicks = value.ticks.map(i => this.formatTick(i));
@@ -49,6 +49,7 @@ export class LegendColorbarComponent implements OnInit {
       if (layerName) {
         this.layerName = layerName;
         this.setUnit(layerName);
+        //this.unit = layerName; // for priority when multiple plots
       }
     });
 
@@ -67,15 +68,17 @@ export class LegendColorbarComponent implements OnInit {
   }
 
   setUnit(layerName: string) {
+    
     console.log("Checking the layerName! -> " + layerName)
     if (layerName == 'ORO') {
-      this.layerName = 'm';
+      this.unit = 'm';
     } else if (['spec001_mr'].includes(layerName)) {
-      this.layerName = 'ng/m³';
+      this.unit = 'ng/m³';
     } else if (['WD_spec001', 'DD_spec001', 'TD_spec001'].includes(layerName)) {
-      this.layerName = 'pg/m²';
+      this.unit = 'pg/m²';
     } else {
-      this.layerName = 'No units';
+      this.unit = 'No units';
+      console.log("why no units ? " + layerName)
     }
   }
 
