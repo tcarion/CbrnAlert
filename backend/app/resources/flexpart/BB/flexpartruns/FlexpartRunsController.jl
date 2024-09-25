@@ -224,11 +224,22 @@ end
 
 function add_total_depo(fp_output)
   ds = Dataset(fp_output, "a")
-  if haskey(ds,"WD_spec001") && haskey(ds, "DD_spec001")  && !haskey(ds,"TD_spec001")
-    wet_depo = ds["WD_spec001"]
-    dry_depo = ds["DD_spec001"]
-    total_depo = wet_depo + dry_depo
-    defVar(ds, "TD_spec001", total_depo, dimnames(wet_depo), attrib=["units" => wet_depo.attrib["units"]])
+  if any(key -> occursin("WD_spec", key), keys(ds)) && any(key -> occursin("DD_spec", key), keys(ds))
+    wet_depo_keys = filter(v -> startswith(v, "WD_spec"), keys(ds))
+    dry_depo_keys = filter(v -> startswith(v, "DD_spec"), keys(ds))
+    for wet_key in wet_depo_keys
+      spec_num = wet_key[8:end]
+      dry_key = "DD_spec$spec_num"
+      total_key = "TD_spec$spec_num"
+      if !haskey(ds, total_key)
+        wet_depo = ds[wet_key]
+        dry_depo = ds[dry_key]
+        total_depo = wet_depo + dry_depo
+        defVar(ds, total_key, total_depo, dimnames(wet_depo), attrib=["units" => wet_depo.attrib["units"]])
+      else
+        nothing
+      end
+    end
   else
     nothing
   end
