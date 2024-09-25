@@ -1,32 +1,16 @@
-<ng-container *ngIf="spatialLayers$ | async as spatialLayers">
-    <mat-selection-list class="listbox" [multiple]="false">
-        <mat-list-option class="list-item" *ngFor="let layer of spatialLayers;" (click)="onClick(layer)">
-          <ng-container *ngIf="layer === 'ORO'; else layer2">
-            <pre>Surface elevation:     {{ layer }}</pre>
-          </ng-container>
-          <ng-template #layer2>
-            <ng-container *ngIf="layer === 'spec001_mr'; else layer3">
-              <pre>Air concentration:     {{ layer }}</pre>
-            </ng-container>
-          </ng-template>
-          <ng-template #layer3>
-            <ng-container *ngIf="layer === 'WD_spec001'; else layer4">
-              <pre>Wet surface deposition:     {{ layer }}</pre>
-            </ng-container>
-          </ng-template>
-          <ng-template #layer4>
-            <ng-container *ngIf="layer === 'DD_spec001'; else layer5">
-              <pre>Dry surface deposition:     {{ layer }}</pre>
-            </ng-container>
-          </ng-template>
-          <ng-template #layer5>
-            <ng-container *ngIf="layer === 'TD_spec001'; else defaultText">
-              <pre>Total surface deposition:     {{ layer }}</pre>
-            </ng-container>
-          </ng-template>
-          <ng-template #defaultText>
-            {{ layer }}
-          </ng-template>
-        </mat-list-option>
-    </mat-selection-list>
-</ng-container>
+<div class="flex flex-col" style="gap: 1vh;">
+    <mat-form-field style="margin-top: 1vh;">
+      <mat-select placeholder="Choose variable" [(value)]="selectedCategory" (selectionChange)="onCategoryChange()">
+        <mat-option *ngFor="let category of categories" [value]="category.id">
+          {{ category.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field *ngIf="selectedCategory">
+      <mat-select placeholder="Choose release" [(value)]="selectedLayer">
+        <mat-option *ngFor="let layer of getLayersForCategory(selectedCategory)" [value]="layer" (click)="onClick(layer)">
+          {{ layer }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+</div>

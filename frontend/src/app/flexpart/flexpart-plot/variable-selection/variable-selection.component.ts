@@ -12,18 +12,20 @@ import { Observable } from 'rxjs';
 })
 export class VariableSelectionComponent implements OnInit {
 
-    // @Select(FlexpartState.fpOutput)
-    // fpOutput$: Observable<FlexpartOutput>;
-
-    // fpOutputVar2D$: Observable<string[]>;
-
-    // selectedVarSub = new Subject<string>();
-    // selectedVar$: Observable<string>;
-    // fpOutput$: Observable<FlexpartOutput>
     value: string
     spatialLayers$: Observable<string[]>;
-    @Output() selectedIdEvent = new EventEmitter<string>();
+    spatialLayersList: string[] = [];
+    selectedCategory: string | null = null;
+    selectedLayer: string | null = null;
+    categories = [
+        { id: 'mr', name: 'Air Concentration' },
+        { id: 'WD', name: 'Wet Deposition' },
+        { id: 'DD', name: 'Dry Deposition' },
+        { id: 'TD', name: 'Total Deposition' },
+        { id: 'ORO', name: 'Surface Elevation' }
+    ];
 
+    @Output() selectedIdEvent = new EventEmitter<string>();
 
     @Input()
     get outputId() {return this._outputId}
@@ -42,47 +44,24 @@ export class VariableSelectionComponent implements OnInit {
         private flexpartService: FlexpartService,
         private route: ActivatedRoute,
     ) {
-        // this.selectedVar$ = this.selectedVarSub.asObservable();
     }
 
     ngOnInit(): void {
-        // this.spatialLayers$ = this.route.paramMap.pipe(
-        //     switchMap(params => {
-        //         const outputId = params.get('outputId');
-        //         return this.flexpartService.getOutput(outputId as string)
-        //             .pipe(
-        //                 switchMap(res => {
-        //                     return this.flexpartService.getSpatialLayers(res.uuid)
-        //                 })
-        //             )
-        //     })
-        // )
-        // const params = this.route.snapshot.paramMap;
-        // const runId = params.get('runId');
-        // const outputId = params.get('outputId');
-
-        // this.flexpartService.getOutput(runId as string, outputId as string)
-        //     .pipe(
-        //         tap(res => {
-        //             this.flexpartService.getSpatialLayers(res.uuid).subscribe(layers => {
-        //                 this.spatialLayers = layers;
-        //             });
-        //         })
-        //     )
-        //     .subscribe(fpOutput => {
-        //         this.fpOutput = fpOutput
-        //     })
-        // this.route.data.subscribe(data => {
-        //     this.store.dispatch(new FlexpartOutputAction.Add(data.fpOutput));
-        // })
-
-        // this.fpOutputVar2D$ = this.fpOutput$.pipe(map(out => out.variables2d))
+        this.spatialLayers$.subscribe(layers => {
+            this.spatialLayersList = layers;
+        });
     }
 
     onClick(e: string) {
       this.selectedIdEvent.emit(e);
       this.value = e;
-        // this.selectedVarSub.next((this.store.selectSnapshot(state => state.flexpart.fpOutput.variables2d[i])));
     }
 
+    onCategoryChange() {
+        this.selectedLayer = null;
+    }
+
+    getLayersForCategory(categoryId: string): string[] {
+        return this.spatialLayersList.filter(layer => layer.includes(categoryId));
+    }
 }
