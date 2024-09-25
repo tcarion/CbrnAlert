@@ -1,42 +1,48 @@
 <form [formGroup]="runForm" *ngIf="input$ | async as input else loading" (onSubmit)="submit(runForm)">
   <mat-horizontal-stepper [linear]="true">
 
-    <mat-step label="Release 1">
-
+    <mat-step label="Releases">
+      <div class="substance-nb">
+        <mat-form-field class="form-control-long" style="padding: 0.5% 0 0 0;" appearance="outline" floatLabel="never">
+          <mat-label> Number of Substances/Releases </mat-label>
+          <input matInput type="number" formControlName="numberOfSubstances" />
+        </mat-form-field>
+        <div class="error-message">
+          <mat-error *ngIf="numberOfSubstances.hasError('required')">
+            Number of substances/releases is required.
+          </mat-error>
+          <mat-error *ngIf="numberOfSubstances.hasError('min')">
+            Number of substances/releases must be at least 1.
+          </mat-error>
+        </div>
+      </div>
       <ng-container formArrayName="releases">
         <ng-container *ngFor="let control of releases.controls; let i = index">
           <app-release-form [dateRange]="minMaxDate" [formGroup]="runForm" [formControlName]="i"></app-release-form>
         </ng-container>
       </ng-container>
-
       <div>
-        <button mat-raised-button matStepperNext [disabled]="releases.invalid" >Next</button>
+        <button mat-raised-button matStepperNext [disabled]="releases.invalid || numberOfSubstances.invalid" >Next</button>
       </div>
     </mat-step>
 
     <mat-step label="Command">
       <app-command-form [dateRange]="minMaxDate" [formGroup]="runForm" formControlName="command"></app-command-form>
-      <!-- <app-command-form [appSetDateExtrema]="minMaxDate" formGroupName="command" formControlName="command"></app-command-form> -->
       <div>
         <button mat-raised-button matStepperNext [disabled]="runForm.get('command')!.invalid" >Next</button>
       </div>
     </mat-step>
 
-    <mat-step label="Outgrid">
-      <!-- <app-outgrid-form [formGroup]="runForm" formControlName="outgrid"></app-outgrid-form> -->
+    <mat-step label="Outgrid" class="flex flex-row">
       <app-outgrid-form [formGroup]="runForm" formControlName="outgrid"></app-outgrid-form>
       <div>
-        <button type="submit" mat-raised-button color="primary" [disabled]="runForm.invalid" (click)="submit(runForm)">Run Flexpart!</button>
+        <button type="submit" mat-raised-button color="primary" [disabled]="runForm.invalid" (click)="submit(runForm)">Run Flexpart !</button>
       </div>
-      <!-- <button type="submit" mat-raised-button color="primary" [disabled]="runForm.invalid"></button> -->
     </mat-step>
+
   </mat-horizontal-stepper>
 </form>
-<!-- {{ runForm.value | json }}
-<strong> runForm: {{runForm.valid}} </strong>
-<strong> releases: {{runForm.get('releases')!.valid }} </strong>
-<strong> command: {{runForm.get('command')!.valid }} </strong>
-<strong> command: {{runForm.get('outgrid')!.valid }} </strong> -->
+
 <ng-template #loading>
   <div>Loading ...</div>
 </ng-template>

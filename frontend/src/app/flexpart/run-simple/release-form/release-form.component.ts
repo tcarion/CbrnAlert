@@ -58,13 +58,16 @@ const geometryNames = [{
     }
 ]
 })
+
 export class ReleaseFormComponent implements ControlValueAccessor, OnDestroy {
   @Input() dateRange: {min: Date, max: Date} = {min: new Date(1950), max: new Date(2200)};
+
+  substanceNames = substanceNames;
+  geometryNames = geometryNames;
 
   form = new UntypedFormGroup({
     location: new UntypedFormControl({lon: 0, lat: 0}, Validators.required),
     height: new UntypedFormControl(1.5, Validators.required),
-    substanceNumber: new UntypedFormControl(1, Validators.required),
     substanceName: new UntypedFormControl(substanceNames[0].key, Validators.required),
     geometryName: new UntypedFormControl(geometryNames[0].value, Validators.required),
     mass: new UntypedFormControl(1., Validators.required),
@@ -72,27 +75,25 @@ export class ReleaseFormComponent implements ControlValueAccessor, OnDestroy {
     end: new UntypedFormControl(new Date(), Validators.required)
   })
 
-  substanceNames = substanceNames;
-
-  geometryNames = geometryNames;
-
-  touched = false;
-
-  disabled = false;
-
-  onChange = (value: any) => { };
-
-  onTouched = () => { };
-
-  onChangeSubs: Subscription[] = [];
-
-  constructor(
-  ) {
-
+  createFormGroup(loc: {lon: number, lat: number}, start: Date, end: Date): UntypedFormGroup {
+    return new UntypedFormGroup({
+      location: new UntypedFormControl(loc, Validators.required),
+      height: new UntypedFormControl(1.5, Validators.required),
+      substanceName: new UntypedFormControl(substanceNames[0].key, Validators.required),
+      geometryName: new UntypedFormControl(geometryNames[0].value, Validators.required),
+      mass: new UntypedFormControl(1., Validators.required),
+      start: new UntypedFormControl(start, Validators.required),
+      end: new UntypedFormControl(end, Validators.required)
+    });
   }
 
-  // ngOnInit(): void {
-  // }
+  touched = false;
+  disabled = false;
+  onChange = (value: any) => { };
+  onTouched = () => { };
+  onChangeSubs: Subscription[] = [];
+
+
   validate(control: AbstractControl): ValidationErrors | null {
     if (this.form.valid) {
       return null;

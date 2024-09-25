@@ -1,0 +1,15 @@
+.release-form {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+  
+.substance-nb {
+    display: flex;
+    align-items: center;
+    .error-message {
+        margin-left: 1vw;
+        margin-bottom: 1vw;
+    }
+}

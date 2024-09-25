@@ -1,5 +1,17 @@
-<fieldset [formGroup]="form">
-  <mat-form-field class="form-control" appearance="outline" floatLabel="never">
+<fieldset [formGroup]="form" class="flex flex-row justify-center">
+
+  <mat-form-field class="form-control-long" appearance="outline" floatLabel="never">
+    <mat-label> Substance name </mat-label>
+    <mat-select formControlName="substanceName">
+      <mat-option *ngFor="let option of substanceNames" [value]="option.key">
+        {{ option.value }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <app-location formControlName="location"></app-location>
+
+  <mat-form-field class="form-control-med" appearance="outline" floatLabel="never">
     <mat-label> Release geometry </mat-label>
     <mat-select formControlName="geometryName">
       <mat-option *ngFor="let option of geometryNames" [value]="option.value">
@@ -8,19 +20,12 @@
     </mat-select>
   </mat-form-field>
 
-    <app-location
-      formControlName="location"
-    ></app-location>
-  <!-- <div *ngFor="let question of questions">
-    <app-question [form]="form" [question]="question"></app-question>
-  </div> -->
-
-  <mat-form-field [formGroup]="form" class="form-control" appearance="outline" floatLabel="never">
+  <mat-form-field class="form-control-short" appearance="outline" floatLabel="never">
     <mat-label> Height [m] </mat-label>
     <input type="number" matInput formControlName="height" />
   </mat-form-field>
 
-  <mat-form-field [formGroup]="form" class="form-control" appearance="outline" floatLabel="never">
+  <mat-form-field class="form-control-short" appearance="outline" floatLabel="never">
     <mat-label> Mass [kg] </mat-label>
     <input type="number" matInput formControlName="mass"/>
   </mat-form-field>
@@ -30,7 +35,6 @@
     [max] = "dateRange.max"
     formControlName="start"
     label="Release start"
-    [formGroup]="form"
   ></app-datetime-picker>
 
   <app-datetime-picker
@@ -38,21 +42,6 @@
     [max] = "dateRange.max"
     formControlName="end"
     label="Release end"
-    [formGroup]="form"
   ></app-datetime-picker>
-
-  <mat-form-field [formGroup]="form" class="form-control" appearance="outline" floatLabel="never">
-    <mat-label> Number of Substances </mat-label>
-    <input type="number" matInput formControlName="substanceNumber" />
-  </mat-form-field>
-
-  <mat-form-field class="form-control" appearance="outline" floatLabel="never">
-    <mat-label> Substance 1 </mat-label>
-    <mat-select formControlName="substanceName">
-      <mat-option *ngFor="let option of substanceNames" [value]="option.key">
-        {{ option.value }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
 
 </fieldset>
