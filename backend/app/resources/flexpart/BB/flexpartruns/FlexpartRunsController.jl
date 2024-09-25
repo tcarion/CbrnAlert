@@ -81,13 +81,21 @@ function run_simple()
   oh_fields_path = joinpath(Flexpart.getpath(fpsim), "options/")
 
   # RELEASE options
-  release_start = DateTime(payload["releases"][1]["start"])
-  release_end = DateTime(payload["releases"][1]["end"])
-  lon, lat = values(payload["releases"][1]["location"])
-  release_substance_num = payload["releases"][1]["substanceNumber"]
-  release_substance1 = payload["releases"][1]["substanceName"]
-  release_mass = payload["releases"][1]["mass"]
-  release_height = payload["releases"][1]["height"]
+  release_nb_substances = length(payload["releases"])
+  release_name_substances = [payload["releases"][i]["substanceName"] for i in 1:release_nb_substances]
+  release_name_substances_str = join(release_name_substances, ", ")  # If multiple releases, easier to pass together as string through Flexpart.jl, and not separate values
+  release_start = [DateTime(payload["releases"][i]["start"]) for i in 1:release_nb_substances]
+  release_end = [DateTime(payload["releases"][i]["end"]) for i in 1:release_nb_substances]
+  lon = []
+  lat = []
+  for i in (1:release_nb_substances)
+    longit, latit = values(payload["releases"][i]["location"])
+    push!(lon, longit)
+    push!(lat, latit)
+  end
+  release_mass = [payload["releases"][i]["mass"] for i in 1:release_nb_substances]
+  release_height = [payload["releases"][i]["height"] for i in 1:release_nb_substances]
+  release_particle = [Int(floor(Flexpart.MAX_PARTICLES*release_mass[i]/sum(release_mass))) for i in 1:release_nb_substances]  # Particle number per release proportional to the mass per release
 
   # OUTGRID options
   gridres = payload["outgrid"]["gridres"]
@@ -111,23 +119,37 @@ function run_simple()
   merge!(fpoptions["COMMAND"][:COMMAND], cmd)
 
   # Set release options
-  Flexpart.set_point_release!(fpoptions, lon, lat)
+  #Flexpart.set_point_release!(fpoptions, lon, lat)
   releases_control_options = Dict(
-    :NSPEC => release_substance_num,
-    :SPECNUM_REL => release_substance1
+    :NSPEC => release_nb_substances,
+    :SPECNUM_REL => release_name_substances_str
   )
   Flexpart.merge!(fpoptions["RELEASES"][:RELEASES_CTRL], releases_control_options)
-  releases_options = Dict(
-    :IDATE1 => Dates.format(release_start, "yyyymmdd"),
-    :ITIME1 => Dates.format(release_start, "HHMMSS"),
-    :IDATE2 => Dates.format(release_end, "yyyymmdd"),
-    :ITIME2 => Dates.format(release_end, "HHMMSS"),
-    :Z1 => release_height,
-    :Z2 => release_height,
-    :PARTS => Flexpart.MAX_PARTICLES,
-    :MASS => release_mass
-  )
-  Flexpart.merge!(fpoptions["RELEASES"][:RELEASE], releases_options)
+
+  releases_options_list = Vector{AbstractDict}()  # Initialize list of dicts to collect release options for all releases without new values replacing previous ones
+  for i in (1:release_nb_substances)  # Iterate through each release and collect the options
+    releases_options = Dict(
+      :IDATE1 => Dates.format(release_start[i], "yyyymmdd"),
+      :ITIME1 => Dates.format(release_start[i], "HHMMSS"),
+      :IDATE2 => Dates.format(release_end[i], "yyyymmdd"),
+      :ITIME2 => Dates.format(release_end[i], "HHMMSS"),
+      :LON1 => lon[i],
+      :LON2 => lon[i],
+      :LAT1 => lat[i],
+      :LAT2 => lat[i],
+      :Z1 => release_height[i],
+      :Z2 => release_height[i],
+      :PARTS => release_particle[i],
+      :MASS => release_mass[i],
+      :COMMENT => "\"RELEASE $i\""
+    )
+    push!(releases_options_list, releases_options)
+  end
+  if length(releases_options_list) == 1  # If only 1 release, Flexpart.jl should treat it as a dict, not a list of dict
+    Flexpart.merge!(fpoptions["RELEASES"][:RELEASE], releases_options_list[1])
+  else
+    Flexpart.merge!(fpoptions["RELEASES"][:RELEASE], releases_options_list)
+  end
 
   # Set outgrid options
   area_f = _area(area)
@@ -147,7 +169,6 @@ function run_simple()
   # Save the available file and the flexpart paths
   Flexpart.save(avs)
   Flexpart.save(fpsim)
-
 
   return run(fpsim, fprun) |> API.FlexpartRun |> json
 end
