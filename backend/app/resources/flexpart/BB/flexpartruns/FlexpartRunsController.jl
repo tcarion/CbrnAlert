@@ -94,6 +94,13 @@ function run_simple()
     push!(lat, latit)
   end
   release_mass = [payload["releases"][i]["mass"] for i in 1:release_nb_substances]
+  release_mass_per = []
+  for i in 1:length(release_mass)
+    m = zeros(length(release_mass))
+    m[i] = release_mass[i]
+    m = join(m, ", ")
+    push!(release_mass_per, m)
+  end
   release_height = [payload["releases"][i]["height"] for i in 1:release_nb_substances]
   release_particle = [Int(floor(Flexpart.MAX_PARTICLES*release_mass[i]/sum(release_mass))) for i in 1:release_nb_substances]  # Particle number per release proportional to the mass per release
 
@@ -113,6 +120,8 @@ function run_simple()
     :LSYNCTIME => convert(Int64, time_step / 4),
     # Set netcdf output
     :IOUT => output_type + 8,
+    # Set all outputs of same release in 1 array
+    :IOUTPUTFOREACHRELEASE => 0,
     # Set OH fields path
     :OHFIELDS_PATH => "\"$oh_fields_path\""
   )
@@ -140,7 +149,7 @@ function run_simple()
       :Z1 => release_height[i],
       :Z2 => release_height[i],
       :PARTS => release_particle[i],
-      :MASS => release_mass[i],
+      :MASS => release_mass_per[i],
       :COMMENT => "\"RELEASE $i\""
     )
     push!(releases_options_list, releases_options)
