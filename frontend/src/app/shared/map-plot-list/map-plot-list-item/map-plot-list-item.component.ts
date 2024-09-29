@@ -26,11 +26,24 @@ export class MapPlotListItemComponent implements OnInit {
 
     onItemClick(plotId: number) {
         this.itemClickEvent.emit(plotId);
-        console.log("you selected Plot N° " + (plotId + 1))
+        const selectedPlot = this.getPlotById(plotId);
+        if (selectedPlot) {
+            console.log("You selected Plot N° " + (plotId + 1));
+            console.log("Selected Layer for this Plot: " + selectedPlot.selectedLayer);
+          } else {
+            console.log("Plot with ID " + plotId + " not found.");
+          }
     }
 
     onDelete(plotId: number) {
         this.deleteEvent.emit(plotId);
+    }
+
+    getPlotById(plotId: number): MapPlot | undefined {
+        if (this.plots) {
+            return this.plots.find(plot => plot.id === plotId);
+        }
+        return undefined;
     }
 
 }

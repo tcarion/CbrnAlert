@@ -17,6 +17,7 @@ export interface MapPlot {
   // info?: Object,
   visible: boolean,
   isActive: boolean,
+  selectedLayer: string,
   metadata?: Object
 }
 
@@ -38,6 +39,13 @@ export class MapPlot implements MapPlot {
 
     MapPlot._id++;
     MapPlot.plotsCount[type]++;
+  }
 
+  getSelectedLayer():string {
+    return this.selectedLayer
+  }
+
+  setSelectedLayer(layer:string):void {
+    this.selectedLayer = layer
   }
 }

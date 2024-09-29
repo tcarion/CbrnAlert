@@ -21,6 +21,8 @@ export class LegendColorbarComponent implements OnInit {
   receivedData:string;
   unit: string;
 
+  activeLayerUnit: string | null = null;
+
   @Input() set colorbar(value: ColorbarData) {
     this.formatedTicks = value.ticks.map(i => this.formatTick(i));
     this.colors = value.colors;
@@ -53,6 +55,12 @@ export class LegendColorbarComponent implements OnInit {
       }
     });
 
+    this.mapPlotsService.activePlot$.subscribe((plot) => {
+      if (plot) {
+        this.activeLayerUnit = plot.getSelectedLayer()
+      }
+    })
+
 
 
 
@@ -80,6 +88,10 @@ export class LegendColorbarComponent implements OnInit {
       this.unit = 'No units';
       console.log("why no units ? " + layerName)
     }
+  }
+  
+  getUnit():string {
+    return this.unit
   }
 
 

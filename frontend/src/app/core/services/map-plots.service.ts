@@ -52,17 +52,30 @@ function getColor(value: number, colorbar: ColorbarData) {
 })
 export class MapPlotsService {
 
+
   constructor(
     private mapService: MapService,
-  ) { }
+  ) {
+    this.selectedLayer$.subscribe(layer => {
+      this.currentSelectedLayer = layer;
+    })
+   }
 
   //to handle the unit changing depending on selected layer
   private selectedLayerSubject = new BehaviorSubject<string>('');
   selectedLayer$ = this.selectedLayerSubject.asObservable();
-
+  private currentSelectedLayer: string = '';
   setSelectedLayer(layer: string) {
     console.log("in map plot, Setting layerName:", layer)
     this.selectedLayerSubject.next(layer);
+  }
+
+  //to handle the active plots changing 
+  private activePlotSubject = new BehaviorSubject<MapPlot | null>(null);
+  activePlot$ = this.activePlotSubject.asObservable();
+
+  setActivePlot(plot: MapPlot) {
+    this.activePlotSubject.next(plot);
   }
 
 
@@ -81,6 +94,9 @@ export class MapPlotsService {
     console.log(geoRaster);
     newPlot.data = geoRaster;
     newPlot.metadata = this._colorbarFromGeoRaster(geoRaster)
+
+    newPlot.setSelectedLayer(this.currentSelectedLayer)
+    console.log("inside fillPlotTiff " + newPlot.selectedLayer)
     return newPlot
   }
 
