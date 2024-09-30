@@ -92,7 +92,7 @@ export class LegendColorbarComponent implements OnInit {
     } else if (['WD_spec001', 'DD_spec001', 'TD_spec001'].includes(layerName)) {
       this.unit = 'pg/m²';
     } else {
-      this.unit = 'No units';
+      this.unit = 'Click plot again';
       console.log("why no units ? " + layerName)
     }
   }

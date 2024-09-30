@@ -12,6 +12,7 @@ import chroma from 'chroma-js';
 import { actionMatcher } from '@ngxs/store';
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
+import { tick } from '@angular/core/testing';
 
 
 const POINT_MARKER_OPTIONS = {
@@ -96,7 +97,9 @@ export class MapPlotsService {
     newPlot.data = geoRaster;
     newPlot.metadata = this._colorbarFromGeoRaster(geoRaster)
 
-    newPlot.setLegendLayer(this.currentSelectedLayer)
+    if (this.currentSelectedLayer) {
+      newPlot.setLegendLayer(this.currentSelectedLayer);
+    }
     console.log("inside fillPlotTiff " + newPlot.legendLayer)
     return newPlot
   }
@@ -105,7 +108,7 @@ export class MapPlotsService {
     console.log(geoRaster)
     // inspired from https://github.com/GeoTIFF/georaster-layer-for-leaflet-example/blob/master/examples/color-scale.html
 
-    const unit: string = "becquerel";
+    const unit: string = "kg";
     const output: string = "deposition";
     let min: number;
     let max: number;
@@ -163,7 +166,7 @@ export class MapPlotsService {
   }
 
   _colorbarFromGeoRaster(geoRaster: any, length = 10): ColorbarData {
-    const unit: string = "becquerel";
+    const unit: string = "kg";
     const output: string = "deposition";
     let min: number;
     let max: number;
@@ -186,9 +189,26 @@ export class MapPlotsService {
       max = geoRaster.maxs[0];
       let step = Math.pow(max / min, 1 / (length - 1));
       for (let i = 0; i < length; i++) {
-        let tick = min * Math.pow(step, i)
+        let tickValue = min * Math.pow(step, i);
+        let precision;
+
+        // Adjust precision based on the magnitude of the number
+        if (tickValue < 1) {
+          precision = 3;  // More decimal places for small numbers
+        } else if (tickValue < 10) {
+          precision = 2;
+        } else if (tickValue < 100) {
+          precision = 1;
+        } else {
+          precision = 0;  // Round large numbers to whole numbers
+        }
+
+        // Dynamically set precision using rounding
+        let tick = Math.round(tickValue * Math.pow(10, precision)) / Math.pow(10, precision);
+
         ticks.push(tick);
       }
+      
     }
     if (output == "deposition"){
       scale = this._colorScale_depo().domain(ticks.slice().reverse());
