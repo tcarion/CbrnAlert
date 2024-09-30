@@ -49,6 +49,7 @@ export class LegendColorbarComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    /*
     this.mapPlotsService.selectedLayer$.subscribe(layerName => {
       console.log('Received layerName:', layerName); // Debug log
       if (layerName) {
@@ -57,12 +58,12 @@ export class LegendColorbarComponent implements OnInit {
         //this.unit = layerName; // for priority when multiple plots
       }
     });
-
+    */
     this.mapPlotsService.activePlot$.subscribe((plot: MapPlot | null) => {
       this.activePlot = plot;
       if (this.activePlot) {
           // Update the legend with the selected layer's unit
-          this.updateLegend(this.activePlot.selectedLayer);
+          this.updateLegend(this.activePlot.legendLayer);
       }
       this.cdr.markForCheck();
   });

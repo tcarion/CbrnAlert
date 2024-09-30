@@ -96,8 +96,8 @@ export class MapPlotsService {
     newPlot.data = geoRaster;
     newPlot.metadata = this._colorbarFromGeoRaster(geoRaster)
 
-    newPlot.setSelectedLayer(this.currentSelectedLayer)
-    console.log("inside fillPlotTiff " + newPlot.selectedLayer)
+    newPlot.setLegendLayer(this.currentSelectedLayer)
+    console.log("inside fillPlotTiff " + newPlot.legendLayer)
     return newPlot
   }
 

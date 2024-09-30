@@ -17,7 +17,7 @@ export interface MapPlot {
   // info?: Object,
   visible: boolean,
   isActive: boolean,
-  selectedLayer: string,
+  legendLayer: string,
   metadata?: Object
 }
 
@@ -41,11 +41,11 @@ export class MapPlot implements MapPlot {
     MapPlot.plotsCount[type]++;
   }
 
-  getSelectedLayer():string {
-    return this.selectedLayer
+  getLegendLayer():string {
+    return this.legendLayer
   }
 
-  setSelectedLayer(layer:string):void {
-    this.selectedLayer = layer
+  setLegendLayer(layer:string):void {
+    this.legendLayer = layer
   }
 }
