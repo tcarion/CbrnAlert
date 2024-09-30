@@ -87,7 +87,7 @@ export class LegendColorbarComponent implements OnInit {
     console.log("Checking the layerName! -> " + layerName)
     if (layerName == 'ORO') {
       this.unit = 'm';
-    } else if (['spec001_mr'].includes(layerName)) {
+    } else if (/spec\d+_mr/.test(layerName)) {
       this.unit = 'ng/m³';
     } else if (['WD_spec001', 'DD_spec001', 'TD_spec001'].includes(layerName)) {
       this.unit = 'pg/m²';

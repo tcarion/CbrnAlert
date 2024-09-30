@@ -192,18 +192,18 @@ export class MapPlotsService {
         let tickValue = min * Math.pow(step, i);
         let precision;
 
-        // Adjust precision based on the magnitude of the number
+        //higher numbers = less precision (digit after commas)
         if (tickValue < 1) {
-          precision = 3;  // More decimal places for small numbers
+          precision = 3;  
         } else if (tickValue < 10) {
           precision = 2;
         } else if (tickValue < 100) {
           precision = 1;
         } else {
-          precision = 0;  // Round large numbers to whole numbers
+          precision = 0;  
         }
 
-        // Dynamically set precision using rounding
+        //round numbers but keep them as numbers
         let tick = Math.round(tickValue * Math.pow(10, precision)) / Math.pow(10, precision);
 
         ticks.push(tick);
