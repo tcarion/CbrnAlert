@@ -76,6 +76,7 @@ export class MapPlotsService {
 
   setActivePlot(plot: MapPlot) {
     this.activePlotSubject.next(plot);
+    console.log("Active plot set to: ", plot);
   }
 
 

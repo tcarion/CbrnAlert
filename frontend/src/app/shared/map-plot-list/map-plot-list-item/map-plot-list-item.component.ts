@@ -13,7 +13,7 @@ export class MapPlotListItemComponent implements OnInit {
     
     @Output() visibilityEvent = new EventEmitter<MapPlot>();
     @Output() deleteEvent = new EventEmitter<number>();
-    @Output() itemClickEvent = new EventEmitter<number>();
+    @Output() itemClickEvent = new EventEmitter<MapPlot>();
     constructor() { }
 
     ngOnInit(): void {
@@ -25,11 +25,15 @@ export class MapPlotListItemComponent implements OnInit {
     }
 
     onItemClick(plotId: number) {
-        this.itemClickEvent.emit(plotId);
+        //this.itemClickEvent.emit(plotId);
         const selectedPlot = this.getPlotById(plotId);
         if (selectedPlot) {
             console.log("You selected Plot N° " + (plotId + 1));
             console.log("Selected Layer for this Plot: " + selectedPlot.selectedLayer);
+            
+            //to trigger active plots
+            //this.visibilityEvent.emit(selectedPlot)
+            this.itemClickEvent.emit(selectedPlot)
           } else {
             console.log("Plot with ID " + plotId + " not found.");
           }
