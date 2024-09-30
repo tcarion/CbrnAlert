@@ -30,8 +30,8 @@ export class LegendColorbarComponent implements OnInit {
     this.colors = value.colors;
     //this.unit = value.unit;
     // set unit based on the output variable
-      this.setUnit(this.layerName);
-
+      //this.setUnit(this.layerName);
+      //this.updateLegend(this.layerName)
     // this.units = value.units;
   }
 
@@ -49,16 +49,16 @@ export class LegendColorbarComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    /*
+    
     this.mapPlotsService.selectedLayer$.subscribe(layerName => {
       console.log('Received layerName:', layerName); // Debug log
       if (layerName) {
         this.layerName = layerName;
-        this.setUnit(layerName);
+        this.updateLegend(layerName);
         //this.unit = layerName; // for priority when multiple plots
       }
     });
-    */
+    
     this.mapPlotsService.activePlot$.subscribe((plot: MapPlot | null) => {
       this.activePlot = plot;
       if (this.activePlot) {
