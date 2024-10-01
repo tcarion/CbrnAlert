@@ -1,0 +1,21 @@
+<h1 mat-dialog-title>Release Geometry : Box</h1>
+<div mat-dialog-content class="popup-container">
+    <form [formGroup]="form">
+      <mat-form-field>
+        <!-- <mat-label>Length (m)</mat-label> -->
+        <input matInput formControlName="length" type="number" placeholder="Length (m)" appearance="outline" floatLabel="never">
+      </mat-form-field>
+      
+      <mat-form-field>
+        <!-- <mat-label>Width (m)</mat-label>-->
+        <input matInput formControlName="width" type="number" placeholder="Width (m)" appearance="outline" floatLabel="never">
+      </mat-form-field>
+      <mat-form-field>
+        <input matInput formControlName="boxHeight" type="number" placeholder="Height (m)" appearance="outline" floatLabel="never">
+      </mat-form-field>
+    </form>
+  </div>
+<div mat-dialog-actions>
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button mat-button (click)="onSubmit()">OK</button>
+</div>
