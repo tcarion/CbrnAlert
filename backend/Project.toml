@@ -1,6 +1,6 @@
 name = "CbrnAlertApp"
 uuid = "a24d0d5a-6e7e-4c07-92eb-499b57f1510c"
-authors = ["tcarion <tristancarion@gmail.com>", "PaulPerezRMA <Paul.Perez@mil.be>"]
+authors = ["tcarion <tristancarion@gmail.com>", "PrzPaul <paullouisperez@gmail.com>"]
 version = "0.2.0"
 
 [deps]
@@ -25,6 +25,7 @@ JSON3 = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
 JSONWebTokens = "9b8beb19-0777-58c6-920b-28f749fee4d3"
 Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
 LoggingExtras = "e6f89c97-d47a-5376-807f-9c37f3926c36"
+MapMaths = "0922fada-4501-4821-9da5-5833bcb2b8d4"
 MbedTLS = "739be429-bea8-5141-9913-cc70e7f3736d"
 NCDatasets = "85f8d34a-cbdd-5861-8df4-14fed0d494ab"
 NetCDFF_jll = "78e728a9-57fe-5d11-897c-5014b89e5f84"
@@ -46,4 +47,4 @@ UUIDs = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
 
 [compat]
-julia = "1.10.4"
+julia = "1.10"
