@@ -83,9 +83,10 @@ function run_simple()
   # RELEASE options
   release_nb_substances = length(payload["releases"])
   release_name_substances = [payload["releases"][i]["substanceName"] for i in 1:release_nb_substances]
-  release_name_substances_str = join(release_name_substances, ", ")  # If multiple releases, easier to pass together as string through Flexpart.jl, and not separate values
+  release_geometry = [payload["releases"][i]["geometryName"] for i in 1:release_nb_substances]
   release_start = [DateTime(payload["releases"][i]["start"]) for i in 1:release_nb_substances]
   release_end = [DateTime(payload["releases"][i]["end"]) for i in 1:release_nb_substances]
+
   lon = []
   lat = []
   for i in (1:release_nb_substances)
@@ -102,8 +103,12 @@ function run_simple()
     push!(release_mass_per, m)
   end
   release_height = [payload["releases"][i]["height"] for i in 1:release_nb_substances]
-  release_particle = [Int(floor(Flexpart.MAX_PARTICLES*release_mass[i]/sum(release_mass))) for i in 1:release_nb_substances]  # Particle number per release proportional to the mass per release
 
+  release_length = [release_geometry[i] == "Box" ? payload["releases"][i]["length"] : 0 for i in 1:release_nb_substances]
+  release_width = [release_geometry[i] == "Box" ? payload["releases"][i]["width"] : 0 for i in 1:release_nb_substances]
+  release_boxHeight = [release_geometry[i] == "Box" ? payload["releases"][i]["boxHeight"] : 0 for i in 1:release_nb_substances]
+
+    
   # OUTGRID options
   gridres = payload["outgrid"]["gridres"]
   area = payload["outgrid"]["area"]
@@ -146,10 +151,10 @@ function run_simple()
       :LON2 => lon[i],
       :LAT1 => lat[i],
       :LAT2 => lat[i],
-      :Z1 => release_height[i],
-      :Z2 => release_height[i],
-      :PARTS => release_particle[i],
-      :MASS => release_mass_per[i],
+      :Z1 => release_height[i] - release_boxHeight[i]/2,
+      :Z2 => release_height[i] + release_boxHeight[i]/2,
+      :PARTS => Flexpart.MAX_PARTICLES,
+      :MASS => release_mass[i],
       :COMMENT => "\"RELEASE $i\""
     )
     push!(releases_options_list, releases_options)
