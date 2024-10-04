@@ -108,7 +108,7 @@ export class MapPlotsService {
     console.log(geoRaster)
     // inspired from https://github.com/GeoTIFF/georaster-layer-for-leaflet-example/blob/master/examples/color-scale.html
 
-    const unit: string = "kg";
+    const unit: string = "becquerel";
     const output: string = "deposition";
     let min: number;
     let max: number;
