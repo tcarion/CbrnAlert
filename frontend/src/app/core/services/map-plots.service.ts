@@ -11,6 +11,8 @@ import GeoRasterLayer from 'georaster-layer-for-leaflet';
 import chroma from 'chroma-js';
 import { actionMatcher } from '@ngxs/store';
 import { ActivatedRoute } from '@angular/router';
+import { BehaviorSubject } from 'rxjs';
+import { tick } from '@angular/core/testing';
 
 
 const POINT_MARKER_OPTIONS = {
@@ -51,9 +53,33 @@ function getColor(value: number, colorbar: ColorbarData) {
 })
 export class MapPlotsService {
 
+
   constructor(
     private mapService: MapService,
-  ) { }
+  ) {
+    this.selectedLayer$.subscribe(layer => {
+      this.currentSelectedLayer = layer;
+    })
+   }
+
+  //to handle the unit changing depending on selected layer
+  private selectedLayerSubject = new BehaviorSubject<string>('');
+  selectedLayer$ = this.selectedLayerSubject.asObservable();
+  private currentSelectedLayer: string = '';
+  setSelectedLayer(layer: string) {
+    console.log("in map plot, Setting layerName:", layer)
+    this.selectedLayerSubject.next(layer);
+  }
+
+  //to handle the active plots changing 
+  private activePlotSubject = new BehaviorSubject<MapPlot | null>(null);
+  activePlot$ = this.activePlotSubject.asObservable();
+
+  setActivePlot(plot: MapPlot) {
+    this.activePlotSubject.next(plot);
+    console.log("Active plot set to: ", plot);
+  }
+
 
   fillPlotGeoJSON(plotData: Atp45Result | GeoJsonSliceResponse, type: PlotType) {
     let newPlot = new MapPlot(type);
@@ -70,6 +96,11 @@ export class MapPlotsService {
     console.log(geoRaster);
     newPlot.data = geoRaster;
     newPlot.metadata = this._colorbarFromGeoRaster(geoRaster)
+
+    if (this.currentSelectedLayer) {
+      newPlot.setLegendLayer(this.currentSelectedLayer);
+    }
+    console.log("inside fillPlotTiff " + newPlot.legendLayer)
     return newPlot
   }
 
@@ -135,7 +166,7 @@ export class MapPlotsService {
   }
 
   _colorbarFromGeoRaster(geoRaster: any, length = 10): ColorbarData {
-    const unit: string = "becquerel";
+    const unit: string = "kg";
     const output: string = "deposition";
     let min: number;
     let max: number;
@@ -158,9 +189,26 @@ export class MapPlotsService {
       max = geoRaster.maxs[0];
       let step = Math.pow(max / min, 1 / (length - 1));
       for (let i = 0; i < length; i++) {
-        let tick = min * Math.pow(step, i)
+        let tickValue = min * Math.pow(step, i);
+        let precision;
+
+        //higher numbers = less precision (digit after commas)
+        if (tickValue < 1) {
+          precision = 3;  
+        } else if (tickValue < 10) {
+          precision = 2;
+        } else if (tickValue < 100) {
+          precision = 1;
+        } else {
+          precision = 0;  
+        }
+
+        //round numbers but keep them as numbers
+        let tick = Math.round(tickValue * Math.pow(10, precision)) / Math.pow(10, precision);
+
         ticks.push(tick);
       }
+      
     }
     if (output == "deposition"){
       scale = this._colorScale_depo().domain(ticks.slice().reverse());

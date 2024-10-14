@@ -17,6 +17,7 @@ export interface MapPlot {
   // info?: Object,
   visible: boolean,
   isActive: boolean,
+  legendLayer: string,
   metadata?: Object
 }
 
@@ -38,6 +39,13 @@ export class MapPlot implements MapPlot {
 
     MapPlot._id++;
     MapPlot.plotsCount[type]++;
+  }
 
+  getLegendLayer():string {
+    return this.legendLayer
+  }
+
+  setLegendLayer(layer:string):void {
+    this.legendLayer = layer
   }
 }

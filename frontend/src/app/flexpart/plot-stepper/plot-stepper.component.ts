@@ -1,6 +1,7 @@
 import { FlexpartService } from 'src/app/flexpart/flexpart.service';
 import { SliceResponseType } from './../flexpart-plot-data';
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { MapPlotsService } from 'src/app/core/services/map-plots.service';
 
 @Component({
   selector: 'app-plot-stepper',
@@ -18,6 +19,7 @@ export class PlotStepperComponent implements OnInit {
 
   constructor(
     private flexpartService: FlexpartService,
+    private mapPlotsService: MapPlotsService,
   ) {
   }
 
@@ -32,6 +34,14 @@ export class PlotStepperComponent implements OnInit {
     return this.flexpartService.selectedSliceType;
   }
 
+  showLayer():void {
+    console.log("Selected layer : " + this.selectedLayer)
+  }
+
   selectionChanged(e: any) { }
+
+  onLayerSelected(){
+    this.mapPlotsService.setSelectedLayer(this.selectedLayer);
+  }
 
 }

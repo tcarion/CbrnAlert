@@ -4,7 +4,7 @@
     [plots]="atp45Plots$ | async"
     (visibilityEvent)="toggleVisibility($event)"
     (deleteEvent)="delete($event)"
-    (itemClickEvent)="setActive($event)">
+    (itemClickEvent)="onPlotClick($event)">
 </app-map-plot-list-item>
 <app-map-plot-list-item 
     class="map-plot-list"
@@ -12,5 +12,5 @@
     [plots]="flexpartPlots$ | async"
     (visibilityEvent)="toggleVisibility($event)"
     (deleteEvent)="delete($event)"
-    (itemClickEvent)="setActive($event)">
+    (itemClickEvent)="onPlotClick($event)">
 </app-map-plot-list-item>
