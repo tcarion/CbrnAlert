@@ -108,8 +108,8 @@ export class MapPlotsService {
     console.log(geoRaster)
     // inspired from https://github.com/GeoTIFF/georaster-layer-for-leaflet-example/blob/master/examples/color-scale.html
 
-    const unit: string = "becquerel";
-    const output: string = "deposition";
+    const unit: string = "kg";
+    const output: string = "concentration";
     let min: number;
     let max: number;
     let activity: number;
@@ -119,36 +119,33 @@ export class MapPlotsService {
     let ticks_mr: number[] = [];
     let scale: chroma.Scale;
 
+    activity = 1;
     if (unit == "becquerel"){
       activity = 3.215; // kBq in 1 ng of caesium-137
-      min = geoRaster.mins[0] * activity;
-      max = geoRaster.maxs[0] * activity;
-      ticks_depo = [0, 2, 4, 10, 20, 40, 100, 185, 555, 1480]; // ticks used in similar papers for deposition in kBq/m^2
-      ticks_mr = [0, 1, 2, 5, 10, 15, 25, 40, 100, 300]; // ticks used in similar papers for mixing ratio in kBq/m^3
-      ticks = ticks_depo;
-    } else {
-      min = 0.001;
-      max = geoRaster.maxs[0];
-      let step = Math.pow(max / min, 1 / (length - 1));
-      for (let i = 0; i < length; i++) {
-        let tick = min * Math.pow(step, i)
-        ticks.push(tick);
-      }
     }
-    if (output == "deposition"){
-      scale = this._colorScale_depo().domain(ticks.slice().reverse());
+    min = 0.001 * activity;
+    max = geoRaster.maxs[0] * activity;
+    let step = Math.pow(max / min, 1 / (length - 1));
+    for (let i = 0; i < length; i++) {
+      let tick = min * Math.pow(step, i)
+      ticks.push(tick);
     }
-    else {
-      scale = this._colorScale_mr().domain(ticks.slice().reverse());
-    }
+    scale = this._colorScale().domain(ticks.slice().reverse());
 
     const imageryLayer = new GeoRasterLayer({
       georaster: geoRaster,
       pixelValuesToColorFn: pixelValues => {
         let pixelValue = pixelValues[0] * activity; // there's just one band in this raster
 
-        if (pixelValue === 0) return "";
-        let color = scale(pixelValue).hex();
+        if (pixelValue <= min) return "";
+        let colorIndex = ticks.length - 1;
+        for (let i = 1; i < ticks.length; i++) {
+          if (ticks[i-1] < pixelValue && pixelValue <= ticks[i]) {
+            colorIndex = i;
+            break;
+          }
+        }
+        let color = scale(ticks[colorIndex]).hex();
         return color;
       },
       resolution: 256,
@@ -158,16 +155,16 @@ export class MapPlotsService {
     return imageryLayer as typeof GeoRasterLayer;
   }
 
-  _colorScale_mr() {
+  _colorScale() {
     return chroma.scale("Spectral");
   }
-  _colorScale_depo() {
-    return chroma.scale(['800000', 'F0E68C']);
-  }
+  // _colorScale_depo() {
+  //   return chroma.scale(['800000', 'F0E68C']);
+  // }
 
   _colorbarFromGeoRaster(geoRaster: any, length = 10): ColorbarData {
     const unit: string = "kg";
-    const output: string = "deposition";
+    const output: string = "concentration";
     let min: number;
     let max: number;
     let activity: number;
@@ -177,46 +174,39 @@ export class MapPlotsService {
     let colors: string[] = [];
     let scale: chroma.Scale;
 
+    activity = 1;
     if (unit == "becquerel"){
       activity = 3.215; // kBq in 1 ng of caesium-137
-      min = geoRaster.mins[0] * activity;
-      max = geoRaster.maxs[0] * activity;
-      ticks_depo = [0, 2, 4, 10, 20, 40, 100, 185, 555, 1480]; // ticks used in similar papers for deposition in kBq/m^2
-      ticks_mr = [0, 1, 2, 5, 10, 15, 25, 40, 100, 300]; // ticks used in similar papers for mixing ratio in kBq/m^3
-      ticks = ticks_depo;
-    } else {
-      min = 0.001;
-      max = geoRaster.maxs[0];
-      let step = Math.pow(max / min, 1 / (length - 1));
-      for (let i = 0; i < length; i++) {
-        let tickValue = min * Math.pow(step, i);
-        let precision;
+      // ticks_depo = [0, 2, 4, 10, 20, 40, 100, 185, 555, 1480]; // ticks used in similar papers for deposition in kBq/m^2
+      // ticks_mr = [0, 1, 2, 5, 10, 15, 25, 40, 100, 300]; // ticks used in similar papers for mixing ratio in kBq/m^3
+      // ticks = ticks_depo;
+    }
+    min = 0.001 * activity;
+    max = geoRaster.maxs[0] * activity;
+    let step = Math.pow(max / min, 1 / (length - 1));
+    for (let i = 0; i < length; i++) {
+      let tickValue = min * Math.pow(step, i);
+      let precision;
 
-        //higher numbers = less precision (digit after commas)
-        if (tickValue < 1) {
-          precision = 3;  
-        } else if (tickValue < 10) {
-          precision = 2;
-        } else if (tickValue < 100) {
-          precision = 1;
-        } else {
-          precision = 0;  
-        }
-
-        //round numbers but keep them as numbers
-        let tick = Math.round(tickValue * Math.pow(10, precision)) / Math.pow(10, precision);
-
-        ticks.push(tick);
+      //higher numbers = less precision (digit after commas)
+      if (tickValue < 1) {
+        precision = 3;  
+      } else if (tickValue < 10) {
+        precision = 2;
+      } else if (tickValue < 100) {
+        precision = 1;
+      } else {
+        precision = 0;  
       }
-      
+
+      //round numbers but keep them as numbers
+      let tick = Math.round(tickValue * Math.pow(10, precision)) / Math.pow(10, precision);
+
+      ticks.push(tick);
     }
-    if (output == "deposition"){
-      scale = this._colorScale_depo().domain(ticks.slice().reverse());
-    }
-    else {
-      scale = this._colorScale_mr().domain(ticks.slice().reverse());
-    }
-    for (let i = 0; i < length; i++){
+    scale = this._colorScale().domain(ticks.slice().reverse());
+
+    for (let i = 1; i < length; i++){
       colors.push(scale(ticks[i]).hex())
     }
     //colors.shift()
