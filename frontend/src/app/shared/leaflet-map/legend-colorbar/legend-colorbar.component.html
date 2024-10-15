@@ -5,6 +5,9 @@
       <span class="relative" *ngIf="formatedTicks">
         <span class="legend-ticks">{{ formatedTicks[i] }}</span>
       </span>
+      <span class="relative" *ngIf="i === formatedTicks.length - 2">
+        <span class="legend-ticks max-tick">{{ formatedTicks[i + 1] }}</span>
+      </span>
     </div>
   </div>
 
