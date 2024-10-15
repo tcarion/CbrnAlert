@@ -26,14 +26,25 @@ import { HomeComponent } from './home/home.component';
 import { LoginModule } from './login/login.module';
 import './core/config/custom-methods';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome'
+import { ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button'; // If you're using buttons in the popup
+import { MatDialogModule } from '@angular/material/dialog'; // If using MatDialog
+
 
 import { SnackbarModule } from './shared/ui/snackbar/snackbar.module';
 import { MapPlotsService } from './core/services/map-plots.service';
+import { GeometryPopupComponent } from './flexpart/run-simple/release-form/geometry-popup/geometry-popup.component';
+
+
 
 @NgModule({
     declarations: [
         AppComponent,
         HomeComponent,
+        GeometryPopupComponent
     ],
     imports: [
         BrowserModule,
@@ -45,6 +56,12 @@ import { MapPlotsService } from './core/services/map-plots.service';
         MatSidenavModule,
         MatListModule,
         MatExpansionModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatButtonModule,
+        MatDialogModule,
 
         CoreModule,
         SharedModule,

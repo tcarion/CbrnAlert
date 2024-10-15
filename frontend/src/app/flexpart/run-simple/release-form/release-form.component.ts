@@ -5,6 +5,10 @@ import { FormService } from 'src/app/core/services/form.service';
 import { DropdownQuestion } from 'src/app/shared/form/dropdown-question';
 import { QuestionBase } from 'src/app/shared/form/question-base';
 
+
+import { MatDialog } from '@angular/material/dialog';
+import { GeometryPopupComponent } from './geometry-popup/geometry-popup.component';
+
 const substanceNames = [{
   key: 24,
   value: 'Generic Air Tracer'
@@ -75,6 +79,8 @@ export class ReleaseFormComponent implements ControlValueAccessor, OnDestroy {
     end: new UntypedFormControl(new Date(), Validators.required)
   })
 
+  constructor(public dialog: MatDialog) {}
+
   createFormGroup(loc: {lon: number, lat: number}, start: Date, end: Date): UntypedFormGroup {
     return new UntypedFormGroup({
       location: new UntypedFormControl(loc, Validators.required),
@@ -93,6 +99,16 @@ export class ReleaseFormComponent implements ControlValueAccessor, OnDestroy {
   onTouched = () => { };
   onChangeSubs: Subscription[] = [];
 
+  onGeometryChange(event: any) {
+    const selectedValue = event.value;
+    if (selectedValue === 'Box') {
+      this.openDialog(); // Open the dialog if "Box" is selected
+    }
+  }
+
+  openDialog(): void {
+    this.dialog.open(GeometryPopupComponent);
+  }
 
   validate(control: AbstractControl): ValidationErrors | null {
     if (this.form.valid) {

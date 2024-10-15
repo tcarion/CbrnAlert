@@ -13,15 +13,18 @@
 
   <mat-form-field class="form-control-med" appearance="outline" floatLabel="never">
     <mat-label> Release geometry </mat-label>
-    <mat-select formControlName="geometryName">
+    <mat-select formControlName="geometryName" (selectionChange)="onGeometryChange($event)">
       <mat-option *ngFor="let option of geometryNames" [value]="option.value">
         {{ option.value }}
       </mat-option>
     </mat-select>
   </mat-form-field>
 
+  <!-- Popup that display Box input field -->
+   
+
   <mat-form-field class="form-control-short" appearance="outline" floatLabel="never">
-    <mat-label> Height [m] </mat-label>
+    <mat-label> Altitude [m] </mat-label>
     <input type="number" matInput formControlName="height" />
   </mat-form-field>
 
