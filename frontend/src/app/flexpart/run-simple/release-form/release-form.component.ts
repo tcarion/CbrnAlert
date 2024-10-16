@@ -14,6 +14,10 @@ const substanceNames = [{
   value: 'Generic Air Tracer'
 },
 {
+  key: 15,
+  value: 'Iodine-131'
+},
+{
   key: 16,
   value: 'Caesium-137'
 },
