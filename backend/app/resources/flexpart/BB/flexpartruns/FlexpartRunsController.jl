@@ -208,9 +208,6 @@ function run(fpsim::FlexpartSim, fprun::FlexpartRun)
 
   if _iscompleted(fpsim)
     output_dir = joinpath(fprun.path, "output")
-    nc_file = joinpath(output_dir, filter(x -> endswith(x, ".nc"), readdir(output_dir))[1])
-    add_total_depo(nc_file)
-    _round_dims(nc_file)
     FlexpartRuns.change_status!(fprun.name, STATUS_FINISHED)
   else
     @info "Flexpart run with name $(fprun.name) has failed"
@@ -237,48 +234,6 @@ function run(fpsim::FlexpartSim, fprun::FlexpartRun)
   return fprun
 end
 
-function add_total_depo(fp_output)
-  ds = Dataset(fp_output, "a")
-  if any(key -> occursin("WD_spec", key), keys(ds)) && any(key -> occursin("DD_spec", key), keys(ds))
-    wet_depo_keys = filter(v -> startswith(v, "WD_spec"), keys(ds))
-    dry_depo_keys = filter(v -> startswith(v, "DD_spec"), keys(ds))
-    for wet_key in wet_depo_keys
-      spec_num = wet_key[8:end]
-      dry_key = "DD_spec$spec_num"
-      total_key = "TD_spec$spec_num"
-      if !haskey(ds, total_key)
-        wet_depo = ds[wet_key]
-        dry_depo = ds[dry_key]
-        total_depo = wet_depo + dry_depo
-        defVar(ds, total_key, total_depo, dimnames(wet_depo), attrib=["units" => wet_depo.attrib["units"]])
-      else
-        nothing
-      end
-    end
-  else
-    nothing
-  end
-  close(ds)
-end
-
-function _round_dims(netcdf_file::AbstractString)
-  # Check if the file path is valid
-  if !ispath(netcdf_file)
-      throw(ArgumentError("The provided file path '$netcdf_file' is not valid."))
-  end
-  ds = Dataset(netcdf_file, "r")
-  # Extract dimensions
-  longitudes = Float64.(round.(ds["longitude"][:], digits=6))
-  latitudes = Float64.(round.(ds["latitude"][:], digits=6))
-  close(ds)
-
-  ds = Dataset(netcdf_file, "a")
-  # Round the coordinates
-  ds["longitude"][:] = longitudes
-  ds["latitude"][:] = latitudes
-  close(ds)
-end
-
 function get_runs()
   FlexpartRuns.delete_non_existing!()
   FlexpartRuns.delete_errored!()
@@ -300,7 +255,7 @@ function get_runs()
       newrun = FlexpartRuns.add_existing(joinpath(FLEXPART_RUNS_DIR, new_fpdir))
       output_dir = joinpath(FLEXPART_RUNS_DIR, new_fpdir, "output")
       nc_file = joinpath(output_dir, filter(x -> endswith(x, ".nc"), readdir(output_dir))[1])
-      add_total_depo(nc_file)
+      Flexpart.add_total_depo(nc_file)
       FlexpartRuns.assign_to_user!(current_user(), newrun)
       FlexpartOutputs.add!(newrun)
     end
