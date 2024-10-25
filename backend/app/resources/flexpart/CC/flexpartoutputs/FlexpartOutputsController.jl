@@ -10,7 +10,6 @@ using UUIDs
 
 using JSON3
 using Dates
-# using GeoJSON
 using GeoJSON: Feature, FeatureCollection, Polygon, write
 using GeoInterface
 using Rasters
@@ -91,7 +90,6 @@ function _to_dim(k, v)
 end
 
 function _slice(path::String, layerName, zdims)
-    # layerName = "spec001_mr"
     raster = Raster(path, name = layerName)
     args = [_to_dim(dname, val) for (dname, val) in zdims]
     view(raster, args...)
@@ -124,9 +122,9 @@ end
 function _respond_tiff(raster)
     filename = string(UUIDs.uuid4()) * ".tiff"
     tmpfile = joinpath(TMP_DIR_PATH, filename)
-    trimed = Rasters.trim(replace(raster, 0. => nothing))
+    trimmed = Rasters.trim(replace(raster, 0. => nothing))
     try
-        filename = Rasters.write(tmpfile, replace(trimed, nothing => 0.); options= Dict("COMPRESS"=>"DEFLATE"))
+        filename = Rasters.write(tmpfile, replace(trimmed, nothing => 0.); options= Dict("COMPRESS"=>"DEFLATE"))
         Genie.Router.serve_file(filename)
     catch
         rethrow()
