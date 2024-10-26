@@ -425,8 +425,8 @@ uuid = "928114cd-b949-50c5-8a7b-63c9d706fec3"
 version = "7.1.2+0"
 
 [[deps.Flexpart]]
-deps = ["DataStructures", "Dates", "DocStringExtensions", "FLEXPART_jll", "GRIB", "NetCDFF_jll", "Pkg"]
-git-tree-sha1 = "c7a7822373636dd594d2760d5dd83b0b4053c0f2"
+deps = ["DataStructures", "Dates", "DocStringExtensions", "FLEXPART_jll", "GRIB", "NCDatasets", "NetCDFF_jll", "Pkg"]
+git-tree-sha1 = "af9a009f382933cbdf456d4f7d16053b781912f2"
 repo-rev = "main"
 repo-url = "https://github.com/PrzPaul/Flexpart.jl"
 uuid = "fb362612-c2d8-4302-a9fd-a07f2890630f"
