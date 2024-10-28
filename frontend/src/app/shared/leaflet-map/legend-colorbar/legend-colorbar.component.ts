@@ -68,9 +68,9 @@ export class LegendColorbarComponent implements OnInit {
     if (layerName == 'ORO') {
       this.unit = 'm';
     } else if (/spec\d+_mr/.test(layerName)) {
-      this.unit = 'ng/m³';
+      this.unit = 'ng / m³';
     } else if (/D_spec/.test(layerName)) {
-      this.unit = 'pg/m²';
+      this.unit = 'ng / m²';
     } else {
       this.unit = 'No unit';
       console.log("why no units ? " + layerName)
