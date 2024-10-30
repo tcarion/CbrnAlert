@@ -120,7 +120,7 @@ export class MapPlotsService {
     let scale: chroma.Scale;
 
     activity = 1;
-    if (unit == "becquerel"){
+    if (unit == "bq"){
       activity = 3.215; // kBq in 1 ng of caesium-137
     }
     min = 0.001 * activity;
@@ -175,7 +175,7 @@ export class MapPlotsService {
     let scale: chroma.Scale;
 
     activity = 1;
-    if (unit == "becquerel"){
+    if (unit == "bq"){
       activity = 3.215; // kBq in 1 ng of caesium-137
       // ticks_depo = [0, 2, 4, 10, 20, 40, 100, 185, 555, 1480]; // ticks used in similar papers for deposition in kBq/m^2
       // ticks_mr = [0, 1, 2, 5, 10, 15, 25, 40, 100, 300]; // ticks used in similar papers for mixing ratio in kBq/m^3
@@ -215,6 +215,89 @@ export class MapPlotsService {
       ticks
     };
   }
+
+  // // For Plots of Radiological releases in Becquerels with fixed scale 
+  //
+  // addTiff(geoRaster: any) {
+  //   console.log(geoRaster)
+  //   // inspired from https://github.com/GeoTIFF/georaster-layer-for-leaflet-example/blob/master/examples/color-scale.html
+
+  //   const unit: string = "bq";
+  //   const output: string = "concentration";
+  //   let min: number;
+  //   let max: number;
+  //   let activity: number;
+  //   const length = 10;
+  //   let ticks: number[] = [];
+  //   let ticks_depo: number[] = [];
+  //   let ticks_mr: number[] = [];
+  //   let scale: chroma.Scale;
+
+  //   //activity = 3.215; // kBq in 1 ng of caesium-137
+  //   activity = 4630 // kBq in 1 ng of iodine-131
+  //   ticks_depo = [0, 2, 4, 10, 20, 40, 100, 185, 555, 1480]; // ticks used in similar papers for deposition in kBq/m^2
+  //   // ticks_mr = [0, 1, 2, 5, 10, 15, 25, 40, 100, 300]; // ticks used in similar papers for mixing ratio in kBq/m^3
+  //   ticks = ticks_depo;
+  //   scale = this._colorScale().domain(ticks.slice().reverse());
+
+  //   const imageryLayer = new GeoRasterLayer({
+  //     georaster: geoRaster,
+  //     pixelValuesToColorFn: pixelValues => {
+  //       let pixelValue = pixelValues[0] * activity; // there's just one band in this raster
+
+  //       if (pixelValue === 0) return "";
+  //       let colorIndex = ticks.length - 1;
+  //       for (let i = 1; i < ticks.length; i++) {
+  //         if (ticks[i-1] < pixelValue && pixelValue <= ticks[i]) {
+  //           colorIndex = i-1;
+  //           break;
+  //         }
+  //       }
+  //       let color = scale(ticks[colorIndex]).hex();
+  //       return color;
+  //     },
+  //     resolution: 256,
+  //     opacity: 0.8
+  //   });
+
+  //   return imageryLayer as typeof GeoRasterLayer;
+  // }
+
+  // _colorScale() {
+  //   return chroma.scale("Spectral");
+  // }
+  // // _colorScale_depo() {
+  // //   return chroma.scale(['800000', 'F0E68C']);
+  // // }
+
+  // _colorbarFromGeoRaster(geoRaster: any, length = 10): ColorbarData {
+  //   const unit: string = "bq";
+  //   const output: string = "concentration";
+  //   let min: number;
+  //   let max: number;
+  //   let activity: number;
+  //   let ticks: number[] = [];
+  //   let ticks_depo: number[] = [];
+  //   let ticks_mr: number[] = [];
+  //   let colors: string[] = [];
+  //   let scale: chroma.Scale;
+
+  //   //activity = 3.215; // kBq in 1 ng of caesium-137
+  //   activity = 4630 // kBq in 1 ng of iodine-131
+  //   ticks_depo = [0, 2, 4, 10, 20, 40, 100, 185, 555, 1480]; // ticks used in similar papers for deposition in kBq/m^2
+  //   // ticks_mr = [0, 1, 2, 5, 10, 15, 25, 40, 100, 300]; // ticks used in similar papers for mixing ratio in kBq/m^3
+  //   ticks = ticks_depo;
+  //   scale = this._colorScale().domain(ticks.slice().reverse());
+    
+  //   for (let i = 0; i < length; i++){
+  //     colors.push(scale(ticks[i]).hex())
+  //   }
+  //   //colors.shift()
+  //   return {
+  //     colors,
+  //     ticks
+  //   };
+  // }
 
   setColors(layers: LayerGroup, colorbar: ColorbarData) {
     layers.eachLayer((layer: any) => {
