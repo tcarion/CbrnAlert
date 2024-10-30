@@ -57,7 +57,7 @@ export class MapService {
       if (this.showRectangle) {
         this.updateRectangle(area, this.showRectangle);
       } else {
-        this.showRectangle = this.areaToRectangle(area, {interactive: false, fillOpacity: 0, color: 'green'})
+        this.showRectangle = this.areaToRectangle(area, {interactive: false, fillOpacity: 0, color: '#FE04C4'})
         this.showRectangle.addTo(this.leafletMap)
       }
     }
