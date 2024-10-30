@@ -104,7 +104,7 @@ function run_simple()
     push!(release_mass_per, m)
   end
   release_height = [payload["releases"][i]["height"] for i in 1:release_nb_substances]
-  release_particle = [Int(floor(Flexpart.MAX_PARTICLES*release_mass[i]/sum(release_mass))) for i in 1:release_nb_substances]  # Particle number per release proportional to the mass per release
+  release_particle = Int(floor(Flexpart.MAX_PARTICLES / release_nb_substances))
   release_length = [release_geometry[i] == "Box" ? payload["releases"][i]["length"] : 0 for i in 1:release_nb_substances]
   release_width = [release_geometry[i] == "Box" ? payload["releases"][i]["width"] : 0 for i in 1:release_nb_substances]
   release_boxHeight = [release_geometry[i] == "Box" ? payload["releases"][i]["boxHeight"] : 0 for i in 1:release_nb_substances]
@@ -154,7 +154,7 @@ function run_simple()
       :LAT2 => (center + EastNorth(0, release_width[i]/2)).c1[1],
       :Z1 => (release_height[i] - release_boxHeight[i]/2),
       :Z2 => (release_height[i] + release_boxHeight[i]/2),
-      :PARTS => release_particle[i],
+      :PARTS => release_particle,
       :MASS => release_mass_per[i],
       :COMMENT => "\"RELEASE $i\""
     )
