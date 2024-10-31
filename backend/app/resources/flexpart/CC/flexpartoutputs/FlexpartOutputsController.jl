@@ -13,6 +13,7 @@ using Dates
 using GeoJSON: Feature, FeatureCollection, Polygon, write
 using GeoInterface
 using Rasters
+using GeoFormatTypes
 using ArchGDAL
 using ColorSchemes
 using Colors
@@ -90,7 +91,7 @@ function _to_dim(k, v)
 end
 
 function _slice(path::String, layerName, zdims)
-    raster = Raster(path, name = layerName)
+    raster = Raster(path, name = layerName; crs = EPSG(4326))
     args = [_to_dim(dname, val) for (dname, val) in zdims]
     view(raster, args...)
 end
