@@ -276,6 +276,70 @@ export class FlexpartApiService extends BaseService {
   }
 
   /**
+   * Path part for operation flexpartInputsInputIdRename
+   */
+  static readonly FlexpartInputsInputIdRenamePath = '/flexpart/inputs/{inputId}/rename';
+
+  /**
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `flexpartInputsInputIdRename()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  flexpartInputsInputIdRename$Response(params: {
+    
+    /**
+     * The input ID
+     */
+    inputId: string;
+    newName: string;
+  },
+  context?: HttpContext
+
+): Observable<StrictHttpResponse<FlexpartInput>> {
+
+    const rb = new RequestBuilder(this.rootUrl, FlexpartApiService.FlexpartInputsInputIdRenamePath, 'put');
+    if (params) {
+      rb.path('inputId', params.inputId, {"style":"simple","explode":false});
+      rb.body({ name: params.newName }, 'application/json');  // The body will contain the new name
+    }
+  
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json',
+      context: context
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<FlexpartInput>;
+      })
+    );
+  }
+
+  /**
+   * This method provides access only to the response body.
+   * To access the full response (for headers, for example), `flexpartInputsInputIdRename$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  flexpartInputsInputIdRename(params: {
+    
+    /**
+     * The input ID
+     */
+    inputId: string;
+    newName: string;
+  },
+  context?: HttpContext
+
+): Observable<FlexpartInput> {
+
+    return this.flexpartInputsInputIdRename$Response(params,context).pipe(
+      map((r: StrictHttpResponse<FlexpartInput>) => r.body as FlexpartInput)
+    );
+  }
+
+  /**
    * Path part for operation flexpartRunPost
    */
   static readonly FlexpartRunPostPath = '/flexpart/run';
@@ -483,7 +547,7 @@ export class FlexpartApiService extends BaseService {
   /**
    * Path part for operation flexpartRunsRunIdDelete
    */
-  static readonly FlexpartRunsRunIdDeletePath = '/flexpart/runs/{runId}';
+  static readonly FlexpartRunsRunIdDeletePath = '/flexpart/runs/{runId}/delete';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
@@ -537,6 +601,70 @@ export class FlexpartApiService extends BaseService {
 ): Observable<FlexpartRun> {
 
     return this.flexpartRunsRunIdDelete$Response(params,context).pipe(
+      map((r: StrictHttpResponse<FlexpartRun>) => r.body as FlexpartRun)
+    );
+  }
+
+  /**
+   * Path part for operation flexpartRunsRunIdRename
+   */
+  static readonly FlexpartRunsRunIdRenamePath = '/flexpart/runs/{runId}/rename';
+
+  /**
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `flexpartRunsRunIdRename()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  flexpartRunsRunIdRename$Response(params: {
+    
+    /**
+     * The input ID
+     */
+    runId: string;
+    newName: string;
+  },
+  context?: HttpContext
+
+): Observable<StrictHttpResponse<FlexpartRun>> {
+
+    const rb = new RequestBuilder(this.rootUrl, FlexpartApiService.FlexpartRunsRunIdRenamePath, 'put');
+    if (params) {
+      rb.path('runId', params.runId, {"style":"simple","explode":false});
+      rb.body({ name: params.newName }, 'application/json');  // The body will contain the new name
+    }
+  
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json',
+      context: context
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<FlexpartRun>;
+      })
+    );
+  }
+
+  /**
+   * This method provides access only to the response body.
+   * To access the full response (for headers, for example), `flexpartRunsRunIdRename$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  flexpartRunsRunIdRename(params: {
+    
+    /**
+     * The input ID
+     */
+    runId: string;
+    newName: string;
+  },
+  context?: HttpContext
+
+): Observable<FlexpartRun> {
+
+    return this.flexpartRunsRunIdRename$Response(params,context).pipe(
       map((r: StrictHttpResponse<FlexpartRun>) => r.body as FlexpartRun)
     );
   }

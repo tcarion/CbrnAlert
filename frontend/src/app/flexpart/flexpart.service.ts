@@ -175,6 +175,32 @@ export class FlexpartService {
     // })
   }
 
+  renameInput(inputId: string, newName: string): Observable<FlexpartInput> {
+    return this.apiService.flexpartInputsInputIdRename({ inputId, newName }).pipe(
+      withLatestFrom(this.inputs$),
+      map(([apiRes, currentInputs]) => {
+        const updatedInputs = currentInputs.map(input =>
+          input.uuid === apiRes.uuid ? { ...input, name: apiRes.name } : input
+        );
+        this.inputsSubject.next(updatedInputs);
+        return apiRes;
+      })
+    );
+  }
+
+  renameRun(runId: string, newName: string): Observable<FlexpartRun> {
+    return this.apiService.flexpartRunsRunIdRename({ runId, newName }).pipe(
+      withLatestFrom(this.runs$),
+      map(([apiRes, currentRuns]) => {
+        const updatedRuns = currentRuns.map(run =>
+          run.uuid === apiRes.uuid ? { ...run, name: apiRes.name } : run
+        );
+        this.runsSubject.next(updatedRuns);
+        return apiRes;
+      })
+    );
+  }
+
   getRun(runId: string): Observable<FlexpartRun> {
     return this.apiService.flexpartRunsRunIdGet({ runId })
   }
