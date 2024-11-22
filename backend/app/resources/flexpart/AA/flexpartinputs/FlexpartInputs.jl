@@ -149,6 +149,15 @@ function clear!()
     end
 end
 
+function rename!(uuid::String, new_name::String)
+    entry = findone(FlexpartInput, uuid=uuid)
+    entry.name = new_name
+    new_path = joinpath(EXTRACTED_WEATHER_DATA_DIR, new_name)
+    mv(entry.path, new_path)
+    entry.path = new_path
+    entry |> save!
+end
+
 function delete_empty_output()
     entries = all(FlexpartInput)
     for entry in entries
