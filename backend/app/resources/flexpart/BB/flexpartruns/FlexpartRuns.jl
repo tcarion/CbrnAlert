@@ -119,6 +119,15 @@ function change_options!(name::String, fpoptions::FlexpartOption)
     entry |> save!
 end
 
+function rename!(uuid::String, new_name::String)
+    entry = findone(FlexpartRun, uuid=uuid)
+    entry.name = new_name
+    new_path = joinpath(FLEXPART_RUNS_DIR, new_name)
+    mv(entry.path, new_path)
+    entry.path = new_path
+    entry |> save!
+end
+
 function get_options(entry::FlexpartRun)
     JSON3.read(entry.options)
 end

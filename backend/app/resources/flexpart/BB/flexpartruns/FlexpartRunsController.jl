@@ -282,4 +282,12 @@ function delete_run()
   API.FlexpartRun(to_delete) |> json
 end
 
+function rename_run()
+  uuid = Genie.Router.params(:runId)
+  payload = Genie.Requests.jsonpayload()
+  new_name = payload["name"]
+  to_rename = FlexpartRuns.rename!(uuid, new_name)
+  return API.FlexpartRun(to_rename) |> json
+end
+
 end

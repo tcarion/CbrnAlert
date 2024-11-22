@@ -3,12 +3,15 @@
     <mat-option *ngIf="runs.length === 0" disabled>
       <span>No Flexpart run available - Run model first</span>
     </mat-option>
-    <mat-option *ngFor="let run of runs" [value]="run.uuid" (click)="onClick(run.uuid)">
+    <mat-option *ngFor="let run of runs" [value]="run.uuid" (click)="onClick(run)">
       <span>
-        {{ run.uuid }} - {{ run.date_created }}
+        {{ run.name }} - {{ run.date_created }}
       </span>
     </mat-option>
   </mat-select>
+  <button (click)="renameRun(value, name)">
+    <fa-icon icon="pen"></fa-icon>
+  </button>
   <button (click)="deleteRun(value)">
     <fa-icon icon="trash"></fa-icon>
   </button>

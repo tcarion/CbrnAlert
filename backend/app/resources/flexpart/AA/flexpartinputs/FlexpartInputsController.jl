@@ -161,4 +161,12 @@ function delete_input()
     return API.FlexpartInput(to_delete) |> json
 end
 
+function rename_input()
+    uuid = Genie.Router.params(:inputId)
+    payload = Genie.Requests.jsonpayload()
+    new_name = payload["name"]
+    to_rename = FlexpartInputs.rename!(uuid, new_name)
+    return API.FlexpartInput(to_rename) |> json
+end
+
 end
