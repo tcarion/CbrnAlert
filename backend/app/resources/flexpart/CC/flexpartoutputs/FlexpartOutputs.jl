@@ -50,7 +50,6 @@ function add!(output::AbstractOutputFile)
     else
         d[:isnested] = false
     end
-    @show output
 	rast = RasterStack(path)
 	meta = JSON3.write(Dict(Rasters.metadata(rast)))
     newentry = FlexpartOutput(
@@ -87,6 +86,13 @@ function assign_to_run!(uuid::String, fpoutput::FlexpartOutput)
 end
 
 assign_to_run!(fprun::FlexpartRun, fpoutput::FlexpartOutput) = Relationship!(fprun, fpoutput)
+
+function rename!(uuid::String, new_name::String)
+    renamed_run = findone(FlexpartRun, uuid=uuid)
+    related_output = related(renamed_run, FlexpartOutput)[1]
+    related_output.path = joinpath(renamed_run.path, "output", basename(related_output.path))
+    related_output |> save!
+end
 
 function delete_non_existing!()
     entries = all(FlexpartOutput)

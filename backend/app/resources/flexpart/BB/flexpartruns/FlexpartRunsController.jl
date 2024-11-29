@@ -287,6 +287,7 @@ function rename_run()
   payload = Genie.Requests.jsonpayload()
   new_name = payload["name"]
   to_rename = FlexpartRuns.rename!(uuid, new_name)
+  to_rename_output = FlexpartOutputs.rename!(uuid, new_name)
   return API.FlexpartRun(to_rename) |> json
 end
 
