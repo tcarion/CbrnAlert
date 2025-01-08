@@ -82,7 +82,7 @@ export class RunSimpleComponent implements OnInit, AfterViewInit, OnDestroy {
         // ? for some reason, the parent form is correctly updated for command. But for outgrid, we have
         // ? to manually set the fields or they won't be present by default on runForm.value.outgrid
         this.runForm.get('command')!.patchValue({start: this.start, end})
-        this.runForm.get('outgrid')!.patchValue({area: this.niceInput.area, heights: '100.0', gridres: 0.1})
+        this.runForm.get('outgrid')!.patchValue({area: this.niceInput.area})
       }
     });
 

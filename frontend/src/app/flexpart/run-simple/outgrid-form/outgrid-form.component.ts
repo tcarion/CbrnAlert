@@ -7,6 +7,7 @@ const gridResolutions = [
   0.05,
   0.01,
   0.005,
+  0.001
 ]
 
 @Component({
@@ -30,8 +31,8 @@ export class OutgridFormComponent implements ControlValueAccessor, OnDestroy {
 
   form = new UntypedFormGroup({
     area: new UntypedFormControl('', Validators.required),
-    gridres: new UntypedFormControl(gridResolutions[0], Validators.required),
-    heights: new UntypedFormControl('100.0', Validators.required)
+    gridres: new UntypedFormControl(gridResolutions[2], Validators.required),
+    heights: new UntypedFormControl('1.0', Validators.required)
   })
 
   gridResolutions = gridResolutions;

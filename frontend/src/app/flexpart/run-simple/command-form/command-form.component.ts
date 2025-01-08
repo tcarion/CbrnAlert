@@ -15,8 +15,13 @@ const timeSteps = [{
 },
 {
   key: 1*60*60,
-  value: '1 hours'
+  value: '1 hour'
+},
+{
+  key: 2*60*60,
+  value: '2 hours'
 }]
+
 const outputTypes = [
   {
   key: 1,
@@ -64,7 +69,7 @@ export class CommandFormComponent implements ControlValueAccessor, OnDestroy {
   form = new UntypedFormGroup({
     start: new UntypedFormControl(new Date(), Validators.required),
     end: new UntypedFormControl(new Date(), Validators.required),
-    timeStep: new UntypedFormControl(timeSteps[0].key, Validators.required),
+    timeStep: new UntypedFormControl(timeSteps[2].key, Validators.required),
     outputType: new UntypedFormControl(outputTypes[0].key, Validators.required),
     // nstep: new FormControl(0, Validators.required),
   })
