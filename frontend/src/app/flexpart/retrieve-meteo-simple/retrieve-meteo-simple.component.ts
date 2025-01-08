@@ -6,9 +6,9 @@ import { NotificationService } from 'src/app/core/services/notification.service'
 import { FlexpartService } from '../flexpart.service';
 
 const gridResolutions = [
-  1.,
   0.5,
-  0.2
+  0.2,
+  0.1
 ]
 
 const timeSteps = [{
