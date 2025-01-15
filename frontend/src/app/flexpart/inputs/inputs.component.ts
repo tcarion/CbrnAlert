@@ -1,5 +1,5 @@
 import { MapAction } from 'src/app/core/state/map.state';
-import { Component, OnInit, ChangeDetectionStrategy, Output, EventEmitter, OnDestroy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, Output, EventEmitter, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { Store } from '@ngxs/store';
 import { Observable, filter, take } from 'rxjs';
 import { FlexpartInput } from 'src/app/core/api/models/flexpart-input';
@@ -19,19 +19,24 @@ export class InputsComponent implements OnInit, OnDestroy {
     public flexpartService: FlexpartService,
     private store: Store,
     private dialogService: DialogService,
+    private changeDetectorRef: ChangeDetectorRef,
     public library: FaIconLibrary
   ) { 
     library.addIcons( faPen ) 
   }
 
-  inputs$ = this.flexpartService.inputs$;
+  inputs$: Observable<FlexpartInput[] | null>;
   value: string;
   name: string;
   pen = faPen;
+  isLoading = true;
   @Output() selectedIdEvent = new EventEmitter<string>();
 
-  ngOnInit(): void {
-    this.flexpartService.updateInputsFromServer();
+  async ngOnInit(): Promise<void> {
+    this.inputs$ = this.flexpartService.inputs$
+    await this.flexpartService.updateInputsFromServer();
+    this.isLoading = false;
+    this.changeDetectorRef.detectChanges();
   }
 
   onClick(input:FlexpartInput) {

@@ -1,5 +1,5 @@
 import { FlexpartService } from 'src/app/flexpart/flexpart.service';
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { FlexpartOutput } from 'src/app/core/api/models';
 import { map, switchMap, tap } from 'rxjs/operators';
@@ -17,6 +17,7 @@ export class VariableSelectionComponent implements OnInit {
     spatialLayersList: string[] = [];
     selectedCategory: string | null = null;
     selectedLayer: string | null = null;
+    isLoading = true;
     categories = [
         { id: 'mr', name: 'Air Concentration' },
         { id: 'WD', name: 'Wet Deposition' },
@@ -30,12 +31,12 @@ export class VariableSelectionComponent implements OnInit {
     @Input()
     get outputId() {return this._outputId}
     set outputId(v:string) {
-      this.spatialLayers$ = this.flexpartService.getOutput(v).pipe(
-        switchMap(res => {
-            return this.flexpartService.getSpatialLayers(res.uuid)
-        })
-      )
-      this._outputId = v
+        this.spatialLayers$ = this.flexpartService.getOutput(v).pipe(
+            switchMap(res => {
+                return this.flexpartService.getSpatialLayers(res.uuid)
+            })
+        )
+        this._outputId = v
     }
 
     _outputId = ''
@@ -43,19 +44,21 @@ export class VariableSelectionComponent implements OnInit {
     constructor(
         private flexpartService: FlexpartService,
         private route: ActivatedRoute,
+        private changeDetectorRef: ChangeDetectorRef
     ) {
     }
 
     ngOnInit(): void {
         this.spatialLayers$.subscribe(layers => {
             this.spatialLayersList = layers;
+            this.isLoading = false;
+            this.changeDetectorRef.detectChanges();
         });
     }
 
     onClick(e: string) {
-    console.log(`clicked ${e}`);
-      this.selectedIdEvent.emit(e);
-      this.value = e;
+        this.selectedIdEvent.emit(e);
+        this.value = e;
     }
 
     onCategoryChange() {

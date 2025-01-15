@@ -1,6 +1,6 @@
 import { SliceResponseType } from './flexpart-plot-data';
 import { FlexpartRetrieveSimple } from './../core/api/models/flexpart-retrieve-simple';
-import { BehaviorSubject, combineLatest, Observable, of, Subject, throwError } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of, Subject, throwError, firstValueFrom } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { FlexpartResult } from 'src/app/flexpart/flexpart-result';
 import { FlexpartOptionsSimple, FlexpartOutput, FlexpartRun } from 'src/app/core/api/models';
@@ -124,16 +124,24 @@ export class FlexpartService {
     return this.apiService.flexpartRunsGet();
   }
 
-  updateRunsFromServer() {
-    this.getRuns().pipe(map(runs => {
-      this.runsSubject.next(runs);
-    })).subscribe();
+  updateRunsFromServer(): Promise<void> {
+    return firstValueFrom(
+      this.getRuns().pipe(
+        map(runs => {
+          this.runsSubject.next(runs);
+        })
+      )
+    );
   }
 
-  updateInputsFromServer() {
-    this.getInputs().pipe(map(inputs => {
-      this.inputsSubject.next(inputs);
-    })).subscribe();
+  updateInputsFromServer(): Promise<void> {
+    return firstValueFrom(
+      this.getInputs().pipe(
+        map(inputs => {
+          this.inputsSubject.next(inputs);
+        })
+      )
+    );
   }
 
   deleteInput(inputId: string) {
@@ -252,28 +260,30 @@ export class FlexpartService {
     })
   }
 
-  getDimsQuestions(outputId: string, layer: string) {
-    const questions: QuestionBase<any>[] = []
-    this.getZDims(outputId, layer).subscribe(dims => {
-      console.log(dims)
-      for (const [key, values] of Object.entries(dims as { [k: string]: string[] | number[] })) {
-        const kvs = values.map((v) => {
-          return { key: v as string, value: v as string }
-        })
-        questions.push(new DropdownQuestion({
-          key: key,
-          label: key,
-          options: kvs,
-          required: true,
-          value: values[0],
-          // order: 3
-        }))
-        // this.formGroup.addControl(key, new FormControl(values[0]))
-        // this.dimNames.push(key);
-        // this.dimValues.push(values);
-      }
-    })
-    return of(questions);
+  getDimsQuestions(outputId: string, layer: string): Observable<QuestionBase<any>[]> {
+    const questions: QuestionBase<any>[] = [];
+    return this.getZDims(outputId, layer).pipe(
+      switchMap(dims => {
+        console.log(dims)
+        for (const [key, values] of Object.entries(dims as { [k: string]: string[] | number[] })) {
+          const kvs = values.map((v) => {
+            return { key: v as string, value: v as string }
+          })
+          questions.push(new DropdownQuestion({
+            key: key,
+            label: key,
+            options: kvs,
+            required: true,
+            value: values[0],
+            // order: 3
+          }))
+          // this.formGroup.addControl(key, new FormControl(values[0]))
+          // this.dimNames.push(key);
+          // this.dimValues.push(values);
+        }
+        return of(questions);
+      })
+    );
   }
   meteoDataRetrieval(payload: any) {
     // const notifTitle = this.notificationService.addNotif('Met data retrieval', 'metDataRequest');

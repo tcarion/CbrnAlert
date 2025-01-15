@@ -1,6 +1,6 @@
 import { filter, Observable, Subject, Subscription, take } from 'rxjs';
 import { DatePipe } from '@angular/common';
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { FlexpartService } from '../flexpart.service';
 import { Store } from '@ngxs/store';
 import { FlexpartRun } from 'src/app/core/api/models';
@@ -19,19 +19,24 @@ export class FlexpartPlotComponent implements OnInit {
     public flexpartService: FlexpartService,
     private store: Store,
     private dialogService: DialogService,
+    private changeDetectorRef: ChangeDetectorRef,
     public library: FaIconLibrary
   ) { 
     library.addIcons( faPen ) 
   }
 
-  runs$ = this.flexpartService.runs$;
+  runs$: Observable<FlexpartRun[] | null>;
   value: string;
   name: string;
   pen = faPen;
+  isLoading = true;
   @Output() selectedIdEvent = new EventEmitter<string>();
 
-  ngOnInit(): void {
-    this.flexpartService.updateRunsFromServer();
+  async ngOnInit(): Promise<void> {
+    this.runs$ = this.flexpartService.runs$
+    await this.flexpartService.updateRunsFromServer();
+    this.isLoading = false;
+    this.changeDetectorRef.detectChanges();
   }
 
   onClick(run:FlexpartRun) {

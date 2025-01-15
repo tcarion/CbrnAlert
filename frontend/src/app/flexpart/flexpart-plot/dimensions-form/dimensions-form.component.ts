@@ -8,7 +8,7 @@ import { DropdownQuestion } from 'src/app/shared/form/dropdown-question';
 import { QuestionBase } from 'src/app/shared/form/question-base';
 import { FlexpartService } from '../../flexpart.service';
 import { Store } from '@ngxs/store';
-import { switchMap } from 'rxjs/operators';
+import { switchMap, tap } from 'rxjs/operators';
 import { SliceResponseType } from 'src/app/flexpart/flexpart-plot-data';
 
 @Component({
@@ -22,10 +22,8 @@ export class DimensionsFormComponent implements OnChanges {
   @Input() layerName: string
 
   formGroup: UntypedFormGroup;
-
   questions$: Observable<QuestionBase<any>[]>;
-
-  dimForm: UntypedFormGroup;
+  isLoading = true;
 
   get responseFormat() {
     return this.flexpartService.selectedSliceType;
@@ -37,13 +35,6 @@ export class DimensionsFormComponent implements OnChanges {
     private store: Store
   ) {
     this.formGroup = new UntypedFormGroup({});
-    // this.questions$ = this.route.paramMap.pipe(
-    //     switchMap(params => {
-    //         const outputId = params.get('outputId');
-    //         const layerName = params.get('layerName');
-    //         return this.flexpartService.getDimsQuestions(outputId as string, layerName as string);
-    //     })
-    // )
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -52,14 +43,15 @@ export class DimensionsFormComponent implements OnChanges {
     const newLayer = changes["layerName"] ? changes["layerName"].currentValue : this.layerName;
     if (newOutId && newLayer) {
       this.formGroup = new UntypedFormGroup({});
-      this.questions$ = this.flexpartService.getDimsQuestions(newOutId, newLayer);
+      this.questions$ = this.flexpartService.getDimsQuestions(newOutId, newLayer).pipe(
+        tap((questions) => {
+          this.isLoading = false;
+        })
+      );
     }
   }
 
   onSubmit() {
-    // const params = this.route.snapshot.paramMap;
-    // const outputId = params.get('outputId');
-    // const layerName = params.get('layerName');
     const outputId = this.outputId;
     const layerName = this.layerName;
 
