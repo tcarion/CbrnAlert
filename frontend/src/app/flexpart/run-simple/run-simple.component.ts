@@ -82,7 +82,7 @@ export class RunSimpleComponent implements OnInit, AfterViewInit, OnDestroy {
         // ? for some reason, the parent form is correctly updated for command. But for outgrid, we have
         // ? to manually set the fields or they won't be present by default on runForm.value.outgrid
         this.runForm.get('command')!.patchValue({start: this.start, end})
-        this.runForm.get('outgrid')!.patchValue({area: this.niceInput.area})
+        this.runForm.get('outgrid')!.patchValue({area: this.niceInput.area, heights: '1.0', gridres: 0.01})
       }
     });
 
@@ -111,8 +111,7 @@ export class RunSimpleComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   submit(form: UntypedFormGroup) {
-    this.runForm.removeControl('numberOfSubstances');
-    let formVals = JSON.parse(JSON.stringify(this.runForm.value))
+    let formVals = JSON.parse(JSON.stringify(form.value))
     formVals.outgrid.heights = (formVals.outgrid.heights as string).split(',').map( h  => { return parseFloat(h.trim()) } )
     this.flexpartService.postRunSimple(formVals, this.input!.uuid).subscribe( res => {
       alert('Flexpart Run has completed!')
