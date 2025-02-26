@@ -42,15 +42,18 @@ function data_retrieval()
   area = round_area(_area(payload["area"]))
   gridres = payload["gridres"]
   time_step = convert(Int64, payload["timeStep"] / 3600)
+  dataset_type = payload["datasetType"]
 
-  newinput, fedir = FlexpartInputs.create()
+  newinput, fedir = dataset_type == "ensemble" ? FlexpartInputs.create(ensemble = true) : FlexpartInputs.create()
   FlexpartInputs.assign_to_user!(current_user(), newinput)
   fcontrol = FeControl(fedir)
   fcontrol[:GRID] = gridres
   fcontrol[:REQUEST] = 0
-  fcontrol[:ACCTYPE] = "FC"
   set_area!(fcontrol, area)
   set_steps!(fcontrol, start_date, end_date, time_step)
+  if dataset_type == "ensemble"
+    set_ensemble_rest!(fcontrol)
+  end
 
   FlexExtract.save(fcontrol)
 

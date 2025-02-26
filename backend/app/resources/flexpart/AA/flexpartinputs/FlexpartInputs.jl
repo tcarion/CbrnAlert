@@ -71,10 +71,10 @@ API.FlexpartInput(x::FlexpartInput) = API.FlexpartInput(;
     control = Dict{String, String}([string(k) => string(v) for (k,v) in get_control(x)])
 )
 
-function create()
+function create(; ensemble = false)
     uuid = string(UUIDs.uuid4())
     path = joinpath(EXTRACTED_WEATHER_DATA_DIR, uuid)
-    fedir = FlexExtract.create(path)
+    fedir = ensemble ? FlexExtract.create(path; control = FlexExtract.FLEX_ENSEMBLE_CONTROL) : FlexExtract.create(path)
     default_control = FeControl(fedir)
     newentry = FlexpartInput(
         uuid=uuid,

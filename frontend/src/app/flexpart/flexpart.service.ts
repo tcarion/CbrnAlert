@@ -72,7 +72,8 @@ export class FlexpartService {
     const control = input.control;
     const startDate = control['START_DATE'];
     const hour = control['TIME'].split(" ")[0];
-    return dayjs(startDate + 'T' + hour).toDate();
+    const step = parseInt(control['STEP'].split(" ")[0], 10);
+    return dayjs(startDate + 'T' + hour).add(step, 'hour').toDate();
   }
 
   getInputEnd(input:FlexpartInput) {

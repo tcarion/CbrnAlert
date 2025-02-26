@@ -42,6 +42,7 @@ export class RetrieveMeteoSimpleComponent {
     area: new UntypedFormControl('', Validators.required),
     timeStep: new UntypedFormControl(timeSteps[0].key, Validators.required),
     gridres: new UntypedFormControl(gridResolutions[0], Validators.required),
+    datasetType: new UntypedFormControl('', Validators.required) 
   })
 
   gridResolutions = gridResolutions;

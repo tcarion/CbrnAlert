@@ -1,0 +1,15 @@
+.form-container {
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 75vw;
+    padding: 20px;
+    gap: 10px;
+    align-items: center;
+}
+
+.dataset-selection {
+    padding: 0 50px;
+}
+.dataset-selection span {
+    margin-right: 12px;
+}
