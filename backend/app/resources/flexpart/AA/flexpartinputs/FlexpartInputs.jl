@@ -169,6 +169,14 @@ function delete_empty_output()
     end
 end
 
+function delete_errored!()
+    entries = all(FlexpartInput)
+    errored = filter(x -> x.status == STATUS_ERRORED, entries)
+    for entry in errored
+        SearchLight.delete(entry)
+    end
+end
+
 function delete_non_existing!()
     entries = all(FlexpartInput)
     for entry in entries

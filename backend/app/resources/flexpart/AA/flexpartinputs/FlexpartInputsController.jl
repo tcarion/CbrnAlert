@@ -25,17 +25,12 @@ struct MarsDataNotAvailableError <: Exception end
 struct UnknownMarsError <: Exception end
 
 function _check_mars_errors(filepath)
-  lines = readlines(filepath)
   haserror = false
-  for line in lines
-      if occursin("DATA_NOT_YET_AVAILABLE", line)
-          throw(MarsDataNotAvailableError())
-      end
-      if occursin("ERROR", line)
-          haserror = true
-      end
+  any(occursin.("DATA_NOT_YET_AVAILABLE", readlines(filepath))) && throw(MarsDataNotAvailableError())
+  if !any(occursin.("DONE!", readlines(filepath)))
+    haserror = true
+    throw(UnknownMarsError())
   end
-  haserror && throw(UnknownMarsError())
   return haserror
 end
 
@@ -59,7 +54,7 @@ function data_retrieval()
 
   FlexExtract.save(fcontrol)
 
-  log_file_path = joinpath(fedir.path, "output_log.log")
+  log_file_path = joinpath(fedir.path, "output.log")
   FlexpartInputs.change_control!(newinput, fcontrol)
   FlexpartInputs.change_status!(newinput, STATUS_ONGOING)
   open(log_file_path, "w") do logf
@@ -140,16 +135,9 @@ end
 
 function get_inputs()
     FlexpartInputs.delete_non_existing!()
+    FlexpartInputs.delete_errored!()
     fpinputs = user_related(FlexpartInput)
     filter!(FlexpartInputs.isfinished, fpinputs)
-    fpinputs_names = [input.name for input in fpinputs]
-    if sort(readdir(EXTRACTED_WEATHER_DATA_DIR)) != sort(fpinputs_names)
-        for new_fedir in setdiff(readdir(EXTRACTED_WEATHER_DATA_DIR), fpinputs_names)
-            newinput = FlexpartInputs.add_existing(joinpath(EXTRACTED_WEATHER_DATA_DIR, new_fedir))
-            FlexpartInputs.assign_to_user!(current_user(), newinput)
-        end
-    end
-    fpinputs = user_related(FlexpartInput)
     response = Dict.(fpinputs)
     return response |> json
 end
