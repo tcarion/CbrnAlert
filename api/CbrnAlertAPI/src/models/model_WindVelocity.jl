@@ -8,8 +8,8 @@
         azimuth=nothing,
     )
 
-    - speed::Float64 : Wind speed - units [m/s]
-    - azimuth::Float64 : angle from North - units [m/s]
+    - speed::Float64 : Wind speed - unit [m/s]
+    - azimuth::Float64 : angle from North - unit [m/s]
 """
 Base.@kwdef mutable struct WindVelocity <: OpenAPI.APIModel
     speed::Union{Nothing, Float64} = nothing

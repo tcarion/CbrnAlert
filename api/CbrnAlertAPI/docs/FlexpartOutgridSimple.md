@@ -5,7 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **area** | [***GeoRectangle**](GeoRectangle.md) |  | [default to nothing]
-**gridres** | **Float64** | units: [°] | [default to 1.0]
+**gridres** | **Float64** | unit: [°] | [default to 0.01]
 **heights** | **Vector{Float64}** |  | [default to nothing]
 
 

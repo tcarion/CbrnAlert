@@ -1,6 +1,6 @@
 # Atp45Api
 
-All URIs are relative to *http://localhost:8000/api*
+All URIs are relative to *http://localhost:4200/api*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -42,7 +42,7 @@ No authorization required
 
 
 
-Get the decision tree discriminating between the ATP-45 cases.
+Get the decision tree branching the different ATP-45 options.
 
 ### Required Parameters
 This endpoint does not need any parameter.

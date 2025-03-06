@@ -115,6 +115,36 @@ function flexpart_inputs_input_id_get_invoke(impl; post_invoke=nothing)
     end
 end
 
+function flexpart_inputs_input_id_put_read(handler)
+    function flexpart_inputs_input_id_put_read_handler(req::HTTP.Request)
+        openapi_params = Dict{String,Any}()
+        path_params = HTTP.getparams(req)
+        openapi_params["inputId"] = OpenAPI.Servers.to_param(String, path_params, "inputId", required=true, )
+        query_params = HTTP.queryparams(URIs.URI(req.target))
+        openapi_params["newName"] = OpenAPI.Servers.to_param(String, query_params, "newName", required=true, )
+        req.context[:openapi_params] = openapi_params
+
+        return handler(req)
+    end
+end
+
+function flexpart_inputs_input_id_put_validate(handler)
+    function flexpart_inputs_input_id_put_validate_handler(req::HTTP.Request)
+        openapi_params = req.context[:openapi_params]
+        
+        return handler(req)
+    end
+end
+
+function flexpart_inputs_input_id_put_invoke(impl; post_invoke=nothing)
+    function flexpart_inputs_input_id_put_invoke_handler(req::HTTP.Request)
+        openapi_params = req.context[:openapi_params]
+        ret = impl.flexpart_inputs_input_id_put(req::HTTP.Request, openapi_params["inputId"], openapi_params["newName"];)
+        resp = OpenAPI.Servers.server_response(ret)
+        return (post_invoke === nothing) ? resp : post_invoke(req, resp)
+    end
+end
+
 function flexpart_outputs_output_id_dimensions_get_read(handler)
     function flexpart_outputs_output_id_dimensions_get_read_handler(req::HTTP.Request)
         openapi_params = Dict{String,Any}()
@@ -379,12 +409,43 @@ function flexpart_runs_run_id_outputs_get_invoke(impl; post_invoke=nothing)
     end
 end
 
+function flexpart_runs_run_id_put_read(handler)
+    function flexpart_runs_run_id_put_read_handler(req::HTTP.Request)
+        openapi_params = Dict{String,Any}()
+        path_params = HTTP.getparams(req)
+        openapi_params["runId"] = OpenAPI.Servers.to_param(String, path_params, "runId", required=true, )
+        query_params = HTTP.queryparams(URIs.URI(req.target))
+        openapi_params["newName"] = OpenAPI.Servers.to_param(String, query_params, "newName", required=true, )
+        req.context[:openapi_params] = openapi_params
+
+        return handler(req)
+    end
+end
+
+function flexpart_runs_run_id_put_validate(handler)
+    function flexpart_runs_run_id_put_validate_handler(req::HTTP.Request)
+        openapi_params = req.context[:openapi_params]
+        
+        return handler(req)
+    end
+end
+
+function flexpart_runs_run_id_put_invoke(impl; post_invoke=nothing)
+    function flexpart_runs_run_id_put_invoke_handler(req::HTTP.Request)
+        openapi_params = req.context[:openapi_params]
+        ret = impl.flexpart_runs_run_id_put(req::HTTP.Request, openapi_params["runId"], openapi_params["newName"];)
+        resp = OpenAPI.Servers.server_response(ret)
+        return (post_invoke === nothing) ? resp : post_invoke(req, resp)
+    end
+end
+
 
 function registerFlexpartApi(router::HTTP.Router, impl; path_prefix::String="", optional_middlewares...)
     HTTP.register!(router, "POST", path_prefix * "/flexpart/input", OpenAPI.Servers.middleware(impl, flexpart_input_post_read, flexpart_input_post_validate, flexpart_input_post_invoke; optional_middlewares...))
     HTTP.register!(router, "GET", path_prefix * "/flexpart/inputs", OpenAPI.Servers.middleware(impl, flexpart_inputs_get_read, flexpart_inputs_get_validate, flexpart_inputs_get_invoke; optional_middlewares...))
     HTTP.register!(router, "DELETE", path_prefix * "/flexpart/inputs/{inputId}", OpenAPI.Servers.middleware(impl, flexpart_inputs_input_id_delete_read, flexpart_inputs_input_id_delete_validate, flexpart_inputs_input_id_delete_invoke; optional_middlewares...))
     HTTP.register!(router, "GET", path_prefix * "/flexpart/inputs/{inputId}", OpenAPI.Servers.middleware(impl, flexpart_inputs_input_id_get_read, flexpart_inputs_input_id_get_validate, flexpart_inputs_input_id_get_invoke; optional_middlewares...))
+    HTTP.register!(router, "PUT", path_prefix * "/flexpart/inputs/{inputId}", OpenAPI.Servers.middleware(impl, flexpart_inputs_input_id_put_read, flexpart_inputs_input_id_put_validate, flexpart_inputs_input_id_put_invoke; optional_middlewares...))
     HTTP.register!(router, "GET", path_prefix * "/flexpart/outputs/{outputId}/dimensions", OpenAPI.Servers.middleware(impl, flexpart_outputs_output_id_dimensions_get_read, flexpart_outputs_output_id_dimensions_get_validate, flexpart_outputs_output_id_dimensions_get_invoke; optional_middlewares...))
     HTTP.register!(router, "GET", path_prefix * "/flexpart/outputs/{outputId}", OpenAPI.Servers.middleware(impl, flexpart_outputs_output_id_get_read, flexpart_outputs_output_id_get_validate, flexpart_outputs_output_id_get_invoke; optional_middlewares...))
     HTTP.register!(router, "GET", path_prefix * "/flexpart/outputs/{outputId}/layers", OpenAPI.Servers.middleware(impl, flexpart_outputs_output_id_layers_get_read, flexpart_outputs_output_id_layers_get_validate, flexpart_outputs_output_id_layers_get_invoke; optional_middlewares...))
@@ -394,5 +455,6 @@ function registerFlexpartApi(router::HTTP.Router, impl; path_prefix::String="", 
     HTTP.register!(router, "DELETE", path_prefix * "/flexpart/runs/{runId}", OpenAPI.Servers.middleware(impl, flexpart_runs_run_id_delete_read, flexpart_runs_run_id_delete_validate, flexpart_runs_run_id_delete_invoke; optional_middlewares...))
     HTTP.register!(router, "GET", path_prefix * "/flexpart/runs/{runId}", OpenAPI.Servers.middleware(impl, flexpart_runs_run_id_get_read, flexpart_runs_run_id_get_validate, flexpart_runs_run_id_get_invoke; optional_middlewares...))
     HTTP.register!(router, "GET", path_prefix * "/flexpart/runs/{runId}/outputs", OpenAPI.Servers.middleware(impl, flexpart_runs_run_id_outputs_get_read, flexpart_runs_run_id_outputs_get_validate, flexpart_runs_run_id_outputs_get_invoke; optional_middlewares...))
+    HTTP.register!(router, "PUT", path_prefix * "/flexpart/runs/{runId}", OpenAPI.Servers.middleware(impl, flexpart_runs_run_id_put_read, flexpart_runs_run_id_put_validate, flexpart_runs_run_id_put_invoke; optional_middlewares...))
     return router
 end

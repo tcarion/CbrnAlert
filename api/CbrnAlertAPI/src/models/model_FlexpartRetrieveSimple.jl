@@ -10,13 +10,15 @@
         var"end"=nothing,
         gridres=1.0,
         timeStep=3600,
+        datasetType=nothing,
     )
 
     - area::GeoRectangle
     - start::ZonedDateTime
     - var"end"::ZonedDateTime
-    - gridres::Float64 : units: [°]
-    - timeStep::Float64 : units: [s]
+    - gridres::Float64 : unit: [°]
+    - timeStep::Float64 : unit: [s]
+    - datasetType::String : button to select either \&quot;deterministic\&quot; or \&quot;ensemble\&quot; data
 """
 Base.@kwdef mutable struct FlexpartRetrieveSimple <: OpenAPI.APIModel
     area = nothing # spec type: Union{ Nothing, GeoRectangle }
@@ -24,18 +26,20 @@ Base.@kwdef mutable struct FlexpartRetrieveSimple <: OpenAPI.APIModel
     var"end"::Union{Nothing, ZonedDateTime} = nothing
     gridres::Union{Nothing, Float64} = 1.0
     timeStep::Union{Nothing, Float64} = 3600
+    datasetType::Union{Nothing, String} = nothing
 
-    function FlexpartRetrieveSimple(area, start, var"end", gridres, timeStep, )
+    function FlexpartRetrieveSimple(area, start, var"end", gridres, timeStep, datasetType, )
         OpenAPI.validate_property(FlexpartRetrieveSimple, Symbol("area"), area)
         OpenAPI.validate_property(FlexpartRetrieveSimple, Symbol("start"), start)
         OpenAPI.validate_property(FlexpartRetrieveSimple, Symbol("end"), var"end")
         OpenAPI.validate_property(FlexpartRetrieveSimple, Symbol("gridres"), gridres)
         OpenAPI.validate_property(FlexpartRetrieveSimple, Symbol("timeStep"), timeStep)
-        return new(area, start, var"end", gridres, timeStep, )
+        OpenAPI.validate_property(FlexpartRetrieveSimple, Symbol("datasetType"), datasetType)
+        return new(area, start, var"end", gridres, timeStep, datasetType, )
     end
 end # type FlexpartRetrieveSimple
 
-const _property_types_FlexpartRetrieveSimple = Dict{Symbol,String}(Symbol("area")=>"GeoRectangle", Symbol("start")=>"ZonedDateTime", Symbol("end")=>"ZonedDateTime", Symbol("gridres")=>"Float64", Symbol("timeStep")=>"Float64", )
+const _property_types_FlexpartRetrieveSimple = Dict{Symbol,String}(Symbol("area")=>"GeoRectangle", Symbol("start")=>"ZonedDateTime", Symbol("end")=>"ZonedDateTime", Symbol("gridres")=>"Float64", Symbol("timeStep")=>"Float64", Symbol("datasetType")=>"String", )
 OpenAPI.property_type(::Type{ FlexpartRetrieveSimple }, name::Symbol) = Union{Nothing,eval(Base.Meta.parse(_property_types_FlexpartRetrieveSimple[name]))}
 
 function check_required(o::FlexpartRetrieveSimple)
@@ -44,6 +48,7 @@ function check_required(o::FlexpartRetrieveSimple)
     o.var"end" === nothing && (return false)
     o.gridres === nothing && (return false)
     o.timeStep === nothing && (return false)
+    o.datasetType === nothing && (return false)
     true
 end
 

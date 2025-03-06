@@ -1,70 +1,70 @@
----
 openapi: 3.0.2
 info:
-  title: CbrnAlert API
-  description: "API for the preparing, running and getting the results of atmospheric dispersion models in case of CBRN-type incidents."
   contact:
-    name: Tristan Carion
-    email: tristan.carion@mil.be
-  version: "1.0"
+    email: paullouisperez@gmail.com
+    name: Paul Perez
+  description: API for the computation and visualization of atmospheric dispersion
+    simulations of CBRN agents.
+  title: CbrnAlert API
+  version: "2.0"
 externalDocs:
   description: Find more info here
   url: /docs
 servers:
-- url: http://localhost:8000/api
-  description: Dev Server
-- url: https://cbrnalert.rma.ac.be/api
-  description: Production server
+- description: Dev Server
+  url: http://localhost:4200/api
+- description: Production server
+  url: https://cbrnalert.rma.ac.be/api
 paths:
   /login:
     post:
-      tags:
-      - Auth
       description: Authentication request
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/login_body'
+              $ref: '#/components/schemas/_login_post_request'
         required: true
       responses:
         "200":
-          description: Authentication succeeded
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_200'
+                $ref: '#/components/schemas/_login_post_200_response'
+          description: Authentication succeeded
         "401":
-          description: Access token is missing or invalid
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/UnauthorizedError'
+          description: Access token is missing or invalid
+      tags:
+      - Auth
   /atp45/tree:
     get:
-      tags:
-      - Atp45
-      description: Get the decision tree discriminating between the ATP-45 cases.
+      description: Get the decision tree branching the different ATP-45 options.
       responses:
         "200":
-          description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Atp45DecisionTree'
-  /atp45/run:
-    post:
+          description: OK
       tags:
       - Atp45
+  /atp45/run:
+    post:
       parameters:
-      - name: weathertype
-        in: query
-        description: "Determine if the weather conditions are retrieved in archive forecasts (`archive`), in latest forecast (`forecast`) or are provided in the request (`manually`)"
-        required: true
-        style: form
+      - description: "Determine if the weather conditions are retrieved in archive\
+          \ forecasts (`archive`), in latest forecast (`forecast`) or are provided\
+          \ in the request (`manually`)"
         explode: true
+        in: query
+        name: weathertype
+        required: true
         schema:
           $ref: '#/components/schemas/Atp45RunTypes'
+        style: form
       requestBody:
         content:
           application/json:
@@ -73,407 +73,518 @@ paths:
         required: true
       responses:
         "200":
-          description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Atp45Result'
-  /forecast/available:
-    get:
+          description: OK
       tags:
       - Atp45
+  /forecast/available:
+    get:
       description: Return the last forecast datetimes available at ECMWF
       responses:
         "200":
-          description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ForecastAvailableSteps'
+          description: OK
+      tags:
+      - Atp45
   /flexpart/input:
     post:
-      tags:
-      - Flexpart
       description: Retrieve the meteorological data needed for flexpart
       parameters:
-      - name: retrievalType
-        in: query
-        description: "If `simple`, use the simplified options structure defined by `FlexpartRetrieveSimple`. If `detailed`, a full Flexpart options object is expected (see Flexpart docs)"
-        required: false
-        style: form
+      - description: "If `simple`, use the simplified options structure defined by\
+          \ `FlexpartRetrieveSimple`. If `detailed`, a full Flexpart options object\
+          \ is expected (see Flexpart docs)"
         explode: true
+        in: query
+        name: retrievalType
+        required: false
         schema:
-          type: string
           default: simple
           enum:
           - simple
           - detailed
+          type: string
+        style: form
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/flexpart_input_body'
+              $ref: '#/components/schemas/_flexpart_input_post_request'
         required: true
       responses:
         "200":
-          description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/FlexpartInput'
+          description: OK
         "500":
-          description: The Flexpart input retrieval failed.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/FlexpartInputError'
+          description: The Flexpart input retrieval failed.
+      tags:
+      - Flexpart
   /flexpart/inputs:
     get:
-      tags:
-      - Flexpart
       description: Return all the Flexpart inputs available (default finished)
       parameters:
-      - name: status
+      - explode: true
         in: query
+        name: status
         required: false
-        style: form
-        explode: true
         schema:
           $ref: '#/components/schemas/RunStatus'
+        style: form
       responses:
         "200":
-          description: OK
           content:
             application/json:
               schema:
-                type: array
                 items:
                   $ref: '#/components/schemas/FlexpartInput'
+                type: array
+          description: OK
+      tags:
+      - Flexpart
   /flexpart/inputs/{inputId}:
-    get:
-      tags:
-      - Flexpart
-      parameters:
-      - name: inputId
-        in: path
-        description: The input ID
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FlexpartInput'
     delete:
-      tags:
-      - Flexpart
       parameters:
-      - name: inputId
-        in: path
-        description: The input ID
-        required: true
-        style: simple
+      - description: The input ID
         explode: false
+        in: path
+        name: inputId
+        required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
-          description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/FlexpartInput'
+          description: OK
+      tags:
+      - Flexpart
+    get:
+      parameters:
+      - description: The input ID
+        explode: false
+        in: path
+        name: inputId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlexpartInput'
+          description: OK
+      tags:
+      - Flexpart
+    put:
+      parameters:
+      - description: The input ID
+        explode: false
+        in: path
+        name: inputId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: The new file name chosen by the user
+        explode: true
+        in: query
+        name: newName
+        required: true
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlexpartInput'
+          description: OK
+      tags:
+      - Flexpart
   /flexpart/run:
     post:
-      tags:
-      - Flexpart
       description: Run flexpart
       parameters:
-      - name: runType
-        in: query
-        description: "If `simple`, use the simplified options structure defined by `FlexpartOptionsSimple`. If `detailed`, a full Flexpart options object is expected (see Flexpart docs)"
-        required: false
-        style: form
+      - description: "If `simple`, use the simplified options structure defined by\
+          \ `FlexpartOptionsSimple`. If `detailed`, a full Flexpart options object\
+          \ is expected (see Flexpart docs)"
         explode: true
+        in: query
+        name: runType
+        required: false
         schema:
-          type: string
           default: simple
           enum:
           - simple
           - detailed
-      - name: inputId
-        in: query
-        description: Input id
-        required: true
+          type: string
         style: form
+      - description: Input id
         explode: true
+        in: query
+        name: inputId
+        required: true
         schema:
           type: string
+        style: form
       requestBody:
-        description: Options for Flexpart.
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/flexpart_run_body'
+              $ref: '#/components/schemas/_flexpart_run_post_request'
+        description: Options for Flexpart.
         required: true
       responses:
         "200":
-          description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/FlexpartRun'
+          description: OK
         "500":
-          description: The Flexpart run has failed
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/FlexpartRunError'
+          description: The Flexpart run has failed
+      tags:
+      - Flexpart
   /flexpart/runs:
     get:
-      tags:
-      - Flexpart
       description: Return all the Flexpart runs (default finished)
       parameters:
-      - name: status
+      - explode: true
         in: query
+        name: status
         required: false
-        style: form
-        explode: true
         schema:
           $ref: '#/components/schemas/RunStatus'
+        style: form
       responses:
         "200":
-          description: OK
           content:
             application/json:
               schema:
-                type: array
                 items:
                   $ref: '#/components/schemas/FlexpartRun'
+                type: array
+          description: OK
+      tags:
+      - Flexpart
   /flexpart/runs/{runId}:
-    get:
-      tags:
-      - Flexpart
-      parameters:
-      - name: runId
-        in: path
-        description: The flexpart run ID
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FlexpartRun'
     delete:
-      tags:
-      - Flexpart
       parameters:
-      - name: runId
-        in: path
-        description: The flexpart run ID
-        required: true
-        style: simple
+      - description: The flexpart run ID
         explode: false
+        in: path
+        name: runId
+        required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
-          description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/FlexpartRun'
+          description: OK
+      tags:
+      - Flexpart
+    get:
+      parameters:
+      - description: The flexpart run ID
+        explode: false
+        in: path
+        name: runId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlexpartRun'
+          description: OK
+      tags:
+      - Flexpart
+    put:
+      parameters:
+      - description: The flexpart run ID
+        explode: false
+        in: path
+        name: runId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: The new file name chosen by the user
+        explode: true
+        in: query
+        name: newName
+        required: true
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlexpartRun'
+          description: OK
+      tags:
+      - Flexpart
   /flexpart/runs/{runId}/outputs:
     get:
-      tags:
-      - Flexpart
       description: Return the outputs of the Flexpart run `runId`
       parameters:
-      - name: runId
-        in: path
-        description: The flexpart run ID
-        required: true
-        style: simple
+      - description: The flexpart run ID
         explode: false
+        in: path
+        name: runId
+        required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
-          description: OK
           content:
             application/json:
               schema:
-                type: array
                 items:
                   $ref: '#/components/schemas/FlexpartOutput'
-  /flexpart/outputs/{outputId}:
-    get:
+                type: array
+          description: OK
       tags:
       - Flexpart
+  /flexpart/outputs/{outputId}:
+    get:
       parameters:
-      - name: outputId
-        in: path
-        description: The output ID
-        required: true
-        style: simple
+      - description: The output ID
         explode: false
+        in: path
+        name: outputId
+        required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
-          description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/FlexpartOutput'
-  /flexpart/outputs/{outputId}/layers:
-    get:
+          description: OK
       tags:
       - Flexpart
+  /flexpart/outputs/{outputId}/layers:
+    get:
       description: Return the layers of the Flexpart output `outputId`
       parameters:
-      - name: outputId
-        in: path
-        description: The output ID
-        required: true
-        style: simple
+      - description: The output ID
         explode: false
+        in: path
+        name: outputId
+        required: true
         schema:
           type: string
-      - name: spatial
-        in: query
-        description: If only spatial layers must be retrieved
-        required: false
-        style: form
+        style: simple
+      - description: If only spatial layers must be retrieved
         explode: true
+        in: query
+        name: spatial
+        required: false
         schema:
-          type: boolean
           default: false
+          type: boolean
+        style: form
       responses:
         "200":
-          description: OK
           content:
             application/json:
               schema:
-                type: array
                 items:
                   type: string
-  /flexpart/outputs/{outputId}/dimensions:
-    get:
+                type: array
+          description: OK
       tags:
       - Flexpart
-      description: Return the dimensions layers of the Flexpart output `outputId` with their values
+  /flexpart/outputs/{outputId}/dimensions:
+    get:
+      description: Return the dimensions layers of the Flexpart output `outputId`
+        with their values
       parameters:
-      - name: outputId
-        in: path
-        description: The output ID
-        required: true
-        style: simple
+      - description: The output ID
         explode: false
+        in: path
+        name: outputId
+        required: true
         schema:
           type: string
-      - name: layer
-        in: query
-        description: "If the name of the layer is given, only returns the dimensions of the layer"
-        required: false
-        style: form
+        style: simple
+      - description: "If the name of the layer is given, only returns the dimensions\
+          \ of the layer"
         explode: true
+        in: query
+        name: layer
+        required: false
         schema:
           type: string
-      - name: horizontal
-        in: query
-        description: "If false, don't return the horizontal dimensions (lons and lats)"
-        required: false
         style: form
+      - description: "If false, don't return the horizontal dimensions (lons and lats)"
         explode: true
+        in: query
+        name: horizontal
+        required: false
         schema:
-          type: boolean
           default: false
+          type: boolean
+        style: form
       responses:
         "200":
-          description: OK
           content:
             application/json:
               schema:
                 type: object
-  /flexpart/outputs/{outputId}/slice:
-    post:
+          description: OK
       tags:
       - Flexpart
+  /flexpart/outputs/{outputId}/slice:
+    post:
       description: Return a slice of the `output` according to some dimensions.
       parameters:
-      - name: layer
-        in: query
-        description: Name of the layer to slice
-        required: true
-        style: form
+      - description: Name of the layer to slice
         explode: true
+        in: query
+        name: layer
+        required: true
         schema:
           type: string
-      - name: geojson
-        in: query
-        description: "If true, the output is given in geojson format. The sliced layer must be a surface."
-        required: false
         style: form
+      - description: "If true, the output is given in geojson format. The sliced layer\
+          \ must be a surface."
         explode: true
-        schema:
-          type: boolean
-          default: false
-      - name: legend
         in: query
-        description: "If true, data for legend is provided"
+        name: geojson
         required: false
-        style: form
-        explode: true
         schema:
-          type: boolean
           default: false
-      - name: outputId
-        in: path
-        description: The output ID
-        required: true
-        style: simple
+          type: boolean
+        style: form
+      - description: "If true, data for legend is provided"
+        explode: true
+        in: query
+        name: legend
+        required: false
+        schema:
+          default: false
+          type: boolean
+        style: form
+      - description: The output ID
         explode: false
+        in: path
+        name: outputId
+        required: true
         schema:
           type: string
+        style: simple
       requestBody:
-        description: dimensions to be sliced along
         content:
           application/json:
             schema:
+              example:
+                Time:'2022-02-12T22:00:00.0': null
+                height:50: null
+                pointpsec:1: null
+                nageclass:1: null
               type: object
-              example: {}
+        description: dimensions to be sliced along
         required: true
       responses:
         "200":
-          description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_200_1'
+                $ref: '#/components/schemas/_flexpart_outputs__outputId__slice_post_200_response'
             image/tiff:
               schema:
-                type: string
                 format: binary
+                type: string
+          description: OK
+      tags:
+      - Flexpart
 components:
+  parameters:
+    inputIdParam:
+      description: The input ID
+      explode: false
+      in: path
+      name: inputId
+      required: true
+      schema:
+        type: string
+      style: simple
+    runIdParam:
+      description: The flexpart run ID
+      explode: false
+      in: path
+      name: runId
+      required: true
+      schema:
+        type: string
+      style: simple
+    outputIdParam:
+      description: The output ID
+      explode: false
+      in: path
+      name: outputId
+      required: true
+      schema:
+        type: string
+      style: simple
+    newNameParam:
+      description: The new file name chosen by the user
+      explode: true
+      in: query
+      name: newName
+      required: true
+      schema:
+        type: string
+      style: form
+  responses:
+    UnauthorizedResponse:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UnauthorizedError'
+      description: Access token is missing or invalid
   schemas:
     User:
-      required:
-      - email
-      - username
-      type: object
+      example:
+        name: name
+        email: email
+        username: username
       properties:
         email:
           type: string
@@ -481,242 +592,250 @@ components:
           type: string
         name:
           type: string
-    Atp45Category:
       required:
-      - id
+      - email
+      - username
       type: object
+    Atp45Category:
+      description: Describe the ATP45 categories that will determine which case needs
+        to be considered.
       properties:
         id:
-          type: string
           example: chem
+          type: string
         description:
           type: string
         note:
           type: string
         longname:
-          type: string
           example: Chemical Weapon
-        paramtype:
           type: string
+        paramtype:
           example: category
+          type: string
         internalname:
           type: string
         content:
-          type: array
           items:
             type: string
-      description: Describe the ATP45 categories that will determine which case needs to be considered.
+          type: array
+      required:
+      - id
+      type: object
     Atp45DecisionTree:
-      description: "A tree of `Atp45Category`, representing the decision sequence leading to the final ATP45 case."
       allOf:
       - $ref: '#/components/schemas/Atp45Category'
-      - required:
-        - children
-        type: object
-        properties:
-          children:
-            type: array
-            items:
-              $ref: '#/components/schemas/Atp45DecisionTree'
+      - $ref: '#/components/schemas/Atp45DecisionTree_allOf'
+      description: "A tree of `Atp45Category`, representing the decision sequence\
+        \ leading to the final ATP45 case."
     Atp45Input:
+      description: Information needed to run ATP45. It requires at least the list
+        of id's for discriminating the decision tree and some release location(s).
+      example:
+        weatherInput: null
+        locations:
+        - lon: 4.0
+          lat: 50.0
+        - lon: 4.0
+          lat: 50.0
+        categories:
+        - simplified
+        - chem
+      properties:
+        categories:
+          description: "Array of ids, identifying the categories."
+          example:
+          - simplified
+          - chem
+          items:
+            type: string
+          type: array
+        locations:
+          items:
+            $ref: '#/components/schemas/GeoPoint'
+          type: array
+        weatherInput:
+          $ref: '#/components/schemas/Atp45Input_weatherInput'
       required:
       - categories
       - locations
       - weatherInput
       type: object
-      properties:
-        categories:
-          $ref: '#/components/schemas/Atp45Categories'
-        locations:
-          type: array
-          items:
-            $ref: '#/components/schemas/GeoPoint'
-        weatherInput:
-          oneOf:
-          - $ref: '#/components/schemas/Atp45WeatherManual'
-          - $ref: '#/components/schemas/ForecastStep'
-          - required:
-            - archiveDate
-            type: object
-            properties:
-              archiveDate:
-                type: string
-                format: date-time
-      description: Information needed to run ATP45. It requires at least the list of id's for discriminating the decision tree and some release location(s).
     Atp45Categories:
-      type: array
       description: "Array of ids, identifying the categories."
       example:
       - simplified
       - chem
       items:
         type: string
+      type: array
     Atp45WeatherManual:
-      required:
-      - stability
-      - wind
-      type: object
+      description: "Weather conditions description for ATP45, in case it is provided\
+        \ by the user."
       properties:
         wind:
           $ref: '#/components/schemas/WindVelocity'
         stability:
           $ref: '#/components/schemas/Atp45WeatherManual_stability'
-      description: "Weather conditions description for ATP45, in case it is provided by the user."
+      required:
+      - stability
+      - wind
+      type: object
     Atp45StabilityClasses:
-      type: string
-      example: unstable
       enum:
       - unstable
       - neutral
       - stable
-    Atp45RunTypes:
+      example: unstable
       type: string
+    Atp45RunTypes:
       enum:
       - forecast
       - archive
       - manually
+      type: string
     WindVelocity:
+      properties:
+        speed:
+          description: "Wind speed - unit [m/s]"
+          example: 5.0
+          type: number
+        azimuth:
+          description: "angle from North - unit [m/s]"
+          example: 30.0
+          type: number
       required:
       - azimuth
       - speed
       type: object
-      properties:
-        speed:
-          type: number
-          description: "Wind speed - units [m/s]"
-          example: 5
-        azimuth:
-          type: number
-          description: "angle from North - units [m/s]"
-          example: 30
     GeoPoint:
+      example:
+        lon: 4.0
+        lat: 50.0
+      properties:
+        lon:
+          description: "Longitude [°]"
+          example: 4.0
+          type: number
+        lat:
+          description: "Latitude [°]"
+          example: 50.0
+          type: number
       required:
       - lat
       - lon
       type: object
-      properties:
-        lon:
-          type: number
-          description: "Longitude [°]"
-          example: 4
-        lat:
-          type: number
-          description: "Latitude [°]"
-          example: 50
     GeoRectangle:
+      properties:
+        top:
+          description: "north lat [°]"
+          example: 51.0
+          type: number
+        bottom:
+          description: "south lat [°]"
+          example: 49.0
+          type: number
+        left:
+          description: "west lon [°]"
+          example: 3.0
+          type: number
+        right:
+          description: "east lon [°]"
+          example: 5.0
+          type: number
       required:
       - bottom
       - left
       - right
       - top
       type: object
-      properties:
-        top:
-          type: number
-          description: "north lat [°]"
-          example: 51
-        bottom:
-          type: number
-          description: "south lat [°]"
-          example: 49
-        left:
-          type: number
-          description: "west lon [°]"
-          example: 3
-        right:
-          type: number
-          description: "east lon [°]"
-          example: 5
     Atp45Result:
+      example:
+        metadata: "{}"
+        collection: null
+      properties:
+        collection:
+          $ref: '#/components/schemas/Atp45Result_collection'
+        metadata:
+          type: object
       required:
       - collection
       type: object
-      properties:
-        collection:
-          allOf:
-          - $ref: '#/components/schemas/FeatureCollection'
-          - required:
-            - features
-            type: object
-            properties:
-              features:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Atp45Zone'
-        metadata:
-          type: object
     Atp45Zone:
       allOf:
       - $ref: '#/components/schemas/Feature'
-      - required:
-        - geometry
-        - properties
-        type: object
-        properties:
-          properties:
-            $ref: '#/components/schemas/Atp45Zone_properties'
-          geometry:
-            allOf:
-            - $ref: '#/components/schemas/Polygon'
+      - $ref: '#/components/schemas/Atp45Zone_allOf'
     ForecastAvailableSteps:
+      example:
+        leadtimes:
+        - 2000-01-23T04:56:07.000+00:00
+        - 2000-01-23T04:56:07.000+00:00
+        start: 2000-01-23T04:56:07.000+00:00
+      properties:
+        start:
+          format: date-time
+          type: string
+        leadtimes:
+          items:
+            format: date-time
+            type: string
+          type: array
       required:
       - leadtimes
       - start
       type: object
+    ForecastStep:
       properties:
         start:
-          type: string
           format: date-time
-        leadtimes:
-          type: array
-          items:
-            type: string
-            format: date-time
-    ForecastStep:
+          type: string
+        leadtime:
+          format: date-time
+          type: string
       required:
       - leadtime
       - start
       type: object
-      properties:
-        start:
-          type: string
-          format: date-time
-        leadtime:
-          type: string
-          format: date-time
     FlexpartRetrieveSimple:
+      description: Simplified data structure needed for a retrieval of meteorological
+        data for Flexpart
+      properties:
+        area:
+          $ref: '#/components/schemas/GeoRectangle'
+        start:
+          format: date-time
+          type: string
+        end:
+          format: date-time
+          type: string
+        gridres:
+          default: 1.0
+          description: "unit: [°]"
+          type: number
+        timeStep:
+          default: 3600
+          description: "unit: [s]"
+          type: number
+        datasetType:
+          description: button to select either "deterministic" or "ensemble" data
+          type: string
       required:
       - area
+      - datasetType
       - end
       - gridres
       - start
       - timeStep
       type: object
-      properties:
-        area:
-          $ref: '#/components/schemas/GeoRectangle'
-        start:
-          type: string
-          format: date-time
-        end:
-          type: string
-          format: date-time
-        gridres:
-          type: number
-          description: "units: [°]"
-          default: 1
-        timeStep:
-          type: number
-          description: "units: [s]"
-          default: 3600
-      description: Simplified data structure needed for a retrieval of meteorological data for Flexpart
     FlexpartInput:
-      required:
-      - control
-      - date_created
-      - name
-      - uuid
-      type: object
+      example:
+        date_created: 2000-01-23T04:56:07.000+00:00
+        name: name
+        control:
+          key: control
+        ensemble: true
+        uuid: uuid
+        status: status
       properties:
         uuid:
           type: string
@@ -725,14 +844,22 @@ components:
         status:
           $ref: '#/components/schemas/RunStatus'
         date_created:
-          type: string
           format: date-time
+          type: string
         control:
-          type: object
           additionalProperties:
             type: string
-    FlexpartInputError:
+          type: object
+        ensemble:
+          type: boolean
+      required:
+      - control
+      - date_created
+      - ensemble
+      - name
+      - uuid
       type: object
+    FlexpartInputError:
       properties:
         error:
           type: string
@@ -740,8 +867,8 @@ components:
           type: string
         code:
           $ref: '#/components/schemas/WeatherRetrievalErrorCode'
+      type: object
     WeatherRetrievalErrorCode:
-      type: string
       description: |-
         Application specific error code when a retrieval to MARS from ECMWF fails.
         Possible values area:
@@ -750,96 +877,116 @@ components:
       enum:
       - dataNotYetAvailable
       - unknownMarsError
+      type: string
     FlexpartReleaseSimple:
+      properties:
+        substanceName:
+          default: Generic Air Tracer
+          type: string
+        location:
+          $ref: '#/components/schemas/GeoPoint'
+        geometryName:
+          default: Point
+          type: string
+        boxLength:
+          default: 0
+          description: "unit: [m]"
+          type: number
+        boxWidth:
+          default: 0
+          description: "unit: [m]"
+          type: number
+        boxHeight:
+          default: 0
+          description: "unit: [m]"
+          type: number
+        height:
+          default: 10
+          description: "unit: [m]"
+          type: number
+        mass:
+          default: 1
+          description: "unit: [kg]"
+          type: number
+        start:
+          format: date-time
+          type: string
+        end:
+          format: date-time
+          type: string
+        particles:
+          type: number
       required:
       - end
       - height
       - location
       - mass
       - start
+      - substanceName
       type: object
-      properties:
-        location:
-          $ref: '#/components/schemas/GeoPoint'
-        start:
-          type: string
-          format: date-time
-        end:
-          type: string
-          format: date-time
-        height:
-          type: number
-          default: 50
-        mass:
-          type: number
-          default: 1000
-        particles:
-          type: number
     FlexpartCommandSimple:
+      properties:
+        start:
+          format: date-time
+          type: string
+        end:
+          format: date-time
+          type: string
+        timeStep:
+          default: 3600
+          description: "unit: [s]"
+          type: number
+        outputType:
+          default: 1
+          description: Unit for the output type (see Flexpart docs)
+          type: number
       required:
       - end
       - outputType
       - start
       - timeStep
       type: object
-      properties:
-        start:
-          type: string
-          format: date-time
-        end:
-          type: string
-          format: date-time
-        timeStep:
-          type: number
-          description: "units: [s]"
-          default: 3600
-        specie:
-          type: string
-          default: AIRTRACER
-        outputType:
-          type: number
-          description: Units for the output (see Flexpart docs)
-          default: 1
     FlexpartOutgridSimple:
+      properties:
+        area:
+          $ref: '#/components/schemas/GeoRectangle'
+        gridres:
+          default: 0.01
+          description: "unit: [°]"
+          type: number
+        heights:
+          items:
+            default: 1.0
+            type: number
+          type: array
       required:
       - area
       - gridres
       - heights
       type: object
-      properties:
-        area:
-          $ref: '#/components/schemas/GeoRectangle'
-        gridres:
-          type: number
-          description: "units: [°]"
-          default: 1
-        heights:
-          type: array
-          items:
-            type: number
-            default: 100
     FlexpartOptionsSimple:
+      properties:
+        releases:
+          items:
+            $ref: '#/components/schemas/FlexpartReleaseSimple'
+          type: array
+        command:
+          $ref: '#/components/schemas/FlexpartCommandSimple'
+        outgrid:
+          $ref: '#/components/schemas/FlexpartOutgridSimple'
       required:
       - command
       - outgrid
       - releases
       type: object
-      properties:
-        releases:
-          type: array
-          items:
-            $ref: '#/components/schemas/FlexpartReleaseSimple'
-        command:
-          $ref: '#/components/schemas/FlexpartCommandSimple'
-        outgrid:
-          $ref: '#/components/schemas/FlexpartOutgridSimple'
     FlexpartRun:
-      required:
-      - date_created
-      - name
-      - options
-      - uuid
-      type: object
+      example:
+        date_created: 2000-01-23T04:56:07.000+00:00
+        name: name
+        options: "{}"
+        ensemble: true
+        uuid: uuid
+        status: status
       properties:
         uuid:
           type: string
@@ -848,12 +995,21 @@ components:
         status:
           $ref: '#/components/schemas/RunStatus'
         date_created:
-          type: string
           format: date-time
+          type: string
         options:
           type: object
-    FlexpartRunError:
+        ensemble:
+          type: boolean
+      required:
+      - date_created
+      - ensemble
+      - name
+      - options
+      - uuid
       type: object
+    FlexpartRunError:
+      description: Error when a Flexpart run fails.
       properties:
         error:
           type: string
@@ -861,9 +1017,8 @@ components:
           type: string
         code:
           $ref: '#/components/schemas/FlexpartRunErrorCode'
-      description: Error when a Flexpart run fails.
+      type: object
     FlexpartRunErrorCode:
-      type: string
       description: |-
         Application specific error code when a Flexpart run fails.
         Possible values area:
@@ -872,53 +1027,55 @@ components:
       enum:
       - noMeteoFieldsAvailable
       - unknownFlexpartRunError
+      type: string
     FlexpartOutput:
-      required:
-      - date_created
-      - metadata
-      - name
-      - uuid
-      type: object
+      example:
+        filetype: filetype
+        metadata: "{}"
+        isnested: true
+        date_created: 2000-01-23T04:56:07.000+00:00
+        name: name
+        member: member
+        uuid: uuid
       properties:
         uuid:
           type: string
         name:
           type: string
         date_created:
-          type: string
           format: date-time
+          type: string
         metadata:
           type: object
+        filetype:
+          type: string
+        isnested:
+          type: boolean
+        member:
+          type: string
+      required:
+      - date_created
+      - member
+      - metadata
+      - name
+      - uuid
+      type: object
     RawSliceResponse:
-      type: array
       items:
         type: number
+      type: array
     GeoJsonSliceResponse:
+      properties:
+        collection:
+          $ref: '#/components/schemas/GeoJsonSliceResponse_collection'
+        metadata:
+          $ref: '#/components/schemas/GeoJsonSliceResponse_metadata'
       required:
       - collection
       type: object
-      properties:
-        collection:
-          allOf:
-          - $ref: '#/components/schemas/FeatureCollection'
-          - required:
-            - features
-            type: object
-            properties:
-              features:
-                type: array
-                items:
-                  $ref: '#/components/schemas/GeoCell'
-        metadata:
-          oneOf:
-          - $ref: '#/components/schemas/ColorbarData'
     ColorbarData:
-      required:
-      - ticks
-      type: object
       properties:
         colors:
-          type: array
           description: Colors for each interval in hex format
           example:
           - '#00007F'
@@ -926,61 +1083,56 @@ components:
           - '#7F0000'
           items:
             type: string
-        ticks:
           type: array
+        ticks:
           description: Values for the bounding intervals
           items:
             type: number
+          type: array
+      required:
+      - ticks
+      type: object
     GeoCell:
+      allOf:
+      - $ref: '#/components/schemas/Feature'
+      - $ref: '#/components/schemas/GeoCell_allOf'
       required:
       - geometry
       - properties
       type: object
-      allOf:
-      - $ref: '#/components/schemas/Feature'
-      - type: object
-        properties:
-          geometry:
-            $ref: '#/components/schemas/Polygon'
-          properties:
-            $ref: '#/components/schemas/GeoCell_properties'
     RunStatus:
-      type: string
       enum:
       - created
       - finished
       - ongoing
       - errored
+      type: string
     UnauthorizedError:
-      required:
-      - error
-      type: object
       properties:
         error:
           type: string
         info:
           type: string
+      required:
+      - error
+      type: object
     FeatureCollection:
+      allOf:
+      - $ref: '#/components/schemas/GeoJsonObject'
+      - $ref: '#/components/schemas/FeatureCollection_allOf'
       description: GeoJSon 'FeatureCollection' object
       externalDocs:
         url: https://tools.ietf.org/html/rfc7946#section-3.3
-      allOf:
-      - $ref: '#/components/schemas/GeoJsonObject'
-      - required:
-        - features
-        type: object
-        properties:
-          features:
-            type: array
-            items:
-              $ref: '#/components/schemas/Feature'
     GeoJsonObject:
-      required:
-      - type
-      type: object
+      description: |
+        GeoJSon object
+        The coordinate reference system for all GeoJSON coordinates is a geographic coordinate reference system, using the World Geodetic System 1984 (WGS 84) datum, with longitude and latitude units of decimal degrees. This is equivalent to the coordinate reference system identified by the Open Geospatial Consortium (OGC) URN An OPTIONAL third-position element SHALL be the height in meters above or below the WGS 84 reference ellipsoid. In the absence of elevation values, applications sensitive to height or depth SHOULD interpret positions as being at local ground or sea level.
+      discriminator:
+        propertyName: type
+      externalDocs:
+        url: https://tools.ietf.org/html/rfc7946#section-3
       properties:
         type:
-          type: string
           enum:
           - Feature
           - FeatureCollection
@@ -991,101 +1143,45 @@ components:
           - Polygon
           - MultiPolygon
           - GeometryCollection
+          type: string
         bbox:
-          type: array
           items:
             type: number
-      description: |
-        GeoJSon object
-        The coordinate reference system for all GeoJSON coordinates is a geographic coordinate reference system, using the World Geodetic System 1984 (WGS 84) datum, with longitude and latitude units of decimal degrees. This is equivalent to the coordinate reference system identified by the Open Geospatial Consortium (OGC) URN An OPTIONAL third-position element SHALL be the height in meters above or below the WGS 84 reference ellipsoid. In the absence of elevation values, applications sensitive to height or depth SHOULD interpret positions as being at local ground or sea level.
-      externalDocs:
-        url: https://tools.ietf.org/html/rfc7946#section-3
-      discriminator:
-        propertyName: type
+          type: array
+      required:
+      - type
+      type: object
     Feature:
+      allOf:
+      - $ref: '#/components/schemas/GeoJsonObject'
+      - $ref: '#/components/schemas/Feature_allOf'
       description: GeoJSon 'Feature' object
       externalDocs:
         url: https://tools.ietf.org/html/rfc7946#section-3.2
+    Geometry:
       allOf:
       - $ref: '#/components/schemas/GeoJsonObject'
-      - required:
-        - geometry
-        - properties
-        type: object
-        properties:
-          geometry:
-            allOf:
-            - nullable: true
-            - $ref: '#/components/schemas/Geometry'
-          properties:
-            type: object
-            nullable: true
-          id:
-            oneOf:
-            - type: number
-            - type: string
-    Geometry:
+      - $ref: '#/components/schemas/Geometry_allOf'
       description: |
         Abstract type for all GeoJSon object except Feature and FeatureCollection
       externalDocs:
         url: https://tools.ietf.org/html/rfc7946#section-3
-      allOf:
-      - $ref: '#/components/schemas/GeoJsonObject'
-      - required:
-        - type
-        type: object
-        properties:
-          type:
-            type: string
-            enum:
-            - Point
-            - MultiPoint
-            - LineString
-            - MultiLineString
-            - Polygon
-            - MultiPolygon
-            - GeometryCollection
-        discriminator:
-          propertyName: type
     Polygon:
+      allOf:
+      - $ref: '#/components/schemas/GeometryElement'
+      - $ref: '#/components/schemas/Polygon_allOf'
       description: GeoJSon geometry
       externalDocs:
         url: https://tools.ietf.org/html/rfc7946#section-3.1.6
-      allOf:
-      - $ref: '#/components/schemas/GeometryElement'
-      - required:
-        - coordinates
-        type: object
-        properties:
-          coordinates:
-            type: array
-            items:
-              $ref: '#/components/schemas/LinearRing'
     GeometryElement:
+      allOf:
+      - $ref: '#/components/schemas/Geometry'
+      - $ref: '#/components/schemas/GeometryElement_allOf'
       description: |
         Abstract type for all GeoJSon 'Geometry' object the type of which is not 'GeometryCollection'
       externalDocs:
         url: https://tools.ietf.org/html/rfc7946#section-3
-      allOf:
-      - $ref: '#/components/schemas/Geometry'
-      - required:
-        - type
-        type: object
-        properties:
-          type:
-            type: string
-            enum:
-            - Point
-            - MultiPoint
-            - LineString
-            - MultiLineString
-            - Polygon
-            - MultiPolygon
-        discriminator:
-          propertyName: type
     LinearRing:
-      minItems: 4
-      type: array
       description: |
         A linear ring is a closed LineString with four or more positions.
         The first and last positions are equivalent, and they MUST contain identical values; their representation SHOULD also be identical.
@@ -1095,10 +1191,9 @@ components:
         url: https://tools.ietf.org/html/rfc7946#section-3.1.6
       items:
         $ref: '#/components/schemas/Position'
-    Position:
-      maxItems: 3
-      minItems: 2
+      minItems: 4
       type: array
+    Position:
       description: |
         GeoJSon fundamental geometry construct.
         A position is an array of numbers. There MUST be two or more elements. The first two elements are longitude and latitude, or easting and northing, precisely in that order and using decimal numbers. Altitude or elevation MAY be included as an optional third element.
@@ -1107,21 +1202,27 @@ components:
         url: https://tools.ietf.org/html/rfc7946#section-3.1.1
       items:
         type: number
-    login_body:
-      required:
-      - email
-      - password
-      type: object
+      maxItems: 3
+      minItems: 2
+      type: array
+    _login_post_request:
       properties:
         email:
           type: string
         password:
           type: string
-    inline_response_200:
       required:
-      - idToken
-      - user
+      - email
+      - password
       type: object
+    _login_post_200_response:
+      example:
+        expiresIn: 0.8008281904610115
+        idToken: idToken
+        user:
+          name: name
+          email: email
+          username: username
       properties:
         idToken:
           type: string
@@ -1129,76 +1230,192 @@ components:
           $ref: '#/components/schemas/User'
         expiresIn:
           type: number
-    flexpart_input_body:
+      required:
+      - idToken
+      - user
+      type: object
+    _flexpart_input_post_request:
       oneOf:
       - $ref: '#/components/schemas/FlexpartRetrieveSimple'
-    flexpart_run_body:
+    _flexpart_run_post_request:
       oneOf:
       - $ref: '#/components/schemas/FlexpartOptionsSimple'
-    inline_response_200_1:
+    _flexpart_outputs__outputId__slice_post_200_response:
       oneOf:
       - $ref: '#/components/schemas/RawSliceResponse'
       - $ref: '#/components/schemas/GeoJsonSliceResponse'
-    Atp45WeatherManual_stability:
+    Atp45DecisionTree_allOf:
+      properties:
+        children:
+          items:
+            $ref: '#/components/schemas/Atp45DecisionTree'
+          type: array
       required:
-      - stabilityClass
+      - children
       type: object
+      example: null
+    Atp45Input_weatherInput_oneOf:
+      properties:
+        archiveDate:
+          format: date-time
+          type: string
+      required:
+      - archiveDate
+      type: object
+    Atp45Input_weatherInput:
+      oneOf:
+      - $ref: '#/components/schemas/Atp45WeatherManual'
+      - $ref: '#/components/schemas/ForecastStep'
+      - $ref: '#/components/schemas/Atp45Input_weatherInput_oneOf'
+    Atp45WeatherManual_stability:
       properties:
         stabilityClass:
           $ref: '#/components/schemas/Atp45StabilityClasses'
-    Atp45Zone_properties:
+      required:
+      - stabilityClass
       type: object
+    Atp45Result_collection_allOf:
+      properties:
+        features:
+          items:
+            $ref: '#/components/schemas/Atp45Zone'
+          type: array
+      required:
+      - features
+      type: object
+    Atp45Result_collection:
+      allOf:
+      - $ref: '#/components/schemas/FeatureCollection'
+      - $ref: '#/components/schemas/Atp45Result_collection_allOf'
+    Atp45Zone_allOf_properties:
       properties:
         type:
-          type: string
           example: release
-        shape:
           type: string
+        shape:
           example: circle
-    GeoCell_properties:
-      required:
-      - val
+          type: string
       type: object
+      example: null
+    Atp45Zone_allOf:
+      properties:
+        properties:
+          $ref: '#/components/schemas/Atp45Zone_allOf_properties'
+        geometry:
+          allOf:
+          - $ref: '#/components/schemas/Polygon'
+      required:
+      - geometry
+      - properties
+      type: object
+      example: null
+    GeoJsonSliceResponse_collection_allOf:
+      properties:
+        features:
+          items:
+            $ref: '#/components/schemas/GeoCell'
+          type: array
+      required:
+      - features
+      type: object
+    GeoJsonSliceResponse_collection:
+      allOf:
+      - $ref: '#/components/schemas/FeatureCollection'
+      - $ref: '#/components/schemas/GeoJsonSliceResponse_collection_allOf'
+    GeoJsonSliceResponse_metadata:
+      oneOf:
+      - $ref: '#/components/schemas/ColorbarData'
+    GeoCell_allOf_properties:
       properties:
         val:
           type: number
-  responses:
-    UnauthorizedResponse:
-      description: Access token is missing or invalid
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/UnauthorizedError'
-  parameters:
-    inputIdParam:
-      name: inputId
-      in: path
-      description: The input ID
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-    runIdParam:
-      name: runId
-      in: path
-      description: The flexpart run ID
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-    outputIdParam:
-      name: outputId
-      in: path
-      description: The output ID
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
+      required:
+      - val
+      type: object
+      example: null
+    GeoCell_allOf:
+      properties:
+        geometry:
+          $ref: '#/components/schemas/Polygon'
+        properties:
+          $ref: '#/components/schemas/GeoCell_allOf_properties'
+      type: object
+      example: null
+    FeatureCollection_allOf:
+      properties:
+        features:
+          items:
+            $ref: '#/components/schemas/Feature'
+          type: array
+      required:
+      - features
+      type: object
+      example: null
+    Feature_allOf:
+      properties:
+        geometry:
+          allOf:
+          - nullable: true
+          - $ref: '#/components/schemas/Geometry'
+        properties:
+          nullable: true
+          type: object
+        id:
+          oneOf:
+          - type: number
+          - type: string
+      required:
+      - geometry
+      - properties
+      type: object
+      example: null
+    Geometry_allOf:
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          enum:
+          - Point
+          - MultiPoint
+          - LineString
+          - MultiLineString
+          - Polygon
+          - MultiPolygon
+          - GeometryCollection
+          type: string
+      required:
+      - type
+      type: object
+      example: null
+    Polygon_allOf:
+      properties:
+        coordinates:
+          items:
+            $ref: '#/components/schemas/LinearRing'
+          type: array
+      required:
+      - coordinates
+      type: object
+      example: null
+    GeometryElement_allOf:
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          enum:
+          - Point
+          - MultiPoint
+          - LineString
+          - MultiLineString
+          - Polygon
+          - MultiPolygon
+          type: string
+      required:
+      - type
+      type: object
+      example: null
   securitySchemes:
     bearerAuth:
-      type: http
-      scheme: bearer
       bearerFormat: JWT
+      scheme: bearer
+      type: http

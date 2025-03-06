@@ -9,8 +9,8 @@ import { RequestBuilder } from '../request-builder';
 import { Observable } from 'rxjs';
 import { map, filter } from 'rxjs/operators';
 
-import { InlineResponse200 } from '../models/inline-response-200';
-import { LoginBody } from '../models/login-body';
+import { LoginPost200Response } from '../models/login-post-200-response';
+import { LoginPostRequest } from '../models/login-post-request';
 
 @Injectable({
   providedIn: 'root',
@@ -37,11 +37,11 @@ export class AuthApiService extends BaseService {
    * This method sends `application/json` and handles request body of type `application/json`.
    */
   loginPost$Response(params: {
-    body: LoginBody
+    body: LoginPostRequest
   },
   context?: HttpContext
 
-): Observable<StrictHttpResponse<InlineResponse200>> {
+): Observable<StrictHttpResponse<LoginPost200Response>> {
 
     const rb = new RequestBuilder(this.rootUrl, AuthApiService.LoginPostPath, 'post');
     if (params) {
@@ -55,7 +55,7 @@ export class AuthApiService extends BaseService {
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<InlineResponse200>;
+        return r as StrictHttpResponse<LoginPost200Response>;
       })
     );
   }
@@ -69,14 +69,14 @@ export class AuthApiService extends BaseService {
    * This method sends `application/json` and handles request body of type `application/json`.
    */
   loginPost(params: {
-    body: LoginBody
+    body: LoginPostRequest
   },
   context?: HttpContext
 
-): Observable<InlineResponse200> {
+): Observable<LoginPost200Response> {
 
     return this.loginPost$Response(params,context).pipe(
-      map((r: StrictHttpResponse<InlineResponse200>) => r.body as InlineResponse200)
+      map((r: StrictHttpResponse<LoginPost200Response>) => r.body as LoginPost200Response)
     );
   }
 

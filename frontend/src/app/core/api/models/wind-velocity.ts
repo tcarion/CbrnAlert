@@ -3,12 +3,12 @@
 export interface WindVelocity {
 
   /**
-   * angle from North - units [m/s]
+   * angle from North - unit [m/s]
    */
   azimuth: number;
 
   /**
-   * Wind speed - units [m/s]
+   * Wind speed - unit [m/s]
    */
   speed: number;
 }

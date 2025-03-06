@@ -1,14 +1,13 @@
 openapi: '3.0.2'
 info:
   title: CbrnAlert API
-  version: '1.0'
-  description: 'API for the preparing, running and getting the results of atmospheric dispersion models in case of CBRN-type incidents.'
+  version: '2.0'
+  description: 'API for the computation and visualization of atmospheric dispersion simulations of CBRN agents.'
   contact:
-    name: 'Tristan Carion'
-    email: 'tristan.carion@mil.be'
+    name: 'Paul Perez'
+    email: 'paullouisperez@gmail.com'
 servers:
-  # TODO: CHANGE TO HTTPS FOR PROD
-  - url: 'http://localhost:8000/api'
+  - url: 'http://localhost:4200/api'
     description: Dev Server
   - url: 'https://cbrnalert.rma.ac.be/api'
     description: Production server
@@ -144,11 +143,11 @@ components:
       properties:
         speed:
           type: number
-          description: 'Wind speed - units [m/s]'
+          description: 'Wind speed - unit [m/s]'
           example: 5.0
         azimuth:
           type: number
-          description: 'angle from North - units [m/s]'
+          description: 'angle from North - unit [m/s]'
           example: 30.0
     GeoPoint:
       type: object
@@ -282,6 +281,7 @@ components:
         - "end"
         - "gridres"
         - "timeStep"
+        - "datasetType"
       properties:
         area:
           $ref: '#/components/schemas/GeoRectangle'
@@ -294,11 +294,14 @@ components:
         gridres: 
           type: number
           default: 1.0
-          description: 'units: [°]'
+          description: 'unit: [°]'
         timeStep:
           type: number
-          description: 'units: [s]'
+          description: 'unit: [s]'
           default: 3600
+        datasetType:
+          type: string
+          description: 'button to select either "deterministic" or "ensemble" data'
     FlexpartInput:
       type: object
       required:
@@ -306,6 +309,7 @@ components:
         - "name"
         - "date_created"
         - "control"
+        - "ensemble"
       properties:
         uuid:
           type: string
@@ -321,6 +325,8 @@ components:
           type: object
           additionalProperties: 
             type: string
+        ensemble:
+          type: boolean
 
     FlexpartInputError:
       type: object
@@ -350,26 +356,47 @@ components:
     FlexpartReleaseSimple:
       type: object
       required:
+        - substanceName
         - location
-        - start
-        - end
         - height
         - mass
+        - start
+        - end
       properties:
+        substanceName:
+          type: string
+          default: "Generic Air Tracer"
         location:
           $ref: '#/components/schemas/GeoPoint'
+        geometryName:
+          type: string
+          default: "Point"
+        boxLength:
+          type: number
+          default: 0
+          description: 'unit: [m]'
+        boxWidth:
+          type: number
+          default: 0
+          description: 'unit: [m]'
+        boxHeight:
+          type: number
+          default: 0
+          description: 'unit: [m]'
+        height:
+          type: number
+          default: 10
+          description: 'unit: [m]'
+        mass:
+          type: number
+          default: 1
+          description: 'unit: [kg]'
         start:
           type: string
           format: date-time
         end: 
           type: string
           format: date-time
-        height:
-          type: number
-          default: 50.0
-        mass:
-          type: number
-          default: 1000
         particles:
           type: number
           
@@ -389,15 +416,12 @@ components:
           format: date-time
         timeStep:
           type: number
-          description: 'units: [s]'
+          description: 'unit: [s]'
           default: 3600
-        specie:
-          type: string
-          default: "AIRTRACER"
         outputType:
           type: number
           default: 1
-          description: 'Units for the output (see Flexpart docs)'
+          description: 'Unit for the output type (see Flexpart docs)'
 
     FlexpartOutgridSimple:
       type: object
@@ -410,13 +434,13 @@ components:
           $ref: '#/components/schemas/GeoRectangle'
         gridres: 
           type: number
-          default: 1.0
-          description: 'units: [°]'
+          default: 0.01
+          description: 'unit: [°]'
         heights:
           type: array
           items: 
             type: number
-            default: 100.0
+            default: 1.0
 
     FlexpartOptionsSimple:
       type: object
@@ -442,6 +466,7 @@ components:
         - "name"
         - "date_created"
         - "options"
+        - "ensemble"
       properties:
         uuid:
           type: string
@@ -455,6 +480,8 @@ components:
           format: date-time
         options:
           type: object
+        ensemble:
+          type: boolean
 
     FlexpartRunError:
       description: >-
@@ -492,6 +519,7 @@ components:
         - "name"
         - "date_created"
         - "metadata"
+        - "member"
       properties:
         uuid:
           type: string
@@ -502,6 +530,12 @@ components:
           format: date-time
         metadata:
           type: object
+        filetype:
+          type: string
+        isnested:
+          type: boolean
+        member:
+          type: string
 
     RawSliceResponse:
       type: array
@@ -605,6 +639,13 @@ components:
       schema:
         type: string
       description: The output ID
+    newNameParam:
+      in: query
+      name: newName
+      required: true
+      schema:
+        type: string
+      description: The new file name chosen by the user
   
   responses:
     UnauthorizedResponse:
@@ -664,7 +705,7 @@ paths:
                   
   /atp45/tree:
     get:
-      description: "Get the decision tree discriminating between the ATP-45 cases."
+      description: "Get the decision tree branching the different ATP-45 options."
       tags:
         - Atp45
       responses:
@@ -800,6 +841,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FlexpartInput'
+    put:
+      tags:
+        - Flexpart
+      parameters:
+        - $ref: '#/components/parameters/inputIdParam'
+        - $ref: '#/components/parameters/newNameParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlexpartInput'
 
   /flexpart/run:
     post:
@@ -857,8 +911,6 @@ paths:
         - in: query
           name: status
           schema:
-            # type: string
-            # enum:
             $ref: '#/components/schemas/RunStatus'
             default: "finished"
       responses:
@@ -889,6 +941,19 @@ paths:
         - Flexpart
       parameters:
         - $ref: '#/components/parameters/runIdParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlexpartRun'
+    put:
+      tags:
+        - Flexpart
+      parameters:
+        - $ref: '#/components/parameters/runIdParam'
+        - $ref: '#/components/parameters/newNameParam'
       responses:
         '200':
           description: OK

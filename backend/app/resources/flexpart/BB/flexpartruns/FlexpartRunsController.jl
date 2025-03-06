@@ -312,8 +312,7 @@ end
 
 function rename_run()
   uuid = Genie.Router.params(:runId)
-  payload = Genie.Requests.jsonpayload()
-  new_name = payload["name"]
+  new_name = Genie.Router.params(:newName)
   to_rename = FlexpartRuns.rename!(uuid, new_name)
   to_rename_output = FlexpartOutputs.rename!(uuid)
   return API.FlexpartRun(to_rename) |> json

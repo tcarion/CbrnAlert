@@ -1,11 +1,9 @@
 /* tslint:disable */
 /* eslint-disable */
-import { Feature } from './feature';
+import { FeatureCollectionAllOf } from './feature-collection-all-of';
 import { GeoJsonObject } from './geo-json-object';
 
 /**
  * GeoJSon 'FeatureCollection' object
  */
-export type FeatureCollection = GeoJsonObject & {
-'features': Array<Feature>;
-};
+export type FeatureCollection = GeoJsonObject & FeatureCollectionAllOf;

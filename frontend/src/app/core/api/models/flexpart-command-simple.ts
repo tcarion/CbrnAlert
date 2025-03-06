@@ -4,14 +4,13 @@ export interface FlexpartCommandSimple {
   end: string;
 
   /**
-   * Units for the output (see Flexpart docs)
+   * Unit for the output type (see Flexpart docs)
    */
   outputType: number;
-  specie?: string;
   start: string;
 
   /**
-   * units: [s]
+   * unit: [s]
    */
   timeStep: number;
 }

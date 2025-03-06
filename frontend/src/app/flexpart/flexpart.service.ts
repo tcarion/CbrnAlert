@@ -185,7 +185,7 @@ export class FlexpartService {
   }
 
   renameInput(inputId: string, newName: string): Observable<FlexpartInput> {
-    return this.apiService.flexpartInputsInputIdRename({ inputId, newName }).pipe(
+    return this.apiService.flexpartInputsInputIdPut({ inputId, newName }).pipe(
       withLatestFrom(this.inputs$),
       map(([apiRes, currentInputs]) => {
         const updatedInputs = currentInputs.map(input =>
@@ -198,7 +198,7 @@ export class FlexpartService {
   }
 
   renameRun(runId: string, newName: string): Observable<FlexpartRun> {
-    return this.apiService.flexpartRunsRunIdRename({ runId, newName }).pipe(
+    return this.apiService.flexpartRunsRunIdPut({ runId, newName }).pipe(
       withLatestFrom(this.runs$),
       map(([apiRes, currentRuns]) => {
         const updatedRuns = currentRuns.map(run =>
