@@ -105,8 +105,8 @@ function run_simple()
   end
   release_height = [payload["releases"][i]["height"] for i in 1:release_nb_substances]
   release_particle = Int(floor(Flexpart.MAX_PARTICLES / release_nb_substances))
-  release_length = [release_geometry[i] == "Box" ? payload["releases"][i]["length"] : 0 for i in 1:release_nb_substances]
-  release_width = [release_geometry[i] == "Box" ? payload["releases"][i]["width"] : 0 for i in 1:release_nb_substances]
+  release_boxLength = [release_geometry[i] == "Box" ? payload["releases"][i]["boxLength"] : 0 for i in 1:release_nb_substances]
+  release_boxWidth = [release_geometry[i] == "Box" ? payload["releases"][i]["boxWidth"] : 0 for i in 1:release_nb_substances]
   release_boxHeight = [release_geometry[i] == "Box" ? payload["releases"][i]["boxHeight"] : 0 for i in 1:release_nb_substances]
     
   # OUTGRID options
@@ -133,12 +133,11 @@ function run_simple()
   merge!(fpoptions["COMMAND"][:COMMAND], cmd)
 
   # Set release options
-  #Flexpart.set_point_release!(fpoptions, lon, lat)
   releases_control_options = Dict(
     :NSPEC => release_nb_substances,
     :SPECNUM_REL => release_name_substances_str
   )
-  Flexpart.merge!(fpoptions["RELEASES"][:RELEASES_CTRL], releases_control_options)
+  merge!(fpoptions["RELEASES"][:RELEASES_CTRL], releases_control_options)
 
   releases_options_list = Vector{AbstractDict}()  # Initialize list of dicts to collect release options for all releases without new values replacing previous ones
   for i in (1:release_nb_substances)  # Iterate through each release and collect the options
@@ -148,10 +147,10 @@ function run_simple()
       :ITIME1 => Dates.format(release_start[i], "HHMMSS"),
       :IDATE2 => Dates.format(release_end[i], "yyyymmdd"),
       :ITIME2 => Dates.format(release_end[i], "HHMMSS"),
-      :LON1 => (center + EastNorth(-release_length[i]/2, 0)).c2[1],
-      :LON2 => (center + EastNorth(release_length[i]/2, 0)).c2[1],
-      :LAT1 => (center + EastNorth(0, -release_width[i]/2)).c1[1],
-      :LAT2 => (center + EastNorth(0, release_width[i]/2)).c1[1],
+      :LON1 => (center + EastNorth(-release_boxLength[i]/2, 0)).c2[1],
+      :LON2 => (center + EastNorth(release_boxLength[i]/2, 0)).c2[1],
+      :LAT1 => (center + EastNorth(0, -release_boxWidth[i]/2)).c1[1],
+      :LAT2 => (center + EastNorth(0, release_boxWidth[i]/2)).c1[1],
       :Z1 => (release_height[i] - release_boxHeight[i]/2),
       :Z2 => (release_height[i] + release_boxHeight[i]/2),
       :PARTS => release_particle,
@@ -161,15 +160,15 @@ function run_simple()
     push!(releases_options_list, releases_options)
   end
   if length(releases_options_list) == 1  # If only 1 release, Flexpart.jl should treat it as a dict, not a list of dict
-    Flexpart.merge!(fpoptions["RELEASES"][:RELEASE], releases_options_list[1])
+    merge!(fpoptions["RELEASES"][:RELEASE], releases_options_list[1])
   else
-    Flexpart.merge!(fpoptions["RELEASES"][:RELEASE], releases_options_list)
+    merge!(fpoptions["RELEASES"][:RELEASE], releases_options_list)
   end
 
   # Set outgrid options
   area_f = _area(area)
   outgrid = Flexpart.area2outgrid(area_f, gridres)
-  Flexpart.merge!(fpoptions["OUTGRID"][:OUTGRID], outgrid)
+  merge!(fpoptions["OUTGRID"][:OUTGRID], outgrid)
   fpoptions["OUTGRID"][:OUTGRID][:OUTHEIGHTS] = join(heights, ", ")
 
   # Save the options
@@ -206,8 +205,7 @@ function run(fpsim::FlexpartSim, fprun::FlexpartRun)
     end
   end
 
-  if _iscompleted(fpsim)
-    output_dir = joinpath(fprun.path, "output")
+  if _iscompleted(fpsim, output_path)
     FlexpartRuns.change_status!(fprun.name, STATUS_FINISHED)
   else
     @info "Flexpart run with name $(fprun.name) has failed"
