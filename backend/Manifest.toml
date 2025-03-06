@@ -127,9 +127,9 @@ version = "3.4.3"
 
 [[deps.CSV]]
 deps = ["CodecZlib", "Dates", "FilePathsBase", "InlineStrings", "Mmap", "Parsers", "PooledArrays", "PrecompileTools", "SentinelArrays", "Tables", "Unicode", "WeakRefStrings", "WorkerUtilities"]
-git-tree-sha1 = "6c834533dc1fabd820c1db03c839bf97e45a3fab"
+git-tree-sha1 = "deddd8725e5e1cc49ee205a1964256043720a6c3"
 uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
-version = "0.10.14"
+version = "0.10.15"
 
 [[deps.CodeTracking]]
 deps = ["InteractiveUtils", "UUIDs"]
@@ -320,7 +320,9 @@ version = "2.2.4+0"
 
 [[deps.EcRequests]]
 deps = ["DataStructures", "PyCall", "YAML"]
-git-tree-sha1 = "4747ff770ce2dfba5c6ab7ce5cf5811c42efda7c"
+git-tree-sha1 = "1952a6cd75ebb1fc31ae40d5caf12d7c0e4858e7"
+repo-rev = "main"
+repo-url = "https://github.com/PrzPaul/EcRequests.jl"
 uuid = "c0c4b1a4-92fd-414d-990e-850c1287bada"
 version = "0.2.0"
 
@@ -412,7 +414,7 @@ version = "0.4.3"
 
 [[deps.FlexExtract]]
 deps = ["CSV", "DataStructures", "Dates", "EcRequests", "FlexExtract_jll", "Pkg", "PyCall"]
-git-tree-sha1 = "8c8e6298ac4275a01c599edc7e411ecfbcf21ce6"
+git-tree-sha1 = "7e3e42476ba95cdb78ea24eadcdd61ecff0f4be1"
 repo-rev = "main"
 repo-url = "https://github.com/PrzPaul/FlexExtract.jl"
 uuid = "5ad5ba56-8ec2-41bb-8b56-2065914898b5"
