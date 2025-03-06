@@ -37,19 +37,34 @@ const UNAVAILABLE_METEO_EXCEPTION = FlexpartRunException("noMeteoFieldsAvailable
 const UNKNOWN_EXCEPTION = FlexpartRunException("unknownFlexpartRunError")
 
 
-function _iscompleted(fpsim)
-  lines = readlines(joinpath(Flexpart.getpath(fpsim), "output.log"))
-  any(occursin.("CONGRATULATIONS", lines))
+function _iscompleted(fpsim, log_path)
+  if fpsim.simtype == Ensemble()
+    all(file -> any(occursin.("CONGRATULATIONS", readlines(file))), log_path)
+  else
+    any(occursin.("CONGRATULATIONS", readlines(log_path)))
+  end
 end
 
 function _throw_run_errors(filepath)
-  lines = readlines(filepath)
-  for line in lines
-      if occursin("STOP NO METEO FIELDS AVAILABLE", line)
-          throw(UNAVAILABLE_METEO_EXCEPTION)
+  if isa(filepath, Vector)
+    for file in filepath
+      lines = readlines(file)
+      for line in lines
+          if occursin("STOP NO METEO FIELDS AVAILABLE", line)
+              throw(UNAVAILABLE_METEO_EXCEPTION)
+          end
       end
+    end
+    throw(UNKNOWN_EXCEPTION)
+  else
+    lines = readlines(filepath)
+    for line in lines
+        if occursin("STOP NO METEO FIELDS AVAILABLE", line)
+            throw(UNAVAILABLE_METEO_EXCEPTION)
+        end
+    end
+    throw(UNKNOWN_EXCEPTION)
   end
-  throw(UNKNOWN_EXCEPTION)
 end
 _check_run_errors(fpsim::FlexpartSim) = joinpath(Flexpart.getpath(fpsim), "output.log")
 
@@ -67,9 +82,16 @@ function run_simple()
   payload = Genie.Requests.jsonpayload()
   input_id = Genie.Router.params(:inputId)
 
-  fprun = FlexpartRuns.create()
-  fpsim = Flexpart.FlexpartSim(joinpath(fprun.path, "pathnames"))
-  @info "FlexpartSim created at $(Flexpart.getpath(fpsim))"
+  # Check if meteo input is ensemble or deterministic forecast/archive
+  boolean_ensemble = findone(FlexpartInput, uuid=input_id).ensemble
+  fprun = FlexpartRuns.create(ensemble = boolean_ensemble)
+  if boolean_ensemble == true
+    fpsim = Flexpart.FlexpartSim{Ensemble}(joinpath(fprun.path, "pathnames"))
+    @info "Ensemble FlexpartSim created at $(Flexpart.getpath(fpsim))"
+  else
+    fpsim = Flexpart.FlexpartSim(joinpath(fprun.path, "pathnames"))
+    @info "Deterministic FlexpartSim created at $(Flexpart.getpath(fpsim))"
+  end
 
   fpoptions = FlexpartOption(fpsim)
   Flexpart.remove_unused_species!(fpoptions)
@@ -194,14 +216,22 @@ function run(fpsim::FlexpartSim, fprun::FlexpartRun)
   fpoptions = FlexpartOption(fpsim)
   Flexpart.remove_unused_species!(fpoptions)
   FlexpartRuns.change_options!(fprun.name, fpoptions)
-  output_path = joinpath(Flexpart.getpath(fpsim), "output.log")
-  open(output_path, "w") do logf
+
+  if fprun.ensemble == true
     FlexpartRuns.change_status!(fprun.name, STATUS_ONGOING)
-    Flexpart.run(fpsim) do stream
-      # log_and_broadcast(stream, request_data["ws_info"], logf)
-      line = readline(stream, keep=true)
-      Base.write(logf, line)
-      flush(logf)
+    Flexpart.run(fpsim)
+    log_files = filter(file -> endswith(file, ".log"), readdir(Flexpart.getpath(fpsim)))
+    output_path = joinpath.(Flexpart.getpath(fpsim), log_files)
+  else
+    output_path = joinpath(Flexpart.getpath(fpsim), "output.log")
+    open(output_path, "w") do logf
+      FlexpartRuns.change_status!(fprun.name, STATUS_ONGOING)
+      Flexpart.run(fpsim) do stream
+        # log_and_broadcast(stream, request_data["ws_info"], logf)
+        line = readline(stream, keep=true)
+        Base.write(logf, line)
+        flush(logf)
+      end
     end
   end
 
@@ -285,7 +315,7 @@ function rename_run()
   payload = Genie.Requests.jsonpayload()
   new_name = payload["name"]
   to_rename = FlexpartRuns.rename!(uuid, new_name)
-  to_rename_output = FlexpartOutputs.rename!(uuid, new_name)
+  to_rename_output = FlexpartOutputs.rename!(uuid)
   return API.FlexpartRun(to_rename) |> json
 end
 

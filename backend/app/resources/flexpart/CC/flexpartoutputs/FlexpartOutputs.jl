@@ -10,7 +10,7 @@ using Dates
 using Rasters
 using JSON3
 using Flexpart
-using Flexpart: AbstractOutputFile
+using Flexpart: AbstractOutputFile, EnsembleOutput
 
 using CbrnAlertApp.FlexpartRuns
 using CbrnAlertApp.FlexpartRuns: FlexpartRun
@@ -28,6 +28,7 @@ export FlexpartOutput
 	filetype::String = "" # type of the output file (ncf, binary)
 	isnested::Bool = false # if output is nested
 	metadata::String = "" # metadata in JSON format
+    member::String = "" # member number if ensemble output
 end
 
 Validation.validator(::Type{FlexpartOutput}) = ModelValidator([
@@ -40,16 +41,14 @@ Base.Dict(x::FlexpartOutput) = Dict(
     :name => x.name,
     :date_created => x.date_created,
     :metadata => x.metadata,
+    :filetype => x.filetype,
+    :isnested => x.isnested,
+    :member => x.member
 )
 
 function add!(output::AbstractOutputFile)
     path = output.path
-    d = Dict()
-    if occursin("nest", path)
-        d[:isnested] = true
-    else
-        d[:isnested] = false
-    end
+    ens_member = isa(output, EnsembleOutput) ? string(output.member) : ""
 	rast = RasterStack(path)
 	meta = JSON3.write(Dict(Rasters.metadata(rast)))
     newentry = FlexpartOutput(
@@ -57,15 +56,16 @@ function add!(output::AbstractOutputFile)
         name = basename(path),
         path = relpath(path),
         filetype = output.type,
-        isnested = d[:isnested],
-        metadata = meta
+        isnested = occursin("nest", path),
+        metadata = meta,
+        member = ens_member
     )
     newentry |> save!
 end
 
 function add!(fprun::FlexpartRun)
     isempty(related(fprun, FlexpartOutput)) || return nothing
-    fpsim = FlexpartSim(joinpath(fprun.path, "pathnames"))
+    fpsim = (fprun.ensemble == true) ? FlexpartSim{Ensemble}(joinpath(fprun.path, "pathnames")) : FlexpartSim(joinpath(fprun.path, "pathnames"))
     outfiles = Flexpart.OutputFiles(fpsim)
     for outfile in outfiles
       fpoutput = FlexpartOutputs.add!(outfile)
@@ -87,11 +87,16 @@ end
 
 assign_to_run!(fprun::FlexpartRun, fpoutput::FlexpartOutput) = Relationship!(fprun, fpoutput)
 
-function rename!(uuid::String, new_name::String)
+function rename!(uuid::String)
     renamed_run = findone(FlexpartRun, uuid=uuid)
-    related_output = related(renamed_run, FlexpartOutput)[1]
-    related_output.path = joinpath(renamed_run.path, "output", basename(related_output.path))
-    related_output |> save!
+    related_outputs = related(renamed_run, FlexpartOutput)
+    for output in related_outputs
+        parts = split(output.path, "/")
+        start_index = findfirst(x -> startswith(x, "output"), parts)
+        end_outpath = join(parts[start_index:end], "/")
+        output.path = joinpath(renamed_run.path, end_outpath)
+        output |> save!
+    end
 end
 
 function delete_non_existing!()

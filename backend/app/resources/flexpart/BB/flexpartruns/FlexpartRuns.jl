@@ -51,6 +51,7 @@ export FlexpartRun
     status::String = STATUS_CREATED
     options::String = ""
     # options::OptionType = OptionType()
+    ensemble::Bool = false
 end
 
 Validation.validator(::Type{FlexpartRun}) = ModelValidator([
@@ -65,12 +66,13 @@ API.FlexpartRun(x::FlexpartRun) = API.FlexpartRun(;
   name = x.name,
   status = x.status,
   date_created = x.date_created,
-  options = FlexpartRuns.get_options(x)
+  options = FlexpartRuns.get_options(x),
+  ensemble = x.ensemble
 )
 
 _get_run(id) = findone(FlexpartRun, uuid = id)
 
-function create()
+function create(; ensemble::Bool = false)
     uuid = string(UUIDs.uuid4())
     path = joinpath(FLEXPART_RUNS_DIR, uuid)
     mkpath(path)
@@ -80,7 +82,8 @@ function create()
         uuid=uuid,
         name=uuid,
         path=relpath(path),
-        options=JSON3.write(fpoptions.options)
+        options=JSON3.write(fpoptions.options),
+        ensemble=ensemble
         # date_created = Dates.format(Dates.now(), DATE_FORMAT)
     )
     newentry |> save!
@@ -122,7 +125,7 @@ end
 function rename!(uuid::String, new_name::String)
     entry = findone(FlexpartRun, uuid=uuid)
     entry.name = new_name
-    new_path = joinpath(FLEXPART_RUNS_DIR, new_name)
+    new_path = relpath(joinpath(FLEXPART_RUNS_DIR, new_name))
     mv(entry.path, new_path)
     entry.path = new_path
     entry |> save!
