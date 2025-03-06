@@ -79,13 +79,13 @@ export class ReleaseFormComponent implements ControlValueAccessor, OnDestroy {
 
   form = new UntypedFormGroup({
     location: new UntypedFormControl({lon: 0, lat: 0}, Validators.required),
-    height: new UntypedFormControl(1.5, Validators.required),
+    height: new UntypedFormControl(10, Validators.required),
     substanceName: new UntypedFormControl(substanceNames[0].key, Validators.required),
     geometryName: new UntypedFormControl(geometryNames[0].value, Validators.required),
-    length: new UntypedFormControl(0, Validators.required),
-    width: new UntypedFormControl(0, Validators.required),
+    boxLength: new UntypedFormControl(0, Validators.required),
+    boxWidth: new UntypedFormControl(0, Validators.required),
     boxHeight: new UntypedFormControl(0, Validators.required),
-    mass: new UntypedFormControl(1., Validators.required),
+    mass: new UntypedFormControl(1, Validators.required),
     start: new UntypedFormControl(new Date(), Validators.required),
     end: new UntypedFormControl(new Date(), Validators.required)
   })
@@ -95,13 +95,13 @@ export class ReleaseFormComponent implements ControlValueAccessor, OnDestroy {
   createFormGroup(loc: {lon: number, lat: number}, start: Date, end: Date): UntypedFormGroup {
     return new UntypedFormGroup({
       location: new UntypedFormControl(loc, Validators.required),
-      height: new UntypedFormControl(1.5, Validators.required),
+      height: new UntypedFormControl(10, Validators.required),
       substanceName: new UntypedFormControl(substanceNames[0].key, Validators.required),
       geometryName: new UntypedFormControl(geometryNames[0].value, Validators.required),
-      length: new UntypedFormControl(0, Validators.required),
-      width: new UntypedFormControl(0, Validators.required),
+      boxLength: new UntypedFormControl(0, Validators.required),
+      boxWidth: new UntypedFormControl(0, Validators.required),
       boxHeight: new UntypedFormControl(0, Validators.required),
-      mass: new UntypedFormControl(1., Validators.required),
+      mass: new UntypedFormControl(1, Validators.required),
       start: new UntypedFormControl(start, Validators.required),
       end: new UntypedFormControl(end, Validators.required)
     });
@@ -127,8 +127,8 @@ export class ReleaseFormComponent implements ControlValueAccessor, OnDestroy {
       if (result) {
         // Add the box geometry values to the main form
         this.form.patchValue({
-          length: result.length,
-          width: result.width,
+          boxLength: result.boxLength,
+          boxWidth: result.boxWidth,
           boxHeight: result.boxHeight
         });
       }

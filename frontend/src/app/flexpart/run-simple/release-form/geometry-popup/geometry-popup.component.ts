@@ -17,15 +17,13 @@ export class GeometryPopupComponent {
   form: UntypedFormGroup;
 
     constructor(
-
-
         public dialogRef: MatDialogRef<GeometryPopupComponent>,
         @Inject(MAT_DIALOG_DATA) public data: any
     ) {
     // Initialize the form with length and width controls
     this.form = new UntypedFormGroup({
-      length: new UntypedFormControl(null, [Validators.required, Validators.min(0)]),
-      width: new UntypedFormControl(null, [Validators.required, Validators.min(0)]),
+      boxLength: new UntypedFormControl(null, [Validators.required, Validators.min(0)]),
+      boxWidth: new UntypedFormControl(null, [Validators.required, Validators.min(0)]),
       boxHeight: new UntypedFormControl(null, [Validators.required, Validators.min(0)]),
     });
   }
@@ -33,13 +31,10 @@ export class GeometryPopupComponent {
     onSubmit(): void {
         if (this.form.valid) {
           this.dialogRef.close(this.form.value);
-          console.log("Value of box : ", this.form.value)
-          console.log("this should be the length : ", this.form.value.length)
         }
       }
   
       onCancel(): void {
         this.dialogRef.close();
-        console.log("Value of box : ", this.form.value)
       }
 }
