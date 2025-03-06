@@ -20,16 +20,16 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have as title 'cbrn-spa'`, () => {
+  it(`should have as title 'cbrn-alert'`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('cbrn-spa');
+    expect(app.title).toEqual('cbrn-alert');
   });
 
   it('should render title', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement;
-    expect(compiled.querySelector('.content span').textContent).toContain('cbrn-spa app is running!');
+    expect(compiled.querySelector('.content span').textContent).toContain('cbrn-alert app is running!');
   });
 });
