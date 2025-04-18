@@ -106,12 +106,15 @@ end
 function add_existing(fepath::String)
     fedir = FlexExtractDir(fepath)
     name = basename(fedir.path)
+    uuid = string(UUIDs.uuid4())
     fcontrol = FeControl(fedir)
+    ensemble = occursin("CONTROL_OD.OPER.FC.eta.highres", fedir[:controlfile]) ? false : true
     newentry = FlexpartInput(
-        uuid=name,
+        uuid=uuid,
         name=name,
         path=relpath(fedir.path),
         control=JSON3.write(fcontrol.dict),
+        ensemble=ensemble,
         status=STATUS_FINISHED
     )
     newentry |> save!
