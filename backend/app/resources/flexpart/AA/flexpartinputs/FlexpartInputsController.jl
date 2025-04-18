@@ -89,7 +89,7 @@ function data_retrieval()
       @info "The submission with uuid = $(newinput.uuid) failed."
       FlexpartInputs.change_status!(newinput, STATUS_ERRORED)
       FlexpartInputs.add_error_message!(newinput, join(readlines(log_file_path; keep = true), ""))
-      FlexpartInputs.delete_from_disk(newinput)
+      #FlexpartInputs.delete_from_disk(newinput)
       if e isa MarsDataNotAvailableError
           # throw(Genie.Exceptions.RuntimeException("Mars Retrieval error: DATA_NOT_YET_AVAILABLE", "The data you're requesting is not yet available", 500, e))
           return DATA_NOT_YET_AVAILABLE

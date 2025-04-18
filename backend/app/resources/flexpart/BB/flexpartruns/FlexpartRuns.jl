@@ -143,6 +143,7 @@ function delete_non_existing!()
     entries = all(FlexpartRun)
     for entry in entries
         if !isdir(entry.path)
+            SearchLight.query("DELETE FROM flexpartoutputsflexpartruns WHERE flexpartruns_id = $(entry.id)")
             SearchLight.delete(entry)
         end
     end

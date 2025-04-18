@@ -265,6 +265,7 @@ end
 function get_runs()
   FlexpartRuns.delete_non_existing!()
   FlexpartRuns.delete_errored!()
+  FlexpartOutputs.delete_non_existing!()
   # List for all Flexpart runs across accounts:
   all_fpruns = all(FlexpartRun)
   filter!(FlexpartRuns.isfinished, all_fpruns)
