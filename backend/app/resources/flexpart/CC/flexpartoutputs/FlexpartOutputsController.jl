@@ -71,6 +71,13 @@ function get_dimensions()
         raster = raster[layername]
     end
     d = _dims_to_dict(raster)
+    if haskey(d, :Ti)
+        d[:Time] = pop!(d, :Ti)
+        d[:Time] = [Dates.format(t, "dd/mm/yyyy - HH:MM") for t in d[:Time]]
+    end
+    haskey(d, :height) && (d[:Height] = pop!(d, :height))
+    haskey(d, :pointspec) && pop!(d, :pointspec)
+    haskey(d, :nageclass) && pop!(d, :nageclass)
     if !withhoriz
         pop!(d, :X)
         pop!(d, :Y)

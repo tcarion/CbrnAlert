@@ -1,5 +1,5 @@
 <ng-container *ngIf="questions$ | async as questions">
-    <form *ngIf="questions.length !== 0" [formGroup]="formGroup" (ngSubmit)="onSubmit()">
+    <form *ngIf="questions.length !== 0" [formGroup]="formGroup" (ngSubmit)="onSubmit()" style="display: flex; align-items: center; gap: 2vw;">
         <app-dyn-form [questions]="questions" [parentForm]="formGroup" formName="dimensions"></app-dyn-form>
         <button mat-raised-button color="primary" type="submit" [disabled]="!formGroup.valid">Plot!</button>
     </form>

@@ -1,4 +1,4 @@
-    <form [formGroup]="form">
+    <form [formGroup]="form" style="display: flex; align-items: center; gap: 1vw;">
   
       <div *ngFor="let question of questions" class="form-row">
         <app-question [question]="question" [form]="form"></app-question>
