@@ -153,6 +153,7 @@ function delete_errored!()
     entries = all(FlexpartRun)
     errored = filter(x -> x.status == STATUS_ERRORED, entries)
     for entry in errored
+        SearchLight.query("DELETE FROM flexpartoutputsflexpartruns WHERE flexpartruns_id = $(entry.id)")
         SearchLight.delete(entry)
     end
 end
@@ -161,12 +162,14 @@ function delete_unfinished!()
     entries = all(FlexpartRun)
     unfinished = filter(x -> x.status !== STATUS_FINISHED, entries)
     for entry in unfinished
+        SearchLight.query("DELETE FROM flexpartoutputsflexpartruns WHERE flexpartruns_id = $(entry.id)")
         SearchLight.delete(entry)
     end
 end
 
 function delete!(entry::FlexpartRun)::FlexpartRun
     isdir(entry.path) && rm(entry.path, recursive=true)
+    SearchLight.query("DELETE FROM flexpartoutputsflexpartruns WHERE flexpartruns_id = $(entry.id)")
     SearchLight.delete(entry)
     return entry
 end
