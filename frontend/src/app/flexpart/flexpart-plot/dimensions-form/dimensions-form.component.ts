@@ -38,13 +38,17 @@ export class DimensionsFormComponent implements OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    console.log("CHANGES", changes)
     const newOutId = changes["outputId"] ? changes["outputId"].currentValue : this.outputId;
     const newLayer = changes["layerName"] ? changes["layerName"].currentValue : this.layerName;
     if (newOutId && newLayer) {
       this.formGroup = new UntypedFormGroup({});
       this.questions$ = this.flexpartService.getDimsQuestions(newOutId, newLayer).pipe(
         tap((questions) => {
+          questions.forEach((question) => {
+            if (question.key === 'Ti') {
+              question.label = 'Time'; // Change the label to 'Time' for the 'Ti' key
+            }
+          });
           this.isLoading = false;
         })
       );
@@ -64,17 +68,14 @@ export class DimensionsFormComponent implements OnChanges {
     });
 
     const toGeoJSON = this.responseFormat == SliceResponseType.GEOJSON
-    console.log(this.formGroup.value.dimensions)
 
     if (toGeoJSON) {
       this.flexpartService.getSliceJson(outputId as string, layerName as string, toGeoJSON, this.formGroup.value.dimensions).subscribe(res => {
         const geores = res as GeoJsonSliceResponse;
-        console.log(geores)
         this.store.dispatch(new MapPlotAction.Add(geores, 'flexpart'))
       })
     } else {
       this.flexpartService.getSliceTiff(outputId as string, layerName as string, toGeoJSON, this.formGroup.value.dimensions).subscribe(res => {
-        console.log(res)
         this.store.dispatch(new MapPlotAction.AddTiff(res, 'flexpart'))
       })
     }
