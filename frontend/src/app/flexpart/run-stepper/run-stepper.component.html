@@ -1,7 +1,7 @@
 <mat-horizontal-stepper [linear]="true">
     <mat-step label="Choose Flexpart Input">
         <app-inputs #input></app-inputs>
-        <div>
+        <div class="flex justify-center mt-4">
             <button mat-raised-button matStepperNext [disabled]="input.value == undefined">Next</button>
         </div>
     </mat-step>

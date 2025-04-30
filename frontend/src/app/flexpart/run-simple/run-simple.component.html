@@ -21,21 +21,21 @@
           <app-release-form [dateRange]="minMaxDate" [formGroup]="runForm" [formControlName]="i"></app-release-form>
         </ng-container>
       </ng-container>
-      <div>
+      <div class="flex justify-center">
         <button mat-raised-button matStepperNext [disabled]="releases.invalid || numberOfSubstances.invalid" >Next</button>
       </div>
     </mat-step>
 
     <mat-step label="Command">
       <app-command-form [dateRange]="minMaxDate" [formGroup]="runForm" formControlName="command"></app-command-form>
-      <div>
+      <div class="flex justify-center">
         <button mat-raised-button matStepperNext [disabled]="runForm.get('command')!.invalid" >Next</button>
       </div>
     </mat-step>
 
     <mat-step label="Outgrid" class="flex flex-row">
       <app-outgrid-form [formGroup]="runForm" formControlName="outgrid"></app-outgrid-form>
-      <div>
+      <div class="flex justify-center">
         <button type="submit" mat-raised-button color="primary" [disabled]="runForm.invalid" (click)="submit(runForm)">Run Flexpart !</button>
       </div>
     </mat-step>

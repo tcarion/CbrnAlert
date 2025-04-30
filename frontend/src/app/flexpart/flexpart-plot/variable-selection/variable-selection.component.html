@@ -1,5 +1,4 @@
-<div class="flex flex-col" style="gap: 1vh;">
-
+<div class="flex flex-col items-center w-full" style="gap: 1vh;">
   <!-- Variable selection dropdown -->
   <mat-form-field style="margin-top: 1vh;">
     <mat-select placeholder="Choose variable" [(value)]="selectedCategory" (selectionChange)="onCategoryChange()">
@@ -8,7 +7,6 @@
       </mat-option>
     </mat-select>
   </mat-form-field>
-
   <!-- Release selection dropdown -->
   <mat-form-field *ngIf="selectedCategory">
     <mat-select placeholder="Choose release" [(value)]="selectedLayer">
@@ -24,5 +22,4 @@
       </mat-option>
     </mat-select>
   </mat-form-field>
-
 </div>

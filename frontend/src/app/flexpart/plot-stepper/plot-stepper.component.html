@@ -5,7 +5,7 @@
 <mat-horizontal-stepper (selectionChange)="selectionChanged($event)" [linear]="true">
   <mat-step label="Choose Flexpart run">
     <app-flexpart-plot #run></app-flexpart-plot>
-    <div>
+    <div class="flex justify-center mt-4">
       <button mat-raised-button matStepperNext [disabled]="run.value == undefined">Next</button>
     </div>
   </mat-step>
@@ -13,7 +13,7 @@
   <mat-step label="Choose Flexpart output">
     <ng-template matStepContent>
       <app-choose-output (selectedIdEvent)="selectedOutputId = $event" [runId] = "run.value"></app-choose-output>
-      <div>
+      <div class="flex justify-center mt-4">
         <button mat-raised-button matStepperPrevious>Go back</button>
         <button mat-raised-button matStepperNext [disabled]="selectedOutputId == undefined">Next</button>
       </div>
@@ -23,7 +23,7 @@
   <mat-step label="Choose variable to plot">
     <ng-template matStepContent>
       <app-variable-selection (selectedIdEvent)="selectedLayer = $event"  [outputId] = "selectedOutputId"></app-variable-selection>
-      <div>
+      <div class="flex justify-center mt-4">
         <button mat-raised-button matStepperPrevious>Go back</button>
         <button mat-raised-button matStepperNext [disabled]="selectedOutputId == undefined" (click)="onLayerSelected()">Next</button>
       </div>
@@ -33,7 +33,9 @@
   <mat-step label="Choose dimensions to plot">
     <ng-template matStepContent>
       <app-dimensions-form [outputId]="selectedOutputId" [layerName]="selectedLayer"></app-dimensions-form>
-      <button mat-raised-button matStepperPrevious>Go back</button>
+      <div class="flex justify-center mt-4">
+        <button mat-raised-button matStepperPrevious>Go back</button>
+      </div>
     </ng-template>
   </mat-step>
 
