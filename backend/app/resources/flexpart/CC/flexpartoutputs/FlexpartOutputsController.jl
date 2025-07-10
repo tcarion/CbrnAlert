@@ -6,6 +6,7 @@ using Genie.Renderer.Json: json
 using SearchLight
 using SearchLight.Relationships
 
+using Flexpart
 using UUIDs
 
 using JSON3
@@ -197,5 +198,30 @@ function getcolors(collection)
 end
 
 geo2dict(collection) = JSON3.read(write(collection))
+
+function get_ensemble_stats()
+    output_id = Genie.Router.params(:outputId)
+    layername = Genie.Router.params(:layer)
+    payload = jsonpayload()
+    timestep = payload["dims"]["Ti"]
+    height = haskey(payload["dims"], "height") ? payload["dims"]["height"] : nothing
+    threshold = payload["threshold"]
+
+    # Get stats
+    fprun_folder = related(_output_by_uuid(output_id), FlexpartRun)[].path
+    fprun_pn = joinpath(fprun_folder, "pathnames")
+    threshold_stats = Flexpart.threshold_exceedance(fprun_pn, layername, threshold, timestep, height)
+    agreement = threshold_stats[:agreement]
+    contours = threshold_stats[:contours]
+
+    # Create multi-band raster with all the data
+    contours_uint8 = map(m -> convert(Array{UInt8}, m), contours)
+    stack_data = cat(agreement, contours_uint8...; dims=3)
+    file_mean = joinpath(fprun_folder, "output/ensemble_mean.nc")
+    ref_raster = Raster(file_mean, name=layername; crs=EPSG(4326))
+    raster = Raster(stack_data; dims=(dims(ref_raster)[1:2]..., Band(1:size(stack_data, 3))), crs=EPSG(4326))
+    raster = reverse(raster; dims=Y)
+    _respond_tiff(raster)
+end
 
 end
