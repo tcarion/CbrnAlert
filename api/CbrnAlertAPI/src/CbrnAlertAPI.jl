@@ -46,6 +46,9 @@ The following server methods must be implemented:
 - **flexpart_outputs_output_id_slice_post**
     - *invocation:* POST /flexpart/outputs/{outputId}/slice
     - *signature:* flexpart_outputs_output_id_slice_post(req::HTTP.Request, layer::String, output_id::String, body::Any; geojson=nothing, legend=nothing,) -> FlexpartOutputsOutputIdSlicePost200Response
+- **flexpart_outputs_output_id_stats_post**
+    - *invocation:* POST /flexpart/outputs/{outputId}/stats
+    - *signature:* flexpart_outputs_output_id_stats_post(req::HTTP.Request, output_id::String, layer::String, flexpart_outputs_output_id_stats_post_request::FlexpartOutputsOutputIdStatsPostRequest;) -> String
 - **flexpart_run_post**
     - *invocation:* POST /flexpart/run
     - *signature:* flexpart_run_post(req::HTTP.Request, input_id::String, flexpart_run_post_request::FlexpartRunPostRequest; run_type=nothing,) -> FlexpartRun

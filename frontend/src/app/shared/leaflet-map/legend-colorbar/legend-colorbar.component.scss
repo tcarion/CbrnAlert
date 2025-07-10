@@ -4,9 +4,9 @@
   bottom: calc(0.15 * var(--legendBoxSize));
   right: calc(0.15 * var(--legendBoxSize));
   background-color: white;
-  border-radius: calc(0.03 * var(--legendBoxSize));
-  border-width: calc(0.015 * var(--legendBoxSize));
-  padding: calc(0.04 * var(--legendBoxSize));
+  border-radius: 0.1vw;
+  box-shadow: 0 0 0 0.1vw rgba(0, 0, 0, 0.2);
+  padding: calc(0.06 * var(--legendBoxSize)) calc(0.04 * var(--legendBoxSize));
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -30,7 +30,8 @@
 
 .legend-ticks {
   position: absolute;
-  font-size: calc(0.047 * var(--legendBoxSize));
+  white-space: nowrap;
+  font-size: calc(0.05 * var(--legendBoxSize));
   left: calc(0.015 * var(--legendBoxSize));
   top: calc(0.06 * var(--legendBoxSize));
 }
@@ -39,11 +40,17 @@
   top: calc(-0.035 * var(--legendBoxSize));
 }
 
+.unit-wrapper {
+  width: calc(0.18 * var(--legendBoxSize));
+  display: flex;
+  justify-content: center;
+}
+
 .unit {
   --tw-rotate: 90deg;
   transform: var(--tw-transform);
   --tw-translate-x: calc(0.07 * var(--legendBoxSize));
   transform: var(--tw-transform);
-  font-size: calc(0.055 * var(--legendBoxSize));
+  font-size: calc(0.058 * var(--legendBoxSize));
   white-space: nowrap;
 }

@@ -265,7 +265,6 @@ export class FlexpartService {
     const questions: QuestionBase<any>[] = [];
     return this.getZDims(outputId, layer).pipe(
       switchMap(dims => {
-        console.log(dims)
         for (const [key, values] of Object.entries(dims as { [k: string]: string[] | number[] })) {
           const kvs = values.map((v) => {
             return { key: v as string, value: v as string }
@@ -286,6 +285,15 @@ export class FlexpartService {
       })
     );
   }
+
+  getEnsembleStats(outputId: string, layerName: string, dims: {[key: string]: number}, threshold: number) {
+    return this.apiService.flexpartOutputsOutputIdStatsPost({
+      outputId,
+      layer: layerName,
+      body: {dims, threshold}
+    })
+  }
+
   meteoDataRetrieval(payload: any) {
     // const notifTitle = this.notificationService.addNotif('Met data retrieval', 'metDataRequest');
     // this.store

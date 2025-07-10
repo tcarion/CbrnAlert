@@ -564,6 +564,7 @@ components:
             - $ref: '#/components/schemas/ColorbarData'
             # description: 'Place for other information like legend map'
       # properties:
+
     ColorbarData:
       type: object
       required:
@@ -1088,6 +1089,48 @@ paths:
                 oneOf:
                  - $ref: '#/components/schemas/RawSliceResponse'
                  - $ref: '#/components/schemas/GeoJsonSliceResponse'
+            image/tiff:
+              schema:
+                type: string
+                format: binary
+
+  /flexpart/outputs/{outputId}/stats:
+    post:
+      tags:
+        - Flexpart
+      description: 'Return ensemble statistics of the plotted `output`, based on layer, dimensions and input threshold value.'
+      parameters:
+        - $ref: '#/components/parameters/outputIdParam'
+        - in: query
+          name: layer
+          required: true
+          schema:
+            type: string
+          description: Name of the plotted layer
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - dims
+                - threshold
+              properties:
+                dims:
+                  type: object
+                  additionalProperties:
+                    type: integer
+                  description: Indices of selected dimensions (time and height)
+                threshold:
+                  type: number
+                  description: Threshold value used to calculate stats (ensemble agreement and individual masks)
+
+      responses:
+        '200':
+          description: OK
+          content:
             image/tiff:
               schema:
                 type: string

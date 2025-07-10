@@ -15,6 +15,7 @@ import { FlexpartRun } from '../models/flexpart-run';
 import { RunStatus } from '../models/run-status';
 import { FlexpartInputPostRequest } from '../models/flexpart-input-post-request';
 import { FlexpartOutputsOutputIdSlicePost200Response } from '../models/flexpart-outputs-output-id-slice-post-200-response';
+import { FlexpartOutputsOutputIdStatsPostRequest } from '../models/flexpart-outputs-output-id-stats-post-request';
 import { FlexpartRunPostRequest } from '../models/flexpart-run-post-request';
 
 @Injectable({
@@ -1192,6 +1193,85 @@ export class FlexpartApiService extends BaseService {
 ): Observable<Blob> {
 
     return this.flexpartOutputsOutputIdSlicePost$Tiff$Response(params,context).pipe(
+      map((r: StrictHttpResponse<Blob>) => r.body as Blob)
+    );
+  }
+
+  /**
+   * Path part for operation flexpartOutputsOutputIdStatsPost
+   */
+  static readonly FlexpartOutputsOutputIdStatsPostPath = '/flexpart/outputs/{outputId}/stats';
+
+  /**
+   * Return ensemble statistics of the plotted `output`, based on layer, dimensions and input threshold value.
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `flexpartOutputsOutputIdStatsPost()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  flexpartOutputsOutputIdStatsPost$Response(params: {
+
+    /**
+     * The output ID
+     */
+    outputId: string;
+
+    /**
+     * Name of the plotted layer
+     */
+    layer: string;
+    body: FlexpartOutputsOutputIdStatsPostRequest
+  },
+  context?: HttpContext
+
+): Observable<StrictHttpResponse<Blob>> {
+
+    const rb = new RequestBuilder(this.rootUrl, FlexpartApiService.FlexpartOutputsOutputIdStatsPostPath, 'post');
+    if (params) {
+      rb.path('outputId', params.outputId, {"style":"simple","explode":false});
+      rb.query('layer', params.layer, {"style":"form","explode":true});
+      rb.body(params.body, 'application/json');
+    }
+
+    return this.http.request(rb.build({
+      responseType: 'blob',
+      accept: 'image/tiff',
+      context: context
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<Blob>;
+      })
+    );
+  }
+
+  /**
+   * Return ensemble statistics of the plotted `output`, based on layer, dimensions and input threshold value.
+   *
+   * This method provides access only to the response body.
+   * To access the full response (for headers, for example), `flexpartOutputsOutputIdStatsPost$Response()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  flexpartOutputsOutputIdStatsPost(params: {
+
+    /**
+     * The output ID
+     */
+    outputId: string;
+
+    /**
+     * Name of the plotted layer
+     */
+    layer: string;
+    body: FlexpartOutputsOutputIdStatsPostRequest
+  },
+  context?: HttpContext
+
+): Observable<Blob> {
+
+    return this.flexpartOutputsOutputIdStatsPost$Response(params,context).pipe(
       map((r: StrictHttpResponse<Blob>) => r.body as Blob)
     );
   }

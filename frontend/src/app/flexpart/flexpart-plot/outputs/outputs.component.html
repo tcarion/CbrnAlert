@@ -1,7 +1,14 @@
 <ng-container *ngIf="fpOutputs$ | async as fpOutputs">
-    <mat-selection-list class="listbox" [multiple]="false">
-        <mat-list-option class="list-item" *ngFor="let fpOutput of fpOutputs; let index = index" (click)="onClick(fpOutput.uuid)">
-            <pre>Results file:     {{ fpOutput.name }}</pre>        
-        </mat-list-option>
-    </mat-selection-list>
+    <div class="flex justify-center">
+        <mat-form-field style="margin-top: 1vh;">
+            <mat-label>
+                {{ fpOutputs[0].member === '' ? 'Deterministic results' : 'Ensemble results' }}
+            </mat-label>
+            <mat-select (selectionChange)="onClick($event.value)">
+                <mat-option *ngFor="let fpOutput of fpOutputs" [value]="fpOutput.uuid">
+                    {{ fpOutputs[0].member === '' ? fpOutput.name : (fpOutput.member === '0' ? 'Mean' : 'Member ' + fpOutput.member) }}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+    </div>
 </ng-container>

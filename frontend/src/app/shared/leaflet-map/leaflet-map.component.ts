@@ -1,19 +1,21 @@
 import { FeatureCollection } from 'geojson';
 import { MapAction } from 'src/app/core/state/map.state';
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { circle, Control, Icon, icon, latLng, latLngBounds, Layer, Map, marker, Marker, polygon, Rectangle, tileLayer, LayerGroup, FeatureGroup, TileLayer, LatLngBounds, control } from 'leaflet';
+import { Component, OnInit, ChangeDetectionStrategy, Input } from '@angular/core';
+import { circle, Control, ControlOptions, DomUtil, DomEvent, Icon, icon, latLng, latLngBounds, Layer, Map as LeafletMap, marker, Marker, polygon, Rectangle, tileLayer, LayerGroup, FeatureGroup, TileLayer, LatLngBounds, control } from 'leaflet';
 import { dynamicMapLayer, imageMapLayer, ImageMapLayer } from 'esri-leaflet';
 import chroma from 'chroma-js';
 import { ColorbarData } from 'src/app/core/api/models/colorbar-data';
 import '@geoman-io/leaflet-geoman-free';
 import { MapService } from 'src/app/core/services/map.service';
 import { Select, Store } from '@ngxs/store';
-import { Observable, of } from 'rxjs';
-import { MapPlotState } from 'src/app/core/state/map-plot.state';
+import { Observable, firstValueFrom, of } from 'rxjs';
+import { MapPlotState, MapPlotAction } from 'src/app/core/state/map-plot.state';
 import { MapPlot } from 'src/app/core/models/map-plot';
-import { map, tap } from 'rxjs/operators';
+import { map, tap, take } from 'rxjs/operators';
 import { MapPlotsService } from 'src/app/core/services/map-plots.service';
+import { FlexpartService } from 'src/app/flexpart/flexpart.service';
 import { prefix } from '@fortawesome/free-solid-svg-icons';
+import { stat } from 'fs';
 
 const iconRetinaUrl = 'assets/marker-icon-2x.png';
 const iconUrl = 'assets/marker-icon.png';
@@ -30,6 +32,11 @@ const iconDefault = icon({
 });
 Marker.prototype.options.icon = iconDefault;
 
+interface ThresholdControlOptions extends ControlOptions {
+  collapsed?: boolean;
+  checkboxState?: { [label: string]: boolean };
+}
+
 @Component({
   selector: 'app-leaflet-map',
   templateUrl: './leaflet-map.component.html',
@@ -37,12 +44,14 @@ Marker.prototype.options.icon = iconDefault;
 })
 export class LeafletMapComponent implements OnInit {
 
-  map: Map;
+  map: LeafletMap;
   layer: FeatureGroup | TileLayer;
   scalebar: Control.Scale | undefined;
   sameRender: boolean = false;
   popDensityLayer100m: ImageMapLayer;
   popDensityLayer1km: ImageMapLayer;
+  currentThresholdCtrl: Control | null = null;
+  thresholdControlList = new Map<string, { control: Control, collapsed: boolean, threshold: number | null, plotUnit: string, checkboxState: { [label: string]: boolean } }>();
 
   options = {
     attributionControl: false, // Disable the default attribution control
@@ -77,42 +86,46 @@ export class LeafletMapComponent implements OnInit {
   constructor(
     public mapService: MapService,
     public mapPlotsService: MapPlotsService,
+    public flexpartService: FlexpartService,
     public store: Store
   ) {
   }
 
   ngOnInit(): void {
-    this.mapPlots$.subscribe(mapPlots => {
-      this.updateOverlays(mapPlots);
-    });
-  }
-
-  updateOverlays(mapPlots: MapPlot[]) {
-    const overlayLayers: { [key: string]: Layer } = {};
-    mapPlots.forEach(mapPlot => {
-      if (mapPlot.type == 'flexpart' && mapPlot.geojson) {
-        this.layer = this.mapPlotsService.flexpartPlotToLayer(mapPlot.geojson as FeatureCollection);
-        this.mapPlotsService.setColors(this.layer as LayerGroup, mapPlot.metadata as ColorbarData);
-      } else if (mapPlot.type == 'flexpart') {
-        this.layer = this.mapPlotsService.addTiff(mapPlot.data) as unknown as TileLayer;
-      } else if (mapPlot.type == 'atp45') {
-        let featureGroup = this.mapPlotsService.atp45PlotToLayer(mapPlot.geojson as FeatureCollection);
-        featureGroup.eachLayer((layers: any) => {
-          layers.eachLayer((layer: any) => {
-            layer.bindPopup(layer.feature.properties.type);
-          });
-        });
-        this.layer = featureGroup;
+    this.activePlot$.subscribe(plot => {
+      if (this.currentThresholdCtrl) {
+        this.map.removeControl(this.currentThresholdCtrl);
+        this.currentThresholdCtrl = null;
       }
-      overlayLayers[mapPlot.name] = this.layer;
+      if (plot?.type == 'stats') {
+        const mainPlot = plot.name.split(' - ')[0];
+        const stored = this.thresholdControlList.get(mainPlot);
+        if (stored) {
+          this.currentThresholdCtrl = stored.control;
+          this.currentThresholdCtrl.addTo(this.map);
+        }
+      }
+      if (plot?.type == 'flexpart' && plot?.simType == 'ensemble') {
+        const stored = this.thresholdControlList.get(plot.name);
+        if (stored) {
+          this.currentThresholdCtrl = stored.control;
+          this.currentThresholdCtrl.addTo(this.map);
+        } else {
+          this.currentThresholdCtrl = this.createThresholdControl(plot);
+          this.thresholdControlList.set(plot.name, {
+            control: this.currentThresholdCtrl,
+            collapsed: true,
+            threshold: null,
+            plotUnit: '',
+            checkboxState: {}
+          });
+          this.currentThresholdCtrl.addTo(this.map);
+        }
+      }
     });
-    this.layersControl.overlays = {
-      ... this.layersControl.overlays,
-      ... overlayLayers
-    }
   }
 
-  onMapReady(map: Map) {
+  onMapReady(map: LeafletMap) {
     this.mapService.leafletMap = map;
     this.map = map;
     // Initial map settings at startup
@@ -245,10 +258,6 @@ export class LeafletMapComponent implements OnInit {
       });
     }
 
-    this.mapPlots$.subscribe(mapPlots => {
-      this.updateOverlays(mapPlots);
-    });
-
     // Simulate a click event on the default layer control button such that Esri Satellite Imagery in the Layers icon appears as clicked by default
     setTimeout(() => {
       const layersControlContainer = document.querySelector('.leaflet-control-layers');
@@ -314,44 +323,163 @@ export class LeafletMapComponent implements OnInit {
       const data = await response.json();
       return data.statistics[0].max; // Extract the max value
     };
-
-    /////  IF WE WANT 1 POP DENSITY LAYER THAT AUTOMATICALLY CHANGES BETWEEN 1 KM AND 100 M RESOLUTION /////
-    // map.on('overlayadd', (e) => {
-    //   if (e.layer === this.layersControl.overlays['Add population density']) {
-    //     updatePopDensityLayer();
-    //   }
-    // });
-    //
-    // const updatePopDensityLayer = () => {
-    //   if (map.hasLayer(this.layersControl.overlays['Add population density'])) {
-    //     if (map.getZoom() >= 9) {
-    //       map.removeLayer(this.layersControl.overlays['Add population density']);
-    //       this.layersControl.overlays['Add population density'] = imageMapLayer({url: 'https://worldpop.arcgis.com/arcgis/rest/services/WorldPop_Population_Density_100m/ImageServer', opacity: 0.5, from: new Date('2020'), to: new Date('2020'), renderingRule: this.renderingRule, minZoom: 9, attribution: 'WorldPop, Esri'});
-    //        map.addLayer(this.layersControl.overlays['Add population density']);
-    //     } else {
-    //       map.removeLayer(this.layersControl.overlays['Add population density']);
-    //       this.layersControl.overlays['Add population density'] = imageMapLayer({url: 'https://worldpop.arcgis.com/arcgis/rest/services/WorldPop_Population_Density_1km/ImageServer', opacity: 0.5, from: new Date('2020'), to: new Date('2020'), renderingRule: this.renderingRule, minZoom: 7, attribution: 'WorldPop, Esri'});
-    //       map.addLayer(this.layersControl.overlays['Add population density']);
-    //     }
-    //   }
-    // }
-    
   }
 
-    // Function to create/update scale bar depending on screen resolution
-    private getScalebar() {
-      // remove existing scale bar if it exists
-      if (this.scalebar) {
-        this.map.removeControl(this.scalebar);
-      }
-      // add scale bar with updated maxWidth
-      const maxWidth = 0.07 * window.innerWidth;
-      this.scalebar = new Control.Scale({
-        position: 'bottomleft',
-        maxWidth: maxWidth,
-        metric: true,
-        imperial: false,
-      }).addTo(this.map);
+  // Function to create/update scale bar depending on screen resolution
+  private getScalebar() {
+  // remove existing scale bar if it exists
+    if (this.scalebar) {
+      this.map.removeControl(this.scalebar);
     }
+    // add scale bar with updated maxWidth
+    const maxWidth = 0.07 * window.innerWidth;
+    this.scalebar = new Control.Scale({
+      position: 'bottomleft',
+      maxWidth: maxWidth,
+      metric: true,
+      imperial: false,
+    }).addTo(this.map);
+  }
+
+  private createThresholdControl(plot: MapPlot, options: ThresholdControlOptions = {}): Control {
+    const ThresholdControl = Control.extend({
+      options: {
+        collapsed: true,
+        checkboxState: {}
+      },
+
+      onAdd: (map: LeafletMap) => {
+        const storedCtrl = this.thresholdControlList.get(plot.name);
+        const container = DomUtil.create('div', 'threshold-control');
+        if (storedCtrl) {
+          if (/spec\d+_mr/.test(plot.legendLayer)) {
+            storedCtrl.plotUnit = 'ng/m³';
+          } else if (/D_spec/.test(plot.legendLayer)) {
+            storedCtrl.plotUnit = 'ng/m²';
+          }
+        }
+
+        // Input field
+        const inputWrapper = DomUtil.create('div', 'threshold-input-wrapper', container);
+        const label = DomUtil.create('label', 'threshold-label', inputWrapper);
+        label.innerText = 'Threshold value:';
+        const input = DomUtil.create('input', 'threshold-input', inputWrapper) as HTMLInputElement;
+        input.type = 'text';
+        input.inputMode = 'decimal';
+        if (storedCtrl && storedCtrl.threshold) {
+          input.value = storedCtrl.threshold.toString();
+        }
+
+        // "Calculate statistics" button
+        const calculateBtn = DomUtil.create('button', 'calculate-btn', container) as HTMLButtonElement;
+        const statusWrapper = DomUtil.create('div', 'status-wrapper', container);
+        calculateBtn.innerText = 'Calculate statistics';
+        calculateBtn.disabled = true;
+
+        // Toggle statistics plots button
+        const optionsWrapper = DomUtil.create('div', '', container);
+        const toggleBtn = DomUtil.create('button', 'toggle-checkboxes-btn', container) as HTMLButtonElement;
+        let isVisible: boolean;
+        if (storedCtrl) {
+          optionsWrapper.style.display = storedCtrl.collapsed ? 'none' : 'block';
+          toggleBtn.innerText = storedCtrl.collapsed ? '▼ Show results' : '▲ Hide results';
+          isVisible = storedCtrl.collapsed ? false : true;
+        }
+        toggleBtn.addEventListener('click', () => {
+          isVisible = !isVisible;
+          if (storedCtrl) {
+            storedCtrl.collapsed = !isVisible;
+          }
+          optionsWrapper.style.display = isVisible ? 'block' : 'none';
+          toggleBtn.innerText = isVisible ? '▲ Hide results' : '▼ Show results';
+        });
+
+        // Logic behind "Calculate statistics" button
+        input.addEventListener('input', () => {
+          const value = parseFloat(input.value);
+          const valid = !isNaN(value) && value > 0;
+          calculateBtn.disabled = !valid;
+          if (valid && storedCtrl) {
+            storedCtrl.threshold = value;
+          }
+        });
+        input.addEventListener('keydown', (event: KeyboardEvent) => {
+          if (event.key === 'Enter' && !calculateBtn.disabled) {
+            calculateBtn.click();
+          }
+        });
+        const items = ['percentage agreement', ...Array.from({ length: 9 }, (_, i) => `member ${i + 1}`), 'mean'];
+        calculateBtn.addEventListener('click', () => {
+          calculateBtn.disabled = true;
+          checkboxes.forEach(cb => cb.disabled = true);
+          checkboxes.forEach(cb => cb.checked = false);
+          if (storedCtrl) {
+            storedCtrl.checkboxState = {};
+          }
+          statusWrapper.innerHTML = '';
+          const spinner = document.createElement('div');
+          spinner.className = 'spinner';
+          statusWrapper.appendChild(spinner);
+          const statsItems = items.map(item => `${item} (${storedCtrl?.threshold} ${storedCtrl?.plotUnit})`);;
+          this.flexpartService.getEnsembleStats(plot.fpOutputId!, plot.legendLayer, plot.dimsIndices!, parseFloat(input.value)).subscribe(
+            result => {
+              this.store.dispatch(new MapPlotAction.AddStatsTiff(result, 'stats', statsItems))
+              statusWrapper.innerHTML = 'Done!';
+              setTimeout(() => {
+                statusWrapper.innerHTML = '';
+              }, 3000);
+              checkboxes.forEach(cb => cb.disabled = false);
+              calculateBtn.disabled = true;
+            }
+          );
+        });
+
+        // List of checkboxes &
+        // Logic behind clicking them
+        const checkboxes: HTMLInputElement[] = [];
+        items.forEach(labelText => {
+          const checkboxWrapper = DomUtil.create('label', 'checkbox-wrapper', optionsWrapper);
+          const checkbox = DomUtil.create('input', '', checkboxWrapper) as HTMLInputElement;
+          checkbox.name = labelText;
+          checkbox.type = 'checkbox';
+          checkbox.disabled = true;
+          checkbox.style.marginRight = '0.5vw';
+          if (storedCtrl && storedCtrl.checkboxState[checkbox.name] == true) {
+            checkbox.checked = storedCtrl.checkboxState[checkbox.name];
+          }
+          checkbox.addEventListener('change', () => {
+            if (storedCtrl) {
+              storedCtrl.checkboxState[checkbox.name] = checkbox.checked;
+            }
+            this.mapPlots$.pipe(take(1)).subscribe(mapPlots => {
+              const statsPlot = mapPlots.find(p => p.name === plot.name + ' - ' + checkbox.name + ` (${storedCtrl?.threshold} ${storedCtrl?.plotUnit})`);
+              if (statsPlot) {
+                if (!statsPlot.visible) {
+                  this.store.dispatch([ new MapPlotAction.Show(statsPlot.id) ]);
+                  if (checkbox.name === 'percentage agreement') {
+                    this.store.dispatch([ new MapPlotAction.SetActive(statsPlot.id) ]);
+                  }
+                } else {
+                  this.store.dispatch(new MapPlotAction.Hide(statsPlot.id));
+                }
+              }
+            });
+          });
+          checkboxes.push(checkbox);
+          checkboxWrapper.appendChild(document.createTextNode(checkbox.name));
+        });
+        if (storedCtrl && storedCtrl.threshold) {
+          checkboxes.forEach(cb => cb.disabled = false);
+        }
+
+        DomEvent.disableClickPropagation(container);
+        return container;
+      },
+
+      onRemove: () => {}
+    });
+
+    return new ThresholdControl({position: 'topright'});
+  }
 
 }

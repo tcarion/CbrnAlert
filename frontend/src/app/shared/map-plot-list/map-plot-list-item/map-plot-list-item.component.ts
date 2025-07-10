@@ -21,18 +21,11 @@ export class MapPlotListItemComponent implements OnInit {
 
     onToggleVisibility(plot: MapPlot) {
         this.visibilityEvent.emit(plot);
-        console.log("you changed visibility!")
     }
 
     onItemClick(plotId: number) {
-        //this.itemClickEvent.emit(plotId);
         const selectedPlot = this.getPlotById(plotId);
         if (selectedPlot) {
-            console.log("You selected Plot N° " + (plotId + 1));
-            console.log("Selected Layer for this Plot: " + selectedPlot.legendLayer);
-            
-            //to trigger active plots
-            //this.visibilityEvent.emit(selectedPlot)
             this.itemClickEvent.emit(selectedPlot)
           } else {
             console.log("Plot with ID " + plotId + " not found.");
