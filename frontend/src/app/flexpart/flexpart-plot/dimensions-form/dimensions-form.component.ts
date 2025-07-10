@@ -8,7 +8,7 @@ import { DropdownQuestion } from 'src/app/shared/form/dropdown-question';
 import { QuestionBase } from 'src/app/shared/form/question-base';
 import { FlexpartService } from '../../flexpart.service';
 import { Store } from '@ngxs/store';
-import { switchMap, tap } from 'rxjs/operators';
+import { switchMap, tap, take } from 'rxjs/operators';
 import { SliceResponseType } from 'src/app/flexpart/flexpart-plot-data';
 
 @Component({
@@ -18,12 +18,14 @@ import { SliceResponseType } from 'src/app/flexpart/flexpart-plot-data';
 })
 export class DimensionsFormComponent implements OnChanges {
 
+  @Input() runId: string
   @Input() outputId: string
   @Input() layerName: string
 
   formGroup: UntypedFormGroup;
   questions$: Observable<QuestionBase<any>[]>;
   isLoading = true;
+  dims: {[key: string]: string[] | number[]} = {};
 
   get responseFormat() {
     return this.flexpartService.selectedSliceType;
@@ -42,11 +44,14 @@ export class DimensionsFormComponent implements OnChanges {
     const newLayer = changes["layerName"] ? changes["layerName"].currentValue : this.layerName;
     if (newOutId && newLayer) {
       this.formGroup = new UntypedFormGroup({});
+      this.flexpartService.getZDims(newOutId, newLayer).pipe(take(1)).subscribe(dims => {
+        this.dims = dims as {[key: string]: string[] | number[]};
+      });
       this.questions$ = this.flexpartService.getDimsQuestions(newOutId, newLayer).pipe(
         tap((questions) => {
           questions.forEach((question) => {
             if (question.key === 'Ti') {
-              question.label = 'Time'; // Change the label to 'Time' for the 'Ti' key
+              question.label = 'Time';
             }
           });
           this.isLoading = false;
@@ -58,25 +63,36 @@ export class DimensionsFormComponent implements OnChanges {
   onSubmit() {
     const outputId = this.outputId;
     const layerName = this.layerName;
+    const toGeoJSON = this.responseFormat == SliceResponseType.GEOJSON
+    let simType: 'ensemble' | 'deterministic';
 
-    // TODO: not very clean, should fine a way to automatically cast values from to select to float or int according to the provided type
-    Object.entries(this.formGroup.value.dimensions).forEach(entry => {
-      const [key, value] = entry;
-      if (key == 'height') {
-        this.formGroup.value.dimensions[key] = parseFloat(value as string);
+    this.flexpartService.runs$.pipe(take(1)).subscribe((runs) => {
+      const run = runs.find(r => r.uuid === this.runId);
+      simType = run?.ensemble ? 'ensemble' : 'deterministic';
+    })
+
+    const selectedIndices: { Ti?: number; height?: number } = {};
+    ['Ti', 'height'].forEach(key => {
+      const dimArray = this.dims[key];
+      const value = this.formGroup.value.dimensions[key];
+      if (dimArray) {
+        const index = dimArray.findIndex(v => v == value);
+        selectedIndices[key as 'Ti' | 'height'] = index + 1;
       }
     });
-
-    const toGeoJSON = this.responseFormat == SliceResponseType.GEOJSON
+    
+    if ('height' in this.formGroup.value.dimensions) {
+      this.formGroup.value.dimensions['height'] = parseFloat(this.formGroup.value.dimensions['height'] as string);
+    }
 
     if (toGeoJSON) {
       this.flexpartService.getSliceJson(outputId as string, layerName as string, toGeoJSON, this.formGroup.value.dimensions).subscribe(res => {
         const geores = res as GeoJsonSliceResponse;
-        this.store.dispatch(new MapPlotAction.Add(geores, 'flexpart'))
+        this.store.dispatch(new MapPlotAction.Add(geores, 'flexpart', outputId, simType, selectedIndices))
       })
     } else {
       this.flexpartService.getSliceTiff(outputId as string, layerName as string, toGeoJSON, this.formGroup.value.dimensions).subscribe(res => {
-        this.store.dispatch(new MapPlotAction.AddTiff(res, 'flexpart'))
+        this.store.dispatch(new MapPlotAction.AddTiff(res, 'flexpart', outputId, simType, selectedIndices))
       })
     }
   }

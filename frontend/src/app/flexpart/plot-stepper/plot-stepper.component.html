@@ -4,15 +4,15 @@
 
 <mat-horizontal-stepper (selectionChange)="selectionChanged($event)" [linear]="true">
   <mat-step label="Choose Flexpart run">
-    <app-flexpart-plot #run></app-flexpart-plot>
+    <app-flexpart-plot (selectedIdEvent)="selectedRunId = $event"></app-flexpart-plot>
     <div class="flex justify-center mt-4">
-      <button mat-raised-button matStepperNext [disabled]="run.value == undefined">Next</button>
+      <button mat-raised-button matStepperNext [disabled]="selectedRunId == undefined">Next</button>
     </div>
   </mat-step>
 
   <mat-step label="Choose Flexpart output">
     <ng-template matStepContent>
-      <app-choose-output (selectedIdEvent)="selectedOutputId = $event" [runId] = "run.value"></app-choose-output>
+      <app-choose-output (selectedIdEvent)="selectedOutputId = $event" [runId] = "selectedRunId"></app-choose-output>
       <div class="flex justify-center mt-4">
         <button mat-raised-button matStepperPrevious>Go back</button>
         <button mat-raised-button matStepperNext [disabled]="selectedOutputId == undefined">Next</button>
@@ -25,14 +25,14 @@
       <app-variable-selection (selectedIdEvent)="selectedLayer = $event"  [outputId] = "selectedOutputId"></app-variable-selection>
       <div class="flex justify-center mt-4">
         <button mat-raised-button matStepperPrevious>Go back</button>
-        <button mat-raised-button matStepperNext [disabled]="selectedOutputId == undefined" (click)="onLayerSelected()">Next</button>
+        <button mat-raised-button matStepperNext [disabled]="selectedLayer == undefined" (click)="onLayerSelected()">Next</button>
       </div>
     </ng-template>
   </mat-step>
 
   <mat-step label="Choose dimensions to plot">
     <ng-template matStepContent>
-      <app-dimensions-form [outputId]="selectedOutputId" [layerName]="selectedLayer"></app-dimensions-form>
+      <app-dimensions-form [runId] = "selectedRunId" [outputId]="selectedOutputId" [layerName]="selectedLayer"></app-dimensions-form>
       <div class="flex justify-center mt-4">
         <button mat-raised-button matStepperPrevious>Go back</button>
       </div>
