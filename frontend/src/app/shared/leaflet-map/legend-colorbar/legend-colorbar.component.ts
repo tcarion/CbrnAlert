@@ -26,7 +26,11 @@ export class LegendColorbarComponent implements OnInit {
   activeLayerUnit: string | null = null;
 
   @Input() set colorbar(value: ColorbarData) {
-    this.formatedTicks = value.ticks.map(i => this.formatTick(i));
+    if (value.ticks[0] == 0) {
+      this.formatedTicks = value.ticks.map(i => (this.formatTick(i) + '%'));
+    } else {
+      this.formatedTicks = value.ticks.map(i => this.formatTick(i));
+    }
     this.colors = value.colors;
   }
 
@@ -41,7 +45,6 @@ export class LegendColorbarComponent implements OnInit {
   ngOnInit(): void {
     
     this.mapPlotsService.selectedLayer$.subscribe(layerName => {
-      console.log('Received layerName:', layerName); // Debug log
       if (layerName) {
         this.layerName = layerName;
         this.updateLegend(layerName);
@@ -51,7 +54,6 @@ export class LegendColorbarComponent implements OnInit {
     this.mapPlotsService.activePlot$.subscribe((plot: MapPlot | null) => {
       this.activePlot = plot;
       if (this.activePlot) {
-          // Update the legend with the selected layer's unit
           this.updateLegend(this.activePlot.legendLayer);
       }
       this.cdr.markForCheck();
@@ -64,13 +66,14 @@ export class LegendColorbarComponent implements OnInit {
 
   setUnit(layerName: string) {
     
-    console.log("Checking the layerName! -> " + layerName)
     if (layerName == 'ORO') {
       this.unit = 'm';
     } else if (/spec\d+_mr/.test(layerName)) {
       this.unit = 'ng / m³';
     } else if (/D_spec/.test(layerName)) {
       this.unit = 'ng / m²';
+    } else if (layerName == 'percentage agreement') {
+      this.unit = '% members over threshold';
     } else {
       this.unit = 'No unit';
       console.log("why no units ? " + layerName)
@@ -82,9 +85,7 @@ export class LegendColorbarComponent implements OnInit {
   }
 
   updateLegend(layerName: string) {
-    console.log("Legend update for layer: ", layerName);
     this.setUnit(layerName)
-    console.log("new unit : ", this.unit)
     this.cdr.markForCheck();
   }
 
