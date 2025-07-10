@@ -13,6 +13,7 @@ Method | HTTP request | Description
 [**flexpart_outputs_output_id_get**](FlexpartApi.md#flexpart_outputs_output_id_get) | **GET** /flexpart/outputs/{outputId} | 
 [**flexpart_outputs_output_id_layers_get**](FlexpartApi.md#flexpart_outputs_output_id_layers_get) | **GET** /flexpart/outputs/{outputId}/layers | 
 [**flexpart_outputs_output_id_slice_post**](FlexpartApi.md#flexpart_outputs_output_id_slice_post) | **POST** /flexpart/outputs/{outputId}/slice | 
+[**flexpart_outputs_output_id_stats_post**](FlexpartApi.md#flexpart_outputs_output_id_stats_post) | **POST** /flexpart/outputs/{outputId}/stats | 
 [**flexpart_run_post**](FlexpartApi.md#flexpart_run_post) | **POST** /flexpart/run | 
 [**flexpart_runs_get**](FlexpartApi.md#flexpart_runs_get) | **GET** /flexpart/runs | 
 [**flexpart_runs_run_id_delete**](FlexpartApi.md#flexpart_runs_run_id_delete) | **DELETE** /flexpart/runs/{runId} | 
@@ -305,6 +306,37 @@ No authorization required
 
  - **Content-Type**: application/json
  - **Accept**: application/json, image/tiff
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **flexpart_outputs_output_id_stats_post**
+> flexpart_outputs_output_id_stats_post(req::HTTP.Request, output_id::String, layer::String, flexpart_outputs_output_id_stats_post_request::FlexpartOutputsOutputIdStatsPostRequest;) -> String
+
+
+
+Return ensemble statistics of the plotted `output`, based on layer, dimensions and input threshold value.
+
+### Required Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **req** | **HTTP.Request** | The HTTP Request object | 
+**output_id** | **String**| The output ID | [default to nothing]
+**layer** | **String**| Name of the plotted layer | [default to nothing]
+**flexpart_outputs_output_id_stats_post_request** | [**FlexpartOutputsOutputIdStatsPostRequest**](FlexpartOutputsOutputIdStatsPostRequest.md)|  | 
+
+### Return type
+
+**String**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: image/tiff
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

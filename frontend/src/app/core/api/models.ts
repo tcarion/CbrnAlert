@@ -43,6 +43,7 @@ export { LoginPost200Response } from './models/login-post-200-response';
 export { FlexpartInputPostRequest } from './models/flexpart-input-post-request';
 export { FlexpartRunPostRequest } from './models/flexpart-run-post-request';
 export { FlexpartOutputsOutputIdSlicePost200Response } from './models/flexpart-outputs-output-id-slice-post-200-response';
+export { FlexpartOutputsOutputIdStatsPostRequest } from './models/flexpart-outputs-output-id-stats-post-request';
 export { Atp45DecisionTreeAllOf } from './models/atp-45-decision-tree-all-of';
 export { Atp45InputWeatherInputOneOf } from './models/atp-45-input-weather-input-one-of';
 export { Atp45InputWeatherInput } from './models/atp-45-input-weather-input';

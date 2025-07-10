@@ -31,6 +31,7 @@ docs/FlexpartOptionsSimple.md
 docs/FlexpartOutgridSimple.md
 docs/FlexpartOutput.md
 docs/FlexpartOutputsOutputIdSlicePost200Response.md
+docs/FlexpartOutputsOutputIdStatsPostRequest.md
 docs/FlexpartReleaseSimple.md
 docs/FlexpartRetrieveSimple.md
 docs/FlexpartRun.md
@@ -96,6 +97,7 @@ src/models/model_FlexpartOptionsSimple.jl
 src/models/model_FlexpartOutgridSimple.jl
 src/models/model_FlexpartOutput.jl
 src/models/model_FlexpartOutputsOutputIdSlicePost200Response.jl
+src/models/model_FlexpartOutputsOutputIdStatsPostRequest.jl
 src/models/model_FlexpartReleaseSimple.jl
 src/models/model_FlexpartRetrieveSimple.jl
 src/models/model_FlexpartRun.jl

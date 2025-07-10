@@ -54,6 +54,7 @@ Class | Method | HTTP request | Description
 *FlexpartApi* | [**flexpart_outputs_output_id_get**](docs/FlexpartApi.md#flexpart_outputs_output_id_get) | **GET** /flexpart/outputs/{outputId} | 
 *FlexpartApi* | [**flexpart_outputs_output_id_layers_get**](docs/FlexpartApi.md#flexpart_outputs_output_id_layers_get) | **GET** /flexpart/outputs/{outputId}/layers | 
 *FlexpartApi* | [**flexpart_outputs_output_id_slice_post**](docs/FlexpartApi.md#flexpart_outputs_output_id_slice_post) | **POST** /flexpart/outputs/{outputId}/slice | 
+*FlexpartApi* | [**flexpart_outputs_output_id_stats_post**](docs/FlexpartApi.md#flexpart_outputs_output_id_stats_post) | **POST** /flexpart/outputs/{outputId}/stats | 
 *FlexpartApi* | [**flexpart_run_post**](docs/FlexpartApi.md#flexpart_run_post) | **POST** /flexpart/run | 
 *FlexpartApi* | [**flexpart_runs_get**](docs/FlexpartApi.md#flexpart_runs_get) | **GET** /flexpart/runs | 
 *FlexpartApi* | [**flexpart_runs_run_id_delete**](docs/FlexpartApi.md#flexpart_runs_run_id_delete) | **DELETE** /flexpart/runs/{runId} | 
@@ -94,6 +95,7 @@ Class | Method | HTTP request | Description
  - [FlexpartOutgridSimple](docs/FlexpartOutgridSimple.md)
  - [FlexpartOutput](docs/FlexpartOutput.md)
  - [FlexpartOutputsOutputIdSlicePost200Response](docs/FlexpartOutputsOutputIdSlicePost200Response.md)
+ - [FlexpartOutputsOutputIdStatsPostRequest](docs/FlexpartOutputsOutputIdStatsPostRequest.md)
  - [FlexpartReleaseSimple](docs/FlexpartReleaseSimple.md)
  - [FlexpartRetrieveSimple](docs/FlexpartRetrieveSimple.md)
  - [FlexpartRun](docs/FlexpartRun.md)

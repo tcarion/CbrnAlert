@@ -534,6 +534,43 @@ paths:
           description: OK
       tags:
       - Flexpart
+  /flexpart/outputs/{outputId}/stats:
+    post:
+      description: "Return ensemble statistics of the plotted `output`, based on layer,\
+        \ dimensions and input threshold value."
+      parameters:
+      - description: The output ID
+        explode: false
+        in: path
+        name: outputId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: Name of the plotted layer
+        explode: true
+        in: query
+        name: layer
+        required: true
+        schema:
+          type: string
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/_flexpart_outputs__outputId__stats_post_request'
+        required: true
+      responses:
+        "200":
+          content:
+            image/tiff:
+              schema:
+                format: binary
+                type: string
+          description: OK
+      tags:
+      - Flexpart
 components:
   parameters:
     inputIdParam:
@@ -1244,6 +1281,21 @@ components:
       oneOf:
       - $ref: '#/components/schemas/RawSliceResponse'
       - $ref: '#/components/schemas/GeoJsonSliceResponse'
+    _flexpart_outputs__outputId__stats_post_request:
+      properties:
+        dims:
+          additionalProperties:
+            type: integer
+          description: Indices of selected dimensions (time and height)
+          type: object
+        threshold:
+          description: Threshold value used to calculate stats (ensemble agreement
+            and individual masks)
+          type: number
+      required:
+      - dims
+      - threshold
+      type: object
     Atp45DecisionTree_allOf:
       properties:
         children:
