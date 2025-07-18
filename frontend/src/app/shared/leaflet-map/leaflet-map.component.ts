@@ -180,38 +180,44 @@ export class LeafletMapComponent implements OnInit {
       }
     });
 
+    // Add and Remove Markers
     map.on('pm:create', (e) => {
       if (e.shape == 'Rectangle') {
         const newLayer = e.layer as Rectangle
-        const previousLayer = this.mapService.drawnRectangle;
-
+        const previousLayer = this.mapService.selectionRectangle;
         if (previousLayer) {
           this.store.dispatch(new MapAction.ChangeAreaSelection(this.mapService.rectangleToArea(newLayer)));
           this.mapService.leafletMap.removeLayer(newLayer)
         } else {
-          this.mapService.drawnRectangle = newLayer
+          this.mapService.selectionRectangle = newLayer
           this.store.dispatch(new MapAction.ChangeAreaSelection(this.mapService.rectangleToArea(newLayer)));
-          this.mapService.drawnRectangle.on('pm:edit', (e: any) => {
+          this.mapService.selectionRectangle.on('pm:edit', (e: any) => {
             this.store.dispatch(new MapAction.ChangeAreaSelection(this.mapService.rectangleToArea(e.layer as Rectangle)));
           })
         }
       } else if (e.shape == 'Marker') {
-        // Change the current marker if exists, and create it if not
         const newLayer = e.layer as Marker
-        const previousLayer = this.mapService.drawnMarker;
+        const previousLayer = this.mapService.selectionMarker;
         if (previousLayer) {
-          // this.mapService.copyMarkerPosition(newLayer);
           this.store.dispatch(new MapAction.ChangeMarker(this.mapService.markerToPoint(newLayer)));
           this.mapService.leafletMap.removeLayer(newLayer)
         } else {
-          this.mapService.drawnMarker = newLayer
+          this.mapService.selectionMarker = newLayer
           this.store.dispatch(new MapAction.ChangeMarker(this.mapService.markerToPoint(e.layer as Marker)));
-          this.mapService.drawnMarker.on('pm:edit', (e: any) => {
+          this.mapService.selectionMarker.on('pm:edit', (e: any) => {
             this.store.dispatch(new MapAction.ChangeMarker(this.mapService.markerToPoint(e.layer as Marker)));
           })
         }
       }
     })
+    map.on('pm:remove', (e) => {
+      if (e.layer === this.mapService.selectionRectangle) {
+        this.store.dispatch(new MapAction.RemoveAreaSelection());
+      }
+      if (e.layer === this.mapService.selectionMarker) {
+        this.store.dispatch(new MapAction.RemoveMarker());
+      }
+    });
 
     // Listen to when user selects another layer, to remove the default layer attribution that otherwise stays for other layers
     map.on('baselayerchange', (e) => {

@@ -20,16 +20,22 @@ export namespace MapAction {
         constructor(public marker: GeoPoint) {}
     }
 
+    export class ChangeAreaSelection {
+        static readonly type = '[Map] ChangeAreaSelection'
+
+        constructor(public area: MapArea) {}
+    }
+
     export class RemoveArea {
         static readonly type = '[Map] RemoveArea'
 
         constructor() {}
     }
 
-    export class ChangeAreaSelection {
-        static readonly type = '[Map] ChangeAreaSelection'
+    export class RemoveMarker {
+        static readonly type = '[Map] RemoveMarker'
 
-        constructor(public area: MapArea) {}
+        constructor() {}
     }
 
     export class RemoveAreaSelection {
@@ -71,12 +77,10 @@ export class MapState {
 
     @Action(MapAction.ChangeArea)
     changeArea(ctx: StateContext<MapStateModel>, action : MapAction.ChangeArea ) {
-        this.mapService.updateShowRectangle(action.area);
+        this.mapService.updateRetrievedRectangle(action.area);
         ctx.patchState({
           area: action.area
         })
-
-        // return ctx.dispatch(new MapAction.SetActive(mapPlot.id))
     }
 
     @Action(MapAction.ChangeMarker)
@@ -85,72 +89,38 @@ export class MapState {
         return ctx.patchState({
             userPoint: action.marker
         })
-        // return ctx.dispatch(new MapAction.SetActive(mapPlot.id))
     }
 
     @Action(MapAction.ChangeAreaSelection)
     changeAreaSelection(ctx: StateContext<MapStateModel>, action : MapAction.ChangeAreaSelection ) {
-        // this.mapService.cbrnMap.areaSelection = action.area
-        this.mapService.updateDrawnRectangle(action.area)
+        this.mapService.updateSelectionRectangle(action.area)
         return ctx.patchState({
           userArea: action.area
         })
-        // return ctx.dispatch(new MapAction.SetActive(mapPlot.id))
     }
 
     @Action(MapAction.RemoveArea)
-    removeArea({getState, patchState}: StateContext<MapStateModel>) {
-        this.mapService.removeShowRectangle();
-        patchState({
-            area: undefined
+    removeArea(ctx: StateContext<MapStateModel> ) {
+        this.mapService.removeRetrievedRectangle()
+        return ctx.patchState({
+          area: undefined
         })
     }
-    // @Action(MapAction.Show)
-    // show(ctx: StateContext<MapStateModel>, action : MapAction.Show ) {
-    //     ctx.setState(produce(draft => {
-    //         draft.mapPlots.forEach(plt => {
-    //             if (plt.id == action.mapPlotId) {
-    //                 this.mapPlotService.showMapPlot(plt);
-    //                 plt.visible = true;
-    //             }
-    //         })
-    //     }))
-    // }
 
-    // @Action(MapAction.Hide)
-    // hide(ctx: StateContext<MapStateModel>, action :MapAction.Hide ) {
-    //     ctx.setState(produce(draft => {
-    //         draft.mapPlots.forEach(plt => {
-    //             if (plt.id == action.mapPlotId) {
-    //                 this.mapPlotService.hideMapPlot(plt);
-    //                 plt.visible = false;
-    //             }
-    //         })
-    //     }))
-    // }
+    @Action(MapAction.RemoveMarker)
+    removeMarker(ctx: StateContext<MapStateModel> ) {
+        this.mapService.removeMarker()
+        return ctx.patchState({
+          userPoint: undefined
+        })
+    }
 
-    // @Action(MapAction.SetActive)
-    // setActive(ctx: StateContext<MapStateModel>, action : MapAction.SetActive ) {
-    //     ctx.setState(produce(draft => {
-    //         draft.mapPlots.forEach(plt => {
-    //             if (plt.id == action.mapPlotId) {
-    //                 this.mapPlotService.setActive(plt);
-    //                 plt.isActive = true;
-    //             } else {
-    //                 plt.isActive = false;
-    //             }
-    //         })
-    //     }))
-    // }
+    @Action(MapAction.RemoveAreaSelection)
+    removeAreaSelection(ctx: StateContext<MapStateModel> ) {
+        this.mapService.removeSelectionRectangle()
+        return ctx.patchState({
+          userArea: undefined
+        })
+    }
 
-
-    // @Action(MapAction.Remove)
-    // remove({getState, patchState}: StateContext<MapStateModel>, { mapPlotId }: MapAction.Remove ) {
-    //     const state = getState();
-    //     const toDelete = state.mapPlots.find(e => e.id == mapPlotId);
-    //     !!toDelete && this.mapPlotService.deleteMapPlot(toDelete);
-    //     patchState({
-    //         mapPlots: getState().mapPlots.filter(a => a.id != mapPlotId)
-    //     })
-    // }
 }
