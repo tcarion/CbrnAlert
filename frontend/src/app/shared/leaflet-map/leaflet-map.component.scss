@@ -3,6 +3,14 @@
   width: 100%;
 }
 
+::ng-deep .leaflet-coords-control {
+  padding: 0.1vw 0.3vw;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 0.1vw;
+  box-shadow: 0 0 0 0.1vw rgba(0, 0, 0, 0.2);
+  font-size: 12px;
+}
+
 ::ng-deep .threshold-control {
   padding: 0.5vw;
   background-color: white;

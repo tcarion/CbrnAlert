@@ -1,7 +1,7 @@
 import { FeatureCollection } from 'geojson';
 import { MapAction } from 'src/app/core/state/map.state';
 import { Component, OnInit, ChangeDetectionStrategy, Input } from '@angular/core';
-import { circle, Control, ControlOptions, DomUtil, DomEvent, Icon, icon, latLng, latLngBounds, Layer, Map as LeafletMap, marker, Marker, polygon, Rectangle, tileLayer, LayerGroup, FeatureGroup, TileLayer, LatLngBounds, control } from 'leaflet';
+import { circle, Control, ControlOptions, LeafletMouseEvent, DomUtil, DomEvent, Icon, icon, latLng, latLngBounds, Layer, Map as LeafletMap, marker, Marker, polygon, Rectangle, tileLayer, LayerGroup, FeatureGroup, TileLayer, LatLngBounds, control } from 'leaflet';
 import { dynamicMapLayer, imageMapLayer, ImageMapLayer } from 'esri-leaflet';
 import chroma from 'chroma-js';
 import { ColorbarData } from 'src/app/core/api/models/colorbar-data';
@@ -134,6 +134,26 @@ export class LeafletMapComponent implements OnInit {
     control.attribution({
       prefix: false, // Remove the default 'Leaflet' prefix
     }).addTo(map);
+    // Cursor coordinates
+    const coordsControl = new Control({ position: 'bottomleft' });
+    coordsControl.onAdd = function () {
+      const coordsDiv = DomUtil.create('div', 'leaflet-coords-control');
+      coordsDiv.innerText = 'Lat: --, Lon: --';
+      return coordsDiv;
+    };
+    coordsControl.addTo(map);
+    map.on('mousemove', (e: LeafletMouseEvent) => {
+      const coordsDiv = document.querySelector('.leaflet-coords-control') as HTMLDivElement;
+      if (coordsDiv) {
+        coordsDiv.innerText = `Lat: ${e.latlng.lat.toFixed(5)}, Lon: ${e.latlng.lng.toFixed(5)}`;
+      }
+    });
+    map.on('mouseout', (e: LeafletMouseEvent) => {
+      const coordsDiv = document.querySelector('.leaflet-coords-control') as HTMLDivElement;
+      if (coordsDiv) {
+        coordsDiv.innerText = 'Lat: --, Lon: --';
+      }
+    });
     // Inialize scale bar based on screen resolution
     this.getScalebar();
     // If screen resolution changes, get new scale bar
