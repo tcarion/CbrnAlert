@@ -24,6 +24,7 @@ export class OutputsComponent implements OnInit {
     _runId = ''
 
     value: string
+    
     constructor(
         private flexpartService: FlexpartService,
         private route: ActivatedRoute,
@@ -36,5 +37,20 @@ export class OutputsComponent implements OnInit {
     onClick(v: string) {
       this.selectedIdEvent.emit(v);
       this.value = v;
+    }
+
+    getDisplayName(fpOutput: FlexpartOutput, firstMember: string | undefined): string {
+      if (firstMember === '') {
+        // Deterministic sim case
+        if (fpOutput.name.includes('grid_conc')) {
+          return 'Modelled concentration';
+        }
+        else {
+          return fpOutput.name;
+        }
+      } else {
+        // Ensemble sim case
+        return fpOutput.member === '0' ? 'Mean' : `Member ${fpOutput.member}`;
+      }
     }
 }

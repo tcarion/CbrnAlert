@@ -1,10 +1,7 @@
-import { FeatureCollection } from 'geojson';
 import { MapAction } from 'src/app/core/state/map.state';
 import { Component, OnInit, ChangeDetectionStrategy, Input } from '@angular/core';
-import { circle, Control, ControlOptions, LeafletMouseEvent, DomUtil, DomEvent, Icon, icon, latLng, latLngBounds, Layer, Map as LeafletMap, marker, Marker, polygon, Rectangle, tileLayer, LayerGroup, FeatureGroup, TileLayer, LatLngBounds, control } from 'leaflet';
+import { circle, Control, Popup, ControlOptions, LeafletMouseEvent, DomUtil, DomEvent, Icon, icon, latLng, latLngBounds, Layer, Map as LeafletMap, marker, Marker, polygon, Rectangle, tileLayer, LayerGroup, FeatureGroup, TileLayer, LatLngBounds, control } from 'leaflet';
 import { dynamicMapLayer, imageMapLayer, ImageMapLayer } from 'esri-leaflet';
-import chroma from 'chroma-js';
-import { ColorbarData } from 'src/app/core/api/models/colorbar-data';
 import '@geoman-io/leaflet-geoman-free';
 import { MapService } from 'src/app/core/services/map.service';
 import { Select, Store } from '@ngxs/store';
@@ -14,8 +11,7 @@ import { MapPlot } from 'src/app/core/models/map-plot';
 import { map, tap, take } from 'rxjs/operators';
 import { MapPlotsService } from 'src/app/core/services/map-plots.service';
 import { FlexpartService } from 'src/app/flexpart/flexpart.service';
-import { prefix } from '@fortawesome/free-solid-svg-icons';
-import { stat } from 'fs';
+
 
 const iconRetinaUrl = 'assets/marker-icon-2x.png';
 const iconUrl = 'assets/marker-icon.png';
@@ -52,6 +48,7 @@ export class LeafletMapComponent implements OnInit {
   popDensityLayer1km: ImageMapLayer;
   currentThresholdCtrl: Control | null = null;
   thresholdControlList = new Map<string, { control: Control, collapsed: boolean, threshold: number | null, plotUnit: string, checkboxState: { [label: string]: boolean } }>();
+  currentUnit: string | null;
 
   options = {
     attributionControl: false, // Disable the default attribution control
@@ -93,34 +90,47 @@ export class LeafletMapComponent implements OnInit {
 
   ngOnInit(): void {
     this.activePlot$.subscribe(plot => {
+      if (!this.map) return;
+      this.map.closePopup();
+      this.map.off('contextmenu');
+      this.currentUnit = null;
       if (this.currentThresholdCtrl) {
         this.map.removeControl(this.currentThresholdCtrl);
         this.currentThresholdCtrl = null;
       }
-      if (plot?.type == 'stats') {
+      if (plot.type == 'stats') {
         const mainPlot = plot.name.split(' - ')[0];
         const stored = this.thresholdControlList.get(mainPlot);
         if (stored) {
           this.currentThresholdCtrl = stored.control;
           this.currentThresholdCtrl.addTo(this.map);
+          this.currentUnit = stored.plotUnit;
         }
       }
-      if (plot?.type == 'flexpart' && plot?.simType == 'ensemble') {
-        const stored = this.thresholdControlList.get(plot.name);
-        if (stored) {
-          this.currentThresholdCtrl = stored.control;
-          this.currentThresholdCtrl.addTo(this.map);
-        } else {
-          this.currentThresholdCtrl = this.createThresholdControl(plot);
-          this.thresholdControlList.set(plot.name, {
-            control: this.currentThresholdCtrl,
-            collapsed: true,
-            threshold: null,
-            plotUnit: '',
-            checkboxState: {}
-          });
-          this.currentThresholdCtrl.addTo(this.map);
+      if (plot.type == 'flexpart') {
+        if (plot.simType == 'ensemble') {
+          const stored = this.thresholdControlList.get(plot.name);
+          if (stored) {
+            this.currentThresholdCtrl = stored.control;
+            this.currentThresholdCtrl.addTo(this.map);
+          } else {
+            this.currentThresholdCtrl = this.createThresholdControl(plot);
+            this.thresholdControlList.set(plot.name, {
+              control: this.currentThresholdCtrl,
+              collapsed: true,
+              threshold: null,
+              plotUnit: '',
+              checkboxState: {}
+            });
+            this.currentThresholdCtrl.addTo(this.map);
+          }
         }
+      }
+      if (plot.type == 'flexpart' || plot.legendLayer == "percentage agreement") {
+        if (!this.currentUnit) {
+          this.currentUnit = (/spec\d+_mr/.test(plot.legendLayer)) ? 'ng/m³' : (/D_spec/.test(plot.legendLayer)) ? 'ng/m²' : null;
+        }
+        this.map.on('contextmenu', this.onRightClick(plot));
       }
     });
   }
@@ -230,6 +240,7 @@ export class LeafletMapComponent implements OnInit {
         }
       }
     })
+
     map.on('pm:remove', (e) => {
       if (e.layer === this.mapService.selectionRectangle) {
         this.store.dispatch(new MapAction.RemoveAreaSelection());
@@ -353,11 +364,9 @@ export class LeafletMapComponent implements OnInit {
 
   // Function to create/update scale bar depending on screen resolution
   private getScalebar() {
-  // remove existing scale bar if it exists
     if (this.scalebar) {
       this.map.removeControl(this.scalebar);
     }
-    // add scale bar with updated maxWidth
     const maxWidth = 0.07 * window.innerWidth;
     this.scalebar = new Control.Scale({
       position: 'bottomleft',
@@ -366,6 +375,32 @@ export class LeafletMapComponent implements OnInit {
       imperial: false,
     }).addTo(this.map);
   }
+
+  private onRightClick = (plot: MapPlot) => async (e: LeafletMouseEvent) => {
+    const { lat, lng } = e.latlng;
+    const georaster = plot.data;
+    const column = Math.floor((lng - georaster.xmin) / georaster.pixelWidth);
+    const row = Math.floor((georaster.ymax - lat) / georaster.pixelHeight);
+    if (column >= 0 && column < georaster.width && row >= 0 && row < georaster.height) {
+      //const value = await geoblaze.identify(plot.data, [lng, lat]); // Ideally using geoblaze, but ignores col = 0 and row = 0
+      const value = await georaster.values.map((val: number[][]) => val[row][column]);
+      if (value != null && Number(value) != 0) {
+        const height = plot.selectedParams?.height ? `${plot.selectedParams['height'].value} m` : '- (surface)';
+        const valueLine = plot.type === 'stats' ? `<b>Members over threshold:</b> ${Number(value).toFixed(0)} %` : `<b>Value:</b> ${Number(value).toFixed(2)} ${this.currentUnit}`;
+        new Popup()
+          .setLatLng([lat, lng])
+          .setContent(
+            `<b>Name:</b> ${plot.name}<br>
+            <b>Substance:</b> ${plot.selectedParams!['substance'].value}<br>
+            <b>Time:</b> ${plot.selectedParams!['Ti'].value}<br>
+            <b>Coordinates:</b> (${lat.toFixed(5)}, ${lng.toFixed(5)})<br>
+            <b>Height:</b> ${height}<br>
+            ${valueLine}`
+          )
+          .openOn(this.map);
+      }
+    }
+  };
 
   private createThresholdControl(plot: MapPlot, options: ThresholdControlOptions = {}): Control {
     const ThresholdControl = Control.extend({
@@ -446,10 +481,17 @@ export class LeafletMapComponent implements OnInit {
           const spinner = document.createElement('div');
           spinner.className = 'spinner';
           statusWrapper.appendChild(spinner);
-          const statsItems = items.map(item => `${item} (${storedCtrl?.threshold} ${storedCtrl?.plotUnit})`);;
-          this.flexpartService.getEnsembleStats(plot.fpOutputId!, plot.legendLayer, plot.dimsIndices!, parseFloat(input.value)).subscribe(
+          const statsItems = items.map(item => `${item} (${storedCtrl?.threshold} ${storedCtrl?.plotUnit})`);
+          const dimsIndices: { [key: string]: number } = {};
+          ['Ti', 'height'].forEach(key => {
+            const entry = plot.selectedParams![key];
+            if (entry) {
+              dimsIndices[key] = entry.index;
+            }
+          });
+          this.flexpartService.getEnsembleStats(plot.fpOutputId!, plot.legendLayer, dimsIndices, parseFloat(input.value)).subscribe(
             result => {
-              this.store.dispatch(new MapPlotAction.AddStatsTiff(result, 'stats', statsItems))
+              this.store.dispatch(new MapPlotAction.AddStatsTiff(result, 'stats', statsItems, plot.selectedParams!))
               statusWrapper.innerHTML = 'Done!';
               setTimeout(() => {
                 statusWrapper.innerHTML = '';

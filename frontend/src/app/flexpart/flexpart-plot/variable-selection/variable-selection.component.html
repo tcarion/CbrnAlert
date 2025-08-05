@@ -2,13 +2,18 @@
   <!-- Variable selection dropdown -->
   <mat-form-field style="margin-top: 1vh;">
     <mat-select placeholder="Choose variable" [(value)]="selectedCategory" (selectionChange)="onCategoryChange()">
-      <mat-option *ngFor="let category of categories" [value]="category.id">
+      <mat-option *ngIf="isLoading" disabled>
+        <div style="height: 100%; display: flex; justify-content: center; align-items: center;">
+          <mat-spinner diameter="24"></mat-spinner>
+        </div>
+      </mat-option>
+      <mat-option *ngFor="let category of availableCategories" [value]="category.id">
         {{ category.name }}
       </mat-option>
     </mat-select>
   </mat-form-field>
   <!-- Release selection dropdown -->
-  <mat-form-field *ngIf="selectedCategory">
+  <mat-form-field *ngIf="selectedCategory && selectedCategory !== 'ORO'">
     <mat-select placeholder="Choose release" [(value)]="selectedLayer">
       <!-- Show loading spinner while fetching releases -->
       <mat-option *ngIf="isLoading" disabled>
@@ -17,8 +22,8 @@
         </div>
       </mat-option>
       <!-- Show layers once loaded -->
-      <mat-option *ngFor="let layer of getLayersForCategory(selectedCategory)" [value]="layer" (click)="onClick(layer)">
-        {{ layer }}
+      <mat-option *ngFor="let option of displayLayerOptions" [value]="option.value" (click)="onClick(option.value, option.label)">
+        {{ option.label }}
       </mat-option>
     </mat-select>
   </mat-form-field>

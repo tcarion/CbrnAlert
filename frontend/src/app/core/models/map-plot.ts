@@ -7,19 +7,25 @@ type PlotCount = {
   [K in PlotType]: number;
 }
 
+export interface ParameterEntry {
+  [parameterName: string]: {
+    index: number,
+    value: string | number
+  }
+}
+
 export interface MapPlot {
   type: PlotType,
   name: string,
   id: number,
   simType?: SimType,
-  // TODO: make it parametric
   data?: any,
   geojson?: FeatureCollection | FeatureCollection[],
   fpOutputId?: string,
   visible: boolean,
   isActive: boolean,
   legendLayer: string,
-  dimsIndices?: {[key: string]: number},
+  selectedParams?: ParameterEntry,
   metadata?: Object
 }
 

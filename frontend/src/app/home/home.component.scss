@@ -17,6 +17,18 @@
 
 .sidenav {
   width: var(--sidebarMinWidth);
+  display: flex;
+  flex-direction: column;
+
+  .sidenav-flex-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  .main-list {
+    flex: 1 1 auto;
+    overflow-y: auto;
+  }
   .dashboard-title {
     font-size: calc(0.075 * var(--sidebarMinWidth));
     font-weight: 500;
@@ -36,6 +48,16 @@
     height: 1px;
     margin: 0 auto;
     background-color: rgba(118, 144, 223, 0.734);
+  }
+  .info-note {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 16px;
+    text-align: justify;
+    font-size: 0.75rem;
+    color: rgba(0, 0, 0, 0.6);
+    border-top: 1px solid #ddd;
   }
 }
 

@@ -50,7 +50,18 @@ function add!(output::AbstractOutputFile)
     path = output.path
     ens_member = isa(output, EnsembleOutput) ? string(output.member) : ""
 	rast = RasterStack(path)
-	meta = JSON3.write(Dict(Rasters.metadata(rast)))
+    specs_rel = String[]
+    for layer in keys(rast)
+        if occursin("spec", String(layer))
+            md = metadata(rast[layer]);
+            if haskey(md, "long_name")
+                push!(specs_rel, md["long_name"])
+            end
+        end
+    end
+    meta = Dict(Rasters.metadata(rast))
+    meta["specs_rel"] = specs_rel
+	meta = JSON3.write(meta)
     newentry = FlexpartOutput(
         uuid = string(UUIDs.uuid4()),
         name = basename(path),

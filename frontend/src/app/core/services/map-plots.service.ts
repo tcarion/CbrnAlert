@@ -1,7 +1,7 @@
 import { Atp45Result } from './../api/models/atp-45-result';
 import { GeoJsonSliceResponse } from './../api/models/geo-json-slice-response';
 import { Injectable } from '@angular/core';
-import { MapPlot, PlotType, SimType } from '../models/map-plot';
+import { ParameterEntry, MapPlot, PlotType, SimType } from '../models/map-plot';
 import { MapService } from './map.service';
 import { Feature, FeatureCollection } from 'geojson';
 import { ColorbarData } from '../api/models';
@@ -78,20 +78,19 @@ export class MapPlotsService {
     this.activePlotSubject.next(plot);
   }
 
-
-  fillPlotGeoJSON(plotData: Atp45Result | GeoJsonSliceResponse, type: PlotType, fpOutputId?: string, simType?: SimType, dimsIndices?: {[key: string]: number}) {
+  fillPlotGeoJSON(plotData: Atp45Result | GeoJsonSliceResponse, type: PlotType, fpOutputId?: string, simType?: SimType, selectedParams?: ParameterEntry) {
     let newPlot = new MapPlot(type);
     newPlot.metadata = plotData.metadata
     newPlot.geojson = plotData.collection as FeatureCollection;
     if (fpOutputId) {
       newPlot.fpOutputId = fpOutputId;
       newPlot.simType = simType;
-      newPlot.dimsIndices = dimsIndices;
+      newPlot.selectedParams = selectedParams;
     }
     return newPlot;
   }
 
-  async fillPlotTiff(plotData: Blob, type: PlotType, fpOutputId?: string, simType?: SimType, dimsIndices?: {[key: string]: number}) {
+  async fillPlotTiff(plotData: Blob, type: PlotType, fpOutputId?: string, simType?: SimType, selectedParams?: ParameterEntry) {
     const arrayBuffer = await plotData.arrayBuffer()
     const geoRaster = await parseGeoraster(arrayBuffer);
     let newPlot = new MapPlot(type);
@@ -100,7 +99,7 @@ export class MapPlotsService {
     if (fpOutputId) {
       newPlot.fpOutputId = fpOutputId;
       newPlot.simType = simType;
-      newPlot.dimsIndices = dimsIndices;
+      newPlot.selectedParams = selectedParams;
     }
 
     if (this.currentSelectedLayer) {
@@ -109,7 +108,7 @@ export class MapPlotsService {
     return newPlot
   }
 
-  async fillEnsembleStatsTiff(statsData: Blob, type: PlotType, plotNames: string[]) {
+  async fillEnsembleStatsTiff(statsData: Blob, type: PlotType, plotNames: string[], selectedParams: ParameterEntry) {
     const statsBuffer = await statsData.arrayBuffer();
     const geoRasterStats = await parseGeoraster(statsBuffer);
     const statsPlots = geoRasterStats.values.map((bandData: number[][], index: number) => {
@@ -124,6 +123,7 @@ export class MapPlotsService {
       newPlot.name = newPlot.name + " - " + plotNames[index];
       if (newPlot.legendLayer === "percentage agreement") {
         newPlot.metadata = this._colorbarFromGeoRaster(geoRaster, type);
+        newPlot.selectedParams = selectedParams;
       }
       return newPlot;
     });
@@ -389,15 +389,15 @@ export class MapPlotsService {
   }
 
 
-  createMapPlotGeoJSON({ type, plotData, fpOutputId, simType, dimsIndices }: { type: PlotType, plotData: any, fpOutputId?: string, simType?: SimType, dimsIndices?: {[key: string]: number} }) {
-    return this.fillPlotGeoJSON(plotData, type, fpOutputId || undefined, simType || undefined, dimsIndices || undefined);
+  createMapPlotGeoJSON({ type, plotData, fpOutputId, simType, selectedParams }: { type: PlotType, plotData: any, fpOutputId?: string, simType?: SimType, selectedParams?: ParameterEntry }) {
+    return this.fillPlotGeoJSON(plotData, type, fpOutputId || undefined, simType || undefined, selectedParams || undefined);
   }
 
-  createMapPlotTiff({ type, plotData, fpOutputId, simType, dimsIndices }: { type: PlotType, plotData: any, fpOutputId?: string, simType?: SimType, dimsIndices?: {[key: string]: number} }) {
-    return this.fillPlotTiff(plotData, type, fpOutputId || undefined, simType || undefined, dimsIndices || undefined);
+  createMapPlotTiff({ type, plotData, fpOutputId, simType, selectedParams }: { type: PlotType, plotData: any, fpOutputId?: string, simType?: SimType, selectedParams?: ParameterEntry }) {
+    return this.fillPlotTiff(plotData, type, fpOutputId || undefined, simType || undefined, selectedParams || undefined);
   }
 
-  createMapPlotStatsTiff({ type, plotData, plotNames }: { type: PlotType, plotData: any, plotNames: string[] }) {
-    return this.fillEnsembleStatsTiff(plotData, type, plotNames);
+  createMapPlotStatsTiff({ type, plotData, plotNames, selectedParams }: { type: PlotType, plotData: any, plotNames: string[], selectedParams: ParameterEntry }) {
+    return this.fillEnsembleStatsTiff(plotData, type, plotNames, selectedParams);
   }
 }

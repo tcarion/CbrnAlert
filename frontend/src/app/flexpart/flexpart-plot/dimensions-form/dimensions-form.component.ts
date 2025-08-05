@@ -20,7 +20,7 @@ export class DimensionsFormComponent implements OnChanges {
 
   @Input() runId: string
   @Input() outputId: string
-  @Input() layerName: string
+  @Input() layerName: { value: string; label: string };
 
   formGroup: UntypedFormGroup;
   questions$: Observable<QuestionBase<any>[]>;
@@ -41,7 +41,12 @@ export class DimensionsFormComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     const newOutId = changes["outputId"] ? changes["outputId"].currentValue : this.outputId;
-    const newLayer = changes["layerName"] ? changes["layerName"].currentValue : this.layerName;
+    let newLayer: string | undefined;
+    if (changes["layerName"] && changes["layerName"].currentValue) {
+      newLayer = changes["layerName"].currentValue.value;
+    } else if (this.layerName) {
+      newLayer = this.layerName.value;
+    }
     if (newOutId && newLayer) {
       this.formGroup = new UntypedFormGroup({});
       this.flexpartService.getZDims(newOutId, newLayer).pipe(take(1)).subscribe(dims => {
@@ -62,7 +67,7 @@ export class DimensionsFormComponent implements OnChanges {
 
   onSubmit() {
     const outputId = this.outputId;
-    const layerName = this.layerName;
+    const layerName = this.layerName.value;
     const toGeoJSON = this.responseFormat == SliceResponseType.GEOJSON
     let simType: 'ensemble' | 'deterministic';
 
@@ -71,15 +76,19 @@ export class DimensionsFormComponent implements OnChanges {
       simType = run?.ensemble ? 'ensemble' : 'deterministic';
     })
 
-    const selectedIndices: { Ti?: number; height?: number } = {};
+    const selectedDimensions: { [key: string]: { index: number, value: string | number } } = {};
     ['Ti', 'height'].forEach(key => {
       const dimArray = this.dims[key];
       const value = this.formGroup.value.dimensions[key];
       if (dimArray) {
         const index = dimArray.findIndex(v => v == value);
-        selectedIndices[key as 'Ti' | 'height'] = index + 1;
+        selectedDimensions[key] = {
+          index: index + 1,
+          value: value
+        };
       }
     });
+    selectedDimensions['substance'] = { index: 1, value: this.layerName.label };
     
     if ('height' in this.formGroup.value.dimensions) {
       this.formGroup.value.dimensions['height'] = parseFloat(this.formGroup.value.dimensions['height'] as string);
@@ -88,11 +97,11 @@ export class DimensionsFormComponent implements OnChanges {
     if (toGeoJSON) {
       this.flexpartService.getSliceJson(outputId as string, layerName as string, toGeoJSON, this.formGroup.value.dimensions).subscribe(res => {
         const geores = res as GeoJsonSliceResponse;
-        this.store.dispatch(new MapPlotAction.Add(geores, 'flexpart', outputId, simType, selectedIndices))
+        this.store.dispatch(new MapPlotAction.Add(geores, 'flexpart', outputId, simType, selectedDimensions))
       })
     } else {
       this.flexpartService.getSliceTiff(outputId as string, layerName as string, toGeoJSON, this.formGroup.value.dimensions).subscribe(res => {
-        this.store.dispatch(new MapPlotAction.AddTiff(res, 'flexpart', outputId, simType, selectedIndices))
+        this.store.dispatch(new MapPlotAction.AddTiff(res, 'flexpart', outputId, simType, selectedDimensions))
       })
     }
   }

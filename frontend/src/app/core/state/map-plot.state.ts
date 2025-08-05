@@ -1,7 +1,7 @@
 import { MapPlotsService } from 'src/app/core/services/map-plots.service';
 import { Injectable } from '@angular/core';
 import { Action, createSelector, Selector, State, StateContext } from '@ngxs/store';
-import { MapPlot, PlotType, SimType } from 'src/app/core/models/map-plot';
+import { MapPlot, PlotType, SimType, ParameterEntry } from 'src/app/core/models/map-plot';
 import produce from "immer"
 import { Atp45Result, GeoJsonSliceResponse } from '../api/models';
 import { DRAFTABLE } from 'immer/dist/internal';
@@ -10,19 +10,19 @@ export namespace MapPlotAction {
   export class Add {
     static readonly type = '[MapPlot] Add'
 
-    constructor(public plotData: GeoJsonSliceResponse | Atp45Result, public type: PlotType, public fpOutputId?: string, public simType?: SimType, public dimsIndices?: {[key: string]: number}) { }
+    constructor(public plotData: GeoJsonSliceResponse | Atp45Result, public type: PlotType, public fpOutputId?: string, public simType?: SimType, public selectedParams?: ParameterEntry) { }
   }
 
   export class AddTiff {
     static readonly type = '[MapPlot] AddTiff'
 
-    constructor(public plotData: Blob, public type: PlotType, public fpOutputId?: string, public simType?: SimType, public dimsIndices?: {[key: string]: number}) { }
+    constructor(public plotData: Blob, public type: PlotType, public fpOutputId?: string, public simType?: SimType, public selectedParams?: ParameterEntry) { }
   }
 
   export class AddStatsTiff {
     static readonly type = '[MapPlot] AddStatsTiff'
 
-    constructor(public plotData: Blob, public type: PlotType, public plotNames: string[]) { }
+    constructor(public plotData: Blob, public type: PlotType, public plotNames: string[], public selectedParams: ParameterEntry) { }
   }
 
   export class Hide {

@@ -22,7 +22,7 @@
 
   <mat-step label="Choose variable to plot">
     <ng-template matStepContent>
-      <app-variable-selection (selectedIdEvent)="selectedLayer = $event"  [outputId] = "selectedOutputId"></app-variable-selection>
+      <app-variable-selection (selectedIdEvent)= onLayerSelectedEvent($event)  [outputId] = "selectedOutputId"></app-variable-selection>
       <div class="flex justify-center mt-4">
         <button mat-raised-button matStepperPrevious>Go back</button>
         <button mat-raised-button matStepperNext [disabled]="selectedLayer == undefined" (click)="onLayerSelected()">Next</button>

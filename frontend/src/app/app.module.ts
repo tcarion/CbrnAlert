@@ -30,8 +30,9 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button'; // If you're using buttons in the popup
-import { MatDialogModule } from '@angular/material/dialog'; // If using MatDialog
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 
 
 import { SnackbarModule } from './shared/ui/snackbar/snackbar.module';
@@ -62,6 +63,7 @@ import { GeometryPopupComponent } from './flexpart/run-simple/release-form/geome
         MatSelectModule,
         MatButtonModule,
         MatDialogModule,
+        MatIconModule,
 
         CoreModule,
         SharedModule,

@@ -4,44 +4,54 @@
   <mat-sidenav-container class="sidenav-container" [style.marginTop.px]="mobileQuery.matches ? 40 : 0">
     <mat-sidenav class="sidenav" role="navigation" #snav [mode]="mobileQuery.matches ? 'over' : 'side'"
       [fixedInViewport]="mobileQuery.matches" fixedTopGap="40" opened="true">
-      <mat-nav-list>
-        <mat-panel-title class="dashboard-title">
-          Dashboard
-        </mat-panel-title>
-        <mat-divider></mat-divider>
-        <mat-expansion-panel>
-          <mat-expansion-panel-header [collapsedHeight]="'calc(0.2 * var(--sidebarMinWidth))'" [expandedHeight]="'calc(0.23 * var(--sidebarMinWidth))'">
-            <mat-panel-title class="model-name">
-              <div>
-                ATP45 model
-              </div>
-            </mat-panel-title>
-          </mat-expansion-panel-header>
-          <mat-list-item class="model-step" routerLink="atp45/run">
-            Run procedure
-          </mat-list-item>
-        </mat-expansion-panel>
-        <mat-expansion-panel>
-          <mat-expansion-panel-header [collapsedHeight]="'calc(0.2 * var(--sidebarMinWidth))'" [expandedHeight]="'calc(0.23 * var(--sidebarMinWidth))'">
-            <mat-panel-title class="model-name">
-              <div>
-                Flexpart model
-              </div>
-            </mat-panel-title>
-          </mat-expansion-panel-header>
-          <mat-list-item class="model-step" routerLink="flexpart/retrieve">
-            Retrieve meteo data
-          </mat-list-item>
-          <mat-divider class="custom-divider"></mat-divider>
-          <mat-list-item class="model-step" routerLink="flexpart/run">
-            Run model
-          </mat-list-item>
-          <mat-divider class="custom-divider"></mat-divider>
-          <mat-list-item class="model-step" routerLink="flexpart/plots">
-            Plot results
-          </mat-list-item>
-        </mat-expansion-panel>
-      </mat-nav-list>
+      <div class="sidenav-flex-wrapper">
+        <mat-nav-list class="main-list">
+          <mat-panel-title class="dashboard-title">
+            Dashboard
+          </mat-panel-title>
+          <mat-divider></mat-divider>
+          <mat-expansion-panel>
+            <mat-expansion-panel-header [collapsedHeight]="'calc(0.2 * var(--sidebarMinWidth))'" [expandedHeight]="'calc(0.23 * var(--sidebarMinWidth))'">
+              <mat-panel-title class="model-name">
+                <div>
+                  ATP45 model
+                </div>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <mat-list-item class="model-step" routerLink="atp45/run">
+              Run procedure
+            </mat-list-item>
+          </mat-expansion-panel>
+          <mat-expansion-panel>
+            <mat-expansion-panel-header [collapsedHeight]="'calc(0.2 * var(--sidebarMinWidth))'" [expandedHeight]="'calc(0.23 * var(--sidebarMinWidth))'">
+              <mat-panel-title class="model-name">
+                <div>
+                  Flexpart model
+                </div>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <mat-list-item class="model-step" routerLink="flexpart/retrieve">
+              Retrieve meteo data
+            </mat-list-item>
+            <mat-divider class="custom-divider"></mat-divider>
+            <mat-list-item class="model-step" routerLink="flexpart/run">
+              Run model
+            </mat-list-item>
+            <mat-divider class="custom-divider"></mat-divider>
+            <mat-list-item class="model-step" routerLink="flexpart/plots">
+              Plot results
+            </mat-list-item>
+          </mat-expansion-panel>
+        </mat-nav-list>
+
+        <!-- Info note at the bottom -->
+        <div class="info-note">
+          <mat-icon style="flex-shrink: 0" color="primary">info</mat-icon>
+          <span>
+            Right click a plot on the map for more information about the released substance at a specific location.
+          </span>
+        </div>
+      </div>
     </mat-sidenav>
 
     <mat-sidenav-content class="sidenav-content">
