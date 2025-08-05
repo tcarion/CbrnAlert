@@ -9,7 +9,7 @@
 <div mat-dialog-content>
   <mat-form-field appearance="outline" style="width: 80%;">
     <mat-label>{{ data.message }}</mat-label>
-    <input matInput [(ngModel)]="newName">
+    <input matInput [(ngModel)]="newName" (keydown.enter)="validateAndClose()">
   </mat-form-field>
   <div *ngIf="errorMessage" style="color: red; margin-top: 8px;">
     {{ errorMessage }}

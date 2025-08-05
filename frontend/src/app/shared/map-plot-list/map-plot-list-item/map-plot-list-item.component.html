@@ -5,7 +5,7 @@
         </mat-panel-title>
     </mat-expansion-panel-header>
     <mat-action-list dense>
-        <mat-list-item mat-ripple class="list-item" *ngFor="let plot of plots" checkboxPosition='before' [ngClass]="{'active' : plot.isActive}">
+        <mat-list-item mat-ripple class="list-item" *ngFor="let plot of plots; trackBy: getPlotById" checkboxPosition='before' [ngClass]="{'active' : plot.isActive}">
             <div class="content">
                 <mat-checkbox class="mat-checkbox-inner-container" [checked]="plot.visible" (change)="onToggleVisibility(plot)" click-stop-propagation></mat-checkbox>
                 <span class="clickable" (click)="onItemClick(plot.id)">

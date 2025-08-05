@@ -22,7 +22,7 @@ export class PlotLayerComponent implements OnInit, OnDestroy {
   @Input() mapPlot: MapPlot;
   @Input() visible = true;
 
-  @Select(MapPlotState.activePlot) activePlot$: Observable<MapPlot>;;
+  @Select(MapPlotState.activePlot) activePlot$: Observable<MapPlot>;
 
   layer: FeatureGroup | TileLayer;
   sub: Subscription;
@@ -61,7 +61,7 @@ export class PlotLayerComponent implements OnInit, OnDestroy {
         }
         this.sub = this.activePlot$.subscribe(plot => {
           if (plot !== undefined) {
-            const layer = this.layer as TileLayer
+            const layer = this.layer as TileLayer;
             if (this.mapPlot.id == plot.id) {
               layer.setOpacity(0.6);
               layer.setZIndex(1000);
@@ -77,13 +77,13 @@ export class PlotLayerComponent implements OnInit, OnDestroy {
 
       this.layer.on('click', layer => {
         this.store.dispatch(new MapPlotAction.SetActive(this.mapPlot.id))
-      })
+      });
+
     } else if (this.mapPlot.type == 'atp45') {
       let featureGroup = this.mapPlotsService.atp45PlotToLayer(this.mapPlot.geojson as FeatureCollection);
       featureGroup.eachLayer((layers: any) => {
         layers.eachLayer((layer: any) => {
           layer.bindPopup(layer.feature.properties.type)
-          console.log(layer)
         })
       })
       this.layer = featureGroup;
