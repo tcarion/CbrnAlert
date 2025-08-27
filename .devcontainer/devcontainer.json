@@ -1,0 +1,18 @@
+// For format details, see https://aka.ms/devcontainer.json.
+{
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
+	"workspaceFolder": "/app",
+	"postCreateCommand": "bash .devcontainer/setup.sh",
+	"forwardPorts": [4200],
+	"mounts": [
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ecmwfapirc,target=/root/.ecmwfapirc,type=bind,consistency=cached"
+	],
+	"customizations": {
+    "vscode": {
+      "extensions": ["julialang.language-julia", "ms-python.python", "ms-azuretools.vscode-docker", "ms-vscode.makefile-tools", "gimly81.fortran", "bradlc.vscode-tailwindcss"]
+    }
+  }
+}
