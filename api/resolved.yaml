@@ -1,8 +1,8 @@
 openapi: 3.0.2
 info:
   contact:
-    email: paullouisperez@gmail.com
-    name: Paul Perez
+    email: "tristancarion@gmail.com, paullouisperez@gmail.com"
+    name: "Tristan Carion, Paul Perez"
   description: API for the computation and visualization of atmospheric dispersion
     simulations of CBRN agents.
   title: CbrnAlert API

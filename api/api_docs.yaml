@@ -4,8 +4,8 @@ info:
   version: '2.0'
   description: 'API for the computation and visualization of atmospheric dispersion simulations of CBRN agents.'
   contact:
-    name: 'Paul Perez'
-    email: 'paullouisperez@gmail.com'
+    name: 'Tristan Carion, Paul Perez'
+    email: 'tristancarion@gmail.com, paullouisperez@gmail.com'
 servers:
   - url: 'http://localhost:4200/api'
     description: Dev Server

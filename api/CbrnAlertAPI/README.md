@@ -132,5 +132,5 @@ Class | Method | HTTP request | Description
 
 ## Author
 
-paullouisperez@gmail.com
+tristancarion@gmail.com, paullouisperez@gmail.com
 
