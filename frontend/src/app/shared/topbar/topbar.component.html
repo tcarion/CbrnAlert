@@ -1,26 +1,25 @@
 <mat-toolbar class="topbar">
     <div class="topbar-title">
-        <button mat-icon-button (click)="toggleNav()">
+        <button class="icon-button" mat-icon-button (click)="toggleNav()">
             <mat-icon>menu</mat-icon>
         </button>
-        <h1 class="app-name">CbrnAlert</h1>
-        <div
-        class="p-1 ml-5 my-2 bg-green-400 rounded text-sm justify-center"
-        *ngIf="currentUser$ | async as currentUser"
-        >
+        <h1 class="app-name">
+          CbrnAlert
+        </h1>
+        <div class="username" *ngIf="currentUser$ | async as currentUser">
           User: {{ currentUser.username }}
         </div>
     </div>
     <div class="topbar-icons">
-        <button style="margin-right: 2em" mat-raised-button color="warn" (click)="onLogout()">
-            Log-out
-        </button>
-        <button mat-icon-button (click)="onPlotList()">
+        <button class="icon-button" mat-icon-button (click)="onPlotList()">
             <mat-icon>view_list</mat-icon>
         </button>
-        <button mat-icon-button (click)="onNotif()">
+        <button class="icon-button" mat-icon-button (click)="onNotif()">
             <mat-icon>notifications</mat-icon>
             <span *ngIf="hasNewNotif" matBadge="&#8288;" matBadgeColor="warn" matBadgeSize="small"></span>
+        </button>
+        <button class="logout-button" mat-raised-button color="warn" (click)="onLogout()">
+          Log-out
         </button>
     </div>
 </mat-toolbar>

@@ -7,34 +7,30 @@
         start=nothing,
         var"end"=nothing,
         timeStep=3600,
-        specie="AIRTRACER",
         outputType=1,
     )
 
     - start::ZonedDateTime
     - var"end"::ZonedDateTime
-    - timeStep::Float64 : units: [s]
-    - specie::String
-    - outputType::Float64 : Units for the output (see Flexpart docs)
+    - timeStep::Float64 : unit: [s]
+    - outputType::Float64 : Unit for the output type (see Flexpart docs)
 """
 Base.@kwdef mutable struct FlexpartCommandSimple <: OpenAPI.APIModel
     start::Union{Nothing, ZonedDateTime} = nothing
     var"end"::Union{Nothing, ZonedDateTime} = nothing
     timeStep::Union{Nothing, Float64} = 3600
-    specie::Union{Nothing, String} = "AIRTRACER"
     outputType::Union{Nothing, Float64} = 1
 
-    function FlexpartCommandSimple(start, var"end", timeStep, specie, outputType, )
+    function FlexpartCommandSimple(start, var"end", timeStep, outputType, )
         OpenAPI.validate_property(FlexpartCommandSimple, Symbol("start"), start)
         OpenAPI.validate_property(FlexpartCommandSimple, Symbol("end"), var"end")
         OpenAPI.validate_property(FlexpartCommandSimple, Symbol("timeStep"), timeStep)
-        OpenAPI.validate_property(FlexpartCommandSimple, Symbol("specie"), specie)
         OpenAPI.validate_property(FlexpartCommandSimple, Symbol("outputType"), outputType)
-        return new(start, var"end", timeStep, specie, outputType, )
+        return new(start, var"end", timeStep, outputType, )
     end
 end # type FlexpartCommandSimple
 
-const _property_types_FlexpartCommandSimple = Dict{Symbol,String}(Symbol("start")=>"ZonedDateTime", Symbol("end")=>"ZonedDateTime", Symbol("timeStep")=>"Float64", Symbol("specie")=>"String", Symbol("outputType")=>"Float64", )
+const _property_types_FlexpartCommandSimple = Dict{Symbol,String}(Symbol("start")=>"ZonedDateTime", Symbol("end")=>"ZonedDateTime", Symbol("timeStep")=>"Float64", Symbol("outputType")=>"Float64", )
 OpenAPI.property_type(::Type{ FlexpartCommandSimple }, name::Symbol) = Union{Nothing,eval(Base.Meta.parse(_property_types_FlexpartCommandSimple[name]))}
 
 function check_required(o::FlexpartCommandSimple)

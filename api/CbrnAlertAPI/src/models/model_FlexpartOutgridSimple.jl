@@ -5,17 +5,17 @@
 @doc raw"""
     FlexpartOutgridSimple(;
         area=nothing,
-        gridres=1.0,
+        gridres=0.01,
         heights=nothing,
     )
 
     - area::GeoRectangle
-    - gridres::Float64 : units: [°]
+    - gridres::Float64 : unit: [°]
     - heights::Vector{Float64}
 """
 Base.@kwdef mutable struct FlexpartOutgridSimple <: OpenAPI.APIModel
     area = nothing # spec type: Union{ Nothing, GeoRectangle }
-    gridres::Union{Nothing, Float64} = 1.0
+    gridres::Union{Nothing, Float64} = 0.01
     heights::Union{Nothing, Vector{Float64}} = nothing
 
     function FlexpartOutgridSimple(area, gridres, heights, )

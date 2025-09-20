@@ -9,6 +9,7 @@
         status=nothing,
         date_created=nothing,
         options=nothing,
+        ensemble=nothing,
     )
 
     - uuid::String
@@ -16,6 +17,7 @@
     - status::RunStatus
     - date_created::ZonedDateTime
     - options::Any
+    - ensemble::Bool
 """
 Base.@kwdef mutable struct FlexpartRun <: OpenAPI.APIModel
     uuid::Union{Nothing, String} = nothing
@@ -23,18 +25,20 @@ Base.@kwdef mutable struct FlexpartRun <: OpenAPI.APIModel
     status = nothing # spec type: Union{ Nothing, RunStatus }
     date_created::Union{Nothing, ZonedDateTime} = nothing
     options::Union{Nothing, Any} = nothing
+    ensemble::Union{Nothing, Bool} = nothing
 
-    function FlexpartRun(uuid, name, status, date_created, options, )
+    function FlexpartRun(uuid, name, status, date_created, options, ensemble, )
         OpenAPI.validate_property(FlexpartRun, Symbol("uuid"), uuid)
         OpenAPI.validate_property(FlexpartRun, Symbol("name"), name)
         OpenAPI.validate_property(FlexpartRun, Symbol("status"), status)
         OpenAPI.validate_property(FlexpartRun, Symbol("date_created"), date_created)
         OpenAPI.validate_property(FlexpartRun, Symbol("options"), options)
-        return new(uuid, name, status, date_created, options, )
+        OpenAPI.validate_property(FlexpartRun, Symbol("ensemble"), ensemble)
+        return new(uuid, name, status, date_created, options, ensemble, )
     end
 end # type FlexpartRun
 
-const _property_types_FlexpartRun = Dict{Symbol,String}(Symbol("uuid")=>"String", Symbol("name")=>"String", Symbol("status")=>"RunStatus", Symbol("date_created")=>"ZonedDateTime", Symbol("options")=>"Any", )
+const _property_types_FlexpartRun = Dict{Symbol,String}(Symbol("uuid")=>"String", Symbol("name")=>"String", Symbol("status")=>"RunStatus", Symbol("date_created")=>"ZonedDateTime", Symbol("options")=>"Any", Symbol("ensemble")=>"Bool", )
 OpenAPI.property_type(::Type{ FlexpartRun }, name::Symbol) = Union{Nothing,eval(Base.Meta.parse(_property_types_FlexpartRun[name]))}
 
 function check_required(o::FlexpartRun)
@@ -42,6 +46,7 @@ function check_required(o::FlexpartRun)
     o.name === nothing && (return false)
     o.date_created === nothing && (return false)
     o.options === nothing && (return false)
+    o.ensemble === nothing && (return false)
     true
 end
 

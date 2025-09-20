@@ -17,16 +17,47 @@
 
 .sidenav {
   width: var(--sidebarMinWidth);
+  display: flex;
+  flex-direction: column;
 
-  mat-panel-title,
-  mat-list-item {
-    font-size: 12px;
+  .sidenav-flex-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
   }
-
-  mat-expansion-panel-header,
-  mat-panel-title,
-  mat-list-item {
-    height: 36px;
+  .main-list {
+    flex: 1 1 auto;
+    overflow-y: auto;
+  }
+  .dashboard-title {
+    font-size: calc(0.075 * var(--sidebarMinWidth));
+    font-weight: 500;
+    height: calc(0.2 * var(--sidebarMinWidth));
+    margin-left: calc(0.1 * var(--sidebarMinWidth));
+  }
+  .model-name {
+    font-size: calc(0.065 * var(--sidebarMinWidth));
+    height: calc(0.17 * var(--sidebarMinWidth));
+  }
+  .model-step {
+    font-size: calc(0.06 * var(--sidebarMinWidth));
+    height: calc(0.18 * var(--sidebarMinWidth));
+    color: var(--sidebarBackground);
+  }
+  .custom-divider {
+    height: 1px;
+    margin: 0 auto;
+    background-color: rgba(118, 144, 223, 0.734);
+  }
+  .info-note {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 16px;
+    text-align: justify;
+    font-size: 0.75rem;
+    color: rgba(0, 0, 0, 0.6);
+    border-top: 1px solid #ddd;
   }
 }
 
@@ -39,6 +70,7 @@
 .sidenav-container {
   /* When the sidenav is not fixed, stretch the sidenav container to fill the available space. This
          causes `<mat-sidenav-content>` to act as our scrolling element for desktop layouts. */
+  height: calc(100% - var(--toolbarHeight));
   flex: 1;
 
   .sidenav-content {

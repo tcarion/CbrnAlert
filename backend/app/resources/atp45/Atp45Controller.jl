@@ -131,9 +131,8 @@ function _forecast_weather_inputs(payload)
     fc_req = default_request()
     target = joinpath(TMP_DIR_PATH, "tmp.grib")
 
-    # We retrieve a bounding box because I experienced MARS errors when taking too small areas
-    fc_req[:area] = join([ceil(Int, lat) + 1, floor(Int, lon) - 1, floor(Int, lat) - 1, ceil(Int, lon) + 1], "/")
-    fc_req[:target] = "\"$target\""
+    fc_req[:area] = join([lat + 0.1, lon - 0.1, lat - 0.1, lon + 0.1], "/")
+    fc_req[:target] = target
     fc_req[:step] = string(step_number)
 
     fc_req_s = Dict(string(k)=>v for (k,v) in fc_req)
@@ -160,7 +159,7 @@ function _forecast_weather_inputs(payload)
         u = nearests["10u"][3][1],
         # south to north horizontal wind component
         v = nearests["10v"][3][1],
-        # distance between the the nearest point and `lon`, `lat`
+        # distance between the nearest point and `lon`, `lat`
         distance = nearests["10u"][4][1],
     )
 

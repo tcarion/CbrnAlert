@@ -6,14 +6,16 @@ using Genie.Renderer.Json: json
 using SearchLight
 using SearchLight.Relationships
 
+using Flexpart
 using UUIDs
 
 using JSON3
 using Dates
-# using GeoJSON
 using GeoJSON: Feature, FeatureCollection, Polygon, write
 using GeoInterface
 using Rasters
+using GeoFormatTypes
+using ArchGDAL
 using ColorSchemes
 using Colors
 
@@ -29,6 +31,7 @@ function _output_by_uuid(output_id)
 end
 
 function get_outputs()
+    FlexpartOutputs.delete_non_existing!()
     run_id = Genie.Router.params(:runId)
     outputs = related(FlexpartRuns._get_run(run_id), FlexpartOutput)
     Dict.(outputs) |> json
@@ -50,8 +53,8 @@ function get_layers()
 
     if isspatial
         layers = filter(layers) do layer
-            dimnames = name.(dims(stack[layer]))
-            return (:X in dimnames) && (:Y in dimnames)
+            dim_names = name.(dims(stack[layer]))
+            return (:X in dim_names) && (:Y in dim_names)
         end
     end
     layers |> json
@@ -77,7 +80,7 @@ function get_dimensions()
 end
 
 function _to_dim(k, v)
-    if k == "Time"
+    if k == "Ti"
         Ti(At(DateTime(v)))
     elseif k == "X"
         X(At(v))
@@ -89,11 +92,11 @@ function _to_dim(k, v)
 end
 
 function _slice(path::String, layerName, zdims)
-    # layerName = "spec001_mr"
-    raster = Raster(path, name = layerName)
+    raster = Raster(path, name = layerName; crs = EPSG(4326))
     args = [_to_dim(dname, val) for (dname, val) in zdims]
     view(raster, args...)
 end
+
 function get_slice()
     pl = jsonpayload()
     outputId = Genie.Router.params(:outputId)
@@ -102,6 +105,7 @@ function get_slice()
     to_geojson = Genie.Router.params(:geojson, "false")
     to_geojson = Base.parse(Bool, to_geojson)
     viewed = _slice(fpoutput.path, layerName, pl)
+    viewed = reverse(viewed; dims=Y)
 
     if to_geojson
         collection = to_geointerface(viewed)
@@ -120,14 +124,16 @@ end
 function _respond_tiff(raster)
     filename = string(UUIDs.uuid4()) * ".tiff"
     tmpfile = joinpath(TMP_DIR_PATH, filename)
-    trimed = Rasters.trim(replace(raster, 0. => nothing))
+    trimmed = Rasters.trim(replace(raster, 0. => nothing))
     try
-        filename = Rasters.write(tmpfile, replace(trimed, nothing => 0.); options= Dict("COMPRESS"=>"DEFLATE"))
+        filename = Rasters.write(tmpfile, replace(trimmed, nothing => 0.); options= Dict("COMPRESS"=>"DEFLATE"))
         Genie.Router.serve_file(filename)
     catch
         rethrow()
     finally
-        rm(tmpfile)
+        if isfile(tmpfile)
+            rm(tmpfile)
+        end
     end
 end
 
@@ -183,7 +189,7 @@ function getcolors(collection)
     vals = collection.val
     minval = minimum(vals)
     maxval = maximum(vals)
-    ticks = range(minval, maxval, length=10)
+    ticks = exp10.(range(log10(minval), log10(maxval), length=10))
     cbar = get(DEFAULT_COLOR_SCHEME, ticks[2:end], :extrema)
     Dict(
         :colors => '#'.*hex.(cbar),
@@ -192,5 +198,30 @@ function getcolors(collection)
 end
 
 geo2dict(collection) = JSON3.read(write(collection))
+
+function get_ensemble_stats()
+    output_id = Genie.Router.params(:outputId)
+    layername = Genie.Router.params(:layer)
+    payload = jsonpayload()
+    timestep = payload["dims"]["Ti"]
+    height = haskey(payload["dims"], "height") ? payload["dims"]["height"] : nothing
+    threshold = payload["threshold"]
+
+    # Get stats
+    fprun_folder = related(_output_by_uuid(output_id), FlexpartRun)[].path
+    fprun_pn = joinpath(fprun_folder, "pathnames")
+    threshold_stats = Flexpart.threshold_exceedance(fprun_pn, layername, threshold, timestep, height)
+    agreement = threshold_stats[:agreement]
+    contours = threshold_stats[:contours]
+
+    # Create multi-band raster with all the data
+    contours_uint8 = map(m -> convert(Array{UInt8}, m), contours)
+    stack_data = cat(agreement, contours_uint8...; dims=3)
+    file_mean = joinpath(fprun_folder, "output/ensemble_mean.nc")
+    ref_raster = Raster(file_mean, name=layername; crs=EPSG(4326))
+    raster = Raster(stack_data; dims=(dims(ref_raster)[1:2]..., Band(1:size(stack_data, 3))), crs=EPSG(4326))
+    raster = reverse(raster; dims=Y)
+    _respond_tiff(raster)
+end
 
 end

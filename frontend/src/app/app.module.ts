@@ -25,13 +25,26 @@ import { HomeComponent } from './home/home.component';
 import { LoginModule } from './login/login.module';
 import './core/config/custom-methods';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome'
+import { ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+
 
 import { SnackbarModule } from './shared/ui/snackbar/snackbar.module';
+import { MapPlotsService } from './core/services/map-plots.service';
+import { GeometryPopupComponent } from './flexpart/run-simple/release-form/geometry-popup/geometry-popup.component';
+
+
 
 @NgModule({
     declarations: [
         AppComponent,
         HomeComponent,
+        GeometryPopupComponent
     ],
     imports: [
         BrowserModule,
@@ -42,6 +55,13 @@ import { SnackbarModule } from './shared/ui/snackbar/snackbar.module';
         MatSidenavModule,
         MatListModule,
         MatExpansionModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatButtonModule,
+        MatDialogModule,
+        MatIconModule,
 
         CoreModule,
         SharedModule,
@@ -62,7 +82,8 @@ import { SnackbarModule } from './shared/ui/snackbar/snackbar.module';
         JoinPipe,
         AroundPipe,
         DynamicPipe,
-        DatePipe
+        DatePipe,
+        MapPlotsService,
     ],
     bootstrap: [AppComponent]
 })

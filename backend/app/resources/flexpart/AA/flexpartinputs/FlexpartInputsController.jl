@@ -10,6 +10,7 @@ using Flexpart
 using FlexExtract
 
 using CbrnAlertApp: STATUS_ONGOING, STATUS_ERRORED, STATUS_FINISHED
+using CbrnAlertApp: EXTRACTED_WEATHER_DATA_DIR
 using CbrnAlertApp: _area, round_area
 
 using CbrnAlertApp.Users
@@ -24,17 +25,12 @@ struct MarsDataNotAvailableError <: Exception end
 struct UnknownMarsError <: Exception end
 
 function _check_mars_errors(filepath)
-  lines = readlines(filepath)
   haserror = false
-  for line in lines
-      if occursin("DATA_NOT_YET_AVAILABLE", line)
-          throw(MarsDataNotAvailableError())
-      end
-      if occursin("ERROR", line)
-          haserror = true
-      end
+  any(occursin.("DATA_NOT_YET_AVAILABLE", readlines(filepath))) && throw(MarsDataNotAvailableError())
+  if !any(occursin.("DONE!", readlines(filepath)))
+    haserror = true
+    throw(UnknownMarsError())
   end
-  haserror && throw(UnknownMarsError())
   return haserror
 end
 
@@ -46,20 +42,22 @@ function data_retrieval()
   area = round_area(_area(payload["area"]))
   gridres = payload["gridres"]
   time_step = convert(Int64, payload["timeStep"] / 3600)
+  dataset_type = payload["datasetType"]
 
-  newinput, fedir = FlexpartInputs.create()
+  newinput, fedir = dataset_type == "ensemble" ? FlexpartInputs.create(ensemble = true) : FlexpartInputs.create()
   FlexpartInputs.assign_to_user!(current_user(), newinput)
   fcontrol = FeControl(fedir)
   fcontrol[:GRID] = gridres
   fcontrol[:REQUEST] = 0
-  fcontrol[:ACCTYPE] = "FC"
-#   fcontrol[:CLASS] = "FOO"
   set_area!(fcontrol, area)
   set_steps!(fcontrol, start_date, end_date, time_step)
+  if dataset_type == "ensemble"
+    set_ensemble_rest!(fcontrol)
+  end
 
   FlexExtract.save(fcontrol)
 
-  log_file_path = joinpath(fedir.path, "output_log.log")
+  log_file_path = joinpath(fedir.path, "output.log")
   FlexpartInputs.change_control!(newinput, fcontrol)
   FlexpartInputs.change_status!(newinput, STATUS_ONGOING)
   open(log_file_path, "w") do logf
@@ -91,7 +89,7 @@ function data_retrieval()
       @info "The submission with uuid = $(newinput.uuid) failed."
       FlexpartInputs.change_status!(newinput, STATUS_ERRORED)
       FlexpartInputs.add_error_message!(newinput, join(readlines(log_file_path; keep = true), ""))
-      FlexpartInputs.delete_from_disk(newinput)
+      #FlexpartInputs.delete_from_disk(newinput)
       if e isa MarsDataNotAvailableError
           # throw(Genie.Exceptions.RuntimeException("Mars Retrieval error: DATA_NOT_YET_AVAILABLE", "The data you're requesting is not yet available", 500, e))
           return DATA_NOT_YET_AVAILABLE
@@ -111,6 +109,7 @@ function _find_control_path(fedirpath)::FlexExtractDir
   i = findfirst(x -> occursin("CONTROL", x), fefiles)
   FlexExtractDir(fedirpath, fefiles[1])
 end
+
 function _clarify_control(fcontrol)
   startday = Dates.DateTime(fcontrol[:START_DATE], "yyyymmdd")
   times = Base.parse.(Int, split(fcontrol[:TIME], " "))
@@ -138,10 +137,12 @@ function _clarify_control(fcontrol)
 end
 
 function get_inputs()
-  fpinputs = user_related(FlexpartInput)
-  filter!(FlexpartInputs.isfinished, fpinputs)
-  response = Dict.(fpinputs)
-  return response |> json
+    FlexpartInputs.delete_non_existing!()
+    FlexpartInputs.delete_errored!()
+    fpinputs = user_related(FlexpartInput)
+    filter!(FlexpartInputs.isfinished, fpinputs)
+    response = Dict.(fpinputs)
+    return response |> json
 end
 
 function delete_input()
@@ -149,6 +150,13 @@ function delete_input()
     to_delete = FlexpartInputs.delete!(uuid)
     @show to_delete
     return API.FlexpartInput(to_delete) |> json
+end
+
+function rename_input()
+    uuid = Genie.Router.params(:inputId)
+    new_name = Genie.Router.params(:newName)
+    to_rename = FlexpartInputs.rename!(uuid, new_name)
+    return API.FlexpartInput(to_rename) |> json
 end
 
 end

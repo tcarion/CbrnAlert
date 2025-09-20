@@ -1,34 +1,23 @@
-<!-- <app-selection-table
-    #selectionTableRef
-    [columnInfo]="columnInfo"
-    [displayedColumns]="displayedColumns"
-    (newSelectionEvent)="emitSelection($event)"
-    [hasDescriptionCol]="true"
-    ></app-selection-table> -->
-
-<!-- <app-selection-list [(runIds$ | async)] = "runId$ | async" (selected)="goToOuput($event)"></app-selection-list> -->
-<!-- <app-selection-list [elements] = "runIds$ | async" [routerLink]=""></app-selection-list> -->
-
-<ul class="" *ngIf="runs$ | async as runs">
-    <li class="flex flex-row p-2 cursor-pointer hover:bg-gray-50" *ngFor="let run of runs; let index = index"
-    (click)="onClick(run.uuid)"
-    [ngClass]="{'bg-gray-400 hover:bg-gray-400' : run.uuid == value}"
-    >
-        <span>
-          {{ run.date_created }}
-        </span>
-        <button class="w-5" (click)="deleteRun(run.uuid)">
-          <fa-icon icon="trash"></fa-icon>
-        </button>
-      </li>
-</ul>
-<div class="spinner-container" *ngIf="!(runs$ | async)">
-    <mat-spinner></mat-spinner>
+<div class="flex items-center space-x-10">
+  <mat-select panelClass="flexpart-input" placeholder="Flexpart run" class="p-2 cursor-pointer hover:bg-gray-50" *ngIf="runs$ | async as runs">
+    <mat-option *ngIf="isLoading">
+      <div style="height: 100%; display: flex; justify-content: center; align-items: center;">
+        <mat-spinner diameter="24"></mat-spinner>
+      </div>
+    </mat-option>
+    <mat-option *ngIf="!isLoading && runs.length === 0" disabled>
+      <span>No Flexpart run available - Run model first</span>
+    </mat-option>
+    <mat-option *ngFor="let run of runs" [value]="run.uuid" (click)="onClick(run)">
+      <span>
+        {{ run.name }} - {{ run.date_created | date:'dd/MM/yy - HH:mm' }}
+      </span>
+    </mat-option>
+  </mat-select>
+  <button (click)="renameRun(value, name)">
+    <fa-icon icon="pen"></fa-icon>
+  </button>
+  <button (click)="deleteRun(value)">
+    <fa-icon icon="trash"></fa-icon>
+  </button>
 </div>
-
-<!-- <button (click)="openDialog()"> Open dialog </button> -->
-<!-- <app-flexpart-plot-form
-    *ngIf="fpOutput"
-    [flexpartOutput]="fpOutput"></app-flexpart-plot-form > -->
-
-<!-- <router-outlet></router-outlet> -->

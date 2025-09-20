@@ -1,0 +1,21 @@
+<div class="flex justify-between">
+  <h2 mat-dialog-title>
+    {{ data.title }}
+  </h2>
+  <button mat-icon-button [mat-dialog-close]="false">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+<div mat-dialog-content>
+  <mat-form-field appearance="outline" style="width: 80%;">
+    <mat-label>{{ data.message }}</mat-label>
+    <input matInput [(ngModel)]="newName" (keydown.enter)="validateAndClose()">
+  </mat-form-field>
+  <div *ngIf="errorMessage" style="color: red; margin-top: 8px;">
+    {{ errorMessage }}
+  </div>
+</div>
+<div mat-dialog-actions [align]="'end'">
+  <button mat-raised-button (click)="cancel()">Cancel</button>
+  <button mat-raised-button color="primary" (click)="validateAndClose()">Save</button>
+</div>

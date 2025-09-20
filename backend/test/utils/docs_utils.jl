@@ -3,23 +3,45 @@ using YAML
 using Test
 
 # const API_DOCS = YAML.load_file(joinpath("..", API_DOC_FILE); dicttype=Dict{String, Any})
-const API_DOCS = YAML.load_file(joinpath("..", "public", "docs", "api_docs.yaml"); dicttype=Dict{String, Any})
+const API_DOCS = YAML.load_file(joinpath("..", "..", "api", "api_docs.yaml"); dicttype=Dict{String, Any})
 
 
 function response_schema(testroute; method = "get", response = "200", only_required = true)
     method = lowercase(method)
-    method in ["get", "post"] || error("method $method not knon")
-    schema = API_DOCS["paths"][testroute][method]["responses"][response]["content"]["application/json"]["schema"]
+    method in ["get", "post"] || error("method $method not known")
+    respnode = API_DOCS["paths"][testroute][method]["responses"][response]
+    respnode = resolve_ref(respnode)
+    schema = respnode["content"]["application/json"]["schema"]
+    schema = resolve_ref(schema)
     schema_to_dict(schema; only_required)
 end
 
 function body_schema(testroute)
-    schema = API_DOCS["paths"][testroute]["post"]["requestBody"]["content"]["application/json"]["schema"]
+    node = API_DOCS["paths"][testroute]["post"]["requestBody"]
+    node = resolve_ref(node)
+    schema = node["content"]["application/json"]["schema"]
+    schema = resolve_ref(schema)
     schema_to_dict(schema)
 end
 
 function post_response_schema(testroute; response = "200")
     response_schema(testroute; method = "post", response)
+end
+
+"""
+    If `node` is a Dict containing a `\$ref`, follow it inside `API_DOCS`
+    and return the resolved Dict. Otherwise return `node`.
+"""
+function resolve_ref(node)
+    if isa(node, Dict) && haskey(node, "\$ref")
+        refpath = split(node["\$ref"], "/")[2:end]
+        resolved = API_DOCS
+        for key in refpath
+            resolved = resolved[key]
+        end
+        return resolve_ref(resolved)
+    end
+    return node
 end
 
 get_schema(name) = API_DOCS["components"]["schemas"][name]

@@ -3,6 +3,8 @@
 	"build": {
 		"dockerfile": "Dockerfile"
 	},
+	"workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
+	"workspaceFolder": "/app",
 	"postCreateCommand": "bash .devcontainer/setup.sh",
 	"forwardPorts": [4200],
 	"mounts": [
@@ -10,7 +12,7 @@
 	],
 	"customizations": {
     "vscode": {
-      "extensions": ["julialang.language-julia"]
+      "extensions": ["julialang.language-julia", "ms-python.python", "ms-azuretools.vscode-docker", "ms-vscode.makefile-tools", "gimly81.fortran", "bradlc.vscode-tailwindcss"]
     }
   }
 }

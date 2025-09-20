@@ -9,6 +9,7 @@
         status=nothing,
         date_created=nothing,
         control=nothing,
+        ensemble=nothing,
     )
 
     - uuid::String
@@ -16,6 +17,7 @@
     - status::RunStatus
     - date_created::ZonedDateTime
     - control::Dict{String, String}
+    - ensemble::Bool
 """
 Base.@kwdef mutable struct FlexpartInput <: OpenAPI.APIModel
     uuid::Union{Nothing, String} = nothing
@@ -23,18 +25,20 @@ Base.@kwdef mutable struct FlexpartInput <: OpenAPI.APIModel
     status = nothing # spec type: Union{ Nothing, RunStatus }
     date_created::Union{Nothing, ZonedDateTime} = nothing
     control::Union{Nothing, Dict{String, String}} = nothing
+    ensemble::Union{Nothing, Bool} = nothing
 
-    function FlexpartInput(uuid, name, status, date_created, control, )
+    function FlexpartInput(uuid, name, status, date_created, control, ensemble, )
         OpenAPI.validate_property(FlexpartInput, Symbol("uuid"), uuid)
         OpenAPI.validate_property(FlexpartInput, Symbol("name"), name)
         OpenAPI.validate_property(FlexpartInput, Symbol("status"), status)
         OpenAPI.validate_property(FlexpartInput, Symbol("date_created"), date_created)
         OpenAPI.validate_property(FlexpartInput, Symbol("control"), control)
-        return new(uuid, name, status, date_created, control, )
+        OpenAPI.validate_property(FlexpartInput, Symbol("ensemble"), ensemble)
+        return new(uuid, name, status, date_created, control, ensemble, )
     end
 end # type FlexpartInput
 
-const _property_types_FlexpartInput = Dict{Symbol,String}(Symbol("uuid")=>"String", Symbol("name")=>"String", Symbol("status")=>"RunStatus", Symbol("date_created")=>"ZonedDateTime", Symbol("control")=>"Dict{String, String}", )
+const _property_types_FlexpartInput = Dict{Symbol,String}(Symbol("uuid")=>"String", Symbol("name")=>"String", Symbol("status")=>"RunStatus", Symbol("date_created")=>"ZonedDateTime", Symbol("control")=>"Dict{String, String}", Symbol("ensemble")=>"Bool", )
 OpenAPI.property_type(::Type{ FlexpartInput }, name::Symbol) = Union{Nothing,eval(Base.Meta.parse(_property_types_FlexpartInput[name]))}
 
 function check_required(o::FlexpartInput)
@@ -42,6 +46,7 @@ function check_required(o::FlexpartInput)
     o.name === nothing && (return false)
     o.date_created === nothing && (return false)
     o.control === nothing && (return false)
+    o.ensemble === nothing && (return false)
     true
 end
 

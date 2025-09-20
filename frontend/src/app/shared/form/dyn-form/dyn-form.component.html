@@ -1,7 +1,9 @@
-    <form [formGroup]="form">
+    <form [formGroup]="form" style="display: flex; align-items: center; gap: 1vw;">
   
-      <div *ngFor="let question of questions" class="form-row">
-        <app-question [question]="question" [form]="form"></app-question>
+      <div *ngFor="let question of questions">
+        <div *ngIf="question.key !== 'pointspec' && question.key !== 'nageclass'" class="form-row" style="text-transform: capitalize;">
+          <app-question [question]="question" [form]="form"></app-question>
+        </div>
       </div>
   
       <!-- <div class="form-row">

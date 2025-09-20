@@ -32,7 +32,7 @@ export class Atp45ApiService extends BaseService {
   static readonly Atp45TreeGetPath = '/atp45/tree';
 
   /**
-   * Get the decision tree discriminating between the ATP-45 cases.
+   * Get the decision tree branching the different ATP-45 options.
    *
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
    * To access only the response body, use `atp45TreeGet()` instead.
@@ -62,7 +62,7 @@ export class Atp45ApiService extends BaseService {
   }
 
   /**
-   * Get the decision tree discriminating between the ATP-45 cases.
+   * Get the decision tree branching the different ATP-45 options.
    *
    * This method provides access only to the response body.
    * To access the full response (for headers, for example), `atp45TreeGet$Response()` instead.

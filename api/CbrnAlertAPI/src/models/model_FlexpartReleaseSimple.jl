@@ -4,49 +4,70 @@
 
 @doc raw"""
     FlexpartReleaseSimple(;
+        substanceName="Generic Air Tracer",
         location=nothing,
+        geometryName="Point",
+        boxLength=0,
+        boxWidth=0,
+        boxHeight=0,
+        height=10,
+        mass=1,
         start=nothing,
         var"end"=nothing,
-        height=50.0,
-        mass=1000,
         particles=nothing,
     )
 
+    - substanceName::String
     - location::GeoPoint
+    - geometryName::String
+    - boxLength::Float64 : unit: [m]
+    - boxWidth::Float64 : unit: [m]
+    - boxHeight::Float64 : unit: [m]
+    - height::Float64 : unit: [m]
+    - mass::Float64 : unit: [kg]
     - start::ZonedDateTime
     - var"end"::ZonedDateTime
-    - height::Float64
-    - mass::Float64
     - particles::Float64
 """
 Base.@kwdef mutable struct FlexpartReleaseSimple <: OpenAPI.APIModel
+    substanceName::Union{Nothing, String} = "Generic Air Tracer"
     location = nothing # spec type: Union{ Nothing, GeoPoint }
+    geometryName::Union{Nothing, String} = "Point"
+    boxLength::Union{Nothing, Float64} = 0
+    boxWidth::Union{Nothing, Float64} = 0
+    boxHeight::Union{Nothing, Float64} = 0
+    height::Union{Nothing, Float64} = 10
+    mass::Union{Nothing, Float64} = 1
     start::Union{Nothing, ZonedDateTime} = nothing
     var"end"::Union{Nothing, ZonedDateTime} = nothing
-    height::Union{Nothing, Float64} = 50.0
-    mass::Union{Nothing, Float64} = 1000
     particles::Union{Nothing, Float64} = nothing
 
-    function FlexpartReleaseSimple(location, start, var"end", height, mass, particles, )
+    function FlexpartReleaseSimple(substanceName, location, geometryName, boxLength, boxWidth, boxHeight, height, mass, start, var"end", particles, )
+        OpenAPI.validate_property(FlexpartReleaseSimple, Symbol("substanceName"), substanceName)
         OpenAPI.validate_property(FlexpartReleaseSimple, Symbol("location"), location)
-        OpenAPI.validate_property(FlexpartReleaseSimple, Symbol("start"), start)
-        OpenAPI.validate_property(FlexpartReleaseSimple, Symbol("end"), var"end")
+        OpenAPI.validate_property(FlexpartReleaseSimple, Symbol("geometryName"), geometryName)
+        OpenAPI.validate_property(FlexpartReleaseSimple, Symbol("boxLength"), boxLength)
+        OpenAPI.validate_property(FlexpartReleaseSimple, Symbol("boxWidth"), boxWidth)
+        OpenAPI.validate_property(FlexpartReleaseSimple, Symbol("boxHeight"), boxHeight)
         OpenAPI.validate_property(FlexpartReleaseSimple, Symbol("height"), height)
         OpenAPI.validate_property(FlexpartReleaseSimple, Symbol("mass"), mass)
+        OpenAPI.validate_property(FlexpartReleaseSimple, Symbol("start"), start)
+        OpenAPI.validate_property(FlexpartReleaseSimple, Symbol("end"), var"end")
         OpenAPI.validate_property(FlexpartReleaseSimple, Symbol("particles"), particles)
-        return new(location, start, var"end", height, mass, particles, )
+        return new(substanceName, location, geometryName, boxLength, boxWidth, boxHeight, height, mass, start, var"end", particles, )
     end
 end # type FlexpartReleaseSimple
 
-const _property_types_FlexpartReleaseSimple = Dict{Symbol,String}(Symbol("location")=>"GeoPoint", Symbol("start")=>"ZonedDateTime", Symbol("end")=>"ZonedDateTime", Symbol("height")=>"Float64", Symbol("mass")=>"Float64", Symbol("particles")=>"Float64", )
+const _property_types_FlexpartReleaseSimple = Dict{Symbol,String}(Symbol("substanceName")=>"String", Symbol("location")=>"GeoPoint", Symbol("geometryName")=>"String", Symbol("boxLength")=>"Float64", Symbol("boxWidth")=>"Float64", Symbol("boxHeight")=>"Float64", Symbol("height")=>"Float64", Symbol("mass")=>"Float64", Symbol("start")=>"ZonedDateTime", Symbol("end")=>"ZonedDateTime", Symbol("particles")=>"Float64", )
 OpenAPI.property_type(::Type{ FlexpartReleaseSimple }, name::Symbol) = Union{Nothing,eval(Base.Meta.parse(_property_types_FlexpartReleaseSimple[name]))}
 
 function check_required(o::FlexpartReleaseSimple)
+    o.substanceName === nothing && (return false)
     o.location === nothing && (return false)
-    o.start === nothing && (return false)
-    o.var"end" === nothing && (return false)
     o.height === nothing && (return false)
     o.mass === nothing && (return false)
+    o.start === nothing && (return false)
+    o.var"end" === nothing && (return false)
     true
 end
 

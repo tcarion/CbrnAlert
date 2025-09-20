@@ -9,5 +9,99 @@
     display: flex;
     justify-content: center;
     align-items: center;
+}
 
+.parent-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 0.375rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    background-color: #ffffff;
+    min-width: 20rem; /* min-w-80 (80 x 0.25rem = 20rem) */
+    min-height: 14rem; /* min-w-80 (80 x 0.25rem = 20rem) */
+}
+
+.banner {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-top-left-radius: 0.375rem;
+    border-top-right-radius: 0.375rem;
+    width: 100%;
+    min-height: 3rem;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.8);
+    background-color: #bfdbfe;
+}
+
+.login-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 80%;
+    max-width: 80%;
+    height: 80%;
+    padding-top: 3%;
+    padding-bottom: 3%;
+}
+
+.fields-login {
+    width: 100%;
+}
+
+.button-login {
+    width: 50%;
+}
+
+.error-login {
+    font-size: 1vh;
+    background-color: #fed7d7;
+    color: #c53030;
+    border-radius: 0.125rem;
+    border-width: 0;
+    border-color: #c53030;
+}
+
+@media (min-width: 768px) {
+    .parent-box {
+        width: 24rem;
+    }
+}
+
+@media (min-width: 1280px) {
+    .parent-box {
+        width: 20%;
+        height: 30%;
+    }
+    .banner {
+        height: 12%;
+        font-size: 1.7vh;
+    }
+    .login-box {
+        font-size: 1.5vh;
+        flex-grow: 1;
+        gap: 0.1vh;
+    }
+    .button-login {
+        font-size: 1.5vh;
+    }
+}
+
+@media (min-width: 2000px) {
+    .button-login {
+        flex-grow: 1;
+}
+}
+
+@media (min-width: 4000px) {
+    .parent-box {
+        border-radius: 2rem;
+    }
+    .button-login {
+        border-radius: 1rem;
+    }
 }
