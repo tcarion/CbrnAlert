@@ -15,7 +15,8 @@
             <mat-form-field 
             *ngIf="item.type !== 'mapObject'"
             class="form-control" 
-            appearance="outline">
+            appearance="outline" 
+            floatLabel="never">
                 <mat-label> {{ item.label }} </mat-label>
                 <input 
                 matInput 
@@ -47,7 +48,8 @@
         <ng-container *ngSwitchCase="'datepicker'">
             <mat-form-field 
             class="form-control" 
-            appearance="outline">
+            appearance="outline" 
+            floatLabel="never">
             <mat-label> {{ item.label }} </mat-label>
             <input
                 *ngIf="item.minmax !== undefined"

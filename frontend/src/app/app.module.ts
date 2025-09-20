@@ -5,6 +5,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http'
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { FlexLayoutModule } from '@angular/flex-layout';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -49,6 +50,7 @@ import { GeometryPopupComponent } from './flexpart/run-simple/release-form/geome
     imports: [
         BrowserModule,
         HttpClientModule,
+        FlexLayoutModule,
         AppRoutingModule,
         BrowserAnimationsModule,
         MatNativeDateModule,

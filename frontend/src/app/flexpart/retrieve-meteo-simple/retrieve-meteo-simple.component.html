@@ -4,7 +4,8 @@
 
   <app-area-input formControlName="area"></app-area-input>
 
-  <mat-form-field class="form-control" appearance="outline" placeholder="Horizontal resolution [°]">
+  <mat-form-field class="form-control" appearance="outline" floatLabel="never">
+    <mat-label> Horizontal resolution [°]</mat-label>
     <mat-select formControlName="gridres">
       <mat-option *ngFor="let option of gridResolutions" [value]="option">
         {{ option }}
@@ -12,7 +13,8 @@
     </mat-select>
   </mat-form-field>
 
-  <mat-form-field class="form-control" appearance="outline" placeholder="Time step">
+  <mat-form-field class="form-control" appearance="outline" floatLabel="never">
+    <mat-label> Time step </mat-label>
     <mat-select formControlName="timeStep">
       <mat-option *ngFor="let option of timeSteps" [value]="option.key">
         {{ option.value }}

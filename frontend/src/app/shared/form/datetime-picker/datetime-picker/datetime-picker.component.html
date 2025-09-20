@@ -1,6 +1,7 @@
 <mat-form-field
 class="form-control"
-appearance="outline">
+appearance="outline"
+floatLabel="never">
 <mat-label> {{ label }} </mat-label>
   <input class="datetime-picker" matInput [ngxMatDatetimePicker]="picker" placeholder="Choose a date" [formControl]="control"
      [min]="min ? min: ''" [max]="max ? max : ''">
