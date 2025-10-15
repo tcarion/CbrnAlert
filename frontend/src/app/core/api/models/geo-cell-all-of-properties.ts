@@ -1,5 +1,5 @@
 /* tslint:disable */
 /* eslint-disable */
-export interface GeoCellProperties {
+export interface GeoCellAllOfProperties {
   val: number;
 }

@@ -26,10 +26,10 @@ const FORBIDDEN = Genie.Exceptions.ExceptionalResponse(
     )
 
 _area(area) = [
-    area["top"],
-    area["left"],
-    area["bottom"],
-    area["right"],
+    parse(Float64, area["top"]),
+    parse(Float64, area["left"]),
+    parse(Float64, area["bottom"]),
+    parse(Float64, area["right"])
     ]
     
 function round_area(area)

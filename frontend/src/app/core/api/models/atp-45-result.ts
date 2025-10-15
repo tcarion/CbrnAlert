@@ -1,11 +1,8 @@
 /* tslint:disable */
 /* eslint-disable */
-import { Atp45Zone } from './atp-45-zone';
-import { FeatureCollection } from './feature-collection';
+import { Atp45ResultCollection } from './atp-45-result-collection';
 export interface Atp45Result {
-  collection: FeatureCollection & {
-'features': Array<Atp45Zone>;
-};
+  collection: Atp45ResultCollection;
   metadata?: {
 };
 }

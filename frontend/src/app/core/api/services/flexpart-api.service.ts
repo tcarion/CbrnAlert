@@ -13,9 +13,10 @@ import { FlexpartInput } from '../models/flexpart-input';
 import { FlexpartOutput } from '../models/flexpart-output';
 import { FlexpartRun } from '../models/flexpart-run';
 import { RunStatus } from '../models/run-status';
-import { FlexpartInputBody } from '../models/flexpart-input-body';
-import { FlexpartRunBody } from '../models/flexpart-run-body';
-import { InlineResponse2001 } from '../models/inline-response-2001';
+import { FlexpartInputPostRequest } from '../models/flexpart-input-post-request';
+import { FlexpartOutputsOutputIdSlicePost200Response } from '../models/flexpart-outputs-output-id-slice-post-200-response';
+import { FlexpartOutputsOutputIdStatsPostRequest } from '../models/flexpart-outputs-output-id-stats-post-request';
+import { FlexpartRunPostRequest } from '../models/flexpart-run-post-request';
 
 @Injectable({
   providedIn: 'root',
@@ -47,7 +48,7 @@ export class FlexpartApiService extends BaseService {
      * If `simple`, use the simplified options structure defined by `FlexpartRetrieveSimple`. If `detailed`, a full Flexpart options object is expected (see Flexpart docs)
      */
     retrievalType?: 'simple' | 'detailed';
-    body: FlexpartInputBody
+    body: FlexpartInputPostRequest
   },
   context?: HttpContext
 
@@ -85,7 +86,7 @@ export class FlexpartApiService extends BaseService {
      * If `simple`, use the simplified options structure defined by `FlexpartRetrieveSimple`. If `detailed`, a full Flexpart options object is expected (see Flexpart docs)
      */
     retrievalType?: 'simple' | 'detailed';
-    body: FlexpartInputBody
+    body: FlexpartInputPostRequest
   },
   context?: HttpContext
 
@@ -215,6 +216,78 @@ export class FlexpartApiService extends BaseService {
   }
 
   /**
+   * Path part for operation flexpartInputsInputIdPut
+   */
+  static readonly FlexpartInputsInputIdPutPath = '/flexpart/inputs/{inputId}';
+
+  /**
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `flexpartInputsInputIdPut()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  flexpartInputsInputIdPut$Response(params: {
+
+    /**
+     * The input ID
+     */
+    inputId: string;
+
+    /**
+     * The new file name chosen by the user
+     */
+    newName: string;
+  },
+  context?: HttpContext
+
+): Observable<StrictHttpResponse<FlexpartInput>> {
+
+    const rb = new RequestBuilder(this.rootUrl, FlexpartApiService.FlexpartInputsInputIdPutPath, 'put');
+    if (params) {
+      rb.path('inputId', params.inputId, {"style":"simple","explode":false});
+      rb.query('newName', params.newName, {"style":"form","explode":true});
+    }
+
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json',
+      context: context
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<FlexpartInput>;
+      })
+    );
+  }
+
+  /**
+   * This method provides access only to the response body.
+   * To access the full response (for headers, for example), `flexpartInputsInputIdPut$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  flexpartInputsInputIdPut(params: {
+
+    /**
+     * The input ID
+     */
+    inputId: string;
+
+    /**
+     * The new file name chosen by the user
+     */
+    newName: string;
+  },
+  context?: HttpContext
+
+): Observable<FlexpartInput> {
+
+    return this.flexpartInputsInputIdPut$Response(params,context).pipe(
+      map((r: StrictHttpResponse<FlexpartInput>) => r.body as FlexpartInput)
+    );
+  }
+
+  /**
    * Path part for operation flexpartInputsInputIdDelete
    */
   static readonly FlexpartInputsInputIdDeletePath = '/flexpart/inputs/{inputId}';
@@ -303,7 +376,7 @@ export class FlexpartApiService extends BaseService {
     /**
      * Options for Flexpart.
      */
-    body: FlexpartRunBody
+    body: FlexpartRunPostRequest
   },
   context?: HttpContext
 
@@ -351,7 +424,7 @@ export class FlexpartApiService extends BaseService {
     /**
      * Options for Flexpart.
      */
-    body: FlexpartRunBody
+    body: FlexpartRunPostRequest
   },
   context?: HttpContext
 
@@ -476,6 +549,78 @@ export class FlexpartApiService extends BaseService {
 ): Observable<FlexpartRun> {
 
     return this.flexpartRunsRunIdGet$Response(params,context).pipe(
+      map((r: StrictHttpResponse<FlexpartRun>) => r.body as FlexpartRun)
+    );
+  }
+
+  /**
+   * Path part for operation flexpartRunsRunIdPut
+   */
+  static readonly FlexpartRunsRunIdPutPath = '/flexpart/runs/{runId}';
+
+  /**
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `flexpartRunsRunIdPut()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  flexpartRunsRunIdPut$Response(params: {
+
+    /**
+     * The flexpart run ID
+     */
+    runId: string;
+
+    /**
+     * The new file name chosen by the user
+     */
+    newName: string;
+  },
+  context?: HttpContext
+
+): Observable<StrictHttpResponse<FlexpartRun>> {
+
+    const rb = new RequestBuilder(this.rootUrl, FlexpartApiService.FlexpartRunsRunIdPutPath, 'put');
+    if (params) {
+      rb.path('runId', params.runId, {"style":"simple","explode":false});
+      rb.query('newName', params.newName, {"style":"form","explode":true});
+    }
+
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json',
+      context: context
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<FlexpartRun>;
+      })
+    );
+  }
+
+  /**
+   * This method provides access only to the response body.
+   * To access the full response (for headers, for example), `flexpartRunsRunIdPut$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  flexpartRunsRunIdPut(params: {
+
+    /**
+     * The flexpart run ID
+     */
+    runId: string;
+
+    /**
+     * The new file name chosen by the user
+     */
+    newName: string;
+  },
+  context?: HttpContext
+
+): Observable<FlexpartRun> {
+
+    return this.flexpartRunsRunIdPut$Response(params,context).pipe(
       map((r: StrictHttpResponse<FlexpartRun>) => r.body as FlexpartRun)
     );
   }
@@ -878,7 +1023,7 @@ export class FlexpartApiService extends BaseService {
   },
   context?: HttpContext
 
-): Observable<StrictHttpResponse<InlineResponse2001>> {
+): Observable<StrictHttpResponse<FlexpartOutputsOutputIdSlicePost200Response>> {
 
     const rb = new RequestBuilder(this.rootUrl, FlexpartApiService.FlexpartOutputsOutputIdSlicePostPath, 'post');
     if (params) {
@@ -896,7 +1041,7 @@ export class FlexpartApiService extends BaseService {
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<InlineResponse2001>;
+        return r as StrictHttpResponse<FlexpartOutputsOutputIdSlicePost200Response>;
       })
     );
   }
@@ -939,10 +1084,10 @@ export class FlexpartApiService extends BaseService {
   },
   context?: HttpContext
 
-): Observable<InlineResponse2001> {
+): Observable<FlexpartOutputsOutputIdSlicePost200Response> {
 
     return this.flexpartOutputsOutputIdSlicePost$Json$Response(params,context).pipe(
-      map((r: StrictHttpResponse<InlineResponse2001>) => r.body as InlineResponse2001)
+      map((r: StrictHttpResponse<FlexpartOutputsOutputIdSlicePost200Response>) => r.body as FlexpartOutputsOutputIdSlicePost200Response)
     );
   }
 
@@ -1048,6 +1193,85 @@ export class FlexpartApiService extends BaseService {
 ): Observable<Blob> {
 
     return this.flexpartOutputsOutputIdSlicePost$Tiff$Response(params,context).pipe(
+      map((r: StrictHttpResponse<Blob>) => r.body as Blob)
+    );
+  }
+
+  /**
+   * Path part for operation flexpartOutputsOutputIdStatsPost
+   */
+  static readonly FlexpartOutputsOutputIdStatsPostPath = '/flexpart/outputs/{outputId}/stats';
+
+  /**
+   * Return ensemble statistics of the plotted `output`, based on layer, dimensions and input threshold value.
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `flexpartOutputsOutputIdStatsPost()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  flexpartOutputsOutputIdStatsPost$Response(params: {
+
+    /**
+     * The output ID
+     */
+    outputId: string;
+
+    /**
+     * Name of the plotted layer
+     */
+    layer: string;
+    body: FlexpartOutputsOutputIdStatsPostRequest
+  },
+  context?: HttpContext
+
+): Observable<StrictHttpResponse<Blob>> {
+
+    const rb = new RequestBuilder(this.rootUrl, FlexpartApiService.FlexpartOutputsOutputIdStatsPostPath, 'post');
+    if (params) {
+      rb.path('outputId', params.outputId, {"style":"simple","explode":false});
+      rb.query('layer', params.layer, {"style":"form","explode":true});
+      rb.body(params.body, 'application/json');
+    }
+
+    return this.http.request(rb.build({
+      responseType: 'blob',
+      accept: 'image/tiff',
+      context: context
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<Blob>;
+      })
+    );
+  }
+
+  /**
+   * Return ensemble statistics of the plotted `output`, based on layer, dimensions and input threshold value.
+   *
+   * This method provides access only to the response body.
+   * To access the full response (for headers, for example), `flexpartOutputsOutputIdStatsPost$Response()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  flexpartOutputsOutputIdStatsPost(params: {
+
+    /**
+     * The output ID
+     */
+    outputId: string;
+
+    /**
+     * Name of the plotted layer
+     */
+    layer: string;
+    body: FlexpartOutputsOutputIdStatsPostRequest
+  },
+  context?: HttpContext
+
+): Observable<Blob> {
+
+    return this.flexpartOutputsOutputIdStatsPost$Response(params,context).pipe(
       map((r: StrictHttpResponse<Blob>) => r.body as Blob)
     );
   }

@@ -6,6 +6,7 @@ export interface FlexpartInput {
 [key: string]: string;
 };
   date_created: string;
+  ensemble: boolean;
   name: string;
   status?: RunStatus;
   uuid: string;

@@ -1,4 +1,4 @@
-<form [formGroup]="form">
+<form [formGroup]="form" class="form-container">
   <app-datetime-picker formControlName="start" label="Start" [formGroup]="form" [steps] = steps></app-datetime-picker>
   <app-datetime-picker formControlName="end" label="End" [formGroup]="form" [steps] = steps></app-datetime-picker>
 
@@ -22,8 +22,24 @@
     </mat-select>
   </mat-form-field>
 
+  <div class="dataset-selection">
+    <span>Dataset type:</span>
+    <mat-button-toggle-group formControlName="datasetType">
+      <mat-button-toggle [value]="'deterministic'">
+        Deterministic
+        <mat-icon matTooltip="A single forecast with fixed initial conditions. Faster retrieval and dispersion simulation, but no information on model uncertainties in dispersion results.">info</mat-icon>
+      </mat-button-toggle>
+      <mat-button-toggle [value]="'ensemble'">
+        Ensemble
+        <mat-icon matTooltip="Multiple forecasts with slightly varied initial conditions to better account for uncertainties. Used for probabilistic dispersion modelling.">info</mat-icon>
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+
   <div>
-    <button type="submit" mat-raised-button color="primary" [disabled]="form.invalid" (click)="submit(form)">Retrieve weather data</button>
+    <button type="submit" mat-raised-button color="primary" [disabled]="form.invalid" (click)="submit(form)">
+      Retrieve weather data
+    </button>
   </div>
 
 </form>

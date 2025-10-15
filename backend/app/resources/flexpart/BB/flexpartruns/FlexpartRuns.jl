@@ -51,6 +51,7 @@ export FlexpartRun
     status::String = STATUS_CREATED
     options::String = ""
     # options::OptionType = OptionType()
+    ensemble::Bool = false
 end
 
 Validation.validator(::Type{FlexpartRun}) = ModelValidator([
@@ -65,12 +66,13 @@ API.FlexpartRun(x::FlexpartRun) = API.FlexpartRun(;
   name = x.name,
   status = x.status,
   date_created = x.date_created,
-  options = FlexpartRuns.get_options(x)
+  options = FlexpartRuns.get_options(x),
+  ensemble = x.ensemble
 )
 
 _get_run(id) = findone(FlexpartRun, uuid = id)
 
-function create()
+function create(; ensemble::Bool = false)
     uuid = string(UUIDs.uuid4())
     path = joinpath(FLEXPART_RUNS_DIR, uuid)
     mkpath(path)
@@ -80,13 +82,30 @@ function create()
         uuid=uuid,
         name=uuid,
         path=relpath(path),
-        options=JSON3.write(fpoptions.options)
+        options=JSON3.write(fpoptions.options),
+        ensemble=ensemble
         # date_created = Dates.format(Dates.now(), DATE_FORMAT)
     )
     newentry |> save!
 end
 
+function add_existing(fppath::String)
+    fpsim = FlexpartSim(abspath(joinpath(fppath, "pathnames")))
+    name = basename(fppath)
+    fpoptions = FlexpartOption(fpsim)
+    Flexpart.remove_unused_species!(fpoptions)
+    newentry = FlexpartRun(
+        uuid=name,
+        name=name,
+        path=relpath(fppath),
+        options=JSON3.write(fpoptions.options),
+        status=STATUS_FINISHED
+    )
+    newentry |> save!
+end
+
 isfinished(entry) = entry.status == STATUS_FINISHED
+isongoing(entry) = entry.status == STATUS_ONGOING
 iserrored(entry) = entry.status == STATUS_ERRORED
 
 function change_status!(name::String, value::String)
@@ -103,6 +122,15 @@ function change_options!(name::String, fpoptions::FlexpartOption)
     entry |> save!
 end
 
+function rename!(uuid::String, new_name::String)
+    entry = findone(FlexpartRun, uuid=uuid)
+    entry.name = new_name
+    new_path = relpath(joinpath(FLEXPART_RUNS_DIR, new_name))
+    mv(entry.path, new_path)
+    entry.path = new_path
+    entry |> save!
+end
+
 function get_options(entry::FlexpartRun)
     JSON3.read(entry.options)
 end
@@ -115,8 +143,18 @@ function delete_non_existing!()
     entries = all(FlexpartRun)
     for entry in entries
         if !isdir(entry.path)
+            SearchLight.query("DELETE FROM flexpartoutputsflexpartruns WHERE flexpartruns_id = $(entry.id)")
             SearchLight.delete(entry)
         end
+    end
+end
+
+function delete_errored!()
+    entries = all(FlexpartRun)
+    errored = filter(x -> x.status == STATUS_ERRORED, entries)
+    for entry in errored
+        SearchLight.query("DELETE FROM flexpartoutputsflexpartruns WHERE flexpartruns_id = $(entry.id)")
+        SearchLight.delete(entry)
     end
 end
 
@@ -124,12 +162,14 @@ function delete_unfinished!()
     entries = all(FlexpartRun)
     unfinished = filter(x -> x.status !== STATUS_FINISHED, entries)
     for entry in unfinished
+        SearchLight.query("DELETE FROM flexpartoutputsflexpartruns WHERE flexpartruns_id = $(entry.id)")
         SearchLight.delete(entry)
     end
 end
 
 function delete!(entry::FlexpartRun)::FlexpartRun
     isdir(entry.path) && rm(entry.path, recursive=true)
+    SearchLight.query("DELETE FROM flexpartoutputsflexpartruns WHERE flexpartruns_id = $(entry.id)")
     SearchLight.delete(entry)
     return entry
 end

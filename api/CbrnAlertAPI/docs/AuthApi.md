@@ -1,6 +1,6 @@
 # AuthApi
 
-All URIs are relative to *http://localhost:8000/api*
+All URIs are relative to *http://localhost:4200/api*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------

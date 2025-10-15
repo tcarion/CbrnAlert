@@ -1,6 +1,6 @@
 import { SliceResponseType } from './flexpart-plot-data';
 import { FlexpartRetrieveSimple } from './../core/api/models/flexpart-retrieve-simple';
-import { BehaviorSubject, combineLatest, Observable, of, Subject, throwError } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of, Subject, throwError, firstValueFrom } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { FlexpartResult } from 'src/app/flexpart/flexpart-result';
 import { FlexpartOptionsSimple, FlexpartOutput, FlexpartRun } from 'src/app/core/api/models';
@@ -72,7 +72,8 @@ export class FlexpartService {
     const control = input.control;
     const startDate = control['START_DATE'];
     const hour = control['TIME'].split(" ")[0];
-    return dayjs(startDate + 'T' + hour).toDate();
+    const step = parseInt(control['STEP'].split(" ")[0], 10);
+    return dayjs(startDate + 'T' + hour).add(step, 'hour').toDate();
   }
 
   getInputEnd(input:FlexpartInput) {
@@ -124,16 +125,24 @@ export class FlexpartService {
     return this.apiService.flexpartRunsGet();
   }
 
-  updateRunsFromServer() {
-    this.getRuns().pipe(map(runs => {
-      this.runsSubject.next(runs);
-    })).subscribe();
+  updateRunsFromServer(): Promise<void> {
+    return firstValueFrom(
+      this.getRuns().pipe(
+        map(runs => {
+          this.runsSubject.next(runs);
+        })
+      )
+    );
   }
 
-  updateInputsFromServer() {
-    this.getInputs().pipe(map(inputs => {
-      this.inputsSubject.next(inputs);
-    })).subscribe();
+  updateInputsFromServer(): Promise<void> {
+    return firstValueFrom(
+      this.getInputs().pipe(
+        map(inputs => {
+          this.inputsSubject.next(inputs);
+        })
+      )
+    );
   }
 
   deleteInput(inputId: string) {
@@ -173,6 +182,32 @@ export class FlexpartService {
     //   console.log(`deleted to ${newRuns}`);
     //   this.runsSubject.next(newRuns);
     // })
+  }
+
+  renameInput(inputId: string, newName: string): Observable<FlexpartInput> {
+    return this.apiService.flexpartInputsInputIdPut({ inputId, newName }).pipe(
+      withLatestFrom(this.inputs$),
+      map(([apiRes, currentInputs]) => {
+        const updatedInputs = currentInputs.map(input =>
+          input.uuid === apiRes.uuid ? { ...input, name: apiRes.name } : input
+        );
+        this.inputsSubject.next(updatedInputs);
+        return apiRes;
+      })
+    );
+  }
+
+  renameRun(runId: string, newName: string): Observable<FlexpartRun> {
+    return this.apiService.flexpartRunsRunIdPut({ runId, newName }).pipe(
+      withLatestFrom(this.runs$),
+      map(([apiRes, currentRuns]) => {
+        const updatedRuns = currentRuns.map(run =>
+          run.uuid === apiRes.uuid ? { ...run, name: apiRes.name } : run
+        );
+        this.runsSubject.next(updatedRuns);
+        return apiRes;
+      })
+    );
   }
 
   getRun(runId: string): Observable<FlexpartRun> {
@@ -226,29 +261,39 @@ export class FlexpartService {
     })
   }
 
-  getDimsQuestions(outputId: string, layer: string) {
-    const questions: QuestionBase<any>[] = []
-    this.getZDims(outputId, layer).subscribe(dims => {
-      console.log(dims)
-      for (const [key, values] of Object.entries(dims as { [k: string]: string[] | number[] })) {
-        const kvs = values.map((v) => {
-          return { key: v as string, value: v as string }
-        })
-        questions.push(new DropdownQuestion({
-          key: key,
-          label: key,
-          options: kvs,
-          required: true,
-          value: values[0],
-          // order: 3
-        }))
-        // this.formGroup.addControl(key, new FormControl(values[0]))
-        // this.dimNames.push(key);
-        // this.dimValues.push(values);
-      }
-    })
-    return of(questions);
+  getDimsQuestions(outputId: string, layer: string): Observable<QuestionBase<any>[]> {
+    const questions: QuestionBase<any>[] = [];
+    return this.getZDims(outputId, layer).pipe(
+      switchMap(dims => {
+        for (const [key, values] of Object.entries(dims as { [k: string]: string[] | number[] })) {
+          const kvs = values.map((v) => {
+            return { key: v as string, value: v as string }
+          })
+          questions.push(new DropdownQuestion({
+            key: key,
+            label: key,
+            options: kvs,
+            required: true,
+            value: values[0],
+            // order: 3
+          }))
+          // this.formGroup.addControl(key, new FormControl(values[0]))
+          // this.dimNames.push(key);
+          // this.dimValues.push(values);
+        }
+        return of(questions);
+      })
+    );
   }
+
+  getEnsembleStats(outputId: string, layerName: string, dims: {[key: string]: number}, threshold: number) {
+    return this.apiService.flexpartOutputsOutputIdStatsPost({
+      outputId,
+      layer: layerName,
+      body: {dims, threshold}
+    })
+  }
+
   meteoDataRetrieval(payload: any) {
     // const notifTitle = this.notificationService.addNotif('Met data retrieval', 'metDataRequest');
     // this.store

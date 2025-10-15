@@ -1,11 +1,9 @@
 /* tslint:disable */
 /* eslint-disable */
 import { GeometryElement } from './geometry-element';
-import { LinearRing } from './linear-ring';
+import { PolygonAllOf } from './polygon-all-of';
 
 /**
  * GeoJSon geometry
  */
-export type Polygon = GeometryElement & {
-'coordinates': Array<LinearRing>;
-};
+export type Polygon = GeometryElement & PolygonAllOf;

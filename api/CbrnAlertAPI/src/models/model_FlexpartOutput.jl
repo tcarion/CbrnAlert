@@ -8,29 +8,41 @@
         name=nothing,
         date_created=nothing,
         metadata=nothing,
+        filetype=nothing,
+        isnested=nothing,
+        member=nothing,
     )
 
     - uuid::String
     - name::String
     - date_created::ZonedDateTime
     - metadata::Any
+    - filetype::String
+    - isnested::Bool
+    - member::String
 """
 Base.@kwdef mutable struct FlexpartOutput <: OpenAPI.APIModel
     uuid::Union{Nothing, String} = nothing
     name::Union{Nothing, String} = nothing
     date_created::Union{Nothing, ZonedDateTime} = nothing
     metadata::Union{Nothing, Any} = nothing
+    filetype::Union{Nothing, String} = nothing
+    isnested::Union{Nothing, Bool} = nothing
+    member::Union{Nothing, String} = nothing
 
-    function FlexpartOutput(uuid, name, date_created, metadata, )
+    function FlexpartOutput(uuid, name, date_created, metadata, filetype, isnested, member, )
         OpenAPI.validate_property(FlexpartOutput, Symbol("uuid"), uuid)
         OpenAPI.validate_property(FlexpartOutput, Symbol("name"), name)
         OpenAPI.validate_property(FlexpartOutput, Symbol("date_created"), date_created)
         OpenAPI.validate_property(FlexpartOutput, Symbol("metadata"), metadata)
-        return new(uuid, name, date_created, metadata, )
+        OpenAPI.validate_property(FlexpartOutput, Symbol("filetype"), filetype)
+        OpenAPI.validate_property(FlexpartOutput, Symbol("isnested"), isnested)
+        OpenAPI.validate_property(FlexpartOutput, Symbol("member"), member)
+        return new(uuid, name, date_created, metadata, filetype, isnested, member, )
     end
 end # type FlexpartOutput
 
-const _property_types_FlexpartOutput = Dict{Symbol,String}(Symbol("uuid")=>"String", Symbol("name")=>"String", Symbol("date_created")=>"ZonedDateTime", Symbol("metadata")=>"Any", )
+const _property_types_FlexpartOutput = Dict{Symbol,String}(Symbol("uuid")=>"String", Symbol("name")=>"String", Symbol("date_created")=>"ZonedDateTime", Symbol("metadata")=>"Any", Symbol("filetype")=>"String", Symbol("isnested")=>"Bool", Symbol("member")=>"String", )
 OpenAPI.property_type(::Type{ FlexpartOutput }, name::Symbol) = Union{Nothing,eval(Base.Meta.parse(_property_types_FlexpartOutput[name]))}
 
 function check_required(o::FlexpartOutput)
@@ -38,6 +50,7 @@ function check_required(o::FlexpartOutput)
     o.name === nothing && (return false)
     o.date_created === nothing && (return false)
     o.metadata === nothing && (return false)
+    o.member === nothing && (return false)
     true
 end
 

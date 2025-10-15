@@ -13,7 +13,7 @@ export class MapPlotListItemComponent implements OnInit {
     
     @Output() visibilityEvent = new EventEmitter<MapPlot>();
     @Output() deleteEvent = new EventEmitter<number>();
-    @Output() itemClickEvent = new EventEmitter<number>();
+    @Output() itemClickEvent = new EventEmitter<MapPlot>();
     constructor() { }
 
     ngOnInit(): void {
@@ -24,11 +24,23 @@ export class MapPlotListItemComponent implements OnInit {
     }
 
     onItemClick(plotId: number) {
-        this.itemClickEvent.emit(plotId);
+        const selectedPlot = this.getPlotById(plotId);
+        if (selectedPlot) {
+            this.itemClickEvent.emit(selectedPlot)
+          } else {
+            console.log("Plot with ID " + plotId + " not found.");
+          }
     }
 
     onDelete(plotId: number) {
         this.deleteEvent.emit(plotId);
+    }
+
+    getPlotById(plotId: number): MapPlot | undefined {
+        if (this.plots) {
+            return this.plots.find(plot => plot.id === plotId);
+        }
+        return undefined;
     }
 
 }

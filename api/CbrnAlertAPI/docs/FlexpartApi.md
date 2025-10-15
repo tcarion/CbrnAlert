@@ -1,6 +1,6 @@
 # FlexpartApi
 
-All URIs are relative to *http://localhost:8000/api*
+All URIs are relative to *http://localhost:4200/api*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -8,15 +8,18 @@ Method | HTTP request | Description
 [**flexpart_inputs_get**](FlexpartApi.md#flexpart_inputs_get) | **GET** /flexpart/inputs | 
 [**flexpart_inputs_input_id_delete**](FlexpartApi.md#flexpart_inputs_input_id_delete) | **DELETE** /flexpart/inputs/{inputId} | 
 [**flexpart_inputs_input_id_get**](FlexpartApi.md#flexpart_inputs_input_id_get) | **GET** /flexpart/inputs/{inputId} | 
+[**flexpart_inputs_input_id_put**](FlexpartApi.md#flexpart_inputs_input_id_put) | **PUT** /flexpart/inputs/{inputId} | 
 [**flexpart_outputs_output_id_dimensions_get**](FlexpartApi.md#flexpart_outputs_output_id_dimensions_get) | **GET** /flexpart/outputs/{outputId}/dimensions | 
 [**flexpart_outputs_output_id_get**](FlexpartApi.md#flexpart_outputs_output_id_get) | **GET** /flexpart/outputs/{outputId} | 
 [**flexpart_outputs_output_id_layers_get**](FlexpartApi.md#flexpart_outputs_output_id_layers_get) | **GET** /flexpart/outputs/{outputId}/layers | 
 [**flexpart_outputs_output_id_slice_post**](FlexpartApi.md#flexpart_outputs_output_id_slice_post) | **POST** /flexpart/outputs/{outputId}/slice | 
+[**flexpart_outputs_output_id_stats_post**](FlexpartApi.md#flexpart_outputs_output_id_stats_post) | **POST** /flexpart/outputs/{outputId}/stats | 
 [**flexpart_run_post**](FlexpartApi.md#flexpart_run_post) | **POST** /flexpart/run | 
 [**flexpart_runs_get**](FlexpartApi.md#flexpart_runs_get) | **GET** /flexpart/runs | 
 [**flexpart_runs_run_id_delete**](FlexpartApi.md#flexpart_runs_run_id_delete) | **DELETE** /flexpart/runs/{runId} | 
 [**flexpart_runs_run_id_get**](FlexpartApi.md#flexpart_runs_run_id_get) | **GET** /flexpart/runs/{runId} | 
 [**flexpart_runs_run_id_outputs_get**](FlexpartApi.md#flexpart_runs_run_id_outputs_get) | **GET** /flexpart/runs/{runId}/outputs | 
+[**flexpart_runs_run_id_put**](FlexpartApi.md#flexpart_runs_run_id_put) | **PUT** /flexpart/runs/{runId} | 
 
 
 # **flexpart_input_post**
@@ -126,6 +129,34 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **req** | **HTTP.Request** | The HTTP Request object | 
 **input_id** | **String**| The input ID | [default to nothing]
+
+### Return type
+
+[**FlexpartInput**](FlexpartInput.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **flexpart_inputs_input_id_put**
+> flexpart_inputs_input_id_put(req::HTTP.Request, input_id::String, new_name::String;) -> FlexpartInput
+
+
+
+### Required Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **req** | **HTTP.Request** | The HTTP Request object | 
+**input_id** | **String**| The input ID | [default to nothing]
+**new_name** | **String**| The new file name chosen by the user | [default to nothing]
 
 ### Return type
 
@@ -278,6 +309,37 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **flexpart_outputs_output_id_stats_post**
+> flexpart_outputs_output_id_stats_post(req::HTTP.Request, output_id::String, layer::String, flexpart_outputs_output_id_stats_post_request::FlexpartOutputsOutputIdStatsPostRequest;) -> String
+
+
+
+Return ensemble statistics of the plotted `output`, based on layer, dimensions and input threshold value.
+
+### Required Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **req** | **HTTP.Request** | The HTTP Request object | 
+**output_id** | **String**| The output ID | [default to nothing]
+**layer** | **String**| Name of the plotted layer | [default to nothing]
+**flexpart_outputs_output_id_stats_post_request** | [**FlexpartOutputsOutputIdStatsPostRequest**](FlexpartOutputsOutputIdStatsPostRequest.md)|  | 
+
+### Return type
+
+**String**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: image/tiff
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **flexpart_run_post**
 > flexpart_run_post(req::HTTP.Request, input_id::String, flexpart_run_post_request::FlexpartRunPostRequest; run_type=nothing,) -> FlexpartRun
 
@@ -419,6 +481,34 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**Vector{FlexpartOutput}**](FlexpartOutput.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **flexpart_runs_run_id_put**
+> flexpart_runs_run_id_put(req::HTTP.Request, run_id::String, new_name::String;) -> FlexpartRun
+
+
+
+### Required Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **req** | **HTTP.Request** | The HTTP Request object | 
+**run_id** | **String**| The flexpart run ID | [default to nothing]
+**new_name** | **String**| The new file name chosen by the user | [default to nothing]
+
+### Return type
+
+[**FlexpartRun**](FlexpartRun.md)
 
 ### Authorization
 

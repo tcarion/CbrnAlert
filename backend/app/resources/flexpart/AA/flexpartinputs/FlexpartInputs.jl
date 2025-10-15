@@ -45,6 +45,7 @@ export FlexpartInput
     date_created::DateTime = Dates.now()
     status::String = STATUS_CREATED
     error_message::Union{String, Nothing} = ""
+    ensemble::Bool = false
 end
 
 Validation.validator(::Type{FlexpartInput}) = ModelValidator([
@@ -60,7 +61,8 @@ Base.Dict(x::FlexpartInput) = Dict(
     :name => x.name,
     :status => x.status,
     :date_created => x.date_created,
-    :control => get_control(x)
+    :control => get_control(x),
+    :ensemble => x.ensemble
 )
 
 API.FlexpartInput(x::FlexpartInput) = API.FlexpartInput(;
@@ -68,19 +70,21 @@ API.FlexpartInput(x::FlexpartInput) = API.FlexpartInput(;
     name = x.name,
     status = x.status,
     date_created = x.date_created,
-    control = Dict{String, String}([string(k) => string(v) for (k,v) in get_control(x)])
+    control = Dict{String, String}([string(k) => string(v) for (k,v) in get_control(x)]),
+    ensemble => x.ensemble
 )
 
-function create()
+function create(; ensemble::Bool = false)
     uuid = string(UUIDs.uuid4())
     path = joinpath(EXTRACTED_WEATHER_DATA_DIR, uuid)
-    fedir = FlexExtract.create(path)
+    fedir = ensemble ? FlexExtract.create(path; control = FlexExtract.FLEX_ENSEMBLE_CONTROL) : FlexExtract.create(path)
     default_control = FeControl(fedir)
     newentry = FlexpartInput(
         uuid=uuid,
         name=uuid,
         path=relpath(path),
-        control=JSON3.write(default_control)
+        control=JSON3.write(default_control),
+        ensemble=ensemble
     )
     newentry |> save!, fedir
 end
@@ -95,6 +99,23 @@ function add(fepath::String)
         name=name,
         path=relpath(fedir.path),
         control=JSON3.write(fcontrol.dict)
+    )
+    newentry |> save!
+end
+
+function add_existing(fepath::String)
+    fedir = FlexExtractDir(fepath)
+    name = basename(fedir.path)
+    uuid = string(UUIDs.uuid4())
+    fcontrol = FeControl(fedir)
+    ensemble = occursin("CONTROL_OD.OPER.FC.eta.highres", fedir[:controlfile]) ? false : true
+    newentry = FlexpartInput(
+        uuid=uuid,
+        name=name,
+        path=relpath(fedir.path),
+        control=JSON3.write(fcontrol.dict),
+        ensemble=ensemble,
+        status=STATUS_FINISHED
     )
     newentry |> save!
 end
@@ -117,12 +138,11 @@ function assign_to_user!(user::Users.User, fpinput::FlexpartInput)
     Relationship!(user, fpinput)
 end
 
-function change_control(uuid::String, fcontrol::FeControl)
-    entry = findone(FlexpartInput, uuid=uuid)
-    entry.control = JSON3.write(fcontrol)
+function change_control!(input::FlexpartInput, fcontrol::FeControl)
+    input.control = JSON3.write(fcontrol)
     # entry.options = fpoptions.options
     # entry.options = ""
-    entry |> save!
+    input |> save!
 end
 
 function get_control(input::FlexpartInput)
@@ -136,6 +156,15 @@ function clear!()
     end
 end
 
+function rename!(uuid::String, new_name::String)
+    entry = findone(FlexpartInput, uuid=uuid)
+    entry.name = new_name
+    new_path = relpath(joinpath(EXTRACTED_WEATHER_DATA_DIR, new_name))
+    mv(entry.path, new_path)
+    entry.path = new_path
+    entry |> save!
+end
+
 function delete_empty_output()
     entries = all(FlexpartInput)
     for entry in entries
@@ -144,6 +173,14 @@ function delete_empty_output()
         if length(inputs) == 0
             delete!(entry)
         end
+    end
+end
+
+function delete_errored!()
+    entries = all(FlexpartInput)
+    errored = filter(x -> x.status == STATUS_ERRORED, entries)
+    for entry in errored
+        SearchLight.delete(entry)
     end
 end
 

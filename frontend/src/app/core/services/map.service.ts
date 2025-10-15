@@ -12,9 +12,9 @@ type MapEvent = 'newMarker' | 'areaSelection'
 })
 export class MapService {
 
-    drawnRectangle?: Rectangle
-    drawnMarker?: Marker
-    showRectangle: Rectangle
+    selectionRectangle?: Rectangle    // refers to area being selected by user
+    selectionMarker?: Marker
+    retrievedRectangle?: Rectangle     // refers to area for which meteo data has already been retrieved
 
     mapEventSubject = new Subject<MapEvent>();
     mapPlotEvent = new Subject<number>();
@@ -25,21 +25,16 @@ export class MapService {
     constructor(
     ) {
         this.mapPlotEvent$ = this.mapPlotEvent.asObservable();
-
     }
 
-    // emitMapSubject() {
-    //     this.mapSubject.next(this.cbrnMap);
-    // }
-
     copyMarkerPosition(pos: Marker) {
-      this.drawnMarker!.setLatLng(pos.getLatLng())
+      this.selectionMarker!.setLatLng(pos.getLatLng())
       this.leafletMap.removeLayer(pos)
     }
 
     changeMarkerPosition(newPoint: GeoPoint) {
-      if (this.drawnMarker) {
-        this.drawnMarker.setLatLng(new LatLng(newPoint.lat, newPoint.lon))
+      if (this.selectionMarker) {
+        this.selectionMarker.setLatLng(new LatLng(newPoint.lat, newPoint.lon))
       }
     }
 
@@ -47,18 +42,47 @@ export class MapService {
       layer.setBounds([[area.bottom, area.left], [area.top, area.right]])
     }
 
-    updateDrawnRectangle(area: MapArea) {
-      if (this.drawnRectangle) {
-        this.updateRectangle(area, this.drawnRectangle);
+    updateSelectionRectangle(area: MapArea) {
+      if (this.selectionRectangle) {
+        this.updateRectangle(area, this.selectionRectangle);
       }
     }
 
-    updateShowRectangle(area: MapArea) {
-      if (this.showRectangle) {
-        this.updateRectangle(area, this.showRectangle);
+    updateRetrievedRectangle(area: MapArea) {
+      if (this.retrievedRectangle) {
+        this.updateRectangle(area, this.retrievedRectangle);
       } else {
-        this.showRectangle = this.areaToRectangle(area, {interactive: false, fillOpacity: 0, color: 'green'})
-        this.showRectangle.addTo(this.leafletMap)
+        this.retrievedRectangle = this.areaToRectangle(area, {interactive: false, fillOpacity: 0, color: '#FE04C4'})
+        this.retrievedRectangle.addTo(this.leafletMap)
+      }
+    }
+
+    removeMarker() {
+      if (this.selectionMarker) {
+        this.leafletMap.removeLayer(this.selectionMarker);
+        this.selectionMarker = undefined;
+      }
+    }
+
+    removeSelectionRectangle() {
+      if (this.selectionRectangle) {
+        this.leafletMap.removeLayer(this.selectionRectangle);
+        this.selectionRectangle = undefined;
+      }
+    }
+
+    removeRetrievedRectangle() {
+      if (this.retrievedRectangle) {
+        this.leafletMap.removeLayer(this.retrievedRectangle);
+        this.retrievedRectangle = undefined;
+      }
+    }
+
+    markerToPoint(marker: Marker): GeoPoint {
+      const latlng = marker.getLatLng()
+      return {
+        lon: latlng.lng,
+        lat: latlng.lat
       }
     }
 
@@ -81,21 +105,8 @@ export class MapService {
       return rectangle(bounds, options);
     }
 
-
-    removeShowRectangle() {
-      this.leafletMap.removeLayer(this.showRectangle);
-    }
-
     emitEventSubject(event: MapEvent) {
         this.mapEventSubject.next(event);
-    }
-
-    markerToPoint(marker: Marker): GeoPoint {
-      const latlng = marker.getLatLng()
-      return {
-        lon: latlng.lng,
-        lat: latlng.lat
-      }
     }
 
 }

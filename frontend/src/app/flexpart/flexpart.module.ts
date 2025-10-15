@@ -15,7 +15,8 @@ import { VariableSelectionComponent } from './flexpart-plot/variable-selection/v
 import { DimensionsFormComponent } from './flexpart-plot/dimensions-form/dimensions-form.component';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
-import {MatStepperModule} from '@angular/material/stepper';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatStepperModule } from '@angular/material/stepper';
 import { PlotStepperComponent } from './plot-stepper/plot-stepper.component';
 import { OutputsComponent } from './flexpart-plot/outputs/outputs.component';
 import { RunStepperComponent } from './run-stepper/run-stepper.component';
@@ -58,6 +59,7 @@ import { DialogModule } from 'src/app/shared/ui/dialogs/dialog.module';
         MatListModule,
         MatSelectModule,
         MatButtonModule,
+        MatButtonToggleModule,
         MatTabsModule,
         MatStepperModule,
         MatFormFieldModule,

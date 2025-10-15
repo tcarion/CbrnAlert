@@ -5,6 +5,54 @@ import { FormService } from 'src/app/core/services/form.service';
 import { DropdownQuestion } from 'src/app/shared/form/dropdown-question';
 import { QuestionBase } from 'src/app/shared/form/question-base';
 
+
+import { MatDialog } from '@angular/material/dialog';
+import { GeometryPopupComponent } from './geometry-popup/geometry-popup.component';
+
+const substanceNames = [{
+  key: 24,
+  value: 'Generic Air Tracer'
+},
+{
+  key: 14,
+  value: 'Iodine-131 (gas)'
+},
+{
+  key: 15,
+  value: 'Iodine-131 (aerosol)'
+},
+{
+  key: 16,
+  value: 'Caesium-137'
+},
+{
+  key: 21,
+  value: 'Xenon-133'
+},
+{
+  key: 20,
+  value: 'Strontium-90'
+},
+{
+  key: 52,
+  value: 'Sarin'
+},
+{
+  key: 53,
+  value: 'VX'
+},
+{
+  key: 54,
+  value: 'Benzene'
+}]
+
+const geometryNames = [{
+  value: 'Point'
+},
+{
+  value: 'Box'
+}]
+
 @Component({
   selector: 'app-release-form',
   templateUrl: './release-form.component.html',
@@ -22,34 +70,71 @@ import { QuestionBase } from 'src/app/shared/form/question-base';
     }
 ]
 })
+
 export class ReleaseFormComponent implements ControlValueAccessor, OnDestroy {
   @Input() dateRange: {min: Date, max: Date} = {min: new Date(1950), max: new Date(2200)};
 
+  substanceNames = substanceNames;
+  geometryNames = geometryNames;
+
   form = new UntypedFormGroup({
     location: new UntypedFormControl({lon: 0, lat: 0}, Validators.required),
-    height: new UntypedFormControl(1.5, Validators.required),
-    mass: new UntypedFormControl(1., Validators.required),
+    height: new UntypedFormControl(10, Validators.required),
+    substanceName: new UntypedFormControl(substanceNames[0].key, Validators.required),
+    geometryName: new UntypedFormControl(geometryNames[0].value, Validators.required),
+    boxLength: new UntypedFormControl(0, Validators.required),
+    boxWidth: new UntypedFormControl(0, Validators.required),
+    boxHeight: new UntypedFormControl(0, Validators.required),
+    mass: new UntypedFormControl(1, Validators.required),
     start: new UntypedFormControl(new Date(), Validators.required),
     end: new UntypedFormControl(new Date(), Validators.required)
   })
 
-  touched = false;
+  constructor(public dialog: MatDialog) {}
 
-  disabled = false;
-
-  onChange = (value: any) => { };
-
-  onTouched = () => { };
-
-  onChangeSubs: Subscription[] = [];
-
-  constructor(
-  ) {
-
+  createFormGroup(loc: {lon: number, lat: number}, start: Date, end: Date): UntypedFormGroup {
+    return new UntypedFormGroup({
+      location: new UntypedFormControl(loc, Validators.required),
+      height: new UntypedFormControl(10, Validators.required),
+      substanceName: new UntypedFormControl(substanceNames[0].key, Validators.required),
+      geometryName: new UntypedFormControl(geometryNames[0].value, Validators.required),
+      boxLength: new UntypedFormControl(0, Validators.required),
+      boxWidth: new UntypedFormControl(0, Validators.required),
+      boxHeight: new UntypedFormControl(0, Validators.required),
+      mass: new UntypedFormControl(1, Validators.required),
+      start: new UntypedFormControl(start, Validators.required),
+      end: new UntypedFormControl(end, Validators.required)
+    });
   }
 
-  // ngOnInit(): void {
-  // }
+  touched = false;
+  disabled = false;
+  onChange = (value: any) => { };
+  onTouched = () => { };
+  onChangeSubs: Subscription[] = [];
+
+  onGeometryChange(event: any) {
+    const selectedValue = event.value;
+    if (selectedValue === 'Box') {
+      this.openDialog(); // Open the dialog if "Box" is selected
+    }
+  }
+
+  openDialog(): void {
+    const dialogRef = this.dialog.open(GeometryPopupComponent);
+  
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // Add the box geometry values to the main form
+        this.form.patchValue({
+          boxLength: result.boxLength,
+          boxWidth: result.boxWidth,
+          boxHeight: result.boxHeight
+        });
+      }
+    });
+  }
+
   validate(control: AbstractControl): ValidationErrors | null {
     if (this.form.valid) {
       return null;

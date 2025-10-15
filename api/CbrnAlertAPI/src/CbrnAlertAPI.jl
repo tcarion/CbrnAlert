@@ -31,6 +31,9 @@ The following server methods must be implemented:
 - **flexpart_inputs_input_id_get**
     - *invocation:* GET /flexpart/inputs/{inputId}
     - *signature:* flexpart_inputs_input_id_get(req::HTTP.Request, input_id::String;) -> FlexpartInput
+- **flexpart_inputs_input_id_put**
+    - *invocation:* PUT /flexpart/inputs/{inputId}
+    - *signature:* flexpart_inputs_input_id_put(req::HTTP.Request, input_id::String, new_name::String;) -> FlexpartInput
 - **flexpart_outputs_output_id_dimensions_get**
     - *invocation:* GET /flexpart/outputs/{outputId}/dimensions
     - *signature:* flexpart_outputs_output_id_dimensions_get(req::HTTP.Request, output_id::String; layer=nothing, horizontal=nothing,) -> Any
@@ -43,6 +46,9 @@ The following server methods must be implemented:
 - **flexpart_outputs_output_id_slice_post**
     - *invocation:* POST /flexpart/outputs/{outputId}/slice
     - *signature:* flexpart_outputs_output_id_slice_post(req::HTTP.Request, layer::String, output_id::String, body::Any; geojson=nothing, legend=nothing,) -> FlexpartOutputsOutputIdSlicePost200Response
+- **flexpart_outputs_output_id_stats_post**
+    - *invocation:* POST /flexpart/outputs/{outputId}/stats
+    - *signature:* flexpart_outputs_output_id_stats_post(req::HTTP.Request, output_id::String, layer::String, flexpart_outputs_output_id_stats_post_request::FlexpartOutputsOutputIdStatsPostRequest;) -> String
 - **flexpart_run_post**
     - *invocation:* POST /flexpart/run
     - *signature:* flexpart_run_post(req::HTTP.Request, input_id::String, flexpart_run_post_request::FlexpartRunPostRequest; run_type=nothing,) -> FlexpartRun
@@ -58,6 +64,9 @@ The following server methods must be implemented:
 - **flexpart_runs_run_id_outputs_get**
     - *invocation:* GET /flexpart/runs/{runId}/outputs
     - *signature:* flexpart_runs_run_id_outputs_get(req::HTTP.Request, run_id::String;) -> Vector{FlexpartOutput}
+- **flexpart_runs_run_id_put**
+    - *invocation:* PUT /flexpart/runs/{runId}
+    - *signature:* flexpart_runs_run_id_put(req::HTTP.Request, run_id::String, new_name::String;) -> FlexpartRun
 """
 module CbrnAlertAPI
 
@@ -68,7 +77,7 @@ using TimeZones
 using OpenAPI
 using OpenAPI.Servers
 
-const API_VERSION = "1.0"
+const API_VERSION = "2.0"
 
 include("modelincludes.jl")
 

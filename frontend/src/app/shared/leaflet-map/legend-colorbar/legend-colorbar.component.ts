@@ -1,7 +1,12 @@
+import { FlexpartService } from 'src/app/flexpart/flexpart.service';
 import { ColorbarData } from './../../../core/api/models/colorbar-data';
-import { Component, OnInit, ChangeDetectionStrategy, Input } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, Input, ChangeDetectorRef } from '@angular/core';
 import { Observable, of, BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { MapPlotsService } from 'src/app/core/services/map-plots.service';
+import { StringifyOptions } from 'querystring';
+import { MapPlot } from 'src/app/core/models/map-plot';
+
 
 @Component({
   selector: 'app-legend-colorbar',
@@ -13,29 +18,75 @@ export class LegendColorbarComponent implements OnInit {
 
   formatedTicks: string[];
   colors?: string[];
+  layerName: string;
+  receivedData:string;
+  unit: string;
 
-  units = 'ng/m³';
+  activePlot: MapPlot | null = null;
+  activeLayerUnit: string | null = null;
+
   @Input() set colorbar(value: ColorbarData) {
-    this.formatedTicks = value.ticks.map(i => this.formatTick(i));
+    if (value.ticks[0] == 0) {
+      this.formatedTicks = value.ticks.map(i => (this.formatTick(i) + '%'));
+    } else {
+      this.formatedTicks = value.ticks.map(i => this.formatTick(i));
+    }
     this.colors = value.colors;
-    // this.units = value.units;
   }
 
-  // ticksLabels: string[];
-  // colors: string[];
-  // ticksLabels$: Observable<string[]>;
-  // colors$: Observable<string[]>;
+  constructor(
+    private flexpartService: FlexpartService,
+    private mapPlotsService: MapPlotsService,
+    private cdr: ChangeDetectorRef 
+  ) {
 
-  constructor() { }
+  }
 
   ngOnInit(): void {
-    // this.ticksLabels$ = of(this.colorbar).pipe(map(cb => cb.ticks!.map((e: number) => { return e.toExponential(2) })))
-    // this.ticksLabels = this.colorbar.ticks!.map((e: number) => { return e.toExponential(2) });
-    // this.colors = <string[]>this.colorbar.colors
-    // this.colors$ = of(this.colorbar).pipe(map(cb => cb.colors as string[]))
+    
+    this.mapPlotsService.selectedLayer$.subscribe(layerName => {
+      if (layerName) {
+        this.layerName = layerName;
+        this.updateLegend(layerName);
+      }
+    });
+    
+    this.mapPlotsService.activePlot$.subscribe((plot: MapPlot | null) => {
+      this.activePlot = plot;
+      if (this.activePlot) {
+          this.updateLegend(this.activePlot.legendLayer);
+      }
+      this.cdr.markForCheck();
+    });
   }
 
   formatTick(tick:number) {
-    return tick.toExponential(2)
+    return String(tick)
   }
+
+  setUnit(layerName: string) {
+    
+    if (layerName == 'ORO') {
+      this.unit = 'm';
+    } else if (/spec\d+_mr/.test(layerName)) {
+      this.unit = 'ng / m³';
+    } else if (/D_spec/.test(layerName)) {
+      this.unit = 'ng / m²';
+    } else if (layerName == 'percentage agreement') {
+      this.unit = '% members over threshold';
+    } else {
+      this.unit = 'No unit';
+      console.log("why no units ? " + layerName)
+    }
+  }
+  
+  getUnit():string {
+    return this.unit
+  }
+
+  updateLegend(layerName: string) {
+    this.setUnit(layerName)
+    this.cdr.markForCheck();
+  }
+
 }

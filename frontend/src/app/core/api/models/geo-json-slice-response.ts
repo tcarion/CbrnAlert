@@ -1,11 +1,8 @@
 /* tslint:disable */
 /* eslint-disable */
-import { ColorbarData } from './colorbar-data';
-import { FeatureCollection } from './feature-collection';
-import { GeoCell } from './geo-cell';
+import { GeoJsonSliceResponseCollection } from './geo-json-slice-response-collection';
+import { GeoJsonSliceResponseMetadata } from './geo-json-slice-response-metadata';
 export interface GeoJsonSliceResponse {
-  collection: FeatureCollection & {
-'features': Array<GeoCell>;
-};
-  metadata?: ColorbarData;
+  collection: GeoJsonSliceResponseCollection;
+  metadata?: GeoJsonSliceResponseMetadata;
 }

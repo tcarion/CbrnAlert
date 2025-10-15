@@ -5,7 +5,7 @@ export interface FlexpartOutgridSimple {
   area: GeoRectangle;
 
   /**
-   * units: [°]
+   * unit: [°]
    */
   gridres: number;
   heights: Array<number>;

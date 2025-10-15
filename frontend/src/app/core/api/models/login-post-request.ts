@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-export interface LoginBody {
+export interface LoginPostRequest {
   email: string;
   password: string;
 }

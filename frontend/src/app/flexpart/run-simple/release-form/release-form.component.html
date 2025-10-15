@@ -1,28 +1,50 @@
-<fieldset [formGroup]="form">
+<fieldset [formGroup]="form" class="flex flex-row justify-center">
+
+  <mat-form-field class="form-control-long" appearance="outline" floatLabel="never">
+    <mat-label> Substance name </mat-label>
+    <mat-select formControlName="substanceName">
+      <mat-option *ngFor="let option of substanceNames" [value]="option.key">
+        {{ option.value }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
   <app-location formControlName="location"></app-location>
-  <!-- <div *ngFor="let question of questions">
-    <app-question [form]="form" [question]="question"></app-question>
-  </div> -->
+
+  <mat-form-field class="form-control-med" appearance="outline" floatLabel="never">
+    <mat-label> Release geometry </mat-label>
+    <mat-select formControlName="geometryName" (selectionChange)="onGeometryChange($event)">
+      <mat-option *ngFor="let option of geometryNames" [value]="option.value">
+        {{ option.value }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <!-- Popup that display Box input field -->
+   
+
+  <mat-form-field class="form-control-short" appearance="outline" floatLabel="never">
+    <mat-label> Altitude [m] </mat-label>
+    <input type="number" matInput formControlName="height" />
+  </mat-form-field>
+
+  <mat-form-field class="form-control-short" appearance="outline" floatLabel="never">
+    <mat-label> Mass [kg] </mat-label>
+    <input type="number" matInput formControlName="mass"/>
+  </mat-form-field>
+
   <app-datetime-picker
     [min] = "dateRange.min"
     [max] = "dateRange.max"
     formControlName="start"
     label="Release start"
-    [formGroup]="form"
   ></app-datetime-picker>
+
   <app-datetime-picker
     [min] = "dateRange.min"
     [max] = "dateRange.max"
     formControlName="end"
     label="Release end"
-    [formGroup]="form"
   ></app-datetime-picker>
-  <mat-form-field [formGroup]="form" class="form-control" appearance="outline" floatLabel="never">
-    <mat-label> Height [m] </mat-label>
-    <input type="number" matInput formControlName="height" />
-  </mat-form-field>
-  <mat-form-field [formGroup]="form" class="form-control" appearance="outline" floatLabel="never">
-    <mat-label> Mass [kg] </mat-label>
-    <input type="number" matInput formControlName="mass"/>
-  </mat-form-field>
+
 </fieldset>

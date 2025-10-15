@@ -8,7 +8,7 @@ import { DropdownQuestion } from 'src/app/shared/form/dropdown-question';
 import { QuestionBase } from 'src/app/shared/form/question-base';
 import { FlexpartService } from '../../flexpart.service';
 import { Store } from '@ngxs/store';
-import { switchMap } from 'rxjs/operators';
+import { switchMap, tap, take } from 'rxjs/operators';
 import { SliceResponseType } from 'src/app/flexpart/flexpart-plot-data';
 
 @Component({
@@ -18,14 +18,14 @@ import { SliceResponseType } from 'src/app/flexpart/flexpart-plot-data';
 })
 export class DimensionsFormComponent implements OnChanges {
 
+  @Input() runId: string
   @Input() outputId: string
-  @Input() layerName: string
+  @Input() layerName: { value: string; label: string };
 
   formGroup: UntypedFormGroup;
-
   questions$: Observable<QuestionBase<any>[]>;
-
-  dimForm: UntypedFormGroup;
+  isLoading = true;
+  dims: {[key: string]: string[] | number[]} = {};
 
   get responseFormat() {
     return this.flexpartService.selectedSliceType;
@@ -37,53 +37,71 @@ export class DimensionsFormComponent implements OnChanges {
     private store: Store
   ) {
     this.formGroup = new UntypedFormGroup({});
-    // this.questions$ = this.route.paramMap.pipe(
-    //     switchMap(params => {
-    //         const outputId = params.get('outputId');
-    //         const layerName = params.get('layerName');
-    //         return this.flexpartService.getDimsQuestions(outputId as string, layerName as string);
-    //     })
-    // )
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    console.log("CHANGES", changes)
     const newOutId = changes["outputId"] ? changes["outputId"].currentValue : this.outputId;
-    const newLayer = changes["layerName"] ? changes["layerName"].currentValue : this.layerName;
+    let newLayer: string | undefined;
+    if (changes["layerName"] && changes["layerName"].currentValue) {
+      newLayer = changes["layerName"].currentValue.value;
+    } else if (this.layerName) {
+      newLayer = this.layerName.value;
+    }
     if (newOutId && newLayer) {
       this.formGroup = new UntypedFormGroup({});
-      this.questions$ = this.flexpartService.getDimsQuestions(newOutId, newLayer);
+      this.flexpartService.getZDims(newOutId, newLayer).pipe(take(1)).subscribe(dims => {
+        this.dims = dims as {[key: string]: string[] | number[]};
+      });
+      this.questions$ = this.flexpartService.getDimsQuestions(newOutId, newLayer).pipe(
+        tap((questions) => {
+          questions.forEach((question) => {
+            if (question.key === 'Ti') {
+              question.label = 'Time';
+            }
+          });
+          this.isLoading = false;
+        })
+      );
     }
   }
 
   onSubmit() {
-    // const params = this.route.snapshot.paramMap;
-    // const outputId = params.get('outputId');
-    // const layerName = params.get('layerName');
     const outputId = this.outputId;
-    const layerName = this.layerName;
+    const layerName = this.layerName.value;
+    const toGeoJSON = this.responseFormat == SliceResponseType.GEOJSON
+    let simType: 'ensemble' | 'deterministic';
 
-    // TODO: not very clean, should fine a way to automatically cast values from to select to float or int according to the provided type
-    Object.entries(this.formGroup.value.dimensions).forEach(entry => {
-      const [key, value] = entry;
-      if (key == 'height') {
-        this.formGroup.value.dimensions[key] = parseFloat(value as string);
+    this.flexpartService.runs$.pipe(take(1)).subscribe((runs) => {
+      const run = runs.find(r => r.uuid === this.runId);
+      simType = run?.ensemble ? 'ensemble' : 'deterministic';
+    })
+
+    const selectedDimensions: { [key: string]: { index: number, value: string | number } } = {};
+    ['Ti', 'height'].forEach(key => {
+      const dimArray = this.dims[key];
+      const value = this.formGroup.value.dimensions[key];
+      if (dimArray) {
+        const index = dimArray.findIndex(v => v == value);
+        selectedDimensions[key] = {
+          index: index + 1,
+          value: value
+        };
       }
     });
-
-    const toGeoJSON = this.responseFormat == SliceResponseType.GEOJSON
-    console.log(this.formGroup.value.dimensions)
+    selectedDimensions['substance'] = { index: 1, value: this.layerName.label };
+    
+    if ('height' in this.formGroup.value.dimensions) {
+      this.formGroup.value.dimensions['height'] = parseFloat(this.formGroup.value.dimensions['height'] as string);
+    }
 
     if (toGeoJSON) {
       this.flexpartService.getSliceJson(outputId as string, layerName as string, toGeoJSON, this.formGroup.value.dimensions).subscribe(res => {
         const geores = res as GeoJsonSliceResponse;
-        console.log(geores)
-        this.store.dispatch(new MapPlotAction.Add(geores, 'flexpart'))
+        this.store.dispatch(new MapPlotAction.Add(geores, 'flexpart', outputId, simType, selectedDimensions))
       })
     } else {
       this.flexpartService.getSliceTiff(outputId as string, layerName as string, toGeoJSON, this.formGroup.value.dimensions).subscribe(res => {
-        console.log(res)
-        this.store.dispatch(new MapPlotAction.AddTiff(res, 'flexpart'))
+        this.store.dispatch(new MapPlotAction.AddTiff(res, 'flexpart', outputId, simType, selectedDimensions))
       })
     }
   }

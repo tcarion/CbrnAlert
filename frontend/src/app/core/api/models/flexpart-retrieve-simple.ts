@@ -7,16 +7,21 @@ import { GeoRectangle } from './geo-rectangle';
  */
 export interface FlexpartRetrieveSimple {
   area: GeoRectangle;
+
+  /**
+   * button to select either "deterministic" or "ensemble" data
+   */
+  datasetType: string;
   end: string;
 
   /**
-   * units: [°]
+   * unit: [°]
    */
   gridres: number;
   start: string;
 
   /**
-   * units: [s]
+   * unit: [s]
    */
   timeStep: number;
 }

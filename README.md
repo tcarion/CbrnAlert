@@ -1,15 +1,39 @@
 # CbrnAlert
-These are the sources for the CbrnAlert application. This application first consists in a REST API for preparing, running and getting the results of atmospheric dispersion models. The documentation of this API should be available [here](https://cbrnalert.rma.ac.be/api/docs). The access to this API is restricted, but it's possible to install your proper instance of the application.
+These are the sources for the CbrnAlert application. This application first consists of a REST API for the computation and visualization of atmospheric dispersion simulations of CBRN agents. The documentation of this API should be available [here](https://cbrnalert.rma.ac.be/api/docs). The access to this API is restricted, but it's possible to install your own instance of the application.
 
 This repo also contains the sources for the Single Page Application developed with the Angular framework, which provides a GUI for calling the API.
 
-The API is defined using the [Open API](https://www.openapis.org/) specifications. The file with all the API definitions is availabe [here](https://github.com/tcarion/CbrnAlert/blob/master/api/api_docs.yaml). From these definitions, the API routes and data structures are generated in the Angular/Typescript world with [ng-openapi-gen](https://github.com/cyclosproject/ng-openapi-gen) and in the Julia/Genie world with [OpenAPI.jl](https://github.com/JuliaComputing/OpenAPI.jl) and [OpenAPI generator](https://openapi-generator.tech/).
+The API is defined using the [Open API](https://www.openapis.org/) specifications. The file with all the API definitions is availabe [here](https://github.com/PrzPaul/CbrnAlert/blob/master/api/api_docs.yaml). From these definitions, the API routes and data structures are generated in the Angular/Typescript world with [ng-openapi-gen](https://github.com/cyclosproject/ng-openapi-gen) and in the Julia/Genie world with [OpenAPI.jl](https://github.com/JuliaComputing/OpenAPI.jl) and [OpenAPI generator](https://openapi-generator.tech/).
 
 
 # Installation
 This section explains how to make the app ready both for development purpose and for production. The installation is meant to be done on Rocky Linux v9 or Centos 7, but it should be easy to adapt on other Linux systems. The main softwares needed for the application is [Julia](https://julialang.org/), [nodejs](https://nodejs.org/fr), [Angular](https://angular.io/), java and [eccodes](https://confluence.ecmwf.int/display/ECC).
 
-## Common steps for both development and production
+## Docker quickstart for development
+
+The easiest way to develop is to use a VS Code devcontainer. Install the "Dev Containers" VS Code extension, and then after opening a clone of this repository choose to open it in a dev container. From there, start a first bash terminal and run:
+
+```bash
+cd backend
+./bin/repl
+```
+
+This will start a CLI into the backend server. Once you get the julia prompt, enter:
+
+```julia
+up()
+```
+
+Next, open a new terminal and enter:
+
+```bash
+cd frontend
+npm run start
+```
+
+You can now connect to http://localhost:4200 and login with login `test` and password `test`.
+
+## Common steps for both development and production (non-Docker)
 
 ### Credentials for the ECMWF API
 The application needs to retrieve weather forecasts from ECMWF. That means you'll need to have access to licensed datasets from ECMWF. To setup your credentials, you need to go on https://api.ecmwf.int/v1/key to get your API key, and write those lines on a file called `.ecmwfapirc` in your `$HOME` folder:
@@ -23,22 +47,22 @@ The application needs to retrieve weather forecasts from ECMWF. That means you'l
 ```
 
 ### Install Julia
-Due to an issue with Flexpart.jl (see [this](https://github.com/tcarion/Flexpart.jl/issues/9)), the application will only work with Julia v1.7. To easily install Julia v1.7, you can use [Juliaup](https://github.com/JuliaLang/juliaup):
+The application is currently setup to work with Julia v1.10 and above. To easily install the Julia version of choice, you can use [Juliaup](https://github.com/JuliaLang/juliaup):
 
 ```bash
 curl -fsSL https://install.julialang.org | sh
 ```
 
-Accept the basic configuration, restart your shell session, and install the Julia v1.7 binary with:
+Accept the basic configuration, restart your shell session, and assuming we use v1.10, install the Julia v1.10 binary with:
 
 ```bash
-juliaup add 1.7
+juliaup add 1.10
 ```
 
 Now you should be able to run this julia version with:
 
 ```bash
-julia +1.7
+julia +1.10
 ```
 
 ### Install nodejs
@@ -80,7 +104,7 @@ sudo yum install eccodes
 ### Clone the repo
 
 ```bash
-git clone https://github.com/tcarion/CbrnAlert
+git clone https://github.com/PrzPaul/CbrnAlert
 ```
 
 ### Set up the frontend
@@ -103,7 +127,7 @@ You might get compats error from npm, if so, retry with `npm install --force`
 Go to the backend folder and open a Julia REPL:
 ```
 cd CbrnAlert/backend
-julia +1.7 --project
+julia +1.10 --project
 ```
 
 Download the required Julia packages. You will have to enter the [Pkg REPL](https://docs.julialang.org/en/v1/stdlib/Pkg/#Pkg) by pressing `]` from the Julia REPL. Then, the following command will install all the required registered Julia packages:
@@ -149,6 +173,16 @@ SearchLight.Migration.status()
 SearchLight.Migration.allup()
 ```
 
+Finally, due to a bug in the flex_extract software used to retrieve ECMWF data, run the following lines still in the Julia REPL:
+
+```julia
+using FlexExtract
+faulty_script = joinpath(FlexExtract.PATH_FLEXEXTRACT, "Source", "Python", "Mods", "checks.py")
+run(`sed -i "882s@'{:0>3}'.join(numbers)@'/'.join(numbers)@" $faulty_script`)
+```
+
+This temporary patch can be ignored once the flex_extract source files have been fixed.
+
 ### Set up the JSON Web Tokens keys
 We need now to generate the keys for encoding and decoding the JSON Web Tokens authentication. Go to the backend folder and write:
 
@@ -181,10 +215,10 @@ Genie.Server.ServersCollection(Task (runnable) @0x00007f821a6e42f0, nothing)
 
 You should see those lines, meaning that a server is listening on `localhost:8000`.
 
-If you want, you can also set up a `screen` session like this (probably you will have to install `screen` with `sudo yum install screen`):
+If you want, you can also set up a `tmux` session like this (you will probably have to install `tmux` with `sudo yum install tmux`):
 
 ```bash
-screen -S cbrnalert_backend
+tmux new -s cbrnalert_backend
 ```
  
 and then follow the above steps.
@@ -196,10 +230,10 @@ If you need to start the server again, you just need to run `repl` script and ru
 julia> up()
 ```
 
-In case you're using `screen` you can attach to your screen session with:
+In case you're using `tmux` you can attach to your screen session with:
 
 ```bash
-screen -R cbrnalert_backend
+tmux a -t cbrnalert_backend
 ```
 
 ### Run the frontend server
@@ -210,7 +244,7 @@ cd CbrnAlert/frontend
 npm run generate:all
 ```
 
-This will read the [OpenAPI specifications file](https://github.com/tcarion/CbrnAlert/blob/master/api/api_docs.yaml) to generate all the files needed for both the frontend and the backend.
+This will read the [OpenAPI specifications file](https://github.com/PrzPaul/CbrnAlert/blob/master/api/api_docs.yaml) to generate all the files needed for both the frontend and the backend.
 
 Finally, run the frontend server that will listen to `localhost:4200`:
 
@@ -225,7 +259,7 @@ At this point you should be able to connect to `localhost:4200` and start using 
 When getting on the app landing page, you're asked for an email and a password. That's because you need to be authenticated to use the application API. To add a new user in the database, you need to get into the Genie environment in the interactive mode:
 
 ```bash
-cd PATH_TO_APP/CbrnAlert/backend
+cd CbrnAlert/backend
 ./bin/repl
 ```
 
@@ -236,7 +270,7 @@ julia> using CbrnAlertApp.Users
 julia> Users.add("USER_EMAIL", "USER_PW", username = "USERNAME")
 ```
 
-Now you should be able to log in into the app by using `USER_EMAIL` and `USER_PW`.
+Now you should be able to log into the app by using `USER_EMAIL` and `USER_PW`.
 
 ## Setup for production
 We will deploy the app by using [nginx](https://nginx.org/) to serve the Angular frontend static files and proxy the API traffic to the Genie backend.
@@ -250,10 +284,10 @@ npm run build
 This should create a `dist` folder that will be served with nginx.
 
 ### Run the API backend server
-Go to the backend folder. You should install the `screen` software and create a new screen for the backend. This will allow to close the terminal while keeping the Julia server up.
+Go to the backend folder. You should install the `tmux` software and create a new tmux session for the backend. This will allow you to close the terminal while keeping the Julia server up.
 
 ```bash
-screen -S genie
+tmux new -s genie
 ```
 
 Then start the Genie server in production mode:
@@ -263,7 +297,7 @@ export GENIE_ENV=prod
 ```
 
 ### Set up nginx
-First install nginx and start it to see if it work (you'll need to do all of this in `sudo` mode):
+First install nginx and start it to see if it works (you'll need to do all of this in `sudo` mode):
 
 ```bash
 yum install nginx
