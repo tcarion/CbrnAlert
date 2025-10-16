@@ -1,14 +1,14 @@
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.4"
+julia_version = "1.10.10"
 manifest_format = "2.0"
-project_hash = "802fe11a6158ef51532c7107419f2384352e234c"
+project_hash = "7b7a7c02bef915e6928ee76d81325de5fd719a3e"
 
 [[deps.ATP45]]
 deps = ["AbstractTrees", "GeoInterface", "InteractiveUtils", "LibGEOS", "OrderedCollections", "Proj", "RecipesBase", "WellKnownGeometry"]
 git-tree-sha1 = "cd9e82049d93ef5e66d07bdec1a977be4060ee61"
 repo-rev = "main"
-repo-url = "https://github.com/tcarion/ATP45.jl.git"
+repo-url = "https://github.com/tcarion/ATP45.jl"
 uuid = "e618d77b-d0d4-44a4-84cd-7e2c5c764d14"
 version = "0.1.0"
 
@@ -166,9 +166,9 @@ version = "0.1.13"
 
 [[deps.CodeTracking]]
 deps = ["InteractiveUtils", "UUIDs"]
-git-tree-sha1 = "062c5e1a5bf6ada13db96a4ae4749a4c2234f521"
+git-tree-sha1 = "5ac098a7c8660e217ffac31dc2af0964a8c3182a"
 uuid = "da1fd8a2-8d9e-5ec2-8556-3022fb5608a2"
-version = "1.3.9"
+version = "2.0.0"
 
 [[deps.CodecZlib]]
 deps = ["TranscodingStreams", "Zlib_jll"]
@@ -322,9 +322,9 @@ uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
 
 [[deps.Debugger]]
 deps = ["CodeTracking", "Crayons", "Highlights", "InteractiveUtils", "JuliaInterpreter", "Markdown", "REPL"]
-git-tree-sha1 = "d7bcfc8b0dc380253a3f8b65bd6f532a369cfd41"
+git-tree-sha1 = "f75afd1da693723adafbf7cb379738e9e6f8ee4b"
 uuid = "31a5f54b-26ea-5ae9-a837-f05ce5417438"
-version = "0.7.14"
+version = "0.7.15"
 
 [[deps.DimensionalData]]
 deps = ["Adapt", "ArrayInterface", "ConstructionBase", "DataAPI", "Dates", "Extents", "Interfaces", "IntervalSets", "InvertedIndices", "IteratorInterfaceExtensions", "LinearAlgebra", "OrderedCollections", "PrecompileTools", "Random", "RecipesBase", "Statistics", "TableTraits", "Tables"]
@@ -384,7 +384,7 @@ version = "1.6.0"
 deps = ["DataStructures", "PyCall", "YAML"]
 git-tree-sha1 = "3e3919c2292bc55a05751453ac20fbd9ff4a912e"
 repo-rev = "main"
-repo-url = "https://github.com/tcarion/EcRequests.jl.git"
+repo-url = "https://github.com/tcarion/EcRequests.jl"
 uuid = "c0c4b1a4-92fd-414d-990e-850c1287bada"
 version = "0.2.0"
 
@@ -478,7 +478,7 @@ version = "0.4.3"
 deps = ["CSV", "DataStructures", "Dates", "EcRequests", "FlexExtract_jll", "Pkg", "PyCall", "StatsBase"]
 git-tree-sha1 = "c3d62d1434d5e9c76a9a148895b32a9a29bd88cc"
 repo-rev = "main"
-repo-url = "https://github.com/tcarion/FlexExtract.jl.git"
+repo-url = "https://github.com/tcarion/FlexExtract.jl"
 uuid = "5ad5ba56-8ec2-41bb-8b56-2065914898b5"
 version = "0.1.0"
 
@@ -492,7 +492,7 @@ version = "7.1.2+0"
 deps = ["DataStructures", "Dates", "DocStringExtensions", "FLEXPART_jll", "GRIB", "ImageMorphology", "NCDatasets", "NetCDFF_jll", "Pkg"]
 git-tree-sha1 = "0a707e062546d48c4b3e8875bf3cb52fad108785"
 repo-rev = "main"
-repo-url = "https://github.com/tcarion/Flexpart.jl.git"
+repo-url = "https://github.com/tcarion/Flexpart.jl"
 uuid = "fb362612-c2d8-4302-a9fd-a07f2890630f"
 version = "0.2.2"
 
@@ -767,9 +767,9 @@ version = "1.0.62"
 
 [[deps.JuliaInterpreter]]
 deps = ["CodeTracking", "InteractiveUtils", "Random", "UUIDs"]
-git-tree-sha1 = "6ac9e4acc417a5b534ace12690bc6973c25b862f"
+git-tree-sha1 = "d8337622fe53c05d16f031df24daf0270e53bc64"
 uuid = "aa1ae85d-cabe-5617-a682-6adf51b2e16a"
-version = "0.10.3"
+version = "0.10.5"
 
 [[deps.Kerberos_krb5_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -929,10 +929,10 @@ version = "0.12.172"
     SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 
 [[deps.LoweredCodeUtils]]
-deps = ["Compiler", "JuliaInterpreter"]
-git-tree-sha1 = "b882a7dd7ef37643066ae8f9380beea8fdd89cae"
+deps = ["CodeTracking", "Compiler", "JuliaInterpreter"]
+git-tree-sha1 = "73b98709ad811a6f81d84e105f4f695c229385ba"
 uuid = "6f1432cf-f94c-5a45-995e-cdbf5db27b0b"
-version = "3.4.2"
+version = "3.4.3"
 
 [[deps.Lz4_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -1163,10 +1163,10 @@ uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 version = "1.10.0"
 
 [[deps.PkgDependency]]
-deps = ["AbstractTrees", "Pkg", "Term", "UUIDs"]
-git-tree-sha1 = "dcd5558f8268a2f2c206a3bd0c55c4ce2f848ef4"
+deps = ["OrderedCollections", "Pkg", "Term", "UUIDs"]
+git-tree-sha1 = "8a01e3b51d60a91b45ae0b54eb794edd2b044474"
 uuid = "9eb5382b-762c-48ca-8139-e736883fe800"
-version = "0.5.0"
+version = "0.4.0"
 
 [[deps.PolyesterWeave]]
 deps = ["BitTwiddlingConvenienceFunctions", "CPUSummary", "IfElse", "Static", "ThreadingUtilities"]
@@ -1298,9 +1298,9 @@ version = "1.3.1"
 
 [[deps.Revise]]
 deps = ["CodeTracking", "FileWatching", "JuliaInterpreter", "LibGit2", "LoweredCodeUtils", "OrderedCollections", "REPL", "Requires", "UUIDs", "Unicode"]
-git-tree-sha1 = "f6f7d30fb0d61c64d0cfe56cf085a7c9e7d5bc80"
+git-tree-sha1 = "d852eba0cc08181083a58d5eb9dccaec3129cb03"
 uuid = "295af30f-e4ad-537b-8983-00126c2a3abe"
-version = "3.8.0"
+version = "3.9.0"
 weakdeps = ["Distributed"]
 
     [deps.Revise.extensions]
@@ -1519,10 +1519,10 @@ uuid = "62fd8b95-f654-4bbd-a8a5-9c27f68ccd50"
 version = "0.1.1"
 
 [[deps.Term]]
-deps = ["AbstractTrees", "CodeTracking", "Dates", "Highlights", "InteractiveUtils", "Logging", "Markdown", "MyterialColors", "OrderedCollections", "Parameters", "PrecompileTools", "ProgressLogging", "REPL", "Tables", "UUIDs", "Unicode", "UnicodeFun"]
-git-tree-sha1 = "dec48498aa80c84704745b3c267bac32e206dac2"
+deps = ["Dates", "Highlights", "InteractiveUtils", "Logging", "Markdown", "MyterialColors", "OrderedCollections", "Parameters", "ProgressLogging", "Tables", "UUIDs", "UnicodeFun"]
+git-tree-sha1 = "e4ccdfbdc073f71109c5fe0af7239c43714997d3"
 uuid = "22787eb5-b846-44ae-b979-8e399b8463ab"
-version = "2.0.7"
+version = "1.0.2"
 
 [[deps.Test]]
 deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
@@ -1726,7 +1726,7 @@ version = "1.1.4+0"
 [[deps.libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
-version = "5.8.0+1"
+version = "5.11.0+0"
 
 [[deps.libgeotiff_jll]]
 deps = ["Artifacts", "JLLWrappers", "JpegTurbo_jll", "LibCURL_jll", "Libdl", "Libtiff_jll", "PROJ_jll", "Zlib_jll"]
