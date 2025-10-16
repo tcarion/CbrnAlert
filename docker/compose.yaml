@@ -1,0 +1,57 @@
+services:
+  # Service that ensures the repo is checked out before building
+  repo-check:
+    image: alpine/git:latest
+    command: >
+      sh -c "
+      if [ ! -d '/repo/CbrnAlert' ] || [ -z \"$$(ls -A /repo/CbrnAlert)\" ]; then
+        echo 'Cloning repository...';
+        git clone --branch $${GITHUB_BRANCH:-main} --depth 1 $${GITHUB_REPO:-https://github.com/tcarion/CbrnAlert.git} /repo/CbrnAlert ||
+      else
+        echo 'Repository already exists, updating...';
+        cd /repo/CbrnAlert && git fetch && git checkout $${GITHUB_BRANCH:-main} && git pull || echo 'Using existing code';
+      fi
+      "
+    volumes:
+      - .:/repo  # Mount current directory to /repo in container
+    networks:
+      - cbrnalert-network
+  backend:
+    build: 
+      context: ./
+      dockerfile: ./backend/Dockerfile
+    volumes:
+      - ${PWD}/.ecmwfapirc:/root/.ecmwfapirc
+    container_name: cbrnalert-backend
+    expose:
+      - "8000"       # Expose port 8000 for internal access
+    environment:
+      - JULIA_DEPOT_PATH=/root/.julia
+      # - CORS_ALLOWED_ORIGINS=http://localhost:80
+    networks:
+      - cbrnalert-network
+    depends_on:
+      - repo-check
+    restart: unless-stopped
+
+  frontend:
+    build: 
+      context: ./
+      dockerfile: ./frontend/Dockerfile
+      target: production-stage  # Build only the production stage
+    container_name: cbrnalert-frontend
+    ports:
+      - "80:80"  # Now using standard HTTP port
+    networks:
+      - cbrnalert-network
+    depends_on:
+      - repo-check
+      - backend
+    restart: unless-stopped
+
+volumes:
+  julia-depot:
+
+networks:
+  cbrnalert-network:
+    driver: bridge
