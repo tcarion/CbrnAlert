@@ -13,9 +13,9 @@ RUN apt-get update && apt-get install -y \
 #     python3-genshi python3-eccodes python3-numpy python3-cdsapi
 
 # First instantiate for better caching
-COPY CbrnAlert/backend/Manifest.toml CbrnAlert/backend/Project.toml /app/backend/
+COPY backend/Manifest.toml backend/Project.toml /app/backend/
 
-# Install Julia dependencies (adjust based on your Project.toml/Manifest.toml)
+# Install Julia dependencies
 # The first instantiation might fail. It should be fixed with following commands
 RUN julia --project -e 'using Pkg; Pkg.instantiate()'; exit 0
 
@@ -26,8 +26,8 @@ RUN julia --project -e ' \
     Pkg.build("PyCall")'; exit 0
 
 # Copy application code
-COPY CbrnAlert/backend /app/backend
-COPY CbrnAlert/api /app/api
+COPY backend /app/backend
+COPY api /app/api
 
 # Alternatively, clone from GitHub directly:
 # RUN git clone https://github.com/tcarion/CbrnAlert.git /app
@@ -57,7 +57,7 @@ RUN julia --project -e 'using Genie; Genie.loadapp(); using CbrnAlertApp.Users; 
 EXPOSE 8000
 
 # Create entrypoint script
-COPY backend/entrypoint.sh /entrypoint.sh
+COPY docker/backend/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]

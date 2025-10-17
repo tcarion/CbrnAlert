@@ -21,18 +21,15 @@ RUN node --version && \
 # Set working directory
 WORKDIR /app/frontend
 
-# Alternatively, clone from GitHub:
-# RUN git clone https://github.com/tcarion/CbrnAlert.git /app
-
 # Copy package files first for better caching
-COPY CbrnAlert/frontend/package*.json ./
+COPY frontend/package*.json ./
 
 # Install dependencies
 RUN npm install --force
 
 # Copy application code or clone from GitHub
-COPY CbrnAlert/frontend /app/frontend/
-COPY CbrnAlert/api /app/api
+COPY frontend /app/frontend/
+COPY api /app/api
 
 # Replace the API URL for the docker environment specific URL
 RUN sed -i -e "s@const rootApiUrl.*@const rootApiUrl = ''@g" src/environments/environment.prod.ts
@@ -52,7 +49,7 @@ RUN rm -rf /usr/share/nginx/html/*
 COPY --from=build-stage /app/frontend/dist/ /usr/share/nginx/html
 
 # Copy custom nginx configuration
-COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
+COPY docker/frontend/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expose port
 EXPOSE 80
@@ -63,5 +60,3 @@ EXPOSE 80
 
 # Start nginx
 CMD ["nginx", "-g", "daemon off;"]
-
-# ENTRYPOINT ["/entrypoint.sh"]
