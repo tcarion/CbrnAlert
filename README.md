@@ -7,11 +7,32 @@ The API is defined using the [Open API](https://www.openapis.org/) specification
 
 
 # Installation
-This section explains how to make the app ready both for development purpose and for production. The installation is meant to be done on Rocky Linux v9 or Centos 7, but it should be easy to adapt on other Linux systems. The main softwares needed for the application is [Julia](https://julialang.org/), [nodejs](https://nodejs.org/fr), [Angular](https://angular.io/), java and [eccodes](https://confluence.ecmwf.int/display/ECC).
+This section covers setting up the app for development and production. We provide two methods:
 
-## Docker quickstart for development
+- Docker (Recommended): This is the easiest and most reproducible method. The only prerequisite is [having Docker installed](https://docs.docker.com/engine/install/).
+- Manual Setup: Follow platform-specific instructions to install dependencies directly on your system.
 
-The easiest way to develop is to use a VS Code devcontainer. Install the "Dev Containers" VS Code extension, and then after opening a clone of this repository choose to open it in a dev container. From there, start a first bash terminal and run:
+Both methods are further described below.
+
+The application needs to retrieve weather forecasts from ECMWF. That means you'll need to have access to licensed datasets from ECMWF. To setup your credentials, you need to go on https://api.ecmwf.int/v1/key to get your API key, and write those lines on a file called `.ecmwfapirc` in your `$HOME` folder:
+
+```
+{
+    "url"   : "https://api.ecmwf.int/v1",
+    "key"   : "YOUR_API_KEY",
+    "email" : "YOUR_EMAIL"
+}
+```
+
+***This needs to be done before following any of the instructions below.***
+
+## Installation with Docker (recommended)
+
+### Development set-up with Docker and Dev Containers
+
+The easiest way to develop is to use a VS Code devcontainer. Install the [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) VS Code extension.
+
+And then after opening a clone of this repository choose to open it in a dev container. From there, start a first bash terminal and run:
 
 ```bash
 cd backend
@@ -33,20 +54,47 @@ npm run start
 
 You can now connect to http://localhost:4200 and login with login `test` and password `test`.
 
-## Common steps for both development and production (non-Docker)
+### Production with Docker
+To build and run the app in a production environment using Docker, follow these steps.
 
-### Credentials for the ECMWF API
-The application needs to retrieve weather forecasts from ECMWF. That means you'll need to have access to licensed datasets from ECMWF. To setup your credentials, you need to go on https://api.ecmwf.int/v1/key to get your API key, and write those lines on a file called `.ecmwfapirc` in your `$HOME` folder:
+#### Prerequisites
+*   Ensure [Docker Compose](https://docs.docker.com/compose/install) is installed on your system.
 
-```
-{
-    "url"   : "https://api.ecmwf.int/v1",
-    "key"   : "YOUR_API_KEY",
-    "email" : "YOUR_EMAIL"
-}
-```
+#### Steps
 
-### Install Julia
+1.  **Clone the repository** and navigate to the `docker` folder:
+    ```bash
+    cd docker
+    ```
+
+2.  **Build the service:**
+    ```bash
+    docker compose build
+    ```
+
+3.  **Run the service:**
+    ```bash
+    docker compose up
+    ```
+    The app will start and listen on the port specified by the `APP_PORT` variable in the `docker/.env` file (default: `8080`).
+
+#### Verify the Setup
+
+1.  Open a browser and go to `http://localhost:8080`.
+2.  Log in using the default credentials:
+    *   **Email:** `default`
+    *   **Password:** `password`
+
+#### ⚠️ Security Note
+
+Before deploying the app, you **must** delete the default user and create new, secure user accounts. Failure to do so will leave your application publicly accessible to anyone.
+
+## Installation without Docker
+
+The installation is meant to be done on Rocky Linux v9 or Centos 7, but it should be easy to adapt on other Linux systems. The main softwares needed for the application is [Julia](https://julialang.org/), [nodejs](https://nodejs.org/fr), [Angular](https://angular.io/), java and [eccodes](https://confluence.ecmwf.int/display/ECC). See the section [Installation without Docker](#installation-without-docker).
+
+### Common steps for both development and production
+#### Install Julia
 The application is currently setup to work with Julia v1.10 and above. To easily install the Julia version of choice, you can use [Juliaup](https://github.com/JuliaLang/juliaup):
 
 ```bash
@@ -65,7 +113,7 @@ Now you should be able to run this julia version with:
 julia +1.10
 ```
 
-### Install nodejs
+#### Install nodejs
 The app needs at least nodejs v16.
 
 **On Rocky Linux v9**
@@ -87,27 +135,27 @@ On CentOS 7, nodejs is limited to v14, so we'll need to install it locally with 
 1. `source ~/.bashrc`
 1. `nvm install 16` (v18 won't work because of glibc incompatibilities)
 
-### Install Java
+#### Install Java
 At the moment, Java is needed for the `openapi-generator-cli` to work properly:
 
 ```bash
 sudo yum install java-11-openjdk-devel
 ```
 
-### Install eccodes globally.
+#### Install eccodes globally.
 Unfortunately, the python program for flex_extract is executing the `grib_set` command with `subprocess.check_call()`. I couldn't find a way to make this command available in the PATH when running the python script. So `eccodes` and the `grib_*` commands must be available in the path.
 
 ```bash
 sudo yum install eccodes
 ```
 
-### Clone the repo
+#### Clone the repo
 
 ```bash
 git clone https://github.com/PrzPaul/CbrnAlert
 ```
 
-### Set up the frontend
+#### Set up the frontend
 Install the Angular command line interface:
 
 ```bash
@@ -122,7 +170,7 @@ npm install
 
 You might get compats error from npm, if so, retry with `npm install --force` 
 
-### Set up the backend
+#### Set up the backend
 
 Go to the backend folder and open a Julia REPL:
 ```
@@ -183,7 +231,7 @@ run(`sed -i "882s@'{:0>3}'.join(numbers)@'/'.join(numbers)@" $faulty_script`)
 
 This temporary patch can be ignored once the flex_extract source files have been fixed.
 
-### Set up the JSON Web Tokens keys
+#### Set up the JSON Web Tokens keys
 We need now to generate the keys for encoding and decoding the JSON Web Tokens authentication. Go to the backend folder and write:
 
 ```bash
@@ -192,11 +240,11 @@ openssl rsa -in config/private.pem -out config/public.pem -outform PEM -pubout
 ```
 
 *Note: These lines won't work with OpenSSL v1*
-## Setup for development
+### Setup for development
 
 To get the app up and ready for development, you'll need to follow those few steps.
 
-### Run the backend server
+#### Run the backend server
 Go to the backend folder, and run the `repl` scripts:
 
 ```bash
@@ -236,7 +284,7 @@ In case you're using `tmux` you can attach to your screen session with:
 tmux a -t cbrnalert_backend
 ```
 
-### Run the frontend server
+#### Run the frontend server
 Go to the frontend folder and run this command:
 
 ```bash
@@ -254,7 +302,7 @@ npm run start
 
 At this point you should be able to connect to `localhost:4200` and start using the application. If you set everything up on a remote machine, you might need to use `ssh` tunnels to redirect the application ports. When using the VS code editor, this is done automatically.
 
-### Adding a user in the database
+#### Adding a user in the database
 
 When getting on the app landing page, you're asked for an email and a password. That's because you need to be authenticated to use the application API. To add a new user in the database, you need to get into the Genie environment in the interactive mode:
 
@@ -272,10 +320,10 @@ julia> Users.add("USER_EMAIL", "USER_PW", username = "USERNAME")
 
 Now you should be able to log into the app by using `USER_EMAIL` and `USER_PW`.
 
-## Setup for production
+### Setup for production
 We will deploy the app by using [nginx](https://nginx.org/) to serve the Angular frontend static files and proxy the API traffic to the Genie backend.
 
-### Generate the frontend static files
+#### Generate the frontend static files
 Go to the frontend folder and run:
 ```bash
 npm run build
@@ -283,7 +331,7 @@ npm run build
 
 This should create a `dist` folder that will be served with nginx.
 
-### Run the API backend server
+#### Run the API backend server
 Go to the backend folder. You should install the `tmux` software and create a new tmux session for the backend. This will allow you to close the terminal while keeping the Julia server up.
 
 ```bash
@@ -296,7 +344,7 @@ export GENIE_ENV=prod
 ./bin/server
 ```
 
-### Set up nginx
+#### Set up nginx
 First install nginx and start it to see if it works (you'll need to do all of this in `sudo` mode):
 
 ```bash
