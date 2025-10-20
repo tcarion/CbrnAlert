@@ -5,7 +5,7 @@ services:
       context: ../ # Root of the project
       dockerfile: docker/backend/Dockerfile
     volumes:
-      - ${HOME}/.ecmwfapirc:/root/.ecmwfapirc
+      - ${ECMWF_API_RC_FILE}:/root/.ecmwfapirc
     container_name: cbrnalert-backend
     expose:
       - "${BACKEND_PORT}"       # Expose port 8000 for internal access
@@ -23,7 +23,7 @@ services:
       target: production-stage  # Build only the production stage
     container_name: cbrnalert-frontend
     ports:
-      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
+      - "${APP_PORT}:${FRONTEND_PORT}"
     networks:
       - cbrnalert-network
     depends_on:

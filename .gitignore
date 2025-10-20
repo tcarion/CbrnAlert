@@ -1,2 +1,4 @@
 .vscode
 frontend/package-lock.json
+
+.ecmwfapirc
