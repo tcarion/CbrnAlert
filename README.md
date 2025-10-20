@@ -58,7 +58,7 @@ You can now connect to http://localhost:4200 and login with login `test` and pas
 To build and run the app in a production environment using Docker, follow these steps.
 
 #### Prerequisites
-*   Ensure [Docker Compose](https://docs.docker.com/compose/install) is installed on your system.
+*   Ensure [Docker](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install) are installed on your system.
 
 #### Steps
 
