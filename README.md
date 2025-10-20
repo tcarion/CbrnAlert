@@ -24,7 +24,7 @@ The application needs to retrieve weather forecasts from ECMWF. That means you'l
 }
 ```
 
-***This needs to be done before following any of the instructions below.***
+⚠️ ***This needs to be done before following any of the instructions below.***
 
 ## Installation with Docker (recommended)
 
