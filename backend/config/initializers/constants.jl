@@ -24,15 +24,8 @@ const UNAUTHORIZED = Genie.Exceptions.ExceptionalResponse(
 const FORBIDDEN = Genie.Exceptions.ExceptionalResponse(
     Genie.Router.error(403, "Forbidden", MIME"application/json"; error_info = "You have not access to this resource.")
     )
-
-_area(area) = [
-    parse(Float64, area["top"]),
-    parse(Float64, area["left"]),
-    parse(Float64, area["bottom"]),
-    parse(Float64, area["right"])
-    ]
     
 function round_area(area)
-    return [ceil(area[1]), floor(area[2]), floor(area[3]), ceil(area[4])]
+    return [ceil(area[:top]), floor(area[:left]), floor(area[:bottom]), ceil(area[:right])]
 end
       

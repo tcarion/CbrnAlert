@@ -39,7 +39,7 @@ function data_retrieval()
   payload = Genie.Requests.jsonpayload()
   start_date = payload["start"] |> DateTime
   end_date = payload["end"] |> DateTime
-  area = round_area(_area(payload["area"]))
+  area = round_area(payload["area"])
   gridres = payload["gridres"]
   time_step = convert(Int64, payload["timeStep"] / 3600)
   dataset_type = payload["datasetType"]
