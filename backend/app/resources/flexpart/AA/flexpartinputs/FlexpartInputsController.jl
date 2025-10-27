@@ -11,7 +11,7 @@ using FlexExtract
 
 using CbrnAlertApp: STATUS_ONGOING, STATUS_ERRORED, STATUS_FINISHED
 using CbrnAlertApp: EXTRACTED_WEATHER_DATA_DIR
-using CbrnAlertApp: _area, round_area
+using CbrnAlertApp: round_area
 
 using CbrnAlertApp.Users
 using CbrnAlertApp.Users: current_user
